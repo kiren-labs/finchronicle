@@ -13,6 +13,9 @@ A lightweight, offline-first Progressive Web App (PWA) for tracking your daily t
 ✅ **Simple Entry** - Add transaction in < 10 seconds
 ✅ **Edit Transactions** - Update existing entries
 ✅ **Delete Transactions** - Remove entries with confirmation
+✅ **Multi-Currency** - 20 currencies supported (USD, EUR, GBP, INR, THB, etc.)
+✅ **Smart Type Toggle** - Toggle button for Income/Expense (mobile-friendly)
+✅ **Dynamic Categories** - Categories filter based on transaction type
 ✅ **Transaction List** - View all your transactions
 ✅ **Monthly Filtering** - Filter by any month
 ✅ **Category Filtering** - Filter by specific category
@@ -21,6 +24,8 @@ A lightweight, offline-first Progressive Web App (PWA) for tracking your daily t
 ✅ **Export to CSV** - Download all data for backup
 ✅ **Dark Mode** - Easy on the eyes at night
 ✅ **Auto-Save** - All data saved automatically
+✅ **Auto-Updates** - Notifies when new version is available
+✅ **Version Display** - Always know which version you're running
 ✅ **Install as App** - Installs on iPhone like native app
 
 ### What You Can Track
@@ -269,7 +274,9 @@ Add/remove/rename categories as needed.
 
 ### Changing Currency
 
-Find all instances of `₹` in `index.html` and replace with your currency symbol (e.g., `$`, `€`, `£`).
+**Easy Way (v3.0+):** Click the currency button in the toolbar and select from 20 supported currencies!
+
+**Manual Way:** Find all instances of `₹` in `index.html` and replace with your currency symbol.
 
 ### Changing Colors
 
@@ -652,18 +659,49 @@ Free to use, modify, and distribute. No restrictions.
 
 ---
 
-## 🎉 What's New in v2.0
+## 📱 Version & Updates
 
-**New Features:**
-- ✏️ **Edit Transactions** - Update any transaction
-- 🗑️ **Delete Transactions** - Remove with confirmation
-- 🔍 **Category Filter** - Filter list by specific category
-- 📥 **CSV Export** - Download and backup your data
-- 🌙 **Dark Mode** - Toggle between light and dark themes
-- 🎨 **Better UI** - Improved mobile experience
+### Current Version: 3.0.0
+
+The app version is always visible in the header (top right). When a new version is available:
+- 🎉 Green update banner appears automatically
+- Shows what version you're updating from/to
+- One-click "Update Now" button to reload
+- All your data is preserved during updates
+
+### Version History
+
+See [VERSION.md](VERSION.md) for detailed changelog and release notes.
 
 ---
 
-*Version: 2.0.0*
+## 🎉 What's New in v3.0.0
+
+**🎨 Major UX Improvements:**
+- 💱 **Multi-Currency Support** - Choose from 20 currencies (USD, EUR, GBP, INR, THB, JPY, etc.)
+- 🎛️ **Smart Toggle Button** - Better mobile UX for Income/Expense selection
+- 📊 **Dynamic Categories** - Categories automatically filter based on type
+- 🔢 **Version Display** - See current version in header
+- 🔔 **Auto-Update Notifications** - Get notified when new version is available
+- 🔄 **One-Click Updates** - Update the app instantly from notification
+
+**💰 Currency Features:**
+- Beautiful currency selector modal
+- 20 popular currencies supported
+- Persistent currency selection
+- Updates all amounts instantly
+- CSV export includes currency code
+- Dark mode support
+
+**Previous Features (v2.0):**
+- ✏️ Edit transactions
+- 🗑️ Delete transactions
+- 🔍 Category filtering
+- 📥 CSV export
+- 🌙 Dark mode
+
+---
+
+*Version: 3.0.0*
 *Last Updated: 2025-01-14*
 *Made with ❤️ for simple, offline-first finance tracking*
