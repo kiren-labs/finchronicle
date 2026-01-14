@@ -181,6 +181,49 @@
             opacity: 0.8;
         }
 
+        /* Toggle Button for Type */
+        .type-toggle {
+            display: flex;
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .type-option {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #6e6e73;
+        }
+
+        .type-option.active {
+            background: white;
+            color: #1d1d1f;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .type-option:active {
+            transform: scale(0.98);
+        }
+
+        /* Dark mode toggle button */
+        body.dark-mode .type-toggle {
+            background: #2c2c2e;
+        }
+
+        body.dark-mode .type-option.active {
+            background: #1c1c1e;
+            color: white;
+            box-shadow: 0 2px 4px rgba(255,255,255,0.05);
+        }
+
         /* Transaction List */
         .transaction-item {
             padding: 16px;
@@ -698,11 +741,16 @@
                 <h2 id="formTitle" style="font-size: 20px; margin-bottom: 16px;">Add Transaction</h2>
                 <form id="transactionForm" aria-label="Add transaction form">
                     <div class="form-group">
-                        <label for="type">Type</label>
-                        <select id="type" required>
-                            <option value="expense">Expense</option>
-                            <option value="income">Income</option>
-                        </select>
+                        <label>Type</label>
+                        <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
+                            <button type="button" class="type-option active" data-type="expense" onclick="selectType('expense')" role="radio" aria-checked="true">
+                                💸 Expense
+                            </button>
+                            <button type="button" class="type-option" data-type="income" onclick="selectType('income')" role="radio" aria-checked="false">
+                                💰 Income
+                            </button>
+                        </div>
+                        <input type="hidden" id="type" value="expense" required>
                     </div>
 
                     <div class="form-group">
@@ -713,23 +761,7 @@
                     <div class="form-group">
                         <label for="category">Category</label>
                         <select id="category" required>
-                            <optgroup label="Income">
-                                <option value="Salary">Salary</option>
-                                <option value="Freelance">Freelance</option>
-                                <option value="Business">Business</option>
-                                <option value="Investment">Investment</option>
-                                <option value="Other Income">Other Income</option>
-                            </optgroup>
-                            <optgroup label="Expense">
-                                <option value="Food">Food</option>
-                                <option value="Transport">Transport</option>
-                                <option value="Shopping">Shopping</option>
-                                <option value="Bills">Bills</option>
-                                <option value="Entertainment">Entertainment</option>
-                                <option value="Health">Health</option>
-                                <option value="Education">Education</option>
-                                <option value="Other Expense">Other Expense</option>
-                            </optgroup>
+                            <!-- Categories will be populated dynamically -->
                         </select>
                     </div>
 
@@ -787,6 +819,62 @@
         let editingId = null;
         let deleteId = null;
 
+        // Category definitions
+        const categories = {
+            income: [
+                'Salary',
+                'Freelance',
+                'Business',
+                'Investment',
+                'Other Income'
+            ],
+            expense: [
+                'Food',
+                'Transport',
+                'Shopping',
+                'Bills',
+                'Entertainment',
+                'Health',
+                'Education',
+                'Other Expense'
+            ]
+        };
+
+        // Select transaction type (toggle button)
+        function selectType(type) {
+            // Update hidden input
+            document.getElementById('type').value = type;
+
+            // Update toggle button states
+            document.querySelectorAll('.type-option').forEach(btn => {
+                const isActive = btn.dataset.type === type;
+                btn.classList.toggle('active', isActive);
+                btn.setAttribute('aria-checked', isActive);
+            });
+
+            // Update categories dropdown
+            updateCategoryOptions(type);
+        }
+
+        // Update category dropdown based on type
+        function updateCategoryOptions(type) {
+            const categorySelect = document.getElementById('category');
+            const cats = categories[type] || [];
+
+            // Clear and repopulate
+            categorySelect.innerHTML = cats.map(cat =>
+                `<option value="${cat}">${cat}</option>`
+            ).join('');
+
+            // If editing, try to preserve selection if valid
+            if (editingId) {
+                const currentCategory = categorySelect.dataset.editValue;
+                if (currentCategory && cats.includes(currentCategory)) {
+                    categorySelect.value = currentCategory;
+                }
+            }
+        }
+
         // Load data from localStorage
         function loadData() {
             const stored = localStorage.getItem('transactions');
@@ -805,6 +893,9 @@
 
         // Set today's date as default
         document.getElementById('date').valueAsDate = new Date();
+
+        // Initialize categories for default type (expense)
+        updateCategoryOptions('expense');
 
         // Form submission
         document.getElementById('transactionForm').addEventListener('submit', function(e) {
@@ -1128,11 +1219,22 @@
             if (!transaction) return;
 
             editingId = id;
-            document.getElementById('type').value = transaction.type;
+
+            // Set type and update toggle button
+            selectType(transaction.type);
+
+            // Store category for after type change
+            const categorySelect = document.getElementById('category');
+            categorySelect.dataset.editValue = transaction.category;
+
+            // Update form values
             document.getElementById('amount').value = transaction.amount;
-            document.getElementById('category').value = transaction.category;
             document.getElementById('date').value = transaction.date;
             document.getElementById('notes').value = transaction.notes;
+
+            // Update categories and set selected category
+            updateCategoryOptions(transaction.type);
+            document.getElementById('category').value = transaction.category;
 
             document.getElementById('formTitle').textContent = 'Edit Transaction';
             document.getElementById('submitBtn').textContent = 'Update Transaction';
@@ -1147,6 +1249,10 @@
             editingId = null;
             document.getElementById('transactionForm').reset();
             document.getElementById('date').valueAsDate = new Date();
+
+            // Reset to expense type
+            selectType('expense');
+
             document.getElementById('formTitle').textContent = 'Add Transaction';
             document.getElementById('submitBtn').textContent = 'Save Transaction';
             document.getElementById('cancelEditBtn').style.display = 'none';
