@@ -41,6 +41,18 @@
             font-size: 24px;
             color: #1d1d1f;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .version {
+            font-size: 12px;
+            color: #6e6e73;
+            font-weight: 400;
+            background: #f5f5f7;
+            padding: 4px 8px;
+            border-radius: 6px;
         }
 
         .status {
@@ -643,6 +655,60 @@
             cursor: pointer;
         }
 
+        /* Update Notification */
+        .update-prompt {
+            background: linear-gradient(135deg, #34c759 0%, #30b34d 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+            display: none;
+        }
+
+        .update-prompt.show {
+            display: block;
+        }
+
+        .update-prompt h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .update-prompt p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .update-prompt .update-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .update-prompt button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .update-btn-primary {
+            background: white;
+            color: #34c759;
+            flex: 1;
+        }
+
+        .update-btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
         /* Toolbar */
         .toolbar {
             display: flex;
@@ -762,6 +828,11 @@
             color: #30d158;
         }
 
+        body.dark-mode .version {
+            background: #2c2c2e;
+            color: #98989d;
+        }
+
         body.dark-mode .currency-item {
             background: #1c1c1e;
             border-color: #38383a;
@@ -813,12 +884,25 @@
     <div class="container">
         <!-- Header -->
         <header>
-            <h1>💰 Finance Tracker</h1>
+            <h1>
+                <span>💰 Finance Tracker</span>
+                <span class="version" id="appVersion">v3.0.0</span>
+            </h1>
             <div class="status">Offline Ready</div>
         </header>
 
         <!-- Main Content -->
         <main>
+
+        <!-- Update Available Notification -->
+        <div class="update-prompt" id="updatePrompt">
+            <h3>🎉 Update Available!</h3>
+            <p>A new version is available. Reload to get the latest features and improvements.</p>
+            <div class="update-actions">
+                <button class="update-btn-primary" onclick="reloadApp()">Update Now</button>
+                <button class="update-btn-secondary" onclick="dismissUpdate()">Later</button>
+            </div>
+        </div>
 
         <!-- Install Prompt (iOS) -->
         <div class="install-prompt" id="installPrompt" style="display: none;">
@@ -958,6 +1042,10 @@
     </div>
 
     <script>
+        // App Version - Update this when releasing new features
+        const APP_VERSION = '3.0.0';
+        const VERSION_KEY = 'app_version';
+
         // Initialize
         let transactions = [];
         let currentTab = 'add';
@@ -966,6 +1054,7 @@
         let selectedCategory = 'all';
         let editingId = null;
         let deleteId = null;
+        let updateAvailable = false;
 
         // Category definitions
         const categories = {
@@ -1616,8 +1705,78 @@
             }
         }
 
+        // Version Management Functions
+        function checkAppVersion() {
+            const storedVersion = localStorage.getItem(VERSION_KEY);
+
+            if (!storedVersion) {
+                // First time install
+                localStorage.setItem(VERSION_KEY, APP_VERSION);
+                console.log(`✨ Finance Tracker ${APP_VERSION} installed!`);
+            } else if (storedVersion !== APP_VERSION) {
+                // Version has changed - show update notification
+                console.log(`🎉 Updated from ${storedVersion} to ${APP_VERSION}`);
+                showUpdateNotification(storedVersion, APP_VERSION);
+                localStorage.setItem(VERSION_KEY, APP_VERSION);
+            } else {
+                // Same version, check if service worker has updates
+                checkServiceWorkerUpdate();
+            }
+
+            // Update version display in UI
+            document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
+        }
+
+        function showUpdateNotification(oldVersion, newVersion) {
+            const prompt = document.getElementById('updatePrompt');
+            const message = prompt.querySelector('p');
+            message.textContent = `Updated from v${oldVersion} to v${newVersion}! Check out the new features.`;
+            prompt.classList.add('show');
+
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                dismissUpdate();
+            }, 10000);
+        }
+
+        function checkServiceWorkerUpdate() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration) {
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New service worker available
+                                    updateAvailable = true;
+                                    showUpdatePrompt();
+                                }
+                            });
+                        });
+                        // Check for updates now
+                        registration.update();
+                    }
+                });
+            }
+        }
+
+        function showUpdatePrompt() {
+            const prompt = document.getElementById('updatePrompt');
+            prompt.classList.add('show');
+        }
+
+        function reloadApp() {
+            window.location.reload(true);
+        }
+
+        function dismissUpdate() {
+            const prompt = document.getElementById('updatePrompt');
+            prompt.classList.remove('show');
+        }
+
         // Initialize app
         window.addEventListener('load', function() {
+            checkAppVersion();
             loadData();
             loadDarkMode();
             updateCurrencyDisplay();
