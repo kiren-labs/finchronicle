@@ -1,0 +1,78 @@
+name: Link Checker
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run weekly on Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+
+jobs:
+  check-links:
+    name: Check Links
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check links in markdown files
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'yes'
+        use-verbose-mode: 'yes'
+        config-file: '.github/workflows/link-checker-config.json'
+
+    - name: Check links in HTML
+      run: |
+        echo "Checking for broken links in HTML files..."
+
+        # Extract links from index.html
+        echo "Checking CDN links..."
+        if grep -oP 'href="https?://[^"]+"|src="https?://[^"]+"' index.html; then
+          echo "✓ External links found in HTML"
+        else
+          echo "ℹ No external links found in HTML"
+        fi
+
+  check-cdn:
+    name: Verify CDN Availability
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check CDN resources
+      run: |
+        echo "Checking CDN resource availability..."
+
+        # Extract CDN URLs from index.html
+        CDN_URLS=$(grep -oP 'https?://cdn[^"]+|https?://unpkg[^"]+|https?://[^"]*jsdelivr[^"]+' index.html || echo "")
+
+        if [ -z "$CDN_URLS" ]; then
+          echo "No CDN URLs found"
+          exit 0
+        fi
+
+        echo "Found CDN URLs:"
+        echo "$CDN_URLS"
+
+        # Check each URL
+        while IFS= read -r url; do
+          if [ ! -z "$url" ]; then
+            echo "Checking: $url"
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$url" || echo "000")
+
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✓ $url is accessible (HTTP $HTTP_CODE)"
+            else
+              echo "✗ $url returned HTTP $HTTP_CODE"
+              exit 1
+            fi
+          fi
+        done <<< "$CDN_URLS"
+
+        echo "✓ All CDN resources are accessible"

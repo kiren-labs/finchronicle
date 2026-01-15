@@ -1,0 +1,161 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, dev/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Validate Code
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Validate HTML
+      uses: Cyb3r-Jak3/html5validator-action@v7.2.0
+      with:
+        root: .
+        css: true
+
+    - name: Validate JSON files
+      run: |
+        echo "Validating manifest.json..."
+        python3 -m json.tool manifest.json > /dev/null
+        echo "✓ manifest.json is valid"
+
+    - name: Check for console.log statements
+      run: |
+        if grep -r "console\.log" index.html sw.js; then
+          echo "Warning: Found console.log statements"
+          echo "Consider removing them for production"
+          exit 0
+        else
+          echo "✓ No console.log statements found"
+        fi
+
+    - name: Check file sizes
+      run: |
+        echo "Checking file sizes..."
+        INDEX_SIZE=$(wc -c < index.html)
+        SW_SIZE=$(wc -c < sw.js)
+
+        echo "index.html: $INDEX_SIZE bytes"
+        echo "sw.js: $SW_SIZE bytes"
+
+        if [ $INDEX_SIZE -gt 100000 ]; then
+          echo "Warning: index.html is larger than 100KB"
+        fi
+
+        echo "✓ File size check complete"
+
+    - name: Verify required files
+      run: |
+        echo "Checking for required files..."
+        FILES=("LICENSE" "README.md" "CONTRIBUTING.md" "SECURITY.md" "CODE_OF_CONDUCT.md" "NOTICE")
+
+        for file in "${FILES[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "✗ Missing required file: $file"
+            exit 1
+          else
+            echo "✓ Found $file"
+          fi
+        done
+
+    - name: Check manifest.json completeness
+      run: |
+        echo "Validating PWA manifest..."
+        if ! grep -q '"name"' manifest.json; then
+          echo "✗ manifest.json missing 'name' field"
+          exit 1
+        fi
+        if ! grep -q '"short_name"' manifest.json; then
+          echo "✗ manifest.json missing 'short_name' field"
+          exit 1
+        fi
+        if ! grep -q '"start_url"' manifest.json; then
+          echo "✗ manifest.json missing 'start_url' field"
+          exit 1
+        fi
+        echo "✓ PWA manifest is complete"
+
+  pwa-validation:
+    name: PWA Validation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install http-server
+      run: npm install -g http-server
+
+    - name: Start server
+      run: |
+        http-server -p 8080 &
+        sleep 3
+
+    - name: Check if app loads
+      run: |
+        curl -f http://localhost:8080/index.html || exit 1
+        echo "✓ Application loads successfully"
+
+    - name: Check service worker
+      run: |
+        if grep -q "navigator.serviceWorker.register" index.html; then
+          echo "✓ Service worker registration found"
+        else
+          echo "✗ Service worker registration not found"
+          exit 1
+        fi
+
+  security-check:
+    name: Basic Security Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check for hardcoded secrets
+      run: |
+        echo "Checking for potential secrets..."
+        if grep -r "password\s*=\|api_key\s*=\|secret\s*=" --include="*.html" --include="*.js"; then
+          echo "Warning: Found potential hardcoded secrets"
+          exit 1
+        else
+          echo "✓ No hardcoded secrets found"
+        fi
+
+    - name: Check for eval usage
+      run: |
+        if grep -r "eval(" --include="*.html" --include="*.js"; then
+          echo "✗ Found eval() usage (security risk)"
+          exit 1
+        else
+          echo "✓ No eval() usage found"
+        fi
+
+    - name: Verify SRI integrity
+      run: |
+        echo "Checking for Subresource Integrity on CDN links..."
+        if grep -q "cdn\|unpkg\|jsdelivr" index.html; then
+          if ! grep -q "integrity=" index.html; then
+            echo "Warning: CDN resources found without SRI integrity"
+            echo "Please add integrity and crossorigin attributes"
+            exit 1
+          else
+            echo "✓ SRI integrity checks present"
+          fi
+        else
+          echo "✓ No CDN resources found"
+        fi
