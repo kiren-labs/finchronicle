@@ -1,5 +1,5 @@
 // Service Worker for offline functionality
-const CACHE_NAME = 'finance-tracker-v2';
+const CACHE_NAME = 'finance-tracker-v5';
 const urlsToCache = [
     './',
     './index.html',
@@ -7,16 +7,28 @@ const urlsToCache = [
     './robots.txt'
 ];
 
+// Listen for messages from the app
+self.addEventListener('message', event => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        console.log('Service Worker: Received SKIP_WAITING message');
+        self.skipWaiting();
+    }
+});
+
 // Install event - cache files
 self.addEventListener('install', event => {
+    console.log('Service Worker: Installing new version...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('Opened cache');
+                console.log('Service Worker: Caching files');
                 return cache.addAll(urlsToCache);
             })
+            .then(() => {
+                console.log('Service Worker: Skip waiting - force activation');
+                return self.skipWaiting();
+            })
     );
-    self.skipWaiting();
 });
 
 // Fetch event - serve from cache when offline
@@ -36,17 +48,33 @@ self.addEventListener('fetch', event => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', event => {
+    console.log('Service Worker: Activating new version...');
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('Deleting old cache:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
+        caches.keys()
+            .then(cacheNames => {
+                return Promise.all(
+                    cacheNames.map(cacheName => {
+                        if (cacheName !== CACHE_NAME) {
+                            console.log('Service Worker: Deleting old cache:', cacheName);
+                            return caches.delete(cacheName);
+                        }
+                    })
+                );
+            })
+            .then(() => {
+                console.log('Service Worker: Claiming clients - taking control immediately');
+                return self.clients.claim();
+            })
+            .then(() => {
+                // Notify all clients that update is complete
+                return self.clients.matchAll().then(clients => {
+                    clients.forEach(client => {
+                        client.postMessage({
+                            type: 'SW_UPDATED',
+                            version: CACHE_NAME
+                        });
+                    });
+                });
+            })
     );
-    self.clients.claim();
 });

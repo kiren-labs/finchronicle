@@ -10,11 +10,18 @@
     <meta name="theme-color" content="#0051D5">
     <title>Finance Tracker - Offline Personal Expense Tracker</title>
     <link rel="manifest" href="manifest.json">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        /* Icon Styles */
+        i {
+            display: inline-block;
+            line-height: 1;
         }
 
         body {
@@ -256,16 +263,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 22px;
             flex-shrink: 0;
         }
 
         .transaction-icon.income {
             background: #d4f4dd;
+            color: #34c759;
         }
 
         .transaction-icon.expense {
             background: #ffe5e5;
+            color: #ff3b30;
         }
 
         .transaction-details {
@@ -569,6 +578,15 @@
             }
         }
 
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         .success-message.show {
             display: block;
         }
@@ -863,6 +881,16 @@
         body.dark-mode .close-btn:hover {
             background: #2c2c2e;
         }
+
+        body.dark-mode .transaction-icon.income {
+            background: #1a3a23;
+            color: #30d158;
+        }
+
+        body.dark-mode .transaction-icon.expense {
+            background: #3a1a1a;
+            color: #ff453a;
+        }
     </style>
 </head>
 <body>
@@ -885,8 +913,8 @@
         <!-- Header -->
         <header>
             <h1>
-                <span>💰 Finance Tracker</span>
-                <span class="version" id="appVersion">v3.0.0</span>
+                <span><i class="ri-wallet-3-line"></i> Finance Tracker</span>
+                <span class="version" id="appVersion">v3.1.0</span>
             </h1>
             <div class="status">Offline Ready</div>
         </header>
@@ -896,7 +924,7 @@
 
         <!-- Update Available Notification -->
         <div class="update-prompt" id="updatePrompt">
-            <h3>🎉 Update Available!</h3>
+            <h3><i class="ri-sparkling-line"></i> Update Available!</h3>
             <p>A new version is available. Reload to get the latest features and improvements.</p>
             <div class="update-actions">
                 <button class="update-btn-primary" onclick="reloadApp()">Update Now</button>
@@ -906,7 +934,7 @@
 
         <!-- Install Prompt (iOS) -->
         <div class="install-prompt" id="installPrompt" style="display: none;">
-            <h3>📱 Install App</h3>
+            <h3><i class="ri-smartphone-line"></i> Install App</h3>
             <p>Tap Share → Add to Home Screen for best experience</p>
             <button onclick="hideInstallPrompt()">Got it!</button>
         </div>
@@ -934,8 +962,11 @@
         <!-- Toolbar -->
         <div class="toolbar">
             <button class="toolbar-btn" onclick="exportToCSV()" aria-label="Export CSV">
-                <span>📥</span>
+                <i class="ri-download-2-line"></i>
                 <span>Export CSV</span>
+            </button>
+            <button class="toolbar-btn" onclick="checkForUpdates()" aria-label="Check for updates" id="updateCheckBtn">
+                <i class="ri-refresh-line"></i>
             </button>
             <div class="toolbar-spacer"></div>
             <button class="toolbar-btn" onclick="toggleCurrencySelector()" aria-label="Change currency" id="currencyBtn">
@@ -943,7 +974,7 @@
                 <span id="currencyCode">INR</span>
             </button>
             <button class="toolbar-btn" onclick="toggleDarkMode()" aria-label="Toggle dark mode" id="darkModeBtn">
-                <span id="darkModeIcon">🌙</span>
+                <i class="ri-moon-line" id="darkModeIcon"></i>
             </button>
         </div>
 
@@ -952,7 +983,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Select Currency</h3>
-                    <button class="close-btn" onclick="closeCurrencySelector()" aria-label="Close">✕</button>
+                    <button class="close-btn" onclick="closeCurrencySelector()" aria-label="Close"><i class="ri-close-line"></i></button>
                 </div>
                 <div class="currency-list" id="currencyList">
                     <!-- Currency options will be populated by JavaScript -->
@@ -962,9 +993,9 @@
 
         <!-- Tab Navigation -->
         <div class="tabs" role="tablist" aria-label="Main navigation">
-            <button class="tab active" onclick="switchTab('add')" role="tab" aria-selected="true" aria-controls="addTab">➕ Add</button>
-            <button class="tab" onclick="switchTab('list')" role="tab" aria-selected="false" aria-controls="listTab">📋 List</button>
-            <button class="tab" onclick="switchTab('groups')" role="tab" aria-selected="false" aria-controls="groupsTab">📊 Groups</button>
+            <button class="tab active" onclick="switchTab('add')" role="tab" aria-selected="true" aria-controls="addTab"><i class="ri-add-line"></i> Add</button>
+            <button class="tab" onclick="switchTab('list')" role="tab" aria-selected="false" aria-controls="listTab"><i class="ri-list-check"></i> List</button>
+            <button class="tab" onclick="switchTab('groups')" role="tab" aria-selected="false" aria-controls="groupsTab"><i class="ri-bar-chart-2-line"></i> Groups</button>
         </div>
 
         <!-- Add Transaction Tab -->
@@ -976,10 +1007,10 @@
                         <label>Type</label>
                         <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
                             <button type="button" class="type-option active" data-type="expense" onclick="selectType('expense')" role="radio" aria-checked="true">
-                                💸 Expense
+                                <i class="ri-arrow-down-circle-line"></i> Expense
                             </button>
                             <button type="button" class="type-option" data-type="income" onclick="selectType('income')" role="radio" aria-checked="false">
-                                💰 Income
+                                <i class="ri-arrow-up-circle-line"></i> Income
                             </button>
                         </div>
                         <input type="hidden" id="type" value="expense" required>
@@ -1043,7 +1074,7 @@
 
     <script>
         // App Version - Update this when releasing new features
-        const APP_VERSION = '3.0.0';
+        const APP_VERSION = '3.1.0';
         const VERSION_KEY = 'app_version';
 
         // Initialize
@@ -1151,7 +1182,7 @@
                             <div class="currency-name">${curr.name}</div>
                         </div>
                     </div>
-                    <div class="currency-check">✓</div>
+                    <div class="currency-check"><i class="ri-check-line"></i></div>
                 </div>
             `).join('');
 
@@ -1332,7 +1363,7 @@
 
             list.innerHTML = filtered.map(t => {
                 const isIncome = t.type === 'income';
-                const icon = isIncome ? '💰' : '💸';
+                const icon = isIncome ? '<i class="ri-arrow-up-circle-fill"></i>' : '<i class="ri-arrow-down-circle-fill"></i>';
                 const amountClass = isIncome ? 'positive' : 'negative';
                 const sign = isIncome ? '+' : '-';
 
@@ -1350,8 +1381,8 @@
                             ${sign}${formatCurrency(t.amount)}
                         </div>
                         <div class="transaction-actions">
-                            <button class="action-btn edit-btn" onclick="editTransaction(${t.id})">✏️</button>
-                            <button class="action-btn delete-btn" onclick="deleteTransaction(${t.id})">🗑️</button>
+                            <button class="action-btn edit-btn" onclick="editTransaction(${t.id})"><i class="ri-edit-line"></i></button>
+                            <button class="action-btn delete-btn" onclick="deleteTransaction(${t.id})"><i class="ri-delete-bin-line"></i></button>
                         </div>
                     </div>
                 `;
@@ -1648,7 +1679,8 @@
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
-            document.getElementById('darkModeIcon').textContent = isDark ? '☀️' : '🌙';
+            const icon = document.getElementById('darkModeIcon');
+            icon.className = isDark ? 'ri-sun-line' : 'ri-moon-line';
             document.getElementById('darkModeBtn').setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
             localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
         }
@@ -1658,7 +1690,8 @@
             const darkMode = localStorage.getItem('darkMode');
             if (darkMode === 'enabled') {
                 document.body.classList.add('dark-mode');
-                document.getElementById('darkModeIcon').textContent = '☀️';
+                const icon = document.getElementById('darkModeIcon');
+                icon.className = 'ri-sun-line';
                 document.getElementById('darkModeBtn').setAttribute('aria-label', 'Switch to light mode');
             }
         }
@@ -1766,12 +1799,64 @@
         }
 
         function reloadApp() {
-            window.location.reload(true);
+            // Tell service worker to skip waiting and activate immediately
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.getRegistration().then(reg => {
+                    if (reg && reg.waiting) {
+                        // Tell the waiting service worker to activate
+                        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    } else {
+                        // No waiting worker, just reload
+                        window.location.reload(true);
+                    }
+                });
+            } else {
+                // Force hard reload
+                window.location.reload(true);
+            }
         }
 
         function dismissUpdate() {
             const prompt = document.getElementById('updatePrompt');
             prompt.classList.remove('show');
+        }
+
+        // Manual update check
+        function checkForUpdates() {
+            const btn = document.getElementById('updateCheckBtn');
+            const icon = btn.querySelector('i');
+
+            // Show spinning animation
+            icon.style.animation = 'spin 1s linear infinite';
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration) {
+                        console.log('🔍 Checking for updates...');
+                        showMessage('Checking for updates...');
+
+                        registration.update().then(() => {
+                            setTimeout(() => {
+                                icon.style.animation = '';
+
+                                // Check if update is available
+                                if (registration.waiting || registration.installing) {
+                                    showMessage('Update found! Preparing...');
+                                    showUpdatePrompt();
+                                } else {
+                                    showMessage('You\'re on the latest version!');
+                                }
+                            }, 1000);
+                        });
+                    } else {
+                        icon.style.animation = '';
+                        showMessage('No service worker registered');
+                    }
+                });
+            } else {
+                icon.style.animation = '';
+                showMessage('Service Worker not supported');
+            }
         }
 
         // Initialize app
@@ -1785,8 +1870,56 @@
 
         // Register service worker for offline support
         if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+            let refreshing = false;
+
+            // Listen for messages from service worker
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data.type === 'SW_UPDATED') {
+                    console.log('✅ Service Worker updated:', event.data.version);
+                    // Show update notification
+                    if (!refreshing) {
+                        showUpdatePrompt();
+                    }
+                }
+            });
+
+            // Detect when new service worker is controlling the page
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                console.log('🔄 New service worker taking control - reloading page...');
+                refreshing = true;
+                window.location.reload();
+            });
+
+            // Register service worker
             navigator.serviceWorker.register('sw.js')
-                .then(() => console.log('✅ Service Worker registered - App works offline!'))
+                .then(registration => {
+                    console.log('✅ Service Worker registered - App works offline!');
+
+                    // Check for updates every time the app is opened
+                    registration.update();
+
+                    // Check for updates periodically (every 60 seconds)
+                    setInterval(() => {
+                        registration.update();
+                    }, 60000);
+
+                    // Listen for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        console.log('🆕 New service worker found - installing...');
+
+                        newWorker.addEventListener('statechange', () => {
+                            console.log('Service Worker state:', newWorker.state);
+
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // New version available!
+                                console.log('🎉 New version ready to activate!');
+                                showUpdatePrompt();
+                            }
+                        });
+                    });
+                })
                 .catch(err => console.error('❌ Service Worker registration failed:', err));
         } else if (window.location.protocol === 'file:') {
             console.log('ℹ️ Service Worker requires HTTP/HTTPS. Run a local server to enable offline mode.');
