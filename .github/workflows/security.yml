@@ -1,0 +1,98 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+
+jobs:
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  check-headers:
+    name: Check Security Headers
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check for security best practices
+      run: |
+        echo "Checking for security best practices in code..."
+
+        # Check for Content Security Policy discussion/plans
+        if [ -f "SECURITY.md" ]; then
+          echo "✓ SECURITY.md exists"
+        else
+          echo "⚠ SECURITY.md not found"
+        fi
+
+        # Check localStorage usage patterns
+        if grep -q "localStorage" index.html; then
+          echo "✓ Found localStorage usage (expected for this PWA)"
+          echo "Note: Data is stored unencrypted in localStorage"
+        fi
+
+        # Verify no external tracking
+        if grep -qi "google-analytics\|gtag\|analytics\.js\|facebook\.com" index.html; then
+          echo "⚠ Found potential tracking code"
+          echo "Please verify this aligns with privacy policy"
+        else
+          echo "✓ No tracking scripts detected"
+        fi
