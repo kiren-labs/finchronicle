@@ -5,4 +5,4 @@ User-agent: *
 Allow: /
 
 # Sitemap (update this URL when deployed)
-# Sitemap: https://yourusername.github.io/finance-tracker/sitemap.xml
+# Sitemap: https://kiren-labs..github.io/ffinchronicle/sitemap.xml
