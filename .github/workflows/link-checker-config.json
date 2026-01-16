@@ -4,7 +4,7 @@
       "pattern": "^http://localhost"
     },
     {
-      "pattern": "^https://kiren-labs.github.io/finance-tracker"
+      "pattern": "^https://kiren-labs.github.io/finchronicle"
     }
   ],
   "replacementPatterns": [],

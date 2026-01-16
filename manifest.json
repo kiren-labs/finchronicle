@@ -1,7 +1,7 @@
 {
   "name": "FinChronicle",
   "short_name": "FinChronicle",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Simple offline-first personal finance tracker. Track expenses, income, filter by category, and export to CSV. Built by Kiren Labs.",
   "start_url": "./index.html",
   "display": "standalone",

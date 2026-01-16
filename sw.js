@@ -1,10 +1,12 @@
 // Service Worker for offline functionality
-const CACHE_NAME = 'finchronicle-v3.2.0';
+const CACHE_NAME = 'finchronicle-v3.2.1';
 const urlsToCache = [
     './',
     './index.html',
     './manifest.json',
     './robots.txt',
+    './css/styles.css',
+    './css/dark-mode.css',
     './icons/icon-192.png',
     './icons/icon-512.png',
     './icons/maskable-icon-512.png'
