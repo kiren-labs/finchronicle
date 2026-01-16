@@ -997,9 +997,9 @@
 
         <!-- Tab Navigation -->
         <div class="tabs" role="tablist" aria-label="Main navigation">
-            <button class="tab active" onclick="switchTab('add')" role="tab" aria-selected="true" aria-controls="addTab"><i class="ri-add-line"></i> Add</button>
-            <button class="tab" onclick="switchTab('list')" role="tab" aria-selected="false" aria-controls="listTab"><i class="ri-list-check"></i> List</button>
-            <button class="tab" onclick="switchTab('groups')" role="tab" aria-selected="false" aria-controls="groupsTab"><i class="ri-bar-chart-2-line"></i> Groups</button>
+            <button id="add-tab" class="tab active" onclick="switchTab('add')" role="tab" aria-selected="true" aria-controls="addTab"><i class="ri-add-line"></i> Add</button>
+            <button id="list-tab" class="tab" onclick="switchTab('list')" role="tab" aria-selected="false" aria-controls="listTab"><i class="ri-list-check"></i> List</button>
+            <button id="groups-tab" class="tab" onclick="switchTab('groups')" role="tab" aria-selected="false" aria-controls="groupsTab"><i class="ri-bar-chart-2-line"></i> Groups</button>
         </div>
 
         <!-- Add Transaction Tab -->
@@ -1017,7 +1017,7 @@
                                 <i class="ri-arrow-up-circle-line"></i> Income
                             </button>
                         </div>
-                        <input type="hidden" id="type" value="expense" required>
+                        <input type="hidden" id="type" value="expense">
                     </div>
 
                     <div class="form-group">
@@ -1028,6 +1028,7 @@
                     <div class="form-group">
                         <label for="category">Category</label>
                         <select id="category" required>
+                            <option value="" disabled selected>Select category</option>
                             <!-- Categories will be populated dynamically -->
                         </select>
                     </div>
