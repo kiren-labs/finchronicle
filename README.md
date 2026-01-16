@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-3.2.0-blue.svg)](VERSION.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -336,12 +336,12 @@ If this project helped you, please consider:
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Latest Release: v3.1.0**
-- 🎨 Replaced emoji icons with professional Remix Icon font
-- 🔄 Improved update mechanism with force reload
-- 💱 Added 20 currency support
-- 🎛️ Smart toggle for income/expense selection
-- 📊 Dynamic category filtering
+**Latest Release: v3.2.0**
+- 📖 Rebranded to FinChronicle - Your Financial Chronicle
+- 🎨 New professional PNG icons for better PWA compatibility
+- 📱 Added maskable icon support for Android adaptive icons
+- 🏷️ Updated branding across all files
+- 🔧 Improved icon rendering on macOS/iOS
 
 ---
 
