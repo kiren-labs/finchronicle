@@ -632,12 +632,14 @@ button.primary:active {
 }
 
 .edit-btn {
-    background: #0051D5;
-    color: white;
+    background: #e3f0ff;
+    color: #0051D5;
+    border: 1px solid #b3d4ff;
 }
 
 .edit-btn:active {
-    background: #003d99;
+    background: #cce4ff;
+    color: #003d99;
 }
 
 .delete-btn {
