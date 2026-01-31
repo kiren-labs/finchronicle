@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Simple offline-first personal finance tracker. Track expenses and income, filter by category, export to CSV, and manage your money with beautiful charts. Works completely offline, no internet required.">
+    <meta name="description"
+        content="Simple offline-first personal finance tracker. Track expenses and income, filter by category, export to CSV, and manage your money with beautiful charts. Works completely offline, no internet required.">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="FinChronicle">
@@ -14,12 +16,14 @@
     <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
     <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <link rel="manifest" href="manifest.json">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet" integrity="sha384-RwhG+8423fpoSoUMjpibFzMxLQeaO7oBV45/+IxuLaxxiUOFL9R+OzbK5rBpSazc" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet"
+        integrity="sha384-RwhG+8423fpoSoUMjpibFzMxLQeaO7oBV45/+IxuLaxxiUOFL9R+OzbK5rBpSazc" crossorigin="anonymous">
 
     <!-- External Stylesheets -->
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="./css/dark-mode.css">
 </head>
+
 <body>
     <!-- Success Message -->
     <div class="success-message" id="successMessage">Transaction saved!</div>
@@ -41,7 +45,7 @@
         <header>
             <h1>
                 <span><i class="ri-wallet-3-line"></i> FinChronicle</span>
-                <span class="version" id="appVersion">v3.3.0</span>
+                <span class="version" id="appVersion">v3.3.1</span>
             </h1>
             <div class="status">Offline Ready</div>
         </header>
@@ -49,165 +53,189 @@
         <!-- Main Content -->
         <main>
 
-        <!-- Update Available Notification -->
-        <div class="update-prompt" id="updatePrompt">
-            <h3><i class="ri-sparkling-line"></i> Update Available!</h3>
-            <p>A new version is available. Reload to get the latest features and improvements.</p>
-            <div class="update-actions">
-                <button class="update-btn-primary" onclick="reloadApp()">Update Now</button>
-                <button class="update-btn-secondary" onclick="dismissUpdate()">Later</button>
-            </div>
-        </div>
-
-        <!-- Install Prompt (iOS) -->
-        <div class="install-prompt" id="installPrompt" style="display: none;">
-            <h3><i class="ri-smartphone-line"></i> Install App</h3>
-            <p>Tap Share → Add to Home Screen for best experience</p>
-            <button onclick="hideInstallPrompt()">Got it!</button>
-        </div>
-
-        <!-- Summary Cards -->
-        <div class="summary">
-            <div class="summary-card">
-                <div class="summary-label">This Month</div>
-                <div class="summary-value" id="monthNet">0</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-label">Total Entries</div>
-                <div class="summary-value" id="totalEntries">0</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-label">Income</div>
-                <div class="summary-value positive" id="monthIncome">0</div>
-            </div>
-            <div class="summary-card">
-                <div class="summary-label">Expenses</div>
-                <div class="summary-value negative" id="monthExpense">0</div>
-            </div>
-        </div>
-
-        <!-- Toolbar -->
-        <div class="toolbar">
-            <button class="toolbar-btn" onclick="exportToCSV()" aria-label="Export CSV">
-                <i class="ri-download-2-line"></i>
-                <span>Export CSV</span>
-            </button>
-            <button class="toolbar-btn" onclick="triggerImport()" aria-label="Import CSV">
-                <i class="ri-upload-2-line"></i>
-                <span>Import CSV</span>
-            </button>
-            <input type="file" id="importFile" accept=".csv,text/csv" style="display: none;" onchange="handleImport(event)">
-            <button class="toolbar-btn" onclick="checkForUpdates()" aria-label="Check for updates" id="updateCheckBtn">
-                <i class="ri-refresh-line"></i>
-            </button>
-            <div class="toolbar-spacer"></div>
-            <button class="toolbar-btn" onclick="toggleCurrencySelector()" aria-label="Change currency" id="currencyBtn">
-                <span id="currencySymbol">₹</span>
-                <span id="currencyCode">INR</span>
-            </button>
-            <button class="toolbar-btn" onclick="toggleDarkMode()" aria-label="Toggle dark mode" id="darkModeBtn">
-                <i class="ri-moon-line" id="darkModeIcon"></i>
-            </button>
-        </div>
-
-        <!-- Currency Selector Modal -->
-        <div id="currencyModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Select Currency</h3>
-                    <button class="close-btn" onclick="closeCurrencySelector()" aria-label="Close"><i class="ri-close-line"></i></button>
-                </div>
-                <div class="currency-list" id="currencyList">
-                    <!-- Currency options will be populated by JavaScript -->
+            <!-- Update Available Notification -->
+            <div class="update-prompt" id="updatePrompt">
+                <h3><i class="ri-sparkling-line"></i> Update Available!</h3>
+                <p>A new version is available. Reload to get the latest features and improvements.</p>
+                <div class="update-actions">
+                    <button class="update-btn-primary" onclick="reloadApp()">Update Now</button>
+                    <button class="update-btn-secondary" onclick="dismissUpdate()">Later</button>
                 </div>
             </div>
-        </div>
 
-        <!-- Tab Navigation -->
-        <div class="tabs" role="tablist" aria-label="Main navigation">
-            <button id="add-tab" class="tab active" onclick="switchTab('add')" role="tab" aria-selected="true" aria-controls="addTab"><i class="ri-add-line"></i> Add</button>
-            <button id="list-tab" class="tab" onclick="switchTab('list')" role="tab" aria-selected="false" aria-controls="listTab"><i class="ri-list-check"></i> List</button>
-            <button id="groups-tab" class="tab" onclick="switchTab('groups')" role="tab" aria-selected="false" aria-controls="groupsTab"><i class="ri-bar-chart-2-line"></i> Groups</button>
-        </div>
+            <!-- Install Prompt (iOS) -->
+            <div class="install-prompt" id="installPrompt" style="display: none;">
+                <h3><i class="ri-smartphone-line"></i> Install App</h3>
+                <p>Tap Share → Add to Home Screen for best experience</p>
+                <button onclick="hideInstallPrompt()">Got it!</button>
+            </div>
 
-        <!-- Add Transaction Tab -->
-        <div id="addTab" class="tab-content active" role="tabpanel" aria-labelledby="add-tab">
-            <div class="card">
-                <h2 id="formTitle" style="font-size: 20px; margin-bottom: 16px;">Add Transaction</h2>
-                <form id="transactionForm" aria-label="Add transaction form">
-                    <div class="form-group">
-                        <label>Type</label>
-                        <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
-                            <button type="button" class="type-option active" data-type="expense" onclick="selectType('expense')" role="radio" aria-checked="true">
-                                <i class="ri-arrow-down-circle-line"></i> Expense
-                            </button>
-                            <button type="button" class="type-option" data-type="income" onclick="selectType('income')" role="radio" aria-checked="false">
-                                <i class="ri-arrow-up-circle-line"></i> Income
-                            </button>
+            <!-- Summary Cards -->
+            <div class="summary">
+                <div class="summary-card">
+                    <div class="summary-label">This Month</div>
+                    <div class="summary-value" id="monthNet">0</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Total Entries</div>
+                    <div class="summary-value" id="totalEntries">0</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Income</div>
+                    <div class="summary-value positive" id="monthIncome">0</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-label">Expenses</div>
+                    <div class="summary-value negative" id="monthExpense">0</div>
+                </div>
+            </div>
+            <!-- Currency Selector Modal -->
+            <div id="currencyModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Select Currency</h3>
+                        <button class="close-btn" onclick="closeCurrencySelector()" aria-label="Close"><i
+                                class="ri-close-line"></i></button>
+                    </div>
+                    <div class="currency-list" id="currencyList">
+                        <!-- Currency options will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs" role="tablist" aria-label="Main navigation">
+                <button id="add-tab" class="tab active" onclick="switchTab('add')" role="tab" aria-selected="true"
+                    aria-controls="addTab"><i class="ri-add-line"></i> Add</button>
+                <button id="list-tab" class="tab" onclick="switchTab('list')" role="tab" aria-selected="false"
+                    aria-controls="listTab"><i class="ri-list-check"></i> List</button>
+                <button id="groups-tab" class="tab" onclick="switchTab('groups')" role="tab" aria-selected="false"
+                    aria-controls="groupsTab"><i class="ri-bar-chart-2-line"></i> Groups</button>
+                <button id="settings-tab" class="tab" onclick="switchTab('settings')" role="tab" aria-selected="false"
+                    aria-controls="settingsTab"><i class="ri-settings-3-line"></i> Settings</button>
+            </div>
+
+            <!-- Add Transaction Tab -->
+            <div id="addTab" class="tab-content active" role="tabpanel" aria-labelledby="add-tab">
+                <div class="card">
+                    <h2 id="formTitle" style="font-size: 20px; margin-bottom: 16px;">Add Transaction</h2>
+                    <form id="transactionForm" aria-label="Add transaction form">
+                        <div class="form-group">
+                            <label>Type</label>
+                            <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
+                                <button type="button" class="type-option active" data-type="expense"
+                                    onclick="selectType('expense')" role="radio" aria-checked="true">
+                                    <i class="ri-arrow-down-circle-line"></i> Expense
+                                </button>
+                                <button type="button" class="type-option" data-type="income"
+                                    onclick="selectType('income')" role="radio" aria-checked="false">
+                                    <i class="ri-arrow-up-circle-line"></i> Income
+                                </button>
+                            </div>
+                            <input type="hidden" id="type" value="expense">
                         </div>
-                        <input type="hidden" id="type" value="expense">
-                    </div>
 
-                    <div class="form-group">
-                        <label for="amount">Amount (₹)</label>
-                        <input type="number" id="amount" placeholder="1000" required min="0" step="0.01">
-                    </div>
+                        <div class="form-group">
+                            <label for="amount">Amount (₹)</label>
+                            <input type="number" id="amount" placeholder="1000" required min="0" step="0.01">
+                        </div>
 
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <select id="category" required>
-                            <option value="" disabled selected>Select category</option>
-                            <!-- Categories will be populated dynamically -->
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" required>
+                                <option value="" disabled selected>Select category</option>
+                                <!-- Categories will be populated dynamically -->
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="date">Date</label>
-                        <input type="date" id="date" required>
-                    </div>
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="notes">Notes (Optional)</label>
-                        <input type="text" id="notes" placeholder="Add a note...">
-                    </div>
+                        <div class="form-group">
+                            <label for="notes">Notes (Optional)</label>
+                            <input type="text" id="notes" placeholder="Add a note...">
+                        </div>
 
-                    <input type="hidden" id="editId" value="">
+                        <input type="hidden" id="editId" value="">
 
-                    <button type="submit" class="primary" id="submitBtn">Save Transaction</button>
-                    <button type="button" class="primary" id="cancelEditBtn" onclick="cancelEdit()"
+                        <button type="submit" class="primary" id="submitBtn">Save Transaction</button>
+                        <button type="button" class="primary" id="cancelEditBtn" onclick="cancelEdit()"
                             style="background: #6e6e73; margin-top: 12px; display: none;">Cancel</button>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        <!-- List Tab -->
-        <div id="listTab" class="tab-content" role="tabpanel" aria-labelledby="list-tab">
-            <div class="filters" id="monthFilters"></div>
-            <div style="margin-bottom: 16px;">
-                <label for="categoryFilter" style="display: block; font-size: 14px; color: #6e6e73; margin-bottom: 8px; font-weight: 500;">Filter by Category</label>
-                <select class="category-filter" id="categoryFilter" onchange="filterByCategory()" aria-label="Filter transactions by category">
-                    <option value="all">All Categories</option>
-                </select>
+            <!-- List Tab -->
+            <div id="listTab" class="tab-content" role="tabpanel" aria-labelledby="list-tab">
+                <div class="filters" id="monthFilters"></div>
+                <div style="margin-bottom: 16px;">
+                    <label for="categoryFilter"
+                        style="display: block; font-size: 14px; color: #6e6e73; margin-bottom: 8px; font-weight: 500;">Filter
+                        by Category</label>
+                    <select class="category-filter" id="categoryFilter" onchange="filterByCategory()"
+                        aria-label="Filter transactions by category">
+                        <option value="all">All Categories</option>
+                    </select>
+                </div>
+                <div class="card">
+                    <div id="transactionsList"></div>
+                </div>
             </div>
-            <div class="card">
-                <div id="transactionsList"></div>
-            </div>
-        </div>
 
-        <!-- Groups Tab -->
-        <div id="groupsTab" class="tab-content" role="tabpanel" aria-labelledby="groups-tab">
-            <div class="filters">
-                <button class="filter-btn active" onclick="changeGrouping('month')">By Month</button>
-                <button class="filter-btn" onclick="changeGrouping('category')">By Category</button>
+            <!-- Groups Tab -->
+            <div id="groupsTab" class="tab-content" role="tabpanel" aria-labelledby="groups-tab">
+                <div class="filters">
+                    <button class="filter-btn active" onclick="changeGrouping('month')">By Month</button>
+                    <button class="filter-btn" onclick="changeGrouping('category')">By Category</button>
+                </div>
+                <div id="groupedContent"></div>
             </div>
-            <div id="groupedContent"></div>
-        </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="tab-content" role="tabpanel" aria-labelledby="settings-tab">
+                <div class="card">
+                    <h2 style="font-size: 20px; margin-bottom: 16px;">Settings</h2>
+                    <div class="settings-actions">
+                        <button class="toolbar-btn" onclick="exportToCSV()" aria-label="Export CSV">
+                            <i class="ri-download-2-line"></i>
+                            <span>Export CSV</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="triggerImport()" aria-label="Import CSV">
+                            <i class="ri-upload-2-line"></i>
+                            <span>Import CSV</span>
+                        </button>
+                        <input type="file" id="importFile" accept=".csv,text/csv" style="display: none;"
+                            onchange="handleImport(event)">
+                        <button class="toolbar-btn" onclick="checkForUpdates()" aria-label="Check for updates"
+                            id="updateCheckBtn">
+                            <i class="ri-refresh-line"></i>
+                            <span>Check Updates</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="toggleCurrencySelector()" aria-label="Change currency"
+                            id="currencyBtn">
+                            <i class="ri-exchange-dollar-line"></i>
+                            <span>Currency</span>
+                            <span class="currency-display">
+                                <span id="currencySymbol">₹</span>
+                                <span id="currencyCode">INR</span>
+                            </span>
+                        </button>
+                        <button class="toolbar-btn" onclick="toggleDarkMode()" aria-label="Toggle dark mode"
+                            id="darkModeBtn">
+                            <i class="ri-contrast-2-line" id="darkModeIcon"></i>
+                            <span>Dark Mode</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
     <script>
         // App Version - Update this when releasing new features
-        const APP_VERSION = '3.3.0';
+        const APP_VERSION = '3.3.1';
         const VERSION_KEY = 'app_version';
 
         // Initialize
@@ -224,48 +252,46 @@
         const categories = {
             income: [
                 'Salary',
-                'Bonus',
-                'Freelance',
                 'Business',
                 'Investment',
                 'Rental Income',
                 'Gifts/Refunds',
+                'Freelance',
+                'Bonus',
                 'Other Income'
             ],
             expense: [
-                'Rent',
-                'Debt/Loans',
-                'Groceries',
                 'Food',
+                'Groceries',
                 'Transport',
                 'Utilities/Bills',
-                'Household',
                 'Kids/School',
+                'Fees/Docs',
+                'Debt/Loans',
+                'Household',
+                'Other Expense',
+                'Rent',
                 'Healthcare',
                 'Personal/Shopping',
-                'Fees/Docs',
                 'Insurance/Taxes',
                 'Savings/Investments',
                 'Charity/Gifts',
-                'Misc/Buffer',
-                'Other Expense'
+                'Misc/Buffer'
             ]
         };
 
         // Currency definitions
         const currencies = {
+            INR: { symbol: '₹', name: 'Indian Rupee' },
+            THB: { symbol: '฿', name: 'Thai Baht' },
             USD: { symbol: '$', name: 'US Dollar' },
             EUR: { symbol: '€', name: 'Euro' },
             GBP: { symbol: '£', name: 'British Pound' },
-            INR: { symbol: '₹', name: 'Indian Rupee' },
             JPY: { symbol: '¥', name: 'Japanese Yen' },
             CNY: { symbol: '¥', name: 'Chinese Yuan' },
-            AUD: { symbol: 'A$', name: 'Australian Dollar' },
-            CAD: { symbol: 'C$', name: 'Canadian Dollar' },
-            CHF: { symbol: 'Fr', name: 'Swiss Franc' },
-            THB: { symbol: '฿', name: 'Thai Baht' },
             SGD: { symbol: 'S$', name: 'Singapore Dollar' },
             HKD: { symbol: 'HK$', name: 'Hong Kong Dollar' },
+            AUD: { symbol: 'A$', name: 'Australian Dollar' },
             NZD: { symbol: 'NZ$', name: 'New Zealand Dollar' },
             KRW: { symbol: '₩', name: 'South Korean Won' },
             MYR: { symbol: 'RM', name: 'Malaysian Ringgit' },
@@ -273,7 +299,9 @@
             IDR: { symbol: 'Rp', name: 'Indonesian Rupiah' },
             VND: { symbol: '₫', name: 'Vietnamese Dong' },
             AED: { symbol: 'د.إ', name: 'UAE Dirham' },
-            SAR: { symbol: 'SR', name: 'Saudi Riyal' }
+            SAR: { symbol: 'SR', name: 'Saudi Riyal' },
+            CHF: { symbol: 'Fr', name: 'Swiss Franc' },
+            CAD: { symbol: 'C$', name: 'Canadian Dollar' }
         };
 
         // Get current currency
@@ -402,7 +430,7 @@
         updateCategoryOptions('expense');
 
         // Form submission
-        document.getElementById('transactionForm').addEventListener('submit', function(e) {
+        document.getElementById('transactionForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const transaction = {
@@ -845,6 +873,7 @@
             reader.readAsText(file);
         }
 
+
         function importFromCSV(text) {
             const rows = parseCSV(text).filter(row => row.some(cell => cell.trim() !== ''));
             if (rows.length < 2) {
@@ -1237,7 +1266,7 @@
         }
 
         // Initialize app
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             checkAppVersion();
             loadData();
             loadDarkMode();
@@ -1304,4 +1333,5 @@
         }
     </script>
 </body>
+
 </html>
