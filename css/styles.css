@@ -408,9 +408,21 @@ button.primary:active {
 .transaction-item {
     padding: 16px;
     border-bottom: 1px solid #f5f5f7;
+    border-left: 4px solid transparent;
     display: flex;
     align-items: center;
     gap: 12px;
+    position: relative;
+}
+
+.transaction-item.income {
+    border-left-color: #34c759;
+    background: linear-gradient(90deg, rgba(52, 199, 89, 0.03) 0%, transparent 100%);
+}
+
+.transaction-item.expense {
+    border-left-color: #ff3b30;
+    background: linear-gradient(90deg, rgba(255, 59, 48, 0.03) 0%, transparent 100%);
 }
 
 .transaction-item:last-child {
@@ -418,24 +430,7 @@ button.primary:active {
 }
 
 .transaction-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-}
-
-.transaction-icon.income {
-    background: #d4f4dd;
-    color: #34c759;
-}
-
-.transaction-icon.expense {
-    background: #ffe5e5;
-    color: #ff3b30;
+    display: none;
 }
 
 .transaction-details {
@@ -488,22 +483,17 @@ button.primary:active {
     .transaction-item {
         padding: 12px;
         display: grid;
-        grid-template-columns: 32px 1fr auto;
+        grid-template-columns: 1fr auto;
         grid-template-areas:
-            "icon details amount"
-            "icon details actions";
-        column-gap: 10px;
+            "details amount"
+            "details actions";
+        column-gap: 12px;
         row-gap: 6px;
         align-items: center;
-        border-bottom: 1px solid #ebebef;
     }
 
     .transaction-icon {
-        width: 30px;
-        height: 30px;
-        font-size: 16px;
-        border-radius: 8px;
-        grid-area: icon;
+        display: none;
     }
 
     .transaction-details {
