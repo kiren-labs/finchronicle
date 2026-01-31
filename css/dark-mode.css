@@ -1,6 +1,39 @@
 /* FinChronicle - Dark Mode Styles */
 /* Version: 3.3.1 */
 
+/* Dark mode pagination controls */
+body.dark-mode .pagination-container {
+    background: #1c1c1e;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+body.dark-mode .pagination-btn {
+    background: #0051D5;
+    color: white;
+}
+
+body.dark-mode .pagination-btn:hover:not(:disabled) {
+    background: #0061f5;
+    box-shadow: 0 4px 12px rgba(0,97,245,0.4);
+}
+
+body.dark-mode .pagination-btn:active:not(:disabled) {
+    box-shadow: 0 2px 6px rgba(0,97,245,0.3);
+}
+
+body.dark-mode .pagination-btn:disabled {
+    background: #2c2c2e;
+    color: #636366;
+}
+
+body.dark-mode .pagination-btn:disabled:hover {
+    background: #2c2c2e;
+}
+
+body.dark-mode .pagination-info {
+    color: #98989d;
+}
+
 /* ==========================================================================
    Dark Mode Base
    ========================================================================== */
