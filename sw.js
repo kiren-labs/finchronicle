@@ -1,5 +1,5 @@
 // Service Worker for offline functionality
-const CACHE_NAME = 'finchronicle-v3.3.0';
+const CACHE_NAME = 'finchronicle-v3.3.1';
 const urlsToCache = [
     './',
     './index.html',

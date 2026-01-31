@@ -17,6 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.3.1] - 2026-01-31
+
+### Changed
+- 💎 Enhanced currency display with badge styling for better visibility
+- 📊 Reorganized currency list by priority (local, major, regional currencies)
+
+---
+
 ## [3.3.0] - 2026-01-31
 
 ### Added
