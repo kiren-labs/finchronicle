@@ -10,11 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Import from CSV
 - Budget tracking per category
 - Recurring transactions
 - Search functionality
 - Charts and graphs
+
+---
+
+## [3.3.0] - 2026-01-31
+
+### Added
+- 📥 **CSV Import**: Import transactions from CSV files via toolbar button
+  - Supports app export format and custom CSVs with Date, Category, Amount, Notes/Description
+  - Automatic date normalization for common formats
+
+### Changed
+- Expanded and refined expense categories for better budgeting accuracy
 
 ---
 
