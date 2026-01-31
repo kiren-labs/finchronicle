@@ -37,12 +37,6 @@
     font-size: 18px;
 }
 
-.pagination-btn:disabled:hover {
-    background: #e5e5e7;
-    transform: none;
-    box-shadow: none;
-}
-
 .pagination-btn:hover:not(:disabled) {
     background: #0046b8;
     transform: translateY(-1px);
@@ -519,11 +513,6 @@ button.primary:active {
 
     .transaction-details {
         grid-area: details;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        min-width: 0;
-        line-height: 1.2;
     }
 
     .transaction-category {
