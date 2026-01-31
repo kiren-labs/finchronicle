@@ -92,6 +92,11 @@
                 <i class="ri-download-2-line"></i>
                 <span>Export CSV</span>
             </button>
+            <button class="toolbar-btn" onclick="triggerImport()" aria-label="Import CSV">
+                <i class="ri-upload-2-line"></i>
+                <span>Import CSV</span>
+            </button>
+            <input type="file" id="importFile" accept=".csv,text/csv" style="display: none;" onchange="handleImport(event)">
             <button class="toolbar-btn" onclick="checkForUpdates()" aria-label="Check for updates" id="updateCheckBtn">
                 <i class="ri-refresh-line"></i>
             </button>
@@ -809,6 +814,175 @@
             window.URL.revokeObjectURL(url);
 
             showMessage('Export successful!');
+        }
+
+        function triggerImport() {
+            const input = document.getElementById('importFile');
+            input.value = '';
+            input.click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const result = importFromCSV(reader.result);
+                    if (result.added === 0) {
+                        showMessage('No valid rows to import.');
+                        return;
+                    }
+                    showMessage(`Imported ${result.added} transaction(s)` + (result.skipped ? ` • Skipped ${result.skipped}` : ''));
+                } catch (err) {
+                    showMessage('Import failed. Check the CSV format.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function importFromCSV(text) {
+            const rows = parseCSV(text).filter(row => row.some(cell => cell.trim() !== ''));
+            if (rows.length < 2) {
+                return { added: 0, skipped: rows.length };
+            }
+
+            const headers = rows[0].map(h => h.trim());
+            const dateIndex = findHeaderIndex(headers, /^date$/i);
+            const typeIndex = findHeaderIndex(headers, /^type$/i);
+            const categoryIndex = findHeaderIndex(headers, /^category$/i);
+            const amountIndex = findHeaderIndex(headers, /^amount\b/i);
+            const notesIndex = findHeaderIndex(headers, /^notes$/i) ?? findHeaderIndex(headers, /^description$/i);
+
+            if (dateIndex === -1 || categoryIndex === -1 || amountIndex === -1) {
+                throw new Error('Missing required headers');
+            }
+
+            let added = 0;
+            let skipped = 0;
+            const nowIso = new Date().toISOString();
+            const startId = Date.now();
+
+            rows.slice(1).forEach((row, i) => {
+                const rawDate = (row[dateIndex] || '').trim();
+                const normalizedDate = normalizeDate(rawDate);
+                const rawAmount = (row[amountIndex] || '').replace(/,/g, '').trim();
+                const amount = parseFloat(rawAmount);
+
+                if (!normalizedDate || Number.isNaN(amount)) {
+                    skipped += 1;
+                    return;
+                }
+
+                const rawType = typeIndex !== -1 ? (row[typeIndex] || '').trim().toLowerCase() : 'expense';
+                const type = rawType === 'income' ? 'income' : 'expense';
+                const category = (row[categoryIndex] || '').trim() || (type === 'income' ? 'Other Income' : 'Other Expense');
+                const notes = notesIndex !== -1 ? (row[notesIndex] || '').trim() : '';
+
+                transactions.unshift({
+                    id: startId + i,
+                    type,
+                    amount: Math.abs(amount),
+                    category,
+                    date: normalizedDate,
+                    notes,
+                    createdAt: nowIso
+                });
+                added += 1;
+            });
+
+            if (added > 0) {
+                saveData();
+                updateUI();
+            }
+
+            return { added, skipped };
+        }
+
+        function findHeaderIndex(headers, regex) {
+            return headers.findIndex(h => regex.test(h));
+        }
+
+        function normalizeDate(value) {
+            if (!value) return '';
+            const trimmed = value.trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+                return trimmed;
+            }
+
+            const shortMatch = trimmed.match(/^(\d{1,2})-([A-Za-z]{3})$/);
+            if (shortMatch) {
+                const day = shortMatch[1].padStart(2, '0');
+                const month = monthNameToNumber(shortMatch[2]);
+                if (!month) return '';
+                const year = new Date().getFullYear();
+                return `${year}-${month}-${day}`;
+            }
+
+            const slashMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (slashMatch) {
+                const day = slashMatch[1].padStart(2, '0');
+                const month = slashMatch[2].padStart(2, '0');
+                const year = slashMatch[3];
+                return `${year}-${month}-${day}`;
+            }
+
+            const date = new Date(trimmed);
+            if (!Number.isNaN(date.getTime())) {
+                return date.toISOString().slice(0, 10);
+            }
+
+            return '';
+        }
+
+        function monthNameToNumber(month) {
+            const map = {
+                jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+                jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12'
+            };
+            return map[month.toLowerCase()] || '';
+        }
+
+        function parseCSV(text) {
+            const rows = [];
+            let row = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const next = text[i + 1];
+
+                if (char === '"') {
+                    if (inQuotes && next === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(current);
+                    current = '';
+                } else if ((char === '\n' || char === '\r') && !inQuotes) {
+                    if (char === '\r' && next === '\n') {
+                        i++;
+                    }
+                    row.push(current);
+                    rows.push(row);
+                    row = [];
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+
+            if (current.length > 0 || row.length > 0) {
+                row.push(current);
+                rows.push(row);
+            }
+
+            return rows;
         }
 
         // Toggle dark mode
