@@ -407,21 +407,41 @@ button.primary:active {
 
 .transaction-item {
     padding: 16px;
+    padding-left: 20px;
     border-bottom: 1px solid #f5f5f7;
-    border-left: 4px solid transparent;
     display: flex;
     align-items: center;
     gap: 12px;
     position: relative;
 }
 
+.transaction-item::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 50%;
+    border-radius: 4px;
+    background: transparent;
+}
+
+.transaction-item.income::before {
+    background: linear-gradient(180deg, #34c759 0%, #28a745 100%);
+    box-shadow: 0 0 8px rgba(52, 199, 89, 0.3);
+}
+
+.transaction-item.expense::before {
+    background: linear-gradient(180deg, #ff3b30 0%, #d93025 100%);
+    box-shadow: 0 0 8px rgba(255, 59, 48, 0.3);
+}
+
 .transaction-item.income {
-    border-left-color: #34c759;
     background: linear-gradient(90deg, rgba(52, 199, 89, 0.03) 0%, transparent 100%);
 }
 
 .transaction-item.expense {
-    border-left-color: #ff3b30;
     background: linear-gradient(90deg, rgba(255, 59, 48, 0.03) 0%, transparent 100%);
 }
 
@@ -482,6 +502,7 @@ button.primary:active {
 @media (max-width: 480px) {
     .transaction-item {
         padding: 12px;
+        padding-left: 24px;
         display: grid;
         grid-template-columns: 1fr auto;
         grid-template-areas:
