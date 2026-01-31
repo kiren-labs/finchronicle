@@ -224,16 +224,18 @@
         const categories = {
             income: [
                 'Salary',
+                'Bonus',
                 'Freelance',
                 'Business',
                 'Investment',
+                'Rental Income',
+                'Gifts/Refunds',
                 'Other Income'
             ],
             expense: [
                 'Rent',
                 'Debt/Loans',
                 'Groceries',
-                'Dining Out',
                 'Food',
                 'Transport',
                 'Utilities/Bills',
@@ -242,9 +244,10 @@
                 'Healthcare',
                 'Personal/Shopping',
                 'Fees/Docs',
-                'Gifts/Events',
-                'Nanny Salary',
-                'Play School (Son)',
+                'Insurance/Taxes',
+                'Savings/Investments',
+                'Charity/Gifts',
+                'Misc/Buffer',
                 'Other Expense'
             ]
         };
@@ -877,8 +880,9 @@
 
                 const rawType = typeIndex !== -1 ? (row[typeIndex] || '').trim().toLowerCase() : 'expense';
                 const type = rawType === 'income' ? 'income' : 'expense';
-                const category = (row[categoryIndex] || '').trim() || (type === 'income' ? 'Other Income' : 'Other Expense');
+                const baseCategory = (row[categoryIndex] || '').trim();
                 const notes = notesIndex !== -1 ? (row[notesIndex] || '').trim() : '';
+                const category = normalizeImportedCategory(baseCategory, notes, type);
 
                 transactions.unshift({
                     id: startId + i,
@@ -934,6 +938,69 @@
             }
 
             return '';
+        }
+
+        function normalizeImportedCategory(baseCategory, notes, type) {
+            if (type === 'income') {
+                const incomeBase = (baseCategory || '').trim();
+                if (incomeBase) {
+                    return incomeBase;
+                }
+                const desc = (notes || '').toLowerCase();
+                const incomeMap = [
+                    { category: 'Salary', keys: ['salary', 'payroll', 'paycheck'] },
+                    { category: 'Bonus', keys: ['bonus'] },
+                    { category: 'Freelance', keys: ['freelance', 'contract'] },
+                    { category: 'Business', keys: ['business', 'sale', 'revenue'] },
+                    { category: 'Investment', keys: ['investment', 'interest', 'dividend', 'capital gain'] },
+                    { category: 'Rental Income', keys: ['rent', 'rental'] },
+                    { category: 'Gifts/Refunds', keys: ['gift', 'refund', 'cashback', 'reimbursement'] }
+                ];
+                for (const entry of incomeMap) {
+                    if (entry.keys.some(key => desc.includes(key))) {
+                        return entry.category;
+                    }
+                }
+                return 'Other Income';
+            }
+
+            const desc = (notes || '').toLowerCase();
+            const base = (baseCategory || '').toLowerCase();
+
+            const keywordMap = [
+                { category: 'Groceries', keys: ['grocery', 'groceries', 'market', 'big c', 'bigc', 'tops', '7 11', '7-11', 'seven 11', 'lotus', 'taopoon', 'fruits', 'veg', 'vegetable', 'meat', 'fish', 'milk', 'powder', 'diaper'] },
+                { category: 'Food', keys: ['kfc', 'mcd', 'mc d', 'subway', 'grab food', 'grab', 'dinner', 'lunch', 'coffee', 'coffe', 'tea', 'ice cream', 'burger', 'biriyani', 'haidilao', 'pepper lunch', 'restaurant', 'food', 'tao bin', 'taobin'] },
+                { category: 'Utilities/Bills', keys: ['bill', 'electricity', 'water', 'true', 'phone', 'internet'] },
+                { category: 'Transport', keys: ['taxi', 'bus', 'train', 'mrt', 'fuel', 'bike', 'scooter', 'car'] },
+                { category: 'Fees/Docs', keys: ['passport', 'renewal', 'certificate', 'cert', 'photostats', 'fee', 'tax'] },
+                { category: 'Kids/School', keys: ['playschool', 'play school', 'tuition', 'school', 'kid', 'kevin', 'elvin', 'bday', 'birthday', 'kids'] },
+                { category: 'Household', keys: ['cleaning', 'repair', 'mirror'] },
+                { category: 'Insurance/Taxes', keys: ['insurance', 'premium', 'tax', 'taxes'] },
+                { category: 'Savings/Investments', keys: ['saving', 'savings', 'investment', 'invest', 'mutual fund', 'sip', 'stock', 'equity'] },
+                { category: 'Charity/Gifts', keys: ['charity', 'donation', 'gift', 'gifts', 'event', 'events'] }
+            ];
+
+            const hardCategories = ['rent', 'debt/loans', 'nanny salary', 'play school (son)'];
+            if (hardCategories.includes(base)) {
+                return baseCategory;
+            }
+
+            for (const entry of keywordMap) {
+                if (entry.keys.some(key => desc.includes(key))) {
+                    return entry.category;
+                }
+            }
+
+            if (base === 'transport') return 'Transport';
+            if (base === 'groceries') return 'Groceries';
+            if (base === 'food' || base === 'dining out') return 'Food';
+            if (base === 'utilities/misc') return 'Utilities/Bills';
+            if (base === 'gifts/events' || base === 'gifts' || base === 'charity') return 'Charity/Gifts';
+            if (base === 'insurance/taxes' || base === 'insurance' || base === 'taxes') return 'Insurance/Taxes';
+            if (base === 'savings/investments' || base === 'savings' || base === 'investments') return 'Savings/Investments';
+            if (base === 'other expense') return 'Misc/Buffer';
+
+            return baseCategory || 'Other Expense';
         }
 
         function monthNameToNumber(month) {
