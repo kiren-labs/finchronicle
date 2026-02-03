@@ -45,7 +45,7 @@
         <header>
             <h1>
                 <span><i class="ri-wallet-3-line"></i> FinChronicle</span>
-                <span class="version" id="appVersion">v3.3.2</span>
+                <span class="version" id="appVersion">v3.4.0</span>
             </h1>
             <div class="status">Offline Ready</div>
         </header>
@@ -246,8 +246,14 @@
 
     <script>
         // App Version - Update this when releasing new features
-        const APP_VERSION = '3.3.2';
+        const APP_VERSION = '3.4.0';
         const VERSION_KEY = 'app_version';
+
+        // IndexedDB Configuration
+        const DB_NAME = 'FinChronicleDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'transactions';
+        let db = null;
 
         // Initialize
         let transactions = [];
@@ -422,6 +428,139 @@
             }
         }
 
+        // =====================================================================
+        // IndexedDB Operations
+        // =====================================================================
+
+        // Initialize IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        store.createIndex('date', 'date', { unique: false });
+                        store.createIndex('type', 'type', { unique: false });
+                        store.createIndex('category', 'category', { unique: false });
+                        store.createIndex('dateType', ['date', 'type'], { unique: false });
+                    }
+                };
+            });
+        }
+
+        // Load all transactions from IndexedDB
+        function loadDataFromDB() {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject(new Error('Database not initialized'));
+                    return;
+                }
+
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+
+                request.onsuccess = () => {
+                    transactions = request.result || [];
+                    transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    resolve(transactions);
+                };
+
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Save single transaction to IndexedDB
+        function saveTransactionToDB(transaction) {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject(new Error('Database not initialized'));
+                    return;
+                }
+
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.put(transaction);
+
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Delete transaction from IndexedDB
+        function deleteTransactionFromDB(id) {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject(new Error('Database not initialized'));
+                    return;
+                }
+
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.delete(id);
+
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Bulk save transactions to IndexedDB (for import)
+        function bulkSaveTransactionsToDB(transactionsArray) {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject(new Error('Database not initialized'));
+                    return;
+                }
+
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+
+                transactionsArray.forEach(transaction => {
+                    store.put(transaction);
+                });
+
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        // Migrate localStorage data to IndexedDB (one-time)
+        async function migrateFromLocalStorage() {
+            const migrationFlag = localStorage.getItem('idb_migrated');
+            
+            // Skip if already migrated
+            if (migrationFlag === 'true') {
+                return;
+            }
+
+            const stored = localStorage.getItem('transactions');
+            if (stored) {
+                try {
+                    const oldTransactions = JSON.parse(stored);
+                    if (oldTransactions.length > 0) {
+                        await bulkSaveTransactionsToDB(oldTransactions);
+                        console.log(`Migrated ${oldTransactions.length} transactions to IndexedDB`);
+                    }
+                    localStorage.removeItem('transactions'); // Clean up old data
+                } catch (err) {
+                    console.error('Migration failed:', err);
+                    return;
+                }
+            }
+
+            // Mark migration as complete (even if no data existed)
+            localStorage.setItem('idb_migrated', 'true');
+        }
+
         // Load data from localStorage
         function loadData() {
             const stored = localStorage.getItem('transactions');
@@ -445,7 +584,7 @@
         updateCategoryOptions('expense');
 
         // Form submission
-        document.getElementById('transactionForm').addEventListener('submit', function (e) {
+        document.getElementById('transactionForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const transaction = {
@@ -460,30 +599,35 @@
                     new Date().toISOString()
             };
 
-            if (editingId) {
-                // Update existing transaction
-                const index = transactions.findIndex(t => t.id === editingId);
-                if (index !== -1) {
-                    transactions[index] = transaction;
+            try {
+                await saveTransactionToDB(transaction);
+
+                if (editingId) {
+                    // Update existing transaction in memory
+                    const index = transactions.findIndex(t => t.id === editingId);
+                    if (index !== -1) {
+                        transactions[index] = transaction;
+                    }
+                    showMessage('Transaction updated!');
+                } else {
+                    // Add new transaction to memory
+                    transactions.unshift(transaction);
+                    showMessage('Transaction saved!');
                 }
-                showMessage('Transaction updated!');
-            } else {
-                // Add new transaction
-                transactions.unshift(transaction);
-                showMessage('Transaction saved!');
+
+                // Clear form
+                document.getElementById('transactionForm').reset();
+                document.getElementById('date').valueAsDate = new Date();
+                editingId = null;
+                document.getElementById('formTitle').textContent = 'Add Transaction';
+                document.getElementById('submitBtn').textContent = 'Save Transaction';
+                document.getElementById('cancelEditBtn').style.display = 'none';
+
+                updateUI();
+            } catch (err) {
+                console.error('Save failed:', err);
+                showMessage('Failed to save transaction');
             }
-
-            saveData();
-
-            // Clear form
-            document.getElementById('transactionForm').reset();
-            document.getElementById('date').valueAsDate = new Date();
-            editingId = null;
-            document.getElementById('formTitle').textContent = 'Add Transaction';
-            document.getElementById('submitBtn').textContent = 'Save Transaction';
-            document.getElementById('cancelEditBtn').style.display = 'none';
-
-            updateUI();
         });
 
         // Show message
@@ -860,12 +1004,17 @@
         }
 
         // Confirm delete
-        function confirmDelete() {
+        async function confirmDelete() {
             if (deleteId) {
-                transactions = transactions.filter(t => t.id !== deleteId);
-                saveData();
-                updateUI();
-                showMessage('Transaction deleted!');
+                try {
+                    await deleteTransactionFromDB(deleteId);
+                    transactions = transactions.filter(t => t.id !== deleteId);
+                    updateUI();
+                    showMessage('Transaction deleted!');
+                } catch (err) {
+                    console.error('Delete failed:', err);
+                    showMessage('Failed to delete transaction');
+                }
                 deleteId = null;
             }
             closeDeleteModal();
@@ -989,8 +1138,11 @@
             });
 
             if (added > 0) {
-                saveData();
-                updateUI();
+                bulkSaveTransactionsToDB(transactions).then(() => {
+                    updateUI();
+                }).catch(err => {
+                    console.error('Bulk save failed:', err);
+                });
             }
 
             return { added, skipped };
@@ -1021,7 +1173,16 @@
                 const day = slashMatch[1].padStart(2, '0');
                 const month = slashMatch[2].padStart(2, '0');
                 const year = slashMatch[3];
-                return `${year}-${month}-${day}`;
+                const dateStr = `${year}-${month}-${day}`;
+                // Validate the date is actually valid
+                const testDate = new Date(dateStr);
+                if (!Number.isNaN(testDate.getTime()) &&
+                    testDate.getFullYear() === parseInt(year) &&
+                    testDate.getMonth() + 1 === parseInt(month) &&
+                    testDate.getDate() === parseInt(day)) {
+                    return dateStr;
+                }
+                return '';
             }
 
             const date = new Date(trimmed);
@@ -1064,12 +1225,12 @@
                 { category: 'Food', keys: ['kfc', 'mcd', 'mc d', 'subway', 'grab food', 'grab', 'dinner', 'lunch', 'coffee', 'coffe', 'tea', 'ice cream', 'burger', 'biriyani', 'haidilao', 'pepper lunch', 'restaurant', 'food', 'tao bin', 'taobin'] },
                 { category: 'Utilities/Bills', keys: ['bill', 'electricity', 'water', 'true', 'phone', 'internet'] },
                 { category: 'Transport', keys: ['taxi', 'bus', 'train', 'mrt', 'fuel', 'bike', 'scooter', 'car'] },
-                { category: 'Fees/Docs', keys: ['passport', 'renewal', 'certificate', 'cert', 'photostats', 'fee', 'tax'] },
-                { category: 'Kids/School', keys: ['playschool', 'play school', 'tuition', 'school', 'kid', 'kevin', 'elvin', 'bday', 'birthday', 'kids'] },
-                { category: 'Household', keys: ['cleaning', 'repair', 'mirror'] },
+                { category: 'Kids/School', keys: ['playschool', 'play school', 'tuition', 'school', 'kid', 'kevin', 'elvin', 'bday', 'kids'] },
                 { category: 'Insurance/Taxes', keys: ['insurance', 'premium', 'tax', 'taxes'] },
-                { category: 'Savings/Investments', keys: ['saving', 'savings', 'investment', 'invest', 'mutual fund', 'sip', 'stock', 'equity'] },
-                { category: 'Charity/Gifts', keys: ['charity', 'donation', 'gift', 'gifts', 'event', 'events'] }
+                { category: 'Charity/Gifts', keys: ['charity', 'donation', 'gift', 'gifts', 'event', 'events', 'birthday'] },
+                { category: 'Fees/Docs', keys: ['passport', 'renewal', 'certificate', 'cert', 'photostats', 'fee'] },
+                { category: 'Household', keys: ['cleaning', 'repair', 'mirror'] },
+                { category: 'Savings/Investments', keys: ['saving', 'savings', 'investment', 'invest', 'mutual fund', 'sip', 'stock', 'equity'] }
             ];
 
             const hardCategories = ['rent', 'debt/loans', 'nanny salary', 'play school (son)'];
@@ -1136,7 +1297,11 @@
                 }
             }
 
-            if (current.length > 0 || row.length > 0) {
+            // Handle remaining data after loop
+            if (text.length === 0) {
+                // Empty CSV should return one empty cell
+                return [['']];
+            } else if (current.length > 0 || row.length > 0) {
                 row.push(current);
                 rows.push(row);
             }
@@ -1329,12 +1494,20 @@
         }
 
         // Initialize app
-        window.addEventListener('load', function () {
-            checkAppVersion();
-            loadData();
-            loadDarkMode();
-            updateCurrencyDisplay();
-            checkInstallPrompt();
+        window.addEventListener('load', async function () {
+            try {
+                await initDB();
+                await migrateFromLocalStorage();
+                await loadDataFromDB();
+                updateUI();
+                checkAppVersion();
+                loadDarkMode();
+                updateCurrencyDisplay();
+                checkInstallPrompt();
+            } catch (err) {
+                console.error('App initialization failed:', err);
+                showMessage('Failed to load data');
+            }
         });
 
         // Register service worker for offline support

@@ -17,6 +17,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.4.0] - 2026-02-01
+
+### Changed
+- 🗄️ **Major upgrade: IndexedDB storage** for transactions (unlimited scale)
+- 💾 localStorage now used only for settings (currency, dark mode, version)
+- 🔄 Auto-migration from localStorage to IndexedDB on first load
+- ⚡ Improved performance with indexed queries for filters
+
+### Technical
+- Added IndexedDB wrapper with Promise-based API
+- Hybrid storage architecture (IndexedDB + localStorage)
+- Backward compatible migration (preserves existing data)
+
+---
+
 ## [3.3.2] - 2026-01-31
 
 ### Changed
