@@ -1567,7 +1567,7 @@ button.primary.loading .btn-spinner {
     border-top: 1px solid var(--color-border);
     display: flex;
     padding: var(--space-sm) 0;
-    padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom));
+    padding-bottom: var(--space-sm);
     box-shadow: 0 -2px var(--space-sm) rgba(0,0,0,0.05);
 }
 
