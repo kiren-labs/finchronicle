@@ -17,18 +17,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [3.4.0] - 2026-02-01
+## [3.4.0] - 2026-02-06
+
+### Added
+- ✨ **Enhanced Form Feedback**: Multi-layered confirmation when adding transactions
+  - Loading state with spinner animation while saving
+  - Success state with checkmark and green button color
+  - Card pulse animation with green glow effect
+  - Haptic feedback (vibration) on mobile devices
+  - Improved success message with bounce animation and checkmark icon
+- 📱 **Better Mobile Keyboard**: Amount input now shows optimized decimal keypad
+  - Added `inputmode="decimal"` for perfect currency input experience
+  - Consistent across iOS and Android devices
 
 ### Changed
 - 🗄️ **Major upgrade: IndexedDB storage** for transactions (unlimited scale)
 - 💾 localStorage now used only for settings (currency, dark mode, version)
 - 🔄 Auto-migration from localStorage to IndexedDB on first load
 - ⚡ Improved performance with indexed queries for filters
+- 🎨 Cleaner amount input field (removed spinner arrows on desktop)
+- 📅 Fixed date input field overflow and height consistency on iOS devices
+- 🔢 Improved decimal precision for amount input (step changed to 0.01)
 
 ### Technical
 - Added IndexedDB wrapper with Promise-based API
 - Hybrid storage architecture (IndexedDB + localStorage)
 - Backward compatible migration (preserves existing data)
+- Implemented button state management (loading, success, disabled states)
+- Added CSS animations: `successPulse`, `slideDownBounce`, spinner rotation
+- Enhanced form submission flow with 800ms feedback cycle
+- Added haptic feedback using Vibration API
 
 ---
 
@@ -233,6 +251,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+- **v3.4.0** - IndexedDB storage, enhanced form feedback, mobile improvements (2026-02-06)
+- **v3.3.2** - Mobile layout refinements (2026-01-31)
+- **v3.3.1** - Currency display improvements (2026-01-31)
+- **v3.3.0** - CSV import (2026-01-31)
 - **v3.1.0** - Professional icons, improved updates (2025-01-15)
 - **v3.0.0** - Multi-currency, smart toggles, version system (2025-01-14)
 - **v2.0.0** - Edit, delete, filter, export, dark mode (2025-01-13)
@@ -241,6 +263,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## Upgrade Notes
+
+### Upgrading to v3.4.0
+- **Automatic data migration**: All transactions automatically migrate from localStorage to IndexedDB
+- Migration happens seamlessly on first load
+- All existing data preserved (transactions, currency, dark mode preference)
+- Enhanced form feedback works immediately
+- Mobile keyboard improvements apply automatically
+- No manual action required
 
 ### Upgrading from v3.0.0 to v3.1.0
 - No data migration needed
