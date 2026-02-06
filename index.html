@@ -137,7 +137,7 @@
 
                         <div class="form-group">
                             <label for="amount">Amount (₹)</label>
-                            <input type="number" id="amount" placeholder="1000" required min="0" step="0.01">
+                            <input type="number" id="amount" placeholder="1000" required min="0" step="0.01" inputmode="decimal">
                         </div>
 
                         <div class="form-group">
@@ -587,6 +587,15 @@
         document.getElementById('transactionForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
+            const submitBtn = document.getElementById('submitBtn');
+            const formCard = document.querySelector('#addTab .card');
+            const originalBtnText = submitBtn.textContent;
+
+            // Show loading state
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="btn-spinner"></span> Saving...';
+
             const transaction = {
                 id: editingId || Date.now(),
                 type: document.getElementById('type').value,
@@ -602,6 +611,19 @@
             try {
                 await saveTransactionToDB(transaction);
 
+                // Show success state
+                submitBtn.classList.remove('loading');
+                submitBtn.classList.add('success');
+                submitBtn.innerHTML = '<i class="ri-check-line btn-icon"></i> Saved!';
+
+                // Trigger haptic feedback (mobile)
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
+
+                // Animate card
+                formCard.classList.add('success-pulse');
+
                 if (editingId) {
                     // Update existing transaction in memory
                     const index = transactions.findIndex(t => t.id === editingId);
@@ -615,17 +637,34 @@
                     showMessage('Transaction saved!');
                 }
 
-                // Clear form
-                document.getElementById('transactionForm').reset();
-                document.getElementById('date').valueAsDate = new Date();
-                editingId = null;
-                document.getElementById('formTitle').textContent = 'Add Transaction';
-                document.getElementById('submitBtn').textContent = 'Save Transaction';
-                document.getElementById('cancelEditBtn').style.display = 'none';
+                // Wait for animations to complete
+                setTimeout(() => {
+                    // Clear form
+                    document.getElementById('transactionForm').reset();
+                    document.getElementById('date').valueAsDate = new Date();
+                    editingId = null;
+                    document.getElementById('formTitle').textContent = 'Add Transaction';
+                    document.getElementById('cancelEditBtn').style.display = 'none';
 
-                updateUI();
+                    // Reset button state
+                    submitBtn.classList.remove('success');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Transaction';
+
+                    // Remove card animation class
+                    formCard.classList.remove('success-pulse');
+
+                    updateUI();
+                }, 800);
+
             } catch (err) {
                 console.error('Save failed:', err);
+
+                // Reset button on error
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+
                 showMessage('Failed to save transaction');
             }
         });

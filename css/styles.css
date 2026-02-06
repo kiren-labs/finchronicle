@@ -303,6 +303,11 @@ h1 {
     border-radius: 12px;
     margin-bottom: 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.card.success-pulse {
+    animation: successPulse 0.6s ease-out;
 }
 
 /* ==========================================================================
@@ -331,11 +336,35 @@ input, select {
     background: white;
 }
 
+/* Hide number input spinner arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 input[type="date"] {
     display: block;
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    /* iOS-specific fixes */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    /* Match the height of other inputs by using same padding */
+    padding: 12px;
+    /* Ensure content doesn't overflow */
+    overflow: hidden;
+    /* Improve vertical alignment */
+    line-height: normal;
+    /* Prevent iOS date picker from expanding */
+    font-size: 16px;
 }
 
 input:focus, select:focus, textarea:focus {
@@ -353,11 +382,50 @@ button.primary {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 button.primary:active {
     opacity: 0.8;
+}
+
+button.primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+button.primary.loading {
+    pointer-events: none;
+}
+
+button.primary.success {
+    background: #34c759;
+}
+
+/* Button icon states */
+button.primary .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: 20px;
+}
+
+button.primary .btn-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+button.primary.loading .btn-spinner {
+    display: inline-block;
 }
 
 /* ==========================================================================
@@ -902,17 +970,32 @@ button.primary:active {
     transform: translateX(-50%);
     background: #34c759;
     color: white;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 500;
-    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: 0 6px 20px rgba(52, 199, 89, 0.4);
     z-index: 1000;
     display: none;
-    animation: slideDown 0.3s ease;
+    animation: slideDownBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .success-message.show {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.success-message::before {
+    content: '✓';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    font-weight: bold;
 }
 
 .install-prompt {
@@ -1079,6 +1162,35 @@ button.primary:active {
     to {
         transform: translateX(-50%) translateY(0);
         opacity: 1;
+    }
+}
+
+@keyframes slideDownBounce {
+    0% {
+        transform: translateX(-50%) translateY(-100px);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(-50%) translateY(5px);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes successPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 8px rgba(52, 199, 89, 0.2), 0 4px 20px rgba(52, 199, 89, 0.3);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 }
 
