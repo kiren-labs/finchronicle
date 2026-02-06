@@ -18,12 +18,12 @@
     display: flex;
     align-items: center;
     gap: var(--space-xs);
-    padding: 10px var(--space-xl);
+    padding: var(--button-padding-y) var(--space-xl);
     border: none;
     border-radius: var(--radius-md);
     background: var(--color-primary);
     color: var(--color-on-primary);
-    font-size: 15px;
+    font-size: var(--font-md);
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -31,7 +31,7 @@
 }
 
 .pagination-btn i {
-    font-size: 18px;
+    font-size: var(--icon-md);
 }
 
 .pagination-btn:hover:not(:disabled) {
@@ -61,7 +61,7 @@
 .pagination-info {
     flex: 1;
     text-align: center;
-    font-size: 14px;
+    font-size: var(--font-md);
     font-weight: 500;
     color: var(--color-text-muted);
     white-space: nowrap;
@@ -70,13 +70,13 @@
 /* Mobile responsive */
 @media (max-width: 480px) {
     .pagination-container {
-        gap: 12px;
-        padding: 12px;
+        gap: var(--space-md);
+        padding: var(--space-md);
     }
 
     .pagination-btn {
-        padding: 8px 14px;
-        font-size: 14px;
+        padding: 8px var(--space-md);
+        font-size: var(--font-md);
     }
 
     .pagination-btn span {
@@ -84,63 +84,63 @@
     }
 
     .pagination-btn i {
-        font-size: 20px;
+        font-size: var(--icon-lg);
     }
 
     .pagination-info {
-        font-size: 13px;
+        font-size: var(--font-sm);
     }
 
     /* Tab responsive styling */
     .tab {
-        padding: 8px 6px;
-        font-size: 13px;
-        gap: 4px;
+        padding: 8px var(--space-xs);
+        font-size: var(--font-sm);
+        gap: var(--space-2xs);
     }
 
     .tab i {
-        font-size: 16px;
+        font-size: var(--icon-sm);
     }
 
     /* Header compact on mobile */
     header {
-        padding: 10px 12px;
+        padding: var(--space-sm) var(--space-md);
     }
 
     h1 {
-        font-size: 16px;
+        font-size: var(--font-lg);
     }
 
     h1 i {
-        font-size: 18px;
+        font-size: var(--icon-md);
     }
 
     .header-actions {
-        gap: 6px;
+        gap: var(--space-xs);
     }
 
     .header-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 16px;
+        width: 28px;
+        height: 28px;
+        font-size: var(--icon-sm);
     }
 
     .header-meta {
-        gap: 6px;
+        gap: var(--space-xs);
     }
 
     .status-inline {
-        font-size: 10px;
+        font-size: var(--font-xs);
     }
 
     .status-dot {
-        width: 5px;
-        height: 5px;
+        width: 4px;
+        height: 4px;
     }
 
     .version {
-        font-size: 10px;
-        padding: 3px 6px;
+        font-size: var(--font-xs);
+        padding: 2px 4px;
     }
 
     .header-btn {
@@ -158,20 +158,29 @@
         margin-bottom: 8px;
     }
 
+    .summary-section.collapsed .summary-header {
+        padding: 12px;
+    }
+
     .summary-compact {
-        font-size: 11px;
-        gap: 6px;
+        font-size: 10px;
+        gap: 4px;
+        margin-left: 8px;
     }
 
     .compact-stat {
-        font-size: 15px;
+        font-size: 14px;
     }
 
     .compact-stat-small {
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .compact-stat-small i {
+        font-size: 11px;
+    }
+
+    .summary-title {
         font-size: 12px;
     }
 
@@ -265,7 +274,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: var(--space-lg);
     flex-wrap: nowrap;
     min-width: 0;
 }
@@ -276,7 +285,7 @@ h1 {
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-sm);
     flex-shrink: 1;
     min-width: 0;
     font-weight: 700;
@@ -289,8 +298,8 @@ h1 i {
 }
 
 .header-btn {
-    width: 36px;
-    height: 36px;
+    width: var(--icon-button-sm);
+    height: var(--icon-button-sm);
     border-radius: var(--radius-md);
     border: 2px solid var(--color-border);
     background: var(--color-surface);
@@ -330,8 +339,8 @@ h1 i {
 
 .status-dot {
     display: inline-block;
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: var(--color-status);
 }
@@ -359,6 +368,21 @@ h1 i {
     justify-content: space-between;
     margin-bottom: var(--space-md);
     padding: 0 var(--space-xs);
+    transition: all var(--transition-med);
+}
+
+.summary-section.collapsed .summary-header {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-lg);
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.summary-section.collapsed .summary-header:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
 }
 
 .summary-header-content {
@@ -383,10 +407,15 @@ h1 i {
     gap: var(--space-sm);
     flex-wrap: wrap;
     font-size: var(--font-sm);
+    margin-left: var(--space-md);
 }
 
 .summary-section.collapsed .summary-compact {
     display: flex;
+}
+
+.summary-section.collapsed .summary-title {
+    font-size: var(--font-md);
 }
 
 .compact-stat {
@@ -422,8 +451,8 @@ h1 i {
 }
 
 .collapse-btn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: var(--radius-md);
     border: none;
     background: transparent;
@@ -598,7 +627,7 @@ label {
 
 input, select {
     width: 100%;
-    padding: var(--space-md);
+    padding: var(--text-padding-y);
     border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: var(--font-lg);
@@ -628,7 +657,7 @@ input[type="date"] {
     appearance: none;
     box-sizing: border-box;
     /* Match the height of other inputs by using same padding */
-    padding: var(--space-md);
+    padding: var(--text-padding-y);
     /* Ensure content doesn't overflow */
     overflow: hidden;
     /* Improve vertical alignment */
@@ -644,7 +673,7 @@ input:focus, select:focus, textarea:focus {
 
 button.primary {
     width: 100%;
-    padding: 14px;
+    padding: var(--button-padding-y) var(--button-padding-x);
     background: var(--color-primary);
     color: var(--color-on-primary);
     border: none;
@@ -945,8 +974,8 @@ button.primary.loading .btn-spinner {
    ========================================================================== */
 
 .action-btn {
-    width: 32px;
-    height: 32px;
+    width: var(--icon-button-sm);
+    height: var(--icon-button-sm);
     border-radius: 50%;
     border: none;
     cursor: pointer;
@@ -1240,7 +1269,7 @@ button.primary.loading .btn-spinner {
     transform: translateX(-50%);
     background: var(--color-success);
     color: var(--color-on-primary);
-    padding: 14px 28px;
+    padding: var(--button-padding-y) 28px;
     border-radius: var(--radius-lg);
     font-weight: 600;
     font-size: 15px;
@@ -1261,8 +1290,8 @@ button.primary.loading .btn-spinner {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     background: rgba(255,255,255,0.2);
     border-radius: 50%;
     font-weight: bold;
@@ -1291,7 +1320,7 @@ button.primary.loading .btn-spinner {
 .install-prompt button {
     background: var(--color-surface);
     color: #667eea;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border: none;
     border-radius: var(--radius-sm);
     font-weight: 600;
@@ -1332,7 +1361,7 @@ button.primary.loading .btn-spinner {
 }
 
 .update-prompt button {
-    padding: 10px 20px;
+    padding: 8px 16px;
     border: none;
     border-radius: var(--radius-sm);
     font-weight: 600;

@@ -84,6 +84,21 @@
     --space-2xl: 24px;
     --space-3xl: 28px;
 
+    --button-padding-y: 12px;
+    --button-padding-x: var(--space-lg);
+    --icon-sm: 16px;
+    --icon-md: 18px;
+    --icon-lg: 20px;
+    --icon-xl: 24px;
+    --icon-2xl: 26px;
+
+    --icon-button-sm: 28px;           /* Small icon buttons */
+    --icon-button-md: 32px;           /* Standard icon buttons */
+    --icon-button-lg: 36px;           /* Large icon buttons */
+
+    --text-padding-y: 12px;           /* Vertical padding for inputs */
+    --text-padding-x: var(--space-lg);
+
     --font-xs: 11px;
     --font-sm: 12px;
     --font-md: 14px;
@@ -96,4 +111,27 @@
 
     --color-on-primary: #ffffff;
     --color-on-danger: #ffffff;
+}
+
+/* Mobile (≤480px) token adjustments */
+@media (max-width: 480px) {
+    :root {
+        --space-lg: 12px;
+        --space-md: 10px;
+        --font-lg: 15px;
+        --font-md: 13px;
+        --font-sm: 11px;
+        --button-padding-y: 10px;
+    }
+}
+
+/* Small phone (≤360px) token adjustments */
+@media (max-width: 360px) {
+    :root {
+        --space-lg: 10px;
+        --space-md: 8px;
+        --font-3xl: 20px;
+        --font-2xl: 18px;
+        --font-lg: 14px;
+    }
 }

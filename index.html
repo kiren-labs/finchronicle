@@ -173,7 +173,7 @@
 
             <!-- Summary Cards -->
             <div class="summary-section">
-                <div class="summary-header">
+                <div class="summary-header" onclick="toggleSummaryCollapse()">
                     <div class="summary-header-content">
                         <h2 class="summary-title">Summary</h2>
                         <div class="summary-compact" id="summaryCompact">
@@ -186,7 +186,7 @@
                             <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i> <span id="compactExpense">฿0</span></span>
                         </div>
                     </div>
-                    <button class="collapse-btn" onclick="toggleSummaryCollapse()" aria-label="Toggle Summary">
+                    <button class="collapse-btn" onclick="event.stopPropagation(); toggleSummaryCollapse();" aria-label="Toggle Summary">
                         <i class="ri-arrow-up-s-line" id="summaryCollapseIcon"></i>
                     </button>
                 </div>

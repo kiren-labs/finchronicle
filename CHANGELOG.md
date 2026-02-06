@@ -27,8 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Icons with labels for clarity
 - 🎛️ **Smart Collapsible Summary**: Space-saving with compact view
   - Toggle button to collapse/expand summary cards
-  - **Collapsed view shows one-line summary** with all key metrics
+  - **Collapsed view shows one-line summary in white card** with all key metrics
   - Shows: This Month net • Total entries • Income • Expenses (all in one line)
+  - Proper card styling when collapsed (white background, shadow, padding)
+  - Entire collapsed card is clickable to expand (better UX)
+  - Hover effect on collapsed card
   - Smooth animation with fade and height transition
   - State saved to localStorage (remembers preference)
   - Arrow icon rotates to indicate state
