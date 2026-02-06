@@ -1,19 +1,39 @@
 /* FinChronicle - Dark Mode Styles */
-/* Version: 3.3.1 */
+/* Version: 3.5.1 */
+
+/* Dark mode token overrides */
+body.dark-mode {
+    --color-bg: #000000;
+    --color-surface: #1c1c1e;
+    --color-text: #ffffff;
+    --color-text-muted: #98989d;
+    --color-text-subtle: #98989d;
+    --color-border: #38383a;
+    --color-primary-hover: #0061f5;
+    --color-disabled-bg: #2c2c2e;
+    --color-disabled-text: #636366;
+    --color-status: #30d158;
+    --color-primary-soft: #1a2a3a;
+    --color-toggle-bg: #2c2c2e;
+    --color-toggle-active-bg: #1c1c1e;
+
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+}
 
 /* Dark mode pagination controls */
 body.dark-mode .pagination-container {
-    background: #1c1c1e;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
 }
 
 body.dark-mode .pagination-btn {
-    background: #0051D5;
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
 body.dark-mode .pagination-btn:hover:not(:disabled) {
-    background: #0061f5;
+    background: var(--color-primary-hover);
     box-shadow: 0 4px 12px rgba(0,97,245,0.4);
 }
 
@@ -22,16 +42,16 @@ body.dark-mode .pagination-btn:active:not(:disabled) {
 }
 
 body.dark-mode .pagination-btn:disabled {
-    background: #2c2c2e;
-    color: #636366;
+    background: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
 }
 
 body.dark-mode .pagination-btn:disabled:hover {
-    background: #2c2c2e;
+    background: var(--color-disabled-bg);
 }
 
 body.dark-mode .pagination-info {
-    color: #98989d;
+    color: var(--color-text-muted);
 }
 
 /* ==========================================================================
@@ -39,8 +59,8 @@ body.dark-mode .pagination-info {
    ========================================================================== */
 
 body.dark-mode {
-    background: #000000;
-    color: #ffffff;
+    background: var(--color-bg);
+    color: var(--color-text);
 }
 
 /* ==========================================================================
@@ -57,9 +77,9 @@ body.dark-mode .category-filter,
 body.dark-mode input,
 body.dark-mode select,
 body.dark-mode textarea {
-    background: #1c1c1e;
-    color: #ffffff;
-    border-color: #38383a;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-color: var(--color-border);
 }
 
 /* ==========================================================================
@@ -72,7 +92,7 @@ body.dark-mode .summary-label,
 body.dark-mode label,
 body.dark-mode .group-header,
 body.dark-mode .modal-title {
-    color: #ffffff;
+    color: var(--color-text);
 }
 
 body.dark-mode .transaction-note,
@@ -80,18 +100,18 @@ body.dark-mode .transaction-date,
 body.dark-mode .summary-label,
 body.dark-mode .group-total,
 body.dark-mode .modal-text {
-    color: #98989d;
+    color: var(--color-text-muted);
 }
 
 body.dark-mode .tab,
 body.dark-mode .nav-item,
 body.dark-mode .filter-btn {
-    color: #98989d;
+    color: var(--color-text-muted);
 }
 
 body.dark-mode .tab.active,
 body.dark-mode .nav-item.active {
-    color: white;
+    color: var(--color-on-primary);
 }
 
 /* ==========================================================================
@@ -99,12 +119,12 @@ body.dark-mode .nav-item.active {
    ========================================================================== */
 
 body.dark-mode .type-toggle {
-    background: #2c2c2e;
+    background: var(--color-toggle-bg);
 }
 
 body.dark-mode .type-option.active {
-    background: #1c1c1e;
-    color: white;
+    background: var(--color-toggle-active-bg);
+    color: var(--color-text);
     box-shadow: 0 2px 4px rgba(255,255,255,0.05);
 }
 
@@ -113,12 +133,12 @@ body.dark-mode .type-option.active {
    ========================================================================== */
 
 body.dark-mode .status {
-    color: #30d158;
+    color: var(--color-status);
 }
 
 body.dark-mode .version {
-    background: #2c2c2e;
-    color: #98989d;
+    background: var(--color-toggle-bg);
+    color: var(--color-text-muted);
 }
 
 /* ==========================================================================
@@ -126,7 +146,7 @@ body.dark-mode .version {
    ========================================================================== */
 
 body.dark-mode .transaction-item {
-    border-bottom-color: #38383a;
+    border-bottom-color: var(--color-border);
 }
 
 body.dark-mode .transaction-icon.income {
@@ -144,20 +164,20 @@ body.dark-mode .transaction-icon.expense {
    ========================================================================== */
 
 body.dark-mode .modal-content {
-    background: #1c1c1e;
+    background: var(--color-surface);
 }
 
 body.dark-mode .modal-btn-cancel {
-    background: #38383a;
-    color: white;
+    background: var(--color-border);
+    color: var(--color-on-primary);
 }
 
 body.dark-mode .close-btn {
-    color: #98989d;
+    color: var(--color-text-muted);
 }
 
 body.dark-mode .close-btn:hover {
-    background: #2c2c2e;
+    background: var(--color-toggle-bg);
 }
 
 /* ==========================================================================
@@ -165,26 +185,26 @@ body.dark-mode .close-btn:hover {
    ========================================================================== */
 
 body.dark-mode .currency-item {
-    background: #1c1c1e;
-    border-color: #38383a;
+    background: var(--color-surface);
+    border-color: var(--color-border);
 }
 
 body.dark-mode .currency-item:hover {
-    background: #2c2c2e;
-    border-color: #0051D5;
+    background: var(--color-toggle-bg);
+    border-color: var(--color-primary);
 }
 
 body.dark-mode .currency-item.active {
-    background: #1a2a3a;
-    border-color: #0051D5;
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
 }
 
 body.dark-mode .currency-code {
-    color: #f5f5f7;
+    color: var(--color-text);
 }
 
 body.dark-mode .currency-name {
-    color: #98989d;
+    color: var(--color-text-muted);
 }
 
 /* ==========================================================================
@@ -192,13 +212,13 @@ body.dark-mode .currency-name {
    ========================================================================== */
 
 body.dark-mode .empty-state {
-    color: #98989d;
+    color: var(--color-text-muted);
 }
 
 body.dark-mode .toolbar-btn:active {
-    background: #2c2c2e;
+    background: var(--color-toggle-bg);
 }
 
 body.dark-mode label[for="categoryFilter"] {
-    color: #98989d;
+    color: var(--color-text-muted);
 }
