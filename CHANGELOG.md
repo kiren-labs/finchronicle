@@ -17,6 +17,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.7.1] - 2026-02-07
+
+### Changed
+- **Code Organization**: Separated JavaScript into external `app.js` file (~1,920 lines)
+- Improved developer experience with cleaner file structure
+- Better browser caching efficiency (HTML and JS cached independently)
+- Enhanced code maintainability and debugging
+- Service worker now caches `app.js` for offline functionality
+
+### Technical
+- Created `app.js` containing all application logic
+- Updated service worker cache list to include `app.js`
+- Maintained zero-framework, zero-build-tool philosophy
+- All functionality remains identical to v3.7.0
+
+---
+
 ## [3.7.0] - 2026-02-07
 
 ### Added
