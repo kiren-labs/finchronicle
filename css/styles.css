@@ -524,12 +524,25 @@ h1 i {
     display: flex;
     align-items: center;
     gap: var(--space-md);
+    min-height: 104px;
+    cursor: pointer;
     transition: all var(--transition-fast);
+    position: relative;
 }
 
 .summary-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+}
+
+.summary-card:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-sm);
+}
+
+.summary-card:focus-visible {
+    outline: 3px solid var(--color-primary-strong);
+    outline-offset: 2px;
 }
 
 .card-icon {
@@ -575,6 +588,35 @@ h1 i {
 
 .secondary-card.negative .summary-value {
     color: var(--color-danger);
+}
+
+/* Trend indicators (Phase 2) */
+.summary-trend {
+    font-size: var(--font-md);
+    font-weight: 400;
+    margin-top: var(--space-2xs);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+}
+
+.summary-trend.positive {
+    color: var(--color-success-strong);
+}
+
+.summary-trend.negative {
+    color: var(--color-danger-strong);
+}
+
+.summary-trend.neutral {
+    color: var(--color-text-muted);
+}
+
+.summary-meta {
+    font-size: var(--font-md);
+    color: var(--color-text-muted);
+    margin-top: var(--space-2xs);
+    font-weight: 400;
 }
 
 /* ==========================================================================

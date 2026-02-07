@@ -9,6 +9,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned
+- Budget tracking per category
+- Recurring transactions
+- Search functionality
+- Charts and graphs
+
+---
+
+## [3.7.0] - 2026-02-07
+
+### Added
+- 🎯 **Actionable Summary Tiles**: Tap summary cards to instantly navigate to filtered views
+  - **This Month** → View all transactions for current month
+  - **Total Entries** → View all transactions for current month
+  - **Income** → View income transactions (current month)
+  - **Expenses** → View expense transactions (current month)
+  - Haptic feedback on mobile tap (50ms vibration)
+  - Keyboard accessible (Tab, Enter, Space)
+  - ARIA labels for screen readers
+
+- 📊 **Trend Indicators**: Month-over-month insights at a glance
+  - **This Month Net**: Shows MoM % change with ↑/↓ arrows and color coding
+  - **Income**: Optional MoM trend (currently enabled)
+  - **Expenses**: Shows "% of income" for spending context
+  - Edge case handling: Shows "—" when no previous month data exists
+  - Smart direction indicators: Green for improvements, red for declines
+
+- 🎨 **Visual Consistency Improvements**:
+  - Uniform tile heights (104px minimum)
+  - Consistent cursor pointer on all interactive elements
+  - Smooth `:active` state with scale animation
+  - Focus-visible outline for keyboard navigation (3px primary color)
+  - Enhanced hover states with translateY animation
+
+- 📈 **Advanced Calculations**:
+  - `calculateMoMDelta()`: Month-over-month percentage and absolute change
+  - `calculateExpensePercentage()`: Expenses as % of income
+  - `getMonthTotals()`: Aggregates transactions by month for trend analysis
+  - `getPreviousMonth()`: Smart month navigation with year rollover
+  - Handles edge cases: first month, zero income, empty previous month
+
+- 🔍 **Type Filtering**: New `selectedType` filter ('all', 'income', 'expense')
+  - Allows filtering transaction list by type
+  - Integrated with summary tile navigation
+  - Works alongside existing month and category filters
+
+### Changed
+- 📊 **Total Entries**: Now shows current month count (was: all-time count)
+  - More contextually relevant to "This Month" summary
+  - Aligns with user mental model when viewing monthly dashboard
+- 🎨 **Summary Card Styling**: Enhanced interactive states for better UX
+- 📝 **Summary Meta**: Added "This month" label to Total Entries for clarity
+- 🎨 **"This Month" Card**: Now consistently blue (neutral) regardless of net balance
+  - Aligns with CR spec: neutral tiles always use primary color
+  - Only the trend indicator is colored green/red, not the entire card
+  - Provides better visual distinction between static metrics and trends
+
+### Technical
+- Added 4 new helper functions for trend calculations (60+ lines)
+- Extended `updateTransactionsList()` with type filtering
+- Enhanced `updateSummary()` with trend calculation and display logic
+- Added `selectedType` global variable to filter state
+- New CSS classes: `.summary-trend`, `.summary-meta` for Phase 2 styling
+- Updated summary card HTML with semantic attributes (role, tabindex, aria-label)
+
+### Documentation
+- 📋 Created **Change Request (CR) - REVISED.md**: Comprehensive implementation plan
+  - Aligned with privacy-first, offline-first, vanilla JS architecture
+  - Split into 2 phases: Visual Consistency + Tap Actions, Trend Indicators
+  - Removed analytics/telemetry requirements
+  - Includes MoM calculation formulas with edge case handling
+
 ### Fixed
 - ♿ **Accessibility: Improved Contrast Ratios** - WCAG AA compliance for both light and dark modes
 

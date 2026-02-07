@@ -194,40 +194,64 @@
                     </button>
                 </div>
                 <div class="summary" id="summaryCards">
-                <div class="summary-card">
+                <div class="summary-card"
+                     onclick="onSummaryTileClick('this-month')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();onSummaryTileClick('this-month')}"
+                     role="button"
+                     tabindex="0"
+                     aria-label="View transactions for this month">
                     <div class="card-icon">
                         <i class="ri-calendar-check-line"></i>
                     </div>
                     <div class="card-content">
                         <div class="summary-label">This Month</div>
                         <div class="summary-value" id="monthNet">0</div>
+                        <div class="summary-trend" id="monthNetTrend"></div>
                     </div>
                 </div>
-                <div class="summary-card">
+                <div class="summary-card"
+                     onclick="onSummaryTileClick('total-entries')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();onSummaryTileClick('total-entries')}"
+                     role="button"
+                     tabindex="0"
+                     aria-label="View all transactions for this month">
                     <div class="card-icon">
                         <i class="ri-list-check-2"></i>
                     </div>
                     <div class="card-content">
                         <div class="summary-label">Total Entries</div>
                         <div class="summary-value" id="totalEntries">0</div>
+                        <div class="summary-meta" id="totalEntriesMeta">This month</div>
                     </div>
                 </div>
-                <div class="summary-card positive">
+                <div class="summary-card positive"
+                     onclick="onSummaryTileClick('income')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();onSummaryTileClick('income')}"
+                     role="button"
+                     tabindex="0"
+                     aria-label="View income transactions for this month">
                     <div class="card-icon">
                         <i class="ri-arrow-up-circle-fill"></i>
                     </div>
                     <div class="card-content">
                         <div class="summary-label">Income</div>
                         <div class="summary-value" id="monthIncome">0</div>
+                        <div class="summary-trend" id="monthIncomeTrend"></div>
                     </div>
                 </div>
-                <div class="summary-card negative">
+                <div class="summary-card negative"
+                     onclick="onSummaryTileClick('expenses')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();onSummaryTileClick('expenses')}"
+                     role="button"
+                     tabindex="0"
+                     aria-label="View expense transactions for this month">
                     <div class="card-icon">
                         <i class="ri-arrow-down-circle-fill"></i>
                     </div>
                     <div class="card-content">
                         <div class="summary-label">Expenses</div>
                         <div class="summary-value" id="monthExpense">0</div>
+                        <div class="summary-meta" id="monthExpenseMeta"></div>
                     </div>
                 </div>
             </div>
@@ -417,7 +441,7 @@
 
     <script>
         // App Version - Update this when releasing new features
-        const APP_VERSION = '3.6.0';
+        const APP_VERSION = '3.7.0';
         const VERSION_KEY = 'app_version';
 
         // IndexedDB Configuration
@@ -432,6 +456,7 @@
         let currentGrouping = 'month';
         let selectedMonth = 'all';
         let selectedCategory = 'all';
+        let selectedType = 'all'; // 'all', 'income', 'expense'
         let editingId = null;
         let deleteId = null;
         let updateAvailable = false;
@@ -889,29 +914,61 @@
 
             const net = income - expense;
 
+            // Get previous month data for trends
+            const previousMonth = getPreviousMonth(currentMonth);
+            const prevTotals = getMonthTotals(previousMonth);
+
+            // Calculate trends
+            const netDelta = calculateMoMDelta(net, prevTotals.net);
+            const incomeDelta = calculateMoMDelta(income, prevTotals.income);
+            const expensePercent = calculateExpensePercentage(expense, income);
+
             // Update full summary cards
             document.getElementById('monthNet').textContent = formatCurrency(net);
             document.getElementById('monthNet').className = 'summary-value';
 
-            // Update parent card color class
-            const monthCard = document.getElementById('monthNet').closest('.summary-card');
-            monthCard.classList.remove('positive', 'negative');
-            if (net >= 0) {
-                monthCard.classList.add('positive');
-            } else {
-                monthCard.classList.add('negative');
-            }
+            // This Month card should always be neutral (blue), not colored
+            // Only the trend indicator should be colored
 
-            document.getElementById('totalEntries').textContent = transactions.length;
+            document.getElementById('totalEntries').textContent = monthTxs.length;
             document.getElementById('monthIncome').textContent = formatCurrency(income);
             document.getElementById('monthExpense').textContent = formatCurrency(expense);
+
+            // Update This Month trend
+            const monthNetTrend = document.getElementById('monthNetTrend');
+            if (netDelta && netDelta.pct !== null) {
+                const arrow = netDelta.direction === 'up' ? '↑' : netDelta.direction === 'down' ? '↓' : '→';
+                const sign = netDelta.abs >= 0 ? '+' : '';
+                monthNetTrend.innerHTML = `<i class="ri-arrow-${netDelta.direction === 'up' ? 'up' : netDelta.direction === 'down' ? 'down' : 'right'}-line"></i> ${sign}${Math.abs(netDelta.pct).toFixed(1)}% vs last month`;
+                monthNetTrend.className = `summary-trend ${netDelta.direction === 'up' ? 'positive' : netDelta.direction === 'down' ? 'negative' : 'neutral'}`;
+            } else {
+                monthNetTrend.textContent = '';
+            }
+
+            // Update Income trend (optional)
+            const monthIncomeTrend = document.getElementById('monthIncomeTrend');
+            if (incomeDelta && incomeDelta.pct !== null) {
+                const sign = incomeDelta.abs >= 0 ? '+' : '';
+                monthIncomeTrend.innerHTML = `<i class="ri-arrow-${incomeDelta.direction === 'up' ? 'up' : incomeDelta.direction === 'down' ? 'down' : 'right'}-line"></i> ${sign}${Math.abs(incomeDelta.pct).toFixed(1)}% vs last month`;
+                monthIncomeTrend.className = `summary-trend ${incomeDelta.direction === 'up' ? 'positive' : incomeDelta.direction === 'down' ? 'negative' : 'neutral'}`;
+            } else {
+                monthIncomeTrend.textContent = '';
+            }
+
+            // Update Expenses meta (% of income)
+            const monthExpenseMeta = document.getElementById('monthExpenseMeta');
+            if (expensePercent !== null) {
+                monthExpenseMeta.textContent = `${expensePercent.toFixed(1)}% of income`;
+            } else {
+                monthExpenseMeta.textContent = '';
+            }
 
             // Update compact summary view
             const compactNetElem = document.getElementById('compactNet');
             compactNetElem.textContent = formatCurrency(net);
             compactNetElem.className = 'compact-stat ' + (net >= 0 ? 'compact-income' : 'compact-expense');
 
-            document.getElementById('compactEntries').textContent = transactions.length;
+            document.getElementById('compactEntries').textContent = monthTxs.length;
             document.getElementById('compactIncome').textContent = formatCurrency(income);
             document.getElementById('compactExpense').textContent = formatCurrency(expense);
         }
@@ -928,6 +985,10 @@
 
             if (selectedCategory !== 'all') {
                 filtered = filtered.filter(t => t.category === selectedCategory);
+            }
+
+            if (selectedType !== 'all') {
+                filtered = filtered.filter(t => t.type === selectedType);
             }
 
             if (filtered.length === 0) {
@@ -1227,6 +1288,113 @@
             if (isCollapsed) {
                 document.querySelector('.summary-section').classList.add('collapsed');
             }
+        }
+
+        // Get previous calendar month string
+        function getPreviousMonth(currentMonth) {
+            const [year, month] = currentMonth.split('-').map(Number);
+            const date = new Date(year, month - 1, 1); // Current month's first day
+            date.setMonth(date.getMonth() - 1); // Go back one month
+            return date.toISOString().slice(0, 7);
+        }
+
+        // Get month totals for trend calculation
+        function getMonthTotals(month) {
+            const filtered = transactions.filter(t => t.date.startsWith(month));
+            const income = filtered.filter(t => t.type === 'income')
+                .reduce((sum, t) => sum + t.amount, 0);
+            const expense = filtered.filter(t => t.type === 'expense')
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            return {
+                income,
+                expense,
+                net: income - expense,
+                count: filtered.length
+            };
+        }
+
+        // Calculate month-over-month change
+        function calculateMoMDelta(currentMonth, previousMonth) {
+            // Edge case: No previous month data
+            if (previousMonth === undefined || previousMonth === null) {
+                return null; // Show "—" in UI
+            }
+
+            // Edge case: Previous month is 0
+            if (previousMonth === 0) {
+                if (currentMonth === 0) {
+                    return { abs: 0, pct: 0, direction: 'neutral' };
+                }
+                return {
+                    abs: currentMonth,
+                    pct: null,
+                    direction: currentMonth > 0 ? 'up' : 'down'
+                };
+            }
+
+            const delta_abs = currentMonth - previousMonth;
+            const delta_pct = (delta_abs / Math.abs(previousMonth)) * 100;
+
+            return {
+                abs: delta_abs,
+                pct: delta_pct,
+                direction: delta_abs > 0 ? 'up' : delta_abs < 0 ? 'down' : 'neutral'
+            };
+        }
+
+        // Calculate expenses as percentage of income
+        function calculateExpensePercentage(expenses, income) {
+            if (income === 0 || income === undefined) {
+                return null; // Show "—" in UI
+            }
+            return (expenses / income) * 100;
+        }
+
+        // Handle summary tile clicks - navigate to filtered list view
+        function onSummaryTileClick(tileType) {
+            // Haptic feedback (mobile)
+            if ('vibrate' in navigator) {
+                navigator.vibrate(50);
+            }
+
+            const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+
+            // Switch to List tab
+            switchTab('list');
+
+            // Apply filters based on tile type
+            switch (tileType) {
+                case 'this-month':
+                    selectedMonth = currentMonth;
+                    selectedCategory = 'all';
+                    selectedType = 'all';
+                    break;
+
+                case 'total-entries':
+                    selectedMonth = currentMonth;
+                    selectedCategory = 'all';
+                    selectedType = 'all';
+                    break;
+
+                case 'income':
+                    selectedMonth = currentMonth;
+                    selectedCategory = 'all';
+                    selectedType = 'income';
+                    break;
+
+                case 'expenses':
+                    selectedMonth = currentMonth;
+                    selectedCategory = 'all';
+                    selectedType = 'expense';
+                    break;
+            }
+
+            // Reset pagination
+            currentPage = 1;
+
+            // Update UI
+            updateUI();
         }
 
         // Change grouping
