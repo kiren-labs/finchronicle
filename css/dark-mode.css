@@ -63,15 +63,6 @@ body.dark-mode .pagination-info {
 }
 
 /* ==========================================================================
-   Dark Mode Base
-   ========================================================================== */
-
-body.dark-mode {
-    background: var(--color-bg);
-    color: var(--color-text);
-}
-
-/* ==========================================================================
    Dark Mode Containers
    ========================================================================== */
 
@@ -96,16 +87,18 @@ body.dark-mode textarea {
 
 body.dark-mode h1,
 body.dark-mode .transaction-category,
-body.dark-mode .summary-label,
 body.dark-mode label,
 body.dark-mode .group-header,
 body.dark-mode .modal-title {
     color: var(--color-text);
 }
 
+body.dark-mode .summary-label {
+    color: var(--color-text);
+}
+
 body.dark-mode .transaction-note,
 body.dark-mode .transaction-date,
-body.dark-mode .summary-label,
 body.dark-mode .group-total,
 body.dark-mode .modal-text {
     color: var(--color-text-muted);

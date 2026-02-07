@@ -143,12 +143,6 @@
         padding: var(--space-2xs) var(--space-2xs);
     }
 
-    .header-btn {
-        width: var(--icon-button-md);
-        height: var(--icon-button-md);
-        font-size: var(--icon-sm);
-    }
-
     /* Summary tiles compact spacing */
     .summary-section {
         margin-bottom: var(--space-md);
