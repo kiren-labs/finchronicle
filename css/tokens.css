@@ -1,8 +1,9 @@
 /* FinChronicle - Design Tokens */
-/* Version: 3.6.0 */
+/* Version: 3.7.0 */
 
 :root {
     --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-family-mono: ui-monospace, 'SF Mono', Monaco, 'Segoe UI Mono', 'Consolas', 'Liberation Mono', monospace;
 
     --color-primary: #0051D5;
     --color-primary-hover: #0046b8;

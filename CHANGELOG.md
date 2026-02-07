@@ -55,6 +55,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Integrated with summary tile navigation
   - Works alongside existing month and category filters
 
+- 🔤 **Enhanced Typography for Financial Data**: Improved readability and alignment
+  - Added monospace font stack (`ui-monospace`, SF Mono, Monaco, etc.) for all numerical values
+  - Applied to summary cards, transaction amounts, analytics, input fields, and reports
+  - Enabled `font-variant-numeric: tabular-nums` for equal-width digits
+  - Better visual alignment in transaction lists and grouped views
+  - Zero external dependencies - uses system monospace fonts
+  - New CSS token: `--font-family-mono` for numerical data
+
 ### Changed
 - 📊 **Total Entries**: Now shows current month count (was: all-time count)
   - More contextually relevant to "This Month" summary
@@ -73,6 +81,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `selectedType` global variable to filter state
 - New CSS classes: `.summary-trend`, `.summary-meta` for Phase 2 styling
 - Updated summary card HTML with semantic attributes (role, tabindex, aria-label)
+- New CSS token: `--font-family-mono` for numerical data typography
+- Updated 9 CSS classes with monospace font: `.summary-value`, `.transaction-amount`, `.compact-stat`, `.group-value`, `.group-total`, `.pagination-info`, `.report-value`, `.preview-value`, `input[type="number"]`
+- Applied `font-variant-numeric: tabular-nums` to body for equal-width digits
 
 ### Documentation
 - 📋 Created **Change Request (CR) - REVISED.md**: Comprehensive implementation plan
