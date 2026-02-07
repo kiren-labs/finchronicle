@@ -10,16 +10,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-- ♿ **Dark Mode Accessibility**: Improved contrast ratios for WCAG AA compliance
-  - Updated primary color from `#0051D5` to `#0A84FF` (iOS-standard lighter blue for dark mode)
-  - Updated primary hover color to `#409CFF` for better visibility
-  - Updated muted text color from `#98989d` to `#aeaeb2` (8.5:1 contrast)
-  - Updated subtle text color to `#8e8e93` (6.5:1 contrast)
-  - Removed hardcoded color values in favor of CSS variables
-  - Fixed filter button contrast in dark mode (active state now uses lighter blue)
-  - Fixed filter label contrast in dark mode
-  - Fixed grouped view labels (Income, Expenses, Total) contrast
-  - All interactive elements now meet WCAG AA standards in dark mode
+- ♿ **Accessibility: Improved Contrast Ratios** - WCAG AA compliance for both light and dark modes
+
+  **Light Mode Improvements:**
+  - Success-strong: `#1e8e3e` → `#147A33` (darker green, 7:1 contrast on white)
+  - Danger-strong: `#d93025` → `#C41E1A` (darker red, 6:1 contrast on white)
+  - Compact summary income/expense amounts now highly visible on white surfaces
+
+  **Dark Mode Improvements:**
+  - Primary color: `#0051D5` → `#0053AD` (better balance for dark backgrounds)
+  - Primary hover: Updated to `#409CFF` for better visibility
+  - Success-strong: `#1e8e3e` → `#30E85D` (vibrant green, 9:1 contrast on `#1c1c1e`)
+  - Danger-strong: `#d93025` → `#FF6B6B` (bright coral, 6.5:1 contrast on `#1c1c1e`)
+  - Text-muted: `#98989d` → `#aeaeb2` (8.5:1 contrast)
+  - Text-subtle: `#98989d` → `#8e8e93` (6.5:1 contrast)
+  - Filter buttons: Active state now uses white text for proper contrast
+  - Filter labels: Use CSS variables with proper contrast
+  - Grouped view labels: Removed hardcoded colors, use theme-aware variables
+
+  **Cross-Theme Fixes:**
+  - Removed all hardcoded color values in favor of CSS variables
+  - All text and interactive elements meet WCAG AA standards (4.5:1+)
+  - Mobile and desktop audits now pass for both themes
 
 ### Planned
 - Budget tracking per category

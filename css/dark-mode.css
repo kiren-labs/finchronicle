@@ -19,6 +19,12 @@ body.dark-mode {
     --color-toggle-bg: #2c2c2e;
     --color-toggle-active-bg: #1c1c1e;
 
+    /* Lighter semantic colors for dark mode - optimized for #1c1c1e surface */
+    --color-success: #32D74B;
+    --color-success-strong: #30E85D;
+    --color-danger: #FF453A;
+    --color-danger-strong: #FF6B6B;
+
     --shadow-sm: 0 var(--space-2xs) var(--space-sm) rgba(0,0,0,0.4);
     --shadow-md: 0 var(--space-2xs) var(--space-md) rgba(0,0,0,0.4);
 }
