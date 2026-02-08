@@ -19,13 +19,27 @@ jobs:
 
     - name: Checkout test repository
       uses: actions/checkout@v4
+      continue-on-error: true
+      id: checkout-tests
       with:
         repository: kiren-labs/finchronicle-test
         path: finchronicle-test
         # Optional: Use a specific branch or tag
         # ref: main
 
+    - name: Notify if test repository unavailable
+      if: steps.checkout-tests.outcome != 'success'
+      run: |
+        echo "⚠️ Test repository (kiren-labs/finchronicle-test) is not available"
+        echo "Skipping all tests. This is expected if:"
+        echo "  - The repository is private and no access token is provided"
+        echo "  - The repository does not exist yet"
+        echo "  - There are network connectivity issues"
+        echo ""
+        echo "The main FinChronicle app is not affected by this."
+
     - name: Setup Node.js
+      if: steps.checkout-tests.outcome == 'success'
       uses: actions/setup-node@v4
       with:
         node-version: '18'
@@ -33,10 +47,12 @@ jobs:
         cache-dependency-path: finchronicle-test/package-lock.json
 
     - name: Install test dependencies
+      if: steps.checkout-tests.outcome == 'success'
       working-directory: finchronicle-test
       run: npm ci
 
     - name: Extract functions and check version
+      if: steps.checkout-tests.outcome == 'success'
       working-directory: finchronicle-test
       run: |
         npm run extract
@@ -59,21 +75,24 @@ jobs:
         echo "✅ Extracted $EXTRACTED/$TOTAL functions successfully"
 
     - name: Run unit tests
+      if: steps.checkout-tests.outcome == 'success'
       working-directory: finchronicle-test
       run: npm run test:unit
 
     - name: Install Playwright browsers
+      if: steps.checkout-tests.outcome == 'success'
       working-directory: finchronicle-test
       run: npx playwright install --with-deps chromium firefox
 
     - name: Run E2E tests
+      if: steps.checkout-tests.outcome == 'success'
       working-directory: finchronicle-test
       run: npm run test:e2e
       env:
         CI: true
 
     - name: Upload test results
-      if: always()
+      if: always() && steps.checkout-tests.outcome == 'success'
       uses: actions/upload-artifact@v4
       with:
         name: test-results-${{ env.APP_VERSION }}
@@ -83,7 +102,7 @@ jobs:
         retention-days: 30
 
     - name: Upload Playwright report
-      if: always()
+      if: always() && steps.checkout-tests.outcome == 'success'
       uses: actions/upload-artifact@v4
       with:
         name: playwright-report-${{ env.APP_VERSION }}
@@ -91,7 +110,7 @@ jobs:
         retention-days: 30
 
     - name: Generate test summary
-      if: always()
+      if: always() && steps.checkout-tests.outcome == 'success'
       working-directory: finchronicle-test
       run: |
         echo "## 🧪 Test Results for v$APP_VERSION" >> $GITHUB_STEP_SUMMARY
