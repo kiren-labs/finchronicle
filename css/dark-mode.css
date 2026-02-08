@@ -250,6 +250,62 @@ body.dark-mode .insights-month-selector:hover {
 }
 
 /* ==========================================================================
+   Backup & FAQ - Dark Mode (v3.9.0)
+   ========================================================================== */
+
+body.dark-mode .backup-status-card,
+body.dark-mode .faq-section {
+    background: var(--color-surface);
+}
+
+body.dark-mode .backup-status-good {
+    background: #1e4620;
+    color: #7bc67e;
+}
+
+body.dark-mode .backup-status-good i {
+    color: #7bc67e;
+}
+
+body.dark-mode .backup-status-warning {
+    background: #4a3d1a;
+    color: #ffc107;
+}
+
+body.dark-mode .backup-status-warning i {
+    color: #ffc107;
+}
+
+body.dark-mode .backup-status-danger {
+    background: #4a1a1f;
+    color: #ff6b7a;
+}
+
+body.dark-mode .backup-status-danger i {
+    color: #ff6b7a;
+}
+
+body.dark-mode .faq-section-header {
+    background: var(--color-bg);
+}
+
+body.dark-mode .faq-section-header:hover {
+    background: var(--color-border);
+}
+
+body.dark-mode .faq-question:hover {
+    background: var(--color-surface);
+}
+
+body.dark-mode .faq-answer {
+    background: var(--color-surface);
+}
+
+body.dark-mode .faq-answer code {
+    background: var(--color-bg);
+}
+
+/* ==========================================================================
    Dark Mode Utility States
    ========================================================================== */
 

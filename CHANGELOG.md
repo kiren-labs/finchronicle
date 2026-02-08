@@ -17,6 +17,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.9.0] - 2026-02-08
+
+### Added
+- **Backup Reminder System** - Track and encourage regular data backups
+  - Backup status card in Settings showing last backup date
+  - Color-coded status indicators (green/yellow/red) based on backup age
+  - One-click export directly from backup status card
+  - 7-day grace period for new users before showing warnings
+  - Automatic timestamp recording on each CSV export
+
+- **Comprehensive FAQ** - In-app help section in Settings tab
+  - Data Backup & Recovery section (5 questions)
+    - Where data is stored, how to backup, device loss recovery
+  - Privacy & Security section (3 questions)
+    - Server communication, data access, security guarantees
+  - Usage & Features section (3 questions)
+    - Import bank statements, change currency, insights explanation
+  - Collapsible accordion design for easy navigation
+  - Direct link from backup card to FAQ backup section
+
+### Improved
+- Export function now records backup timestamp automatically
+- Users proactively notified when backup is outdated (30+ days)
+- Better onboarding for data safety awareness
+- Settings tab provides comprehensive self-service help
+- All new components fully responsive on mobile devices
+
+### Technical
+- New localStorage key: `last_backup_timestamp`
+- New functions: `loadBackupTimestamp()`, `updateBackupTimestamp()`, `getDaysSinceBackup()`, `shouldShowBackupReminder()`, `renderBackupStatus()`, `renderFAQ()`, `toggleFAQSection()`, `toggleFAQItem()`, `scrollToFAQ()`, `updateSettingsContent()`
+- Modified `exportToCSV()` to call `updateBackupTimestamp()`
+- Modified `switchTab()` to populate settings content dynamically
+- Added CSS for backup status card and FAQ accordion
+- Full dark mode support for all new components
+- Zero breaking changes - purely additive features
+
+---
+
 ## [3.8.0] - 2026-02-07
 
 ### Added
