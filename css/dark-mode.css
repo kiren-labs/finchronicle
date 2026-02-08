@@ -258,31 +258,55 @@ body.dark-mode .faq-section {
     background: var(--color-surface);
 }
 
+body.dark-mode .backup-header h3 {
+    color: var(--color-text);
+}
+
+body.dark-mode .backup-header .backup-icon {
+    color: var(--color-primary-strong);
+}
+
 body.dark-mode .backup-status-good {
     background: #1e4620;
-    color: #7bc67e;
+    color: #a8e6a3;
 }
 
 body.dark-mode .backup-status-good i {
-    color: #7bc67e;
+    color: #a8e6a3;
 }
 
 body.dark-mode .backup-status-warning {
     background: #4a3d1a;
-    color: #ffc107;
+    color: #ffd54f;
 }
 
 body.dark-mode .backup-status-warning i {
-    color: #ffc107;
+    color: #ffd54f;
 }
 
 body.dark-mode .backup-status-danger {
     background: #4a1a1f;
-    color: #ff6b7a;
+    color: #ff9aa2;
 }
 
 body.dark-mode .backup-status-danger i {
-    color: #ff6b7a;
+    color: #ff9aa2;
+}
+
+body.dark-mode .backup-faq-button {
+    color: var(--color-primary-strong);
+}
+
+body.dark-mode .backup-faq-button:focus {
+    outline-color: var(--color-primary-strong);
+}
+
+body.dark-mode .faq-header h2 {
+    color: var(--color-text);
+}
+
+body.dark-mode .faq-header i {
+    color: var(--color-primary-strong);
 }
 
 body.dark-mode .faq-section-header {
@@ -291,6 +315,22 @@ body.dark-mode .faq-section-header {
 
 body.dark-mode .faq-section-header:hover {
     background: var(--color-border);
+}
+
+body.dark-mode .faq-section-title h3 {
+    color: var(--color-text);
+}
+
+body.dark-mode .faq-section-title i {
+    color: var(--color-primary-strong);
+}
+
+body.dark-mode .faq-question {
+    color: var(--color-text);
+}
+
+body.dark-mode .faq-item-icon {
+    color: var(--color-primary-strong);
 }
 
 body.dark-mode .faq-question:hover {

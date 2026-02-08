@@ -964,6 +964,11 @@ function updateBackupTimestamp() {
     localStorage.setItem('last_backup_timestamp', now.toString());
     lastBackupTimestamp = now;
     console.log('✅ Backup timestamp updated:', new Date(now).toLocaleString());
+    
+    // Refresh backup status UI if on settings tab
+    if (currentTab === 'settings') {
+        updateSettingsContent();
+    }
 }
 
 // Calculate days since last backup
@@ -1035,12 +1040,12 @@ function renderBackupStatus() {
     return `
         <div class="backup-status-card">
             <div class="backup-header">
-                <i class="ri-shield-check-line backup-icon"></i>
-                <h3>Data Backup</h3>
+                <i class="ri-shield-check-line backup-icon" aria-hidden="true"></i>
+                <h3 id="backupSectionHeading">Data Backup</h3>
             </div>
 
-            <div class="backup-status ${statusClass}">
-                <i class="${statusIcon}"></i>
+            <div class="backup-status ${statusClass}" role="status" aria-live="polite" aria-atomic="true">
+                <i class="${statusIcon}" aria-hidden="true"></i>
                 <div class="backup-info">
                     <div class="backup-label">${statusLabel}</div>
                     <div class="backup-message">${statusMessage}</div>
@@ -1052,13 +1057,15 @@ function renderBackupStatus() {
                 lose your financial records if your device is lost or damaged.
             </p>
 
-            <button class="btn btn-primary" onclick="exportToCSV()">
-                <i class="ri-download-line"></i> Export Backup Now
-            </button>
+            <div class="backup-actions">
+                <button class="btn btn-primary" onclick="exportToCSV()" type="button" aria-label="Export all transactions to CSV backup file">
+                    <i class="ri-download-line" aria-hidden="true"></i> Export Backup Now
+                </button>
 
-            <a href="#faq-backup" class="backup-faq-link" onclick="scrollToFAQ()">
-                <i class="ri-question-line"></i> Learn more about backups in FAQ
-            </a>
+                <button class="backup-faq-button" onclick="scrollToFAQ()" type="button" aria-label="Jump to frequently asked questions about backups">
+                    <i class="ri-question-line" aria-hidden="true"></i> Learn more about backups in FAQ
+                </button>
+            </div>
         </div>
     `;
 }
@@ -1146,24 +1153,24 @@ function renderFAQ() {
     faqData.forEach((section, sectionIndex) => {
         html += `
             <div class="faq-section">
-                <div class="faq-section-header" onclick="toggleFAQSection(${sectionIndex})">
+                <button class="faq-section-header" onclick="toggleFAQSection(${sectionIndex})" aria-expanded="false" aria-controls="faqSection${sectionIndex}">
                     <div class="faq-section-title">
-                        <i class="${section.icon}"></i>
-                        <h3>${section.category}</h3>
+                        <i class="${section.icon}" aria-hidden="true"></i>
+                        <h3 id="faqSection${sectionIndex}Header">${section.category}</h3>
                     </div>
-                    <i class="ri-arrow-down-s-line faq-section-arrow" id="faqArrow${sectionIndex}"></i>
-                </div>
-                <div class="faq-section-content" id="faqSection${sectionIndex}" style="display: none;">
+                    <i class="ri-arrow-down-s-line faq-section-arrow" id="faqArrow${sectionIndex}" aria-hidden="true"></i>
+                </button>
+                <div class="faq-section-content" id="faqSection${sectionIndex}" style="display: none;" role="region" aria-labelledby="faqSection${sectionIndex}Header">
         `;
 
         section.questions.forEach((qa, qIndex) => {
             html += `
                 <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFAQItem(${sectionIndex}, ${qIndex})">
+                    <button class="faq-question" onclick="toggleFAQItem(${sectionIndex}, ${qIndex})" aria-expanded="false" aria-controls="faqAnswer${sectionIndex}_${qIndex}">
                         <span>${qa.q}</span>
-                        <i class="ri-add-line faq-item-icon" id="faqIcon${sectionIndex}_${qIndex}"></i>
-                    </div>
-                    <div class="faq-answer" id="faqAnswer${sectionIndex}_${qIndex}" style="display: none;">
+                        <i class="ri-add-line faq-item-icon" id="faqIcon${sectionIndex}_${qIndex}" aria-hidden="true"></i>
+                    </button>
+                    <div class="faq-answer" id="faqAnswer${sectionIndex}_${qIndex}" style="display: none;" role="region">
                         ${qa.a}
                     </div>
                 </div>
@@ -1184,13 +1191,18 @@ function renderFAQ() {
 function toggleFAQSection(sectionIndex) {
     const content = document.getElementById(`faqSection${sectionIndex}`);
     const arrow = document.getElementById(`faqArrow${sectionIndex}`);
+    const header = arrow.closest('.faq-section-header');
 
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        arrow.style.transform = 'rotate(180deg)';
-    } else {
+    const isExpanded = content.style.display !== 'none';
+
+    if (isExpanded) {
         content.style.display = 'none';
         arrow.style.transform = 'rotate(0deg)';
+        header.setAttribute('aria-expanded', 'false');
+    } else {
+        content.style.display = 'block';
+        arrow.style.transform = 'rotate(180deg)';
+        header.setAttribute('aria-expanded', 'true');
     }
 }
 
@@ -1198,13 +1210,18 @@ function toggleFAQSection(sectionIndex) {
 function toggleFAQItem(sectionIndex, qIndex) {
     const answer = document.getElementById(`faqAnswer${sectionIndex}_${qIndex}`);
     const icon = document.getElementById(`faqIcon${sectionIndex}_${qIndex}`);
+    const question = icon.closest('.faq-question');
 
-    if (answer.style.display === 'none') {
-        answer.style.display = 'block';
-        icon.className = 'ri-subtract-line faq-item-icon';
-    } else {
+    const isExpanded = answer.style.display !== 'none';
+
+    if (isExpanded) {
         answer.style.display = 'none';
         icon.className = 'ri-add-line faq-item-icon';
+        question.setAttribute('aria-expanded', 'false');
+    } else {
+        answer.style.display = 'block';
+        icon.className = 'ri-subtract-line faq-item-icon';
+        question.setAttribute('aria-expanded', 'true');
     }
 }
 
@@ -1343,8 +1360,9 @@ function renderMonthlyInsights() {
     const summaryHTML = `
         <div class="insights-section">
             <div class="insights-header">
-                <h3>Monthly Overview</h3>
-                <select id="insightsMonthSelector" class="insights-month-selector">
+                <h3 id="insightsOverviewLabel">Monthly Overview</h3>
+                <label for="insightsMonthSelector" class="sr-only">Select month for insights</label>
+                <select id="insightsMonthSelector" class="insights-month-selector" aria-labelledby="insightsOverviewLabel" aria-label="Select month to view financial insights">
                     ${monthOptions}
                 </select>
             </div>

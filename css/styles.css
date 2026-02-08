@@ -1604,6 +1604,19 @@ button.primary.loading .btn-spinner {
    Utility Components
    ========================================================================== */
 
+/* Screen reader only - hides content visually but keeps it accessible */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
 .empty-state {
     text-align: center;
     padding: calc(var(--space-xl) * 2) var(--space-xl);
@@ -2003,19 +2016,39 @@ button.primary.loading .btn-spinner {
     margin-bottom: var(--space-md);
 }
 
-.backup-faq-link {
+.backup-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    align-items: stretch;
+    margin-top: var(--space-sm);
+}
+
+.backup-faq-button {
     display: inline-flex;
     align-items: center;
     gap: var(--space-xs);
-    margin-top: var(--space-sm);
     font-size: var(--font-sm);
     color: var(--color-primary);
-    text-decoration: none;
+    background: transparent;
+    border: none;
     cursor: pointer;
+    padding: var(--space-sm);
+    font-family: inherit;
+    text-decoration: none;
+    transition: background 0.2s ease;
+    border-radius: var(--radius-md);
+    align-self: flex-start;
 }
 
-.backup-faq-link:hover {
+.backup-faq-button:hover {
+    background: var(--color-bg);
     text-decoration: underline;
+}
+
+.backup-faq-button:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
 }
 
 /* FAQ Styles */
@@ -2057,10 +2090,20 @@ button.primary.loading .btn-spinner {
     cursor: pointer;
     background: var(--color-bg);
     transition: background 0.2s ease;
+    width: 100%;
+    border: none;
+    text-align: left;
+    font-family: inherit;
+    font-size: inherit;
 }
 
 .faq-section-header:hover {
     background: var(--color-border);
+}
+
+.faq-section-header:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
 }
 
 .faq-section-title {
@@ -2109,9 +2152,21 @@ button.primary.loading .btn-spinner {
     padding: var(--space-sm);
     border-radius: var(--radius-md);
     transition: background 0.2s ease;
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-family: inherit;
+    font-size: inherit;
 }
 
 .faq-question:hover {
+    background: var(--color-bg);
+}
+
+.faq-question:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: -2px;
     background: var(--color-bg);
 }
 
@@ -2148,6 +2203,14 @@ button.primary.loading .btn-spinner {
     .backup-status {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .backup-actions {
+        width: 100%;
+    }
+
+    .backup-actions button {
+        width: 100%;
     }
 
     .faq-section-header {
