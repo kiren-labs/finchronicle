@@ -48,8 +48,9 @@
     --color-warning-border: #ffc107;
     --color-warning-text: #856404;
 
-    --color-fin: #FF9500;
-    --color-chronicle: #0051D5;
+    /* Logo colors - Split-color wordmark */
+    --color-fin: #1F3A93;          /* Navy blue for "Fin" (trust, finance) */
+    --color-chronicle: #40831F;    /* Vibrant green for "Chronicle" (growth, time) */
 
     --color-info-bg: #d1ecf1;
     --color-info-border: #17a2b8;
@@ -67,11 +68,11 @@
     --gradient-income: linear-gradient(180deg, #34c759 0%, #28a745 100%);
     --gradient-expense: linear-gradient(180deg, #ff3b30 0%, #d93025 100%);
 
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.3);
-    --shadow-primary: 0 4px 12px rgba(0,81,213,0.3);
-    --shadow-primary-sm: 0 2px 6px rgba(0,81,213,0.2);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+    --shadow-primary: 0 4px 12px rgba(0, 81, 213, 0.3);
+    --shadow-primary-sm: 0 2px 6px rgba(0, 81, 213, 0.2);
 
     --radius-sm: 6px;
     --radius-md: 8px;
@@ -99,11 +100,15 @@
     --icon-xl: 24px;
     --icon-2xl: 26px;
 
-    --icon-button-sm: 28px;           /* Small icon buttons */
-    --icon-button-md: 32px;           /* Standard icon buttons */
-    --icon-button-lg: 36px;           /* Large icon buttons */
+    --icon-button-sm: 28px;
+    /* Small icon buttons */
+    --icon-button-md: 32px;
+    /* Standard icon buttons */
+    --icon-button-lg: 36px;
+    /* Large icon buttons */
 
-    --text-padding-y: 12px;           /* Vertical padding for inputs */
+    --text-padding-y: 12px;
+    /* Vertical padding for inputs */
     --text-padding-x: var(--space-lg);
 
     --font-xs: 11px;

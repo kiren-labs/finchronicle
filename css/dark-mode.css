@@ -25,8 +25,12 @@ body.dark-mode {
     --color-danger: #FF453A;
     --color-danger-strong: #FF6B6B;
 
-    --shadow-sm: 0 var(--space-2xs) var(--space-sm) rgba(0,0,0,0.4);
-    --shadow-md: 0 var(--space-2xs) var(--space-md) rgba(0,0,0,0.4);
+    /* Header title colors for dark mode - Brighter versions of brand colors */
+    --color-fin: #5B8DEF;          /* Lighter navy blue (better contrast on dark bg) */
+    --color-chronicle: #7EE847;    /* Brighter green (more vibrant on dark bg) */
+
+    --shadow-sm: 0 var(--space-2xs) var(--space-sm) rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 var(--space-2xs) var(--space-md) rgba(0, 0, 0, 0.4);
 }
 
 /* Dark mode pagination controls */
@@ -42,11 +46,11 @@ body.dark-mode .pagination-btn {
 
 body.dark-mode .pagination-btn:hover:not(:disabled) {
     background: var(--color-primary-hover);
-    box-shadow: 0 var(--space-2xs) var(--space-md) rgba(0,97,245,0.4);
+    box-shadow: 0 var(--space-2xs) var(--space-md) rgba(0, 97, 245, 0.4);
 }
 
 body.dark-mode .pagination-btn:active:not(:disabled) {
-    box-shadow: 0 var(--space-2xs) var(--space-xs) rgba(0,97,245,0.3);
+    box-shadow: 0 var(--space-2xs) var(--space-xs) rgba(0, 97, 245, 0.3);
 }
 
 body.dark-mode .pagination-btn:disabled {
@@ -127,7 +131,7 @@ body.dark-mode .type-toggle {
 body.dark-mode .type-option.active {
     background: var(--color-toggle-active-bg);
     color: var(--color-text);
-    box-shadow: 0 var(--space-2xs) var(--space-2xs) rgba(255,255,255,0.05);
+    box-shadow: 0 var(--space-2xs) var(--space-2xs) rgba(255, 255, 255, 0.05);
 }
 
 /* ==========================================================================
