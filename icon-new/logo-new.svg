@@ -3,8 +3,8 @@
   <desc id="desc">Two-tone clock ring with a blue top arc, green bottom arc, and hour dots inset from the ring.</desc>
   <defs>
     <style><![CDATA[
-      .ring-blue { stroke: #1F3A93; fill: none; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round }
-      .ring-green { stroke: #6BCF3A; fill: none; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round }
+      .ring-blue { stroke: #1F3A93; fill: none; stroke-width: 1; stroke-linecap: butt; stroke-linejoin: miter }
+      .ring-green { stroke: #6BCF3A; fill: none; stroke-width: 1; stroke-linecap: butt; stroke-linejoin: miter }
       .arrow { stroke: #6BCF3A; fill: none; stroke-width: 0.3; stroke-linecap: round; stroke-linejoin: round }
       .hands { stroke: #1F3A93; fill: none; stroke-width: 0.4; stroke-linecap: round }
       .dots { fill: #1F3A93 }
