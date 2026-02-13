@@ -48,6 +48,6 @@
   </g>
 
   <!-- Upward growth arrow -->
-  <!-- <path class="arrow" d="M20 5.41421L12 13.4142L10.5858 12L18.5858 4H14V2H22V10H20V5.41421Z" /> -->
+  <path class="arrow" d="M20 5.41421L12 13.4142L10.5858 12L18.5858 4H14V2H22V10H20V5.41421Z" />
   
   </svg>
