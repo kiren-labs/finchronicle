@@ -357,6 +357,49 @@ document.getElementById('date').valueAsDate = new Date();
 updateCategoryOptions('expense');
 
 // Form submission
+/**
+ * Validate amount input with proper decimal handling
+ * @param {string} amountInput - The raw amount input string
+ * @returns {Object} - { valid: boolean, amount: number, error: string }
+ */
+function validateAmount(amountInput) {
+    const trimmed = amountInput.trim();
+
+    // Check if amount is empty
+    if (!trimmed) {
+        return { valid: false, amount: 0, error: '⚠️ Please enter an amount' };
+    }
+
+    const amount = parseFloat(trimmed);
+
+    // Check if amount is a valid number
+    if (isNaN(amount)) {
+        return { valid: false, amount: 0, error: '⚠️ Please enter a valid number' };
+    }
+
+    // Check if amount is positive
+    if (amount <= 0) {
+        return { valid: false, amount: 0, error: '⚠️ Amount must be greater than zero' };
+    }
+
+    // Check if amount is not too large (max: 10 million)
+    if (amount > 10000000) {
+        return { valid: false, amount: 0, error: '⚠️ Amount is too large (max: 10,000,000)' };
+    }
+
+    // Check if amount has too many decimals (max: 2 decimal places)
+    // Use string validation to avoid floating point precision issues
+    const decimalParts = trimmed.split('.');
+    if (decimalParts.length > 1 && decimalParts[1].length > 2) {
+        return { valid: false, amount: 0, error: '⚠️ Amount can have at most 2 decimal places' };
+    }
+
+    // Round to 2 decimal places to ensure consistency
+    const roundedAmount = Math.round(amount * 100) / 100;
+
+    return { valid: true, amount: roundedAmount, error: null };
+}
+
 document.getElementById('transactionForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -364,49 +407,18 @@ document.getElementById('transactionForm').addEventListener('submit', async func
     const formCard = document.querySelector('#addTab .card');
     const originalBtnText = submitBtn.textContent;
 
-    // Validate amount input (v3.9.0 - Critical fix)
-    const amountInput = document.getElementById('amount').value.trim();
-    const amount = parseFloat(amountInput);
+    // Validate amount input using centralized validation
+    const amountInput = document.getElementById('amount').value;
+    const validation = validateAmount(amountInput);
 
-    // Check if amount is empty
-    if (!amountInput) {
-        showMessage('⚠️ Please enter an amount');
+    if (!validation.valid) {
+        showMessage(validation.error);
         submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
         return;
     }
 
-    // Check if amount is a valid number
-    if (isNaN(amount)) {
-        showMessage('⚠️ Please enter a valid number');
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-        return;
-    }
-
-    // Check if amount is positive
-    if (amount <= 0) {
-        showMessage('⚠️ Amount must be greater than zero');
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-        return;
-    }
-
-    // Check if amount is not too large (max: 10 million)
-    if (amount > 10000000) {
-        showMessage('⚠️ Amount is too large (max: 10,000,000)');
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-        return;
-    }
-
-    // Check if amount has too many decimals (max: 2 decimal places)
-    if (!Number.isInteger(amount * 100)) {
-        showMessage('⚠️ Amount can have at most 2 decimal places');
-        submitBtn.classList.remove('loading');
-        submitBtn.disabled = false;
-        return;
-    }
+    const amount = validation.amount;
 
     // Show loading state
     submitBtn.classList.add('loading');
@@ -1930,17 +1942,19 @@ function parseBackupCSV(text) {
 
     dataRows.forEach((row, i) => {
         const rawDate = (row[dateIndex] || '').trim();
-        const rawAmount = (row[amountIndex] || '').replace(/,/g, '').trim();
-        const amount = parseFloat(rawAmount);
+        const rawAmount = (row[amountIndex] || '').replace(/,/g, '');
 
-        if (!rawDate || isNaN(amount)) {
+        // Validate amount using centralized validation
+        const amountValidation = validateAmount(rawAmount);
+
+        if (!rawDate || !amountValidation.valid) {
             return; // Skip invalid rows
         }
 
         const transaction = {
             id: idIndex !== -1 && row[idIndex] ? parseInt(row[idIndex]) : Date.now() + i,
             type: typeIndex !== -1 ? (row[typeIndex] || '').trim().toLowerCase() : 'expense',
-            amount: Math.abs(amount),
+            amount: Math.abs(amountValidation.amount),
             category: categoryIndex !== -1 ? (row[categoryIndex] || '').trim() : 'Other Expense',
             date: rawDate,
             notes: notesIndex !== -1 ? (row[notesIndex] || '').trim() : '',
@@ -2121,10 +2135,12 @@ function importFromCSV(text) {
     rows.slice(1).forEach((row, i) => {
         const rawDate = (row[dateIndex] || '').trim();
         const normalizedDate = normalizeDate(rawDate);
-        const rawAmount = (row[amountIndex] || '').replace(/,/g, '').trim();
-        const amount = parseFloat(rawAmount);
+        const rawAmount = (row[amountIndex] || '').replace(/,/g, '');
 
-        if (!normalizedDate || Number.isNaN(amount)) {
+        // Validate amount using centralized validation
+        const amountValidation = validateAmount(rawAmount);
+
+        if (!normalizedDate || !amountValidation.valid) {
             skipped += 1;
             return;
         }
@@ -2138,7 +2154,7 @@ function importFromCSV(text) {
         transactions.unshift({
             id: startId + i,
             type,
-            amount: Math.abs(amount),
+            amount: Math.abs(amountValidation.amount),
             category,
             date: normalizedDate,
             notes,
