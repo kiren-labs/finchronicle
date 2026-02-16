@@ -62,12 +62,4 @@
       <line x1="0" y1="0" x2="-2.46" y2="-1.72" />
     </g>
   </g>
-
-  <!-- Branding text - Two colors -->
-  <text x="100" y="175" text-anchor="middle"
-        font-size="18"
-        font-weight="700"
-        font-family="Inter, -apple-system, sans-serif">
-    <tspan fill="#1F3A93">Fin</tspan><tspan fill="#40831f">Chronicle</tspan>
-  </text>
 </svg>
