@@ -839,13 +839,14 @@ button.primary.loading .btn-spinner {
     background: var(--color-toggle-active-bg);
     color: var(--color-text);
     box-shadow: var(--shadow-sm);
+}
 
-    .ri-arrow-up-circle-line {
-        color: var(--color-success-strong);
-    }
-    .ri-arrow-down-circle-line {
-        color: var(--color-danger-strong);
-    }
+.type-option.active .ri-arrow-up-circle-line {
+    color: var(--color-success-strong);
+}
+
+.type-option.active .ri-arrow-down-circle-line {
+    color: var(--color-danger-strong);
 }
 
 .type-option:active {
