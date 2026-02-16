@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="iconTitle">
+  <title id="iconTitle">FinChronicle Icon</title>
+
+  <defs>
+    <style>
+      .navy { stroke: #1F3A93; fill: none; }
+      .navy-fill { fill: #1F3A93; stroke: none; }
+      .green { stroke: #6BCF3A; fill: none; }
+      .green-fill { fill: #6BCF3A; stroke: none; }
+      .cap { stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <!-- White background for contrast -->
+  <rect width="512" height="512" fill="#FFFFFF" rx="80"/>
+
+  <!-- Icon centered -->
+  <g transform="translate(256, 256)">
+
+    <!-- Clock circle - Navy blue arc (top-left, about 270 degrees) -->
+    <path
+      class="navy cap"
+      stroke-width="32"
+      d="M -130,-90 A 160,160 0 1,1 90,130"
+    />
+
+    <!-- Clock circle - Green arc continues (bottom-right) -->
+    <path
+      class="green cap"
+      stroke-width="32"
+      d="M 90,130 A 160,160 0 0,1 -130,-90"
+    />
+
+    <!-- Upward arrow from green arc -->
+    <g>
+      <!-- Arrow shaft -->
+      <path
+        class="green cap"
+        stroke-width="32"
+        d="M 90,130 L 160,50"
+      />
+
+      <!-- Arrowhead (filled triangle) -->
+      <path
+        class="green-fill"
+        d="M 160,50 L 125,65 L 145,100 Z"
+      />
+    </g>
+
+    <!-- Clock tick marks (4 main positions) -->
+    <g class="navy-fill">
+      <!-- 12 o'clock -->
+      <rect x="-8" y="-170" width="16" height="35" rx="8"/>
+      <!-- 3 o'clock -->
+      <rect x="135" y="-8" width="35" height="16" rx="8"/>
+      <!-- 6 o'clock -->
+      <rect x="-8" y="135" width="16" height="35" rx="8"/>
+      <!-- 9 o'clock -->
+      <rect x="-170" y="-8" width="35" height="16" rx="8"/>
+    </g>
+
+    <!-- Clock hands -->
+    <g class="navy-fill">
+      <!-- Hour hand (pointing to ~10) -->
+      <rect x="-12" y="-70" width="24" height="80" rx="12" transform="rotate(-60)"/>
+
+      <!-- Minute hand (pointing to ~2) -->
+      <rect x="-10" y="-105" width="20" height="115" rx="10" transform="rotate(60)"/>
+
+      <!-- Center dot -->
+      <circle cx="0" cy="0" r="18"/>
+    </g>
+
+  </g>
+</svg>

@@ -1,0 +1,52 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 256" role="img" aria-labelledby="title desc">
+  <title id="title">FinChronicle – Concept 1: Clock + Growth Arrow (Refined Minimalist)</title>
+  <desc id="desc">A minimalist mark combining a navy partial clock with ticks and hands, and a green upward arrow that continues the clock outline. Includes the wordmark FinChronicle.</desc>
+  <defs>
+    <!-- Brand colors -->
+    <style><![CDATA[
+      .navy{stroke:#1F3A93; fill:none}
+      .green{stroke:#6BCF3A; fill:none}      /* Accent green */
+      .greenAA{stroke:#3C7A1D; fill:none}    /* AA-compliant green for text-on-white contexts */
+      .cap{stroke-linecap:round; stroke-linejoin:round}
+      .textFin{fill:#1F3A93}
+      .textChronicle{fill:#6BCF3A}
+    ]]></style>
+  </defs>
+
+  <!-- Icon group -->
+  <g id="icon" transform="translate(24,24)">
+    <!-- Base circle arc (navy half) -->
+    <path class="navy cap" stroke-width="16" d="M 104 192 A 104 104 0 1 1 192 104" />
+
+    <!-- Continuation arc (green) leading to arrowhead -->
+    <path class="green cap" stroke-width="16" d="M 192 104 A 104 104 0 0 1 104 208" />
+
+    <!-- Arrowhead at the end of the green arc -->
+    <polygon class="green cap" stroke-width="2" points="192,104 214,92 200,126" fill="#6BCF3A"/>
+
+    <!-- Clock ticks (minimal) -->
+    <g class="navy cap" stroke-width="12">
+      <line x1="104" y1="16"  x2="104" y2="36"/>
+      <line x1="192" y1="104" x2="172" y2="104"/>
+      <line x1="104" y1="192" x2="104" y2="172"/>
+      <line x1="16"  y1="104" x2="36"  y2="104"/>
+    </g>
+
+    <!-- Clock hands -->
+    <g class="navy cap" stroke-width="14">
+      <line x1="104" y1="104" x2="104" y2="58"/>
+      <line x1="104" y1="104" x2="144" y2="124"/>
+      <circle cx="104" cy="104" r="6" fill="#1F3A93" stroke="none"/>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <g id="wordmark" transform="translate(260,132)">
+    <text class="textFin" font-family="Montserrat, Poppins, Arial, Helvetica, sans-serif" font-weight="600" font-size="56" y="0">Fin</text>
+    <text class="textChronicle" font-family="Montserrat, Poppins, Arial, Helvetica, sans-serif" font-weight="500" font-size="56" x="106" y="0">Chronicle</text>
+  </g>
+
+  <!-- Accessibility note: change class 'green' to 'greenAA' on the two green paths above for AA-compliant green on white -->
+</svg>

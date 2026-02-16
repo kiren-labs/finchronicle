@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">FinChronicle</title>
+  <desc id="logoDesc">Clock with upward arrow representing financial tracking over time and growth</desc>
+
+  <defs>
+    <style>
+      .navy { stroke: #1F3A93; fill: none; }
+      .navy-fill { fill: #1F3A93; stroke: none; }
+      .green { stroke: #6BCF3A; fill: none; }
+      .green-fill { fill: #6BCF3A; stroke: none; }
+      .cap { stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <!-- Icon centered in 512×512 canvas -->
+  <g transform="translate(256, 256)">
+
+    <!-- Clock circle - Navy blue arc (top-left, ~270 degrees) -->
+    <path
+      class="navy cap"
+      stroke-width="28"
+      d="M -120,-80 A 140,140 0 1,1 80,120"
+    />
+
+    <!-- Clock circle - Green arc continues (bottom-right, ~90 degrees) -->
+    <path
+      class="green cap"
+      stroke-width="28"
+      d="M 80,120 A 140,140 0 0,1 -120,-80"
+    />
+
+    <!-- Upward arrow from green arc -->
+    <g class="green-fill">
+      <!-- Arrow shaft -->
+      <path d="M 80,120 L 140,50" stroke="#6BCF3A" stroke-width="28" stroke-linecap="round"/>
+
+      <!-- Arrowhead (triangle) -->
+      <path d="M 140,50 L 110,60 L 130,90 Z" />
+    </g>
+
+    <!-- Clock tick marks (navy) -->
+    <g class="navy-fill">
+      <!-- 12 o'clock -->
+      <rect x="-6" y="-150" width="12" height="30" rx="6"/>
+      <!-- 3 o'clock -->
+      <rect x="120" y="-6" width="30" height="12" rx="6"/>
+      <!-- 6 o'clock -->
+      <rect x="-6" y="120" width="12" height="30" rx="6"/>
+      <!-- 9 o'clock -->
+      <rect x="-150" y="-6" width="30" height="12" rx="6"/>
+    </g>
+
+    <!-- Clock hands (navy) -->
+    <g class="navy-fill cap">
+      <!-- Hour hand (pointing to ~10) -->
+      <rect x="-10" y="-60" width="20" height="70" rx="10" transform="rotate(-60)"/>
+
+      <!-- Minute hand (pointing to ~2) -->
+      <rect x="-8" y="-90" width="16" height="100" rx="8" transform="rotate(60)"/>
+
+      <!-- Center dot -->
+      <circle cx="0" cy="0" r="16"/>
+    </g>
+
+  </g>
+</svg>
