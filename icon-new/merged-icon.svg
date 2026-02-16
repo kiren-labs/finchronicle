@@ -1,71 +1,36 @@
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Text gradient: Green to Light Blue -->
-    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#00b894"/>
-      <stop offset="100%" stop-color="#11adeb"/>
+    <!-- Background gradient: White to light gray -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#f5f5f7"/>
     </linearGradient>
 
     <!-- Clock styles -->
     <style><![CDATA[
-      .ring-blue { stroke: #1F3A93; fill: none; stroke-width: 2.5; stroke-linecap: butt; stroke-linejoin: miter }
-      .ring-green { stroke: #6BCF3A; fill: none; stroke-width: 2.5; stroke-linecap: butt; stroke-linejoin: miter }
-      .hands { stroke: #1F3A93; fill: none; stroke-width: 1; stroke-linecap: round }
+      .ring-blue { stroke: #1F3A93; fill: none; stroke-width: 3.5; stroke-linecap: butt; stroke-linejoin: miter }
+      .ring-green { stroke: #6BCF3A; fill: none; stroke-width: 3.5; stroke-linecap: butt; stroke-linejoin: miter }
+      .hands { stroke: #1F3A93; fill: none; stroke-width: 1.2; stroke-linecap: round }
       .dots { fill: #1F3A93 }
       .center { fill: #1F3A93 }
     ]]></style>
-
-    <!-- Shadow filter for clock background -->
-    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-      <feOffset dx="0" dy="2" result="offsetblur"/>
-      <feComponentTransfer>
-        <feFuncA type="linear" slope="0.3"/>
-      </feComponentTransfer>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
 
-  <!-- Book background (transparent) -->
-  <rect x="40" y="40" width="120" height="120" rx="14"
-        fill="none" stroke="#E0E0E0" stroke-width="2" opacity="0.3"/>
+  <!-- App icon background - rounded rectangle -->
+  <rect x="10" y="10" width="180" height="180" rx="40"
+        fill="url(#bgGradient)"/>
 
-  <!-- Left spine using NCC RED -->
-  <line x1="70" y1="40" x2="70" y2="160"
-        stroke="#d63031" stroke-width="5"/>
-
-  <!-- Horizontal line (yellow) -->
-  <line y1="70" x1="40" y2="70" x2="160"
-        stroke="#fdcb6e" stroke-width="5"/>
-
-  <!-- Growth line (shadow/glow) -->
-  <polyline points="60,140 85,110 110,125 140,80"
+  <!-- Subtle growth arrow in background (simplified) -->
+  <polyline points="30,130 60,100 100,110 150,60"
             fill="none"
             stroke="#00b894"
-            stroke-width="5"
+            stroke-width="6"
             stroke-linecap="round"
             stroke-linejoin="round"
-            opacity="0.6"/>
+            opacity="0.15"/>
 
-  <!-- Growth line (primary highlight) -->
-  <polyline points="60,140 85,110 110,125 140,80"
-            fill="none"
-            stroke="#00b894"
-            stroke-width="3"
-            stroke-linecap="round"
-            stroke-linejoin="round"/>
-
-  <!-- Circular background behind clock -->
-  <circle cx="100" cy="100" r="48"
-          fill="#FFFFFF"
-          opacity="0.95"
-          filter="url(#shadow)"/>
-
-  <!-- Clock icon overlay (centered and scaled) -->
-  <g transform="translate(100, 100) scale(3.5)">
+  <!-- Clock icon (centered and larger) -->
+  <g transform="translate(100, 95) scale(5)">
     <!-- Top arc (blue) -->
     <path class="ring-blue" d="M2.73 15.75 A 10 10 0 0 1 19.88 5.84" transform="translate(-12, -12)" />
 
@@ -99,9 +64,10 @@
   </g>
 
   <!-- Branding text - Two colors -->
-  <text x="100" y="190" text-anchor="middle"
-        font-size="24"
-        font-family="Inter, sans-serif">
+  <text x="100" y="175" text-anchor="middle"
+        font-size="18"
+        font-weight="700"
+        font-family="Inter, -apple-system, sans-serif">
     <tspan fill="#1F3A93">Fin</tspan><tspan fill="#00b894">Chronicle</tspan>
   </text>
 </svg>
