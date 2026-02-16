@@ -14,6 +14,19 @@
       .dots { fill: #1F3A93 }
       .center { fill: #1F3A93 }
     ]]></style>
+
+    <!-- Shadow filter for clock background -->
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
 
   <!-- Book background (transparent) -->
@@ -44,6 +57,12 @@
             stroke-width="3"
             stroke-linecap="round"
             stroke-linejoin="round"/>
+
+  <!-- Circular background behind clock -->
+  <circle cx="100" cy="100" r="48"
+          fill="#FFFFFF"
+          opacity="0.95"
+          filter="url(#shadow)"/>
 
   <!-- Clock icon overlay (centered and scaled) -->
   <g transform="translate(100, 100) scale(3.5)">
