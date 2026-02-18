@@ -574,37 +574,127 @@ function showTemporaryField(fieldName, value) { ... }
    - Family expense breakdown
    - "Kids: ₹20,000 | Self: ₹15,000 | Spouse: ₹18,000"
 
-### Report Generation Functions
+### Report Generation Functions + Caching Strategy
+
+**CRITICAL: Report Performance Optimization**
+
+**Problem:** With 1000+ transactions and 9+ report types, rendering can be slow (9000+ iterations).
+
+**Solution: Implement Report Caching**
 
 ```javascript
-// Core reports (always available)
-generateCategoryPieData()
-generateMonthlyTrendData()
-generateWeeklyTrendData()
-generateDayOfMonthAnalysis()
+// Global cache object
+let reportCache = {
+  dateRange: null,
+  enabledFields: null,
+  transactionCount: 0,
+  data: null,
+  timestamp: null
+};
 
-// Optional field reports (conditional)
-generatePaymentMethodBreakdown()    // if paymentMethod enabled
-generateAccountWiseSpending()       // if account enabled
-generateTopMerchants()              // if merchant enabled
-generateBusinessVsPersonal()        // if expenseType enabled
-generatePerPersonSpending()         // if attachedTo enabled
+// Main report generator with caching
+function generateAllReports() {
+  const currentRange = getSelectedDateRange();
+  const currentFields = getEnabledFields();
+  const txCount = transactions.length;
+
+  // Cache hit conditions:
+  // 1. Same date range
+  // 2. Same enabled fields
+  // 3. Same transaction count (no new transactions added)
+  // 4. Cache less than 5 minutes old (for live updates)
+  const cacheValid =
+    reportCache.dateRange === currentRange &&
+    JSON.stringify(reportCache.enabledFields) === JSON.stringify(currentFields) &&
+    reportCache.transactionCount === txCount &&
+    reportCache.timestamp &&
+    (Date.now() - reportCache.timestamp) < 300000; // 5 minutes
+
+  if (cacheValid) {
+    console.log('📊 Using cached reports');
+    return reportCache.data;
+  }
+
+  console.log('📊 Generating fresh reports');
+
+  // Filter transactions once
+  const filtered = transactions.filter(t => inDateRange(t, currentRange));
+
+  // Generate all reports
+  const reports = {
+    // Core reports (always generated)
+    categoryPie: generateCategoryPieData(filtered),
+    monthlyTrend: generateMonthlyTrendData(filtered),
+    weeklyTrend: generateWeeklyTrendData(filtered),
+    dayAnalysis: generateDayOfMonthAnalysis(filtered)
+  };
+
+  // Optional field reports (conditional)
+  if (currentFields.paymentMethod) {
+    reports.paymentMethod = generatePaymentMethodBreakdown(filtered);
+  }
+  if (currentFields.account) {
+    reports.accountWise = generateAccountWiseSpending(filtered);
+  }
+  if (currentFields.merchant) {
+    reports.topMerchants = generateTopMerchants(filtered);
+  }
+  if (currentFields.expenseType) {
+    reports.businessPersonal = generateBusinessVsPersonal(filtered);
+  }
+  if (currentFields.attachedTo) {
+    reports.perPerson = generatePerPersonSpending(filtered);
+  }
+
+  // Update cache
+  reportCache = {
+    dateRange: currentRange,
+    enabledFields: currentFields,
+    transactionCount: txCount,
+    data: reports,
+    timestamp: Date.now()
+  };
+
+  return reports;
+}
+
+// Invalidate cache when data changes
+function saveTransactionToDB(transaction) {
+  // ... existing save logic ...
+
+  // Invalidate report cache
+  reportCache = {
+    dateRange: null,
+    enabledFields: null,
+    transactionCount: 0,
+    data: null,
+    timestamp: null
+  };
+}
 
 // Dynamic report renderer
-renderReports() {
-  const enabled = getEnabledFields();
+function renderReports() {
+  const reports = generateAllReports();
 
-  // Always show core reports
-  renderCategoryPieChart();
-  renderMonthlyTrend();
+  // Render core reports
+  renderCategoryPieChart(reports.categoryPie);
+  renderMonthlyTrend(reports.monthlyTrend);
+  renderWeeklyTrend(reports.weeklyTrend);
+  renderDayAnalysis(reports.dayAnalysis);
 
-  // Conditionally show optional field reports
-  if (enabled.paymentMethod) renderPaymentMethodBreakdown();
-  if (enabled.account) renderAccountWiseSpending();
-  if (enabled.merchant) renderTopMerchants();
-  // ... etc
+  // Render optional field reports
+  if (reports.paymentMethod) renderPaymentMethodBreakdown(reports.paymentMethod);
+  if (reports.accountWise) renderAccountWiseSpending(reports.accountWise);
+  if (reports.topMerchants) renderTopMerchants(reports.topMerchants);
+  if (reports.businessPersonal) renderBusinessVsPersonal(reports.businessPersonal);
+  if (reports.perPerson) renderPerPersonSpending(reports.perPerson);
 }
 ```
+
+**Performance Improvement:**
+- First load: ~100ms (generate all reports)
+- Subsequent loads: ~2ms (cache hit)
+- Cache invalidated only on: new transaction, delete transaction, date range change, field toggle
 
 ### Date Range Selector
 
@@ -1325,13 +1415,26 @@ async function renderStorageStatus() {
 
 | Version | Feature | Priority | Weeks from 3.10.1 | Estimated Release |
 |---------|---------|----------|-------------------|-------------------|
-| 3.11.0 | Recurring Transactions | **High** | 2-3 | Early March 2026 |
-| 3.12.0 | **Optional Fields System** + Reports & Visualizations | **High** | 4-5 | Late March 2026 |
-| 3.13.0 | Budget Limits & Alerts | **High** | 6-7 | Mid April 2026 |
-| 3.14.0 | Tags & Search | Medium | 8-9 | Late April 2026 |
-| 3.15.0 | Split Transactions | Medium | 10-11 | Mid May 2026 |
-| 3.16.0 | Savings Goals | Medium | 12-13 | Late May 2026 |
-| 3.17.0 | Receipt Photos | Low | 14-15 | Early June 2026 |
+| 3.10.2 | **Transaction Validation Layer** (Foundation) | **CRITICAL** | 1 | Late Feb 2026 |
+| 3.11.0 | Recurring Transactions + Timezone Handling | **High** | 4-5 (revised) | Mid March 2026 |
+| 3.12.0 | **Optional Fields (IDB)** + Reports + Caching | **High** | 7-9 (revised) | Early April 2026 |
+| 3.13.0 | Budget Limits + Rollover Logic | **High** | 11-13 (revised) | Late April 2026 |
+| 3.14.0 | Tags & Search | Medium | 14-16 | Mid May 2026 |
+| 3.15.0 | Split Transactions + Balance Validation | Medium | 17-19 | Late May 2026 |
+| 3.16.0 | Savings Goals | Medium | 20-22 | Mid June 2026 |
+| 3.17.0 | Receipt Photos + Quota Management | Low | 24-26 | Early July 2026 |
+
+**Revised Timeline Notes:**
+- Added v3.10.2 (validation layer) - MUST implement first
+- Increased estimates to account for:
+  - Timezone handling (v3.11.0)
+  - IndexedDB migration complexity (v3.12.0)
+  - Report caching implementation (v3.12.0)
+  - Budget rollover logic (v3.13.0)
+  - Split transaction validation (v3.15.0)
+  - Storage quota enforcement (v3.17.0)
+
+**Total Timeline: ~6 months** (more realistic than original ~4 months)
 
 ## Database Schema Evolution
 
@@ -1340,40 +1443,53 @@ async function renderStorageStatus() {
 - Stores: transactions
 - Fields: id, type, amount, category, date, notes, createdAt
 
-**v3.11.0:**
+**v3.10.2 - Transaction Validation Layer (Foundation):**
+- DB Version: 1 (no schema changes)
+- Add validation layer (JavaScript only - no DB changes)
+
+**v3.11.0 - Recurring Transactions:**
 - DB Version: 2
 - New Store: recurringTemplates
-- Indexes: nextDueDate, enabled
+  - Fields: id, type, amount, category, notes, frequency, dayOfMonth, executionTime, timezone, startDate, nextDueDate, lastExecuted, enabled, skipWeekends, createdAt
+  - Indexes: nextDueDate, enabled
 
-**v3.12.0:**
-- DB Version: 2 (no version bump needed)
+**v3.12.0 - Optional Fields + Reports:** ⚠️ **CRITICAL FIX**
+- DB Version: 3 (MUST bump from 2→3, not stay at 2)
+- New Store: appSettings
+  - Single document: { id: 'config', enabledFields: {...}, appVersion, lastUpdated }
+  - No indexes (single document)
 - Update: transactions gets 7 optional fields (all nullable):
   - `paymentMethod`, `account`, `merchant`, `expenseType`, `attachedTo`, `referenceId`, `location`
-- localStorage: Add `enabledFields` configuration object
+- **CRITICAL:** enabledFields moved from localStorage to IndexedDB for data integrity
 
-**v3.13.0:**
-- DB Version: 3
-- New Store: budgets
-- Indexes: category
-
-**v3.14.0:**
+**v3.13.0 - Budget Limits + Rollover:**
 - DB Version: 4
+- New Store: budgets
+  - Fields: id, category, monthlyLimit, alertThreshold, rolloverEnabled, rolloverBalance, budgetType, resetDay, createdAt, updatedAt
+  - Indexes: category
+
+**v3.14.0 - Tags & Search:**
+- DB Version: 5
 - Update: transactions gets `tags: string[]` field
 - New Index: tags (multiEntry: true)
 
-**v3.15.0:**
-- DB Version: 5
-- Update: transactions gets `isSplit: boolean`, `splits: array` fields
-
-**v3.16.0:**
+**v3.15.0 - Split Transactions:**
 - DB Version: 6
-- New Store: savingsGoals
-- Indexes: deadline
+- Update: transactions gets `isSplit: boolean`, `splits: array` fields
+- Add split transaction balance validation
 
-**v3.17.0:**
+**v3.16.0 - Savings Goals:**
 - DB Version: 7
+- New Store: savingsGoals
+  - Fields: id, name, targetAmount, currentAmount, deadline, category, createdAt
+  - Indexes: deadline
+
+**v3.17.0 - Receipt Photos:**
+- DB Version: 8
 - New Store: receipts
-- Indexes: transactionId
+  - Fields: id, transactionId, imageBlob, fileName, fileSize, uploadedAt
+  - Indexes: transactionId
+- Add storage quota management system
 
 ## Storage Estimates (per 1000 transactions)
 
