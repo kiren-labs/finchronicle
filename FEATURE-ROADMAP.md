@@ -985,8 +985,89 @@ function renderBudgetCard(category) {
 2. **Split Editor**:
    - List of splits with mini-form for each
    - Add/Remove split buttons
-   - Total must equal main amount (validation)
+   - **CRITICAL: Enforce balance validation** - splits MUST equal total
    - Each split: Category, Amount, Notes
+   - Auto-balance last split option
+
+**NEW: Split Transaction Balance Validation (Accounting Integrity)**
+
+**Why:** Prevent accounting errors where splits don't add up to transaction total.
+
+```javascript
+function validateSplitTransaction(transaction) {
+  if (!transaction.isSplit || !transaction.splits || transaction.splits.length === 0) {
+    return { valid: true };
+  }
+
+  const errors = [];
+
+  // 1. Calculate total of splits
+  const splitTotal = transaction.splits.reduce((sum, split) => sum + split.amount, 0);
+
+  // 2. Allow 0.01 difference for rounding errors
+  const diff = Math.abs(transaction.amount - splitTotal);
+
+  if (diff > 0.01) {
+    errors.push({
+      field: 'splits',
+      message: `Split amounts (${formatCurrency(splitTotal)}) don't match transaction total (${formatCurrency(transaction.amount)}). Difference: ${formatCurrency(diff)}`
+    });
+  }
+
+  // 3. Validate each split
+  transaction.splits.forEach((split, index) => {
+    if (!split.category || split.category.trim() === '') {
+      errors.push({ field: `splits[${index}].category`, message: `Split ${index + 1}: Category required` });
+    }
+    if (isNaN(split.amount) || split.amount <= 0) {
+      errors.push({ field: `splits[${index}].amount`, message: `Split ${index + 1}: Invalid amount` });
+    }
+  });
+
+  return {
+    valid: errors.length === 0,
+    errors: errors
+  };
+}
+
+// UI Helper: Auto-balance last split
+function autoBalanceLastSplit(totalAmount, splits) {
+  if (splits.length === 0) return [];
+
+  // Calculate sum of all splits except last
+  const allButLast = splits.slice(0, -1);
+  const manualTotal = allButLast.reduce((sum, s) => sum + s.amount, 0);
+
+  // Automatically set last split to balance
+  const lastSplit = splits[splits.length - 1];
+  lastSplit.amount = Math.round((totalAmount - manualTotal) * 100) / 100;
+  lastSplit.autoAdjusted = true;
+
+  return splits;
+}
+
+// Integrate into save function
+async function saveTransaction(transaction) {
+  // Validate basic fields
+  const basicValidation = validateTransaction(transaction);
+  if (!basicValidation.valid) {
+    showErrors(basicValidation.errors);
+    return false;
+  }
+
+  // Validate splits if applicable
+  if (transaction.isSplit) {
+    const splitValidation = validateSplitTransaction(transaction);
+    if (!splitValidation.valid) {
+      showErrors(splitValidation.errors);
+      return false;
+    }
+  }
+
+  await saveTransactionToDB(transaction);
+  return true;
+}
+```
 
 3. **Display Logic**:
    - Transaction list: Show "📋 Split" badge
