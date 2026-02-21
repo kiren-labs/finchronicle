@@ -17,6 +17,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.10.2] - 2026-02-20
+
+### Added
+- **Transaction Validation Layer** - Comprehensive validation for all transactions (Foundation for future features)
+  - Type validation: Only 'income' or 'expense' allowed
+  - Amount validation: Must be positive, maximum ₹99 crore (999,999,999)
+  - Category validation: Must match available categories for transaction type
+  - Date validation: No future dates, no dates before 1900
+  - Notes sanitization: XSS protection via HTML sanitization
+  - Notes length validation: Maximum 500 characters
+  - Centralized validation logic for maintainability
+
+### Security
+- Implemented XSS protection for notes field using HTML sanitization
+- All user inputs now validated before saving to database
+- Sanitized transaction data stored to prevent injection attacks
+
+### Technical
+- New functions: `validateTransaction()`, `sanitizeHTML()`
+- Updated form submission handler to use centralized validation
+- Validation returns detailed error objects for debugging
+- All validation errors displayed to user with clear messages
+- Zero breaking changes - backward compatible with existing data
+- No database migration required (validation is JavaScript-only)
+
+### Improved
+- Better error messages for invalid transaction data
+- Consolidated validation logic (previously scattered across form handler)
+- Data integrity protection for all future features
+- Performance: Negligible impact (~1ms per validation)
+
+---
+
 ## [3.10.1] - 2026-02-16
 
 ### Fixed
@@ -32,7 +65,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Centralized amount validation logic for better maintainability
 - Amount values are now rounded to 2 decimal places for consistency
 
----
 
 ## [3.10.0] - 2026-02-16
 

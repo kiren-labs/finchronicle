@@ -1,5 +1,5 @@
 // App Version - Update this when releasing new features
-const APP_VERSION = '3.10.1';
+const APP_VERSION = '3.10.2';
 const VERSION_KEY = 'app_version';
 
 // IndexedDB Configuration
@@ -235,6 +235,71 @@ function loadDataFromDB() {
     });
 }
 
+// ========================================
+// Transaction Validation Layer (v3.10.2)
+// ========================================
+
+// Sanitize HTML to prevent XSS attacks
+function sanitizeHTML(str) {
+    if (!str) return '';
+    const temp = document.createElement('div');
+    temp.textContent = str;
+    return temp.innerHTML;
+}
+
+// Validate transaction before saving
+function validateTransaction(transaction) {
+    const errors = [];
+
+    // 1. Type validation
+    if (!['income', 'expense'].includes(transaction.type)) {
+        errors.push({ field: 'type', message: 'Invalid transaction type' });
+    }
+
+    // 2. Amount validation
+    if (isNaN(transaction.amount) || transaction.amount <= 0) {
+        errors.push({ field: 'amount', message: 'Amount must be a positive number' });
+    }
+    if (transaction.amount > 999999999) {  // ₹99 crore max
+        errors.push({ field: 'amount', message: 'Amount exceeds maximum limit' });
+    }
+
+    // 3. Category validation
+    const validCategories = transaction.type === 'income' ? categories.income : categories.expense;
+    if (!validCategories.includes(transaction.category)) {
+        errors.push({ field: 'category', message: 'Invalid category for transaction type' });
+    }
+
+    // 4. Date validation
+    const date = new Date(transaction.date);
+    if (isNaN(date.getTime())) {
+        errors.push({ field: 'date', message: 'Invalid date format' });
+    } else {
+        // Check for future dates
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // End of today
+        if (date > today) {
+            errors.push({ field: 'date', message: 'Future dates are not allowed' });
+        }
+        // Check for dates too far in the past
+        if (date < new Date('1900-01-01')) {
+            errors.push({ field: 'date', message: 'Date is too far in the past' });
+        }
+    }
+
+    // 5. Notes sanitization and length validation
+    if (transaction.notes && transaction.notes.length > 500) {
+        errors.push({ field: 'notes', message: 'Notes too long (max 500 characters)' });
+    }
+    transaction.notes = sanitizeHTML(transaction.notes || '');
+
+    return {
+        valid: errors.length === 0,
+        errors: errors,
+        sanitized: transaction
+    };
+}
+
 // Save single transaction to IndexedDB
 function saveTransactionToDB(transaction) {
     return new Promise((resolve, reject) => {
@@ -362,44 +427,6 @@ updateCategoryOptions('expense');
  * @param {string} amountInput - The raw amount input string
  * @returns {Object} - { valid: boolean, amount: number, error: string }
  */
-function validateAmount(amountInput) {
-    const trimmed = amountInput.trim();
-
-    // Check if amount is empty
-    if (!trimmed) {
-        return { valid: false, amount: 0, error: '⚠️ Please enter an amount' };
-    }
-
-    const amount = parseFloat(trimmed);
-
-    // Check if amount is a valid number
-    if (isNaN(amount)) {
-        return { valid: false, amount: 0, error: '⚠️ Please enter a valid number' };
-    }
-
-    // Check if amount is positive
-    if (amount <= 0) {
-        return { valid: false, amount: 0, error: '⚠️ Amount must be greater than zero' };
-    }
-
-    // Check if amount is not too large (max: 10 million)
-    if (amount > 10000000) {
-        return { valid: false, amount: 0, error: '⚠️ Amount is too large (max: 10,000,000)' };
-    }
-
-    // Check if amount has too many decimals (max: 2 decimal places)
-    // Use string validation to avoid floating point precision issues
-    const decimalParts = trimmed.split('.');
-    if (decimalParts.length > 1 && decimalParts[1].length > 2) {
-        return { valid: false, amount: 0, error: '⚠️ Amount can have at most 2 decimal places' };
-    }
-
-    // Round to 2 decimal places to ensure consistency
-    const roundedAmount = Math.round(amount * 100) / 100;
-
-    return { valid: true, amount: roundedAmount, error: null };
-}
-
 document.getElementById('transactionForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -407,28 +434,36 @@ document.getElementById('transactionForm').addEventListener('submit', async func
     const formCard = document.querySelector('#addTab .card');
     const originalBtnText = submitBtn.textContent;
 
-    // Validate amount input using centralized validation
-    const amountInput = document.getElementById('amount').value;
-    const validation = validateAmount(amountInput);
+    // Parse amount input
+    const amountInput = document.getElementById('amount').value.trim();
+    const amount = parseFloat(amountInput);
 
-    if (!validation.valid) {
-        showMessage(validation.error);
+    // Check if amount is empty (quick check before full validation)
+    if (!amountInput) {
+        showMessage('⚠️ Please enter an amount');
         submitBtn.classList.remove('loading');
         submitBtn.disabled = false;
         return;
     }
 
-    const amount = validation.amount;
+    // Check if amount has too many decimals (max: 2 decimal places)
+    if (!isNaN(amount) && !Number.isInteger(amount * 100)) {
+        showMessage('⚠️ Amount can have at most 2 decimal places');
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        return;
+    }
 
     // Show loading state
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="btn-spinner"></span> Saving...';
 
+    // Build transaction object
     const transaction = {
         id: editingId || Date.now(),
         type: document.getElementById('type').value,
-        amount: amount, // Use validated amount
+        amount: amount,
         category: document.getElementById('category').value,
         date: document.getElementById('date').value,
         notes: document.getElementById('notes').value,
@@ -437,8 +472,24 @@ document.getElementById('transactionForm').addEventListener('submit', async func
             new Date().toISOString()
     };
 
+    // Validate transaction using centralized validation layer (v3.10.2)
+    const validation = validateTransaction(transaction);
+
+    if (!validation.valid) {
+        // Show validation errors
+        const errorMessage = validation.errors.map(e => e.message).join(', ');
+        showMessage(`⚠️ ${errorMessage}`);
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+        return;
+    }
+
+    // Use sanitized transaction from validation
+    const sanitizedTransaction = validation.sanitized;
+
     try {
-        await saveTransactionToDB(transaction);
+        await saveTransactionToDB(sanitizedTransaction);
 
         // Show success state
         submitBtn.classList.remove('loading');
@@ -457,12 +508,12 @@ document.getElementById('transactionForm').addEventListener('submit', async func
             // Update existing transaction in memory
             const index = transactions.findIndex(t => t.id === editingId);
             if (index !== -1) {
-                transactions[index] = transaction;
+                transactions[index] = sanitizedTransaction;
             }
             showMessage('Transaction updated!');
         } else {
             // Add new transaction to memory
-            transactions.unshift(transaction);
+            transactions.unshift(sanitizedTransaction);
             showMessage('Transaction saved!');
         }
 
@@ -1943,18 +1994,17 @@ function parseBackupCSV(text) {
     dataRows.forEach((row, i) => {
         const rawDate = (row[dateIndex] || '').trim();
         const rawAmount = (row[amountIndex] || '').replace(/,/g, '');
+        const amount = parseFloat(rawAmount);
 
-        // Validate amount using centralized validation
-        const amountValidation = validateAmount(rawAmount);
-
-        if (!rawDate || !amountValidation.valid) {
+        // Skip invalid rows (empty date or invalid amount)
+        if (!rawDate || isNaN(amount) || amount <= 0) {
             return; // Skip invalid rows
         }
 
         const transaction = {
             id: idIndex !== -1 && row[idIndex] ? parseInt(row[idIndex]) : Date.now() + i,
             type: typeIndex !== -1 ? (row[typeIndex] || '').trim().toLowerCase() : 'expense',
-            amount: Math.abs(amountValidation.amount),
+            amount: Math.abs(amount),
             category: categoryIndex !== -1 ? (row[categoryIndex] || '').trim() : 'Other Expense',
             date: rawDate,
             notes: notesIndex !== -1 ? (row[notesIndex] || '').trim() : '',
@@ -2136,11 +2186,10 @@ function importFromCSV(text) {
         const rawDate = (row[dateIndex] || '').trim();
         const normalizedDate = normalizeDate(rawDate);
         const rawAmount = (row[amountIndex] || '').replace(/,/g, '');
+        const amount = parseFloat(rawAmount);
 
-        // Validate amount using centralized validation
-        const amountValidation = validateAmount(rawAmount);
-
-        if (!normalizedDate || !amountValidation.valid) {
+        // Skip invalid rows (invalid date or invalid amount)
+        if (!normalizedDate || isNaN(amount) || amount <= 0) {
             skipped += 1;
             return;
         }
@@ -2154,7 +2203,7 @@ function importFromCSV(text) {
         transactions.unshift({
             id: startId + i,
             type,
-            amount: Math.abs(amountValidation.amount),
+            amount: Math.abs(amount),
             category,
             date: normalizedDate,
             notes,
