@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-3.3.0-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-3.10.2-blue.svg)](VERSION.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -51,7 +51,8 @@
 
 ### 🛠️ Technical Features
 - ✅ **Service Worker** - Offline caching
-- ✅ **localStorage** - Client-side data persistence
+- ✅ **IndexedDB** - Robust transaction data storage
+- ✅ **localStorage** - Settings persistence
 - ✅ **Responsive Design** - Works on all screen sizes
 - ✅ **WCAG AA Compliant** - Fully accessible
 - ✅ **Version Management** - Semantic versioning with auto-update
@@ -105,27 +106,40 @@ open http://localhost:8000
 
 ```
 finchronicle/
-├── index.html          # Main app (HTML + CSS + JS)
+├── index.html          # Main HTML structure
+├── app.js             # Application logic (~2650 lines)
 ├── sw.js              # Service Worker for offline support
 ├── manifest.json      # PWA manifest
+├── css/
+│   ├── tokens.css     # Design tokens
+│   ├── styles.css     # Main styles
+│   └── dark-mode.css  # Dark theme
+├── icons/             # PWA icons
 ├── robots.txt         # SEO configuration
 ├── README.md          # This file
 ├── CONTRIBUTING.md    # Contribution guidelines
-├── LICENSE           # MIT License
-├── VERSION.md        # Version history and guide
-└── CHANGELOG.md      # Detailed changelog
+├── LICENSE            # MIT License
+├── VERSION.md         # Version history and guide
+└── CHANGELOG.md       # Detailed changelog
 ```
 
 ### Making Changes
 
-1. **Edit** `index.html` for UI/features
-2. **Update version** in two places:
+1. **Edit files**:
+   - `app.js` for application logic and features
+   - `index.html` for HTML structure
+   - `css/styles.css` for styling
+2. **Update version** in three places:
    ```javascript
-   // index.html (line ~1077)
-   const APP_VERSION = '3.2.0';
+   // app.js (line 2)
+   const APP_VERSION = '3.10.2';
 
-   // sw.js (line 2)
-   const CACHE_NAME = 'finchronicle-v6';
+   // sw.js (line 4)
+   const CACHE_NAME = 'finchronicle-v3.10.2';
+   ```
+   ```json
+   // manifest.json
+   "version": "3.10.2"
    ```
 3. **Test locally**:
    ```bash
@@ -140,28 +154,30 @@ finchronicle/
 
 Click the currency button in the toolbar and select from 20+ currencies!
 
-Or modify the default:
+Or modify the default in [app.js](app.js):
 ```javascript
-// In index.html, change default currency (line ~1138):
+// In app.js, search for getCurrency() function:
 function getCurrency() {
     const saved = localStorage.getItem('currency');
-    return saved && currencies[saved] ? saved : 'USD'; // Change 'USD' to your default
+    return saved && currencies[saved] ? saved : 'INR'; // Change to your default
 }
 ```
 
 #### Add Categories
 
 ```javascript
-// In index.html (line ~1087):
+// In app.js, search for categories object:
 const categories = {
     income: [
         'Salary',
-        'Freelance',
+        'Business',
+        'Investment',
         'Your New Category', // Add here
         'Other Income'
     ],
     expense: [
         'Food',
+        'Groceries',
         'Transport',
         'Your New Category', // Add here
         'Other Expense'
@@ -172,12 +188,12 @@ const categories = {
 #### Change Theme Colors
 
 ```css
-/* In index.html <style> section: */
---primary-color: #0051D5;    /* Blue - main app color */
---income-color: #34c759;     /* Green - income */
---expense-color: #ff3b30;    /* Red - expense */
---background: #f5f5f7;       /* Light mode background */
---card-bg: #ffffff;          /* Card background */
+/* In css/tokens.css: */
+--color-primary: #0051D5;     /* Blue - main app color */
+--color-success: #34c759;     /* Green - income */
+--color-danger: #ff3b30;      /* Red - expense */
+--color-bg: #f5f5f7;          /* Light mode background */
+--color-surface: #ffffff;     /* Card background */
 ```
 
 ---
@@ -208,27 +224,31 @@ const categories = {
 
 ### Data Access
 - Only you can access your data
-- Data stays in your browser's localStorage
+- Transaction data stays in your browser's IndexedDB
+- Settings stay in your browser's localStorage
 - Even we (the developers) can't see your data
 
 ---
 
 ## 🛣️ Roadmap
 
-### v3.2 (Next Release)
-- [ ] Import from CSV
-- [ ] Budget tracking per category
+### Recently Completed (v3.x)
+- ✅ Import from CSV / Backup & Restore
+- ✅ Budget Health Tracking
+- ✅ Month-over-month trends
+- ✅ Advanced filtering
+- ✅ Transaction validation layer
+- ✅ Enhanced export with metadata
+
+### Upcoming Features
 - [ ] Recurring transactions
 - [ ] Search functionality
-
-### v4.0 (Future)
+- [ ] Custom categories
 - [ ] Charts and graphs
-- [ ] Google Sheets sync (optional)
-- [ ] Multi-device sync
-- [ ] Tags system
+- [ ] Tag system
 - [ ] Custom date ranges
 
-See [VERSION.md](VERSION.md) for detailed roadmap.
+See [FEATURE-ROADMAP.md](docs/FEATURE-ROADMAP.md) for detailed roadmap.
 
 ---
 
@@ -336,12 +356,13 @@ If this project helped you, please consider:
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Latest Release: v3.2.0**
-- 📖 Rebranded to FinChronicle - Your Financial Chronicle
-- 🎨 New professional PNG icons for better PWA compatibility
-- 📱 Added maskable icon support for Android adaptive icons
-- 🏷️ Updated branding across all files
-- 🔧 Improved icon rendering on macOS/iOS
+**Latest Release: v3.10.2**
+- 🔒 Transaction validation layer (amounts, dates, categories)
+- 💾 Enhanced backup system with metadata
+- 📊 Month-over-month trend indicators
+- 🎯 Budget health tracking
+- ⚡ Performance optimizations
+- 🐛 Various bug fixes
 
 ---
 

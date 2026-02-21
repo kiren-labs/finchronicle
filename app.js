@@ -604,7 +604,6 @@ function updateSummary() {
     // Update This Month trend
     const monthNetTrend = document.getElementById('monthNetTrend');
     if (netDelta && netDelta.pct !== null) {
-        const arrow = netDelta.direction === 'up' ? '↑' : netDelta.direction === 'down' ? '↓' : '→';
         const sign = netDelta.abs >= 0 ? '+' : '';
         monthNetTrend.innerHTML = `<i class="ri-arrow-${netDelta.direction === 'up' ? 'up' : netDelta.direction === 'down' ? 'down' : 'right'}-line"></i> ${sign}${Math.abs(netDelta.pct).toFixed(1)}% vs last month`;
         monthNetTrend.className = `summary-trend ${netDelta.direction === 'up' ? 'positive' : netDelta.direction === 'down' ? 'negative' : 'neutral'}`;
@@ -1679,14 +1678,16 @@ function onSummaryTileClick(tileType) {
 }
 
 // Change grouping
-function changeGrouping(type) {
+function changeGrouping(type, event) {
     currentGrouping = type;
 
     // Update filter buttons
     document.querySelectorAll('#groupsTab .filter-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
 
     updateGroupedView();
 }
