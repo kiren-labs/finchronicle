@@ -15,7 +15,7 @@
 ## 📱 Screenshots
 
 <div align="center">
-  <img src="screenshots/home.png" alt="Home Screen" width="200"/>
+  <img src="screenshots/add-transaction.png" alt="Home Screen" width="200"/>
   <img src="screenshots/add-transaction.png" alt="Add Transaction" width="200"/>
   <img src="screenshots/list.png" alt="Transaction List" width="200"/>
   <img src="screenshots/dark-mode.png" alt="Dark Mode" width="200"/>
