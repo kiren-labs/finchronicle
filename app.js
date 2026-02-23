@@ -1,5 +1,5 @@
 // App Version - Update this when releasing new features
-const APP_VERSION = '3.10.2';
+const APP_VERSION = '3.10.3';
 const VERSION_KEY = 'app_version';
 
 // IndexedDB Configuration
@@ -2589,6 +2589,15 @@ window.addEventListener('load', async function () {
         showMessage('Failed to load data');
     }
 });
+
+// Feedback Modal Functions
+function openFeedbackModal() {
+    document.getElementById('feedbackModal').classList.add('show');
+}
+
+function closeFeedbackModal() {
+    document.getElementById('feedbackModal').classList.remove('show');
+}
 
 // Register service worker for offline support
 if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {

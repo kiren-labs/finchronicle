@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-3.10.2-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-3.10.3-blue.svg)](VERSION.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -132,14 +132,14 @@ finchronicle/
 2. **Update version** in three places:
    ```javascript
    // app.js (line 2)
-   const APP_VERSION = '3.10.2';
+   const APP_VERSION = '3.10.3';
 
    // sw.js (line 4)
-   const CACHE_NAME = 'finchronicle-v3.10.2';
+   const CACHE_NAME = 'finchronicle-v3.10.3';
    ```
    ```json
    // manifest.json
-   "version": "3.10.2"
+   "version": "3.10.3"
    ```
 3. **Test locally**:
    ```bash
@@ -356,7 +356,7 @@ If this project helped you, please consider:
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Latest Release: v3.10.2**
+**Latest Release: v3.10.3**
 - 🔒 Transaction validation layer (amounts, dates, categories)
 - 💾 Enhanced backup system with metadata
 - 📊 Month-over-month trend indicators

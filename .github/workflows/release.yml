@@ -1,0 +1,85 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on version tags like v3.10.3
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for changelog
+
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Verify version consistency
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          # Check app.js
+          APP_VERSION=$(grep "const APP_VERSION = " app.js | sed "s/.*'\(.*\)'.*/\1/")
+          if [ "$APP_VERSION" != "$VERSION" ]; then
+            echo "Error: Version mismatch in app.js (expected $VERSION, got $APP_VERSION)"
+            exit 1
+          fi
+          
+          # Check sw.js
+          SW_VERSION=$(grep "// Version: " sw.js | head -1 | sed 's/.*: //')
+          if [ "$SW_VERSION" != "$VERSION" ]; then
+            echo "Error: Version mismatch in sw.js (expected $VERSION, got $SW_VERSION)"
+            exit 1
+          fi
+          
+          # Check manifest.json
+          MANIFEST_VERSION=$(grep '"version":' manifest.json | sed 's/.*: "\(.*\)".*/\1/')
+          if [ "$MANIFEST_VERSION" != "$VERSION" ]; then
+            echo "Error: Version mismatch in manifest.json (expected $VERSION, got $MANIFEST_VERSION)"
+            exit 1
+          fi
+          
+          echo "✓ All versions match: $VERSION"
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          
+          # Extract changelog section for this version
+          CHANGELOG=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
+          
+          if [ -z "$CHANGELOG" ]; then
+            echo "Warning: No changelog entry found for version $VERSION"
+            CHANGELOG="Release version $VERSION"
+          fi
+          
+          # Save to file for multiline output
+          echo "$CHANGELOG" > changelog_temp.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          name: FinChronicle v${{ steps.get_version.outputs.version }}
+          body_path: changelog_temp.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy to GitHub Pages
+        run: |
+          echo "✓ GitHub Pages will auto-deploy from main branch"
+          echo "Live at: https://kiren-labs.github.io/finance-tracker/"

@@ -1,73 +1,28 @@
 ---
 name: Feature Request
-about: Suggest an idea for this project
+about: Suggest a new feature or enhancement for FinChronicle
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
 ---
 
-## 💡 Feature Description
-
+## Feature Description
 A clear and concise description of the feature you'd like to see.
 
-## 🤔 Problem Statement
+## Problem It Solves
+Describe the problem or pain point this feature would address.
 
-Is your feature request related to a problem? Please describe.
+## Proposed Solution
+How would you like this feature to work?
 
-Example: "I'm always frustrated when [...]"
+## Alternative Solutions
+Have you considered any alternative solutions or workarounds?
 
-## ✨ Proposed Solution
+## Additional Context
+Add any other context, mockups, or examples about the feature request here.
 
-A clear and concise description of what you want to happen.
-
-## 🔄 Alternative Solutions
-
-Have you considered any alternative solutions or features? Please describe them.
-
-## 📸 Mockups / Examples (Optional)
-
-If you have any mockups, wireframes, or examples from other apps, please share them here.
-
-You can drag and drop images here.
-
-## 📊 Use Case
-
-How would this feature be used? Please describe a typical scenario.
-
-Example:
-1. User wants to [...]
-2. User clicks [...]
-3. App shows [...]
-
-## 💼 Benefits
-
-Who would benefit from this feature?
-- [ ] All users
-- [ ] Mobile users primarily
-- [ ] Power users
-- [ ] New users
-- [ ] Specific use case: ___
-
-## 🎯 Priority (Your Opinion)
-
-How important is this feature to you?
-- [ ] Critical - Can't use the app without it
-- [ ] High - Would significantly improve my experience
-- [ ] Medium - Would be nice to have
-- [ ] Low - Just an idea
-
-## 🔧 Implementation Ideas (Optional)
-
-If you have technical knowledge, any ideas on how this could be implemented?
-
-## 📝 Additional Context
-
-Add any other context, screenshots, or examples about the feature request here.
-
-## ⚖️ Considerations
-
-Are there any potential drawbacks or challenges you foresee with this feature?
-
----
-
-**Thank you for helping improve Finance Tracker! 🙏**
+## Would This Break Privacy/Offline-First?
+FinChronicle is privacy-first and offline-first. Does this feature align with these principles?
+- [ ] Yes, this maintains privacy (no external tracking/APIs)
+- [ ] Yes, this works offline
+- [ ] Unsure

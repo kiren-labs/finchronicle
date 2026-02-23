@@ -139,6 +139,68 @@
         </div>
     </div>
 
+    <!-- Feedback Modal -->
+    <div class="modal" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ri-feedback-line"></i> Send Feedback</h3>
+                <button class="close-btn" onclick="closeFeedbackModal()" aria-label="Close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div class="feedback-options">
+                <div class="feedback-option">
+                    <div class="feedback-icon">
+                        <i class="ri-github-fill"></i>
+                    </div>
+                    <div class="feedback-content">
+                        <h4>GitHub Issues</h4>
+                        <p>Report bugs, request features, or share general feedback</p>
+                        <div class="feedback-links">
+                            <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=bug_report.md"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="feedback-link">
+                                <i class="ri-bug-line"></i> Report Bug
+                            </a>
+                            <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=feature_request.md"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="feedback-link">
+                                <i class="ri-lightbulb-line"></i> Request Feature
+                            </a>
+                            <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=feedback.md"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="feedback-link">
+                                <i class="ri-chat-3-line"></i> General Feedback
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feedback-divider">
+                    <span>OR</span>
+                </div>
+
+                <div class="feedback-option">
+                    <div class="feedback-icon">
+                        <i class="ri-mail-line"></i>
+                    </div>
+                    <div class="feedback-content">
+                        <h4>Email Us</h4>
+                        <p>Don't have a GitHub account? Send us an email</p>
+                        <a href="mailto:feedbackfinchronicle@gmail.com?subject=FinChronicle%20Feedback"
+                           class="feedback-link feedback-link-primary">
+                            <i class="ri-send-plane-line"></i> Send Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <header>
@@ -147,6 +209,9 @@
                 <div class="header-meta">
                     <span class="status-inline"><span class="status-dot"></span> Offline</span>
                     <span class="version" id="appVersion">v3.7.1</span>
+                    <button class="header-btn" onclick="openFeedbackModal()" aria-label="Send Feedback" title="Send Feedback">
+                        <i class="ri-feedback-line"></i>
+                    </button>
                     <button class="header-btn" onclick="quickAddTransaction()" aria-label="Quick Add Transaction" title="Quick Add">
                         <i class="ri-add-line"></i>
                     </button>
@@ -412,6 +477,11 @@
                             id="darkModeBtn">
                             <i class="ri-contrast-2-line" id="darkModeIcon"></i>
                             <span>Dark Mode</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="openFeedbackModal()" aria-label="Send Feedback"
+                            id="feedbackBtn">
+                            <i class="ri-feedback-line"></i>
+                            <span>Send Feedback</span>
                         </button>
                     </div>
                 </div>
