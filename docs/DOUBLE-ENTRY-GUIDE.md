@@ -651,6 +651,299 @@ v4.0 MVP:
 
 ---
 
+### 5.3 Aggregation Complexity & Refactoring Strategy ⚠️ IMPORTANT
+
+#### The Challenge
+
+**Current v3 (Single-Entry) - Aggregations are EASY:**
+```javascript
+// One transaction = one amount
+const income = transactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+// Done! Simple, fast ✅
+```
+
+**New v4 (Double-Entry) - Aggregations are MORE COMPLEX:**
+```javascript
+// Each transaction = 2+ nested line items
+// Must traverse nested arrays
+journalEntries.forEach(entry => {
+    entry.entries.forEach(lineItem => {
+        // Must check account type to calculate correctly
+        // Different rules for assets vs liabilities vs income vs expenses
+    });
+});
+// More complex, slower ⚠️
+```
+
+**Key Differences:**
+
+| Aspect | v3 | v4 |
+|--------|-----|-----|
+| Transaction structure | Flat (1 record) | Nested (2+ line items) |
+| Amount per transaction | Single value | Split across entries |
+| Category aggregation | Direct field | Must lookup account |
+| Account balances | Not possible | Requires account type logic |
+| Computation passes | 1-2 | 2-3+ |
+
+---
+
+#### Recommended Refactoring Strategy
+
+**PATTERN 1: Aggregation Functions Library (START HERE)**
+
+Create a dedicated aggregations class to encapsulate all calculation logic:
+
+```javascript
+// File: aggregations.js
+class Aggregations {
+    constructor(journalEntries, accounts) {
+        this.entries = journalEntries;
+        this.accounts = accounts;
+    }
+
+    // Get income for a month
+    getMonthIncome(month) {
+        return this.entries
+            .filter(e => e.date.startsWith(month))
+            .reduce((sum, e) => {
+                return sum + e.entries
+                    .filter(line => {
+                        const acc = this.accounts.find(a => a.id === line.accountId);
+                        return acc && acc.type === 'income';
+                    })
+                    .reduce((s, line) => s + line.credit, 0); // Credit increases income
+            }, 0);
+    }
+
+    // Get expenses for a month
+    getMonthExpense(month) {
+        return this.entries
+            .filter(e => e.date.startsWith(month))
+            .reduce((sum, e) => {
+                return sum + e.entries
+                    .filter(line => {
+                        const acc = this.accounts.find(a => a.id === line.accountId);
+                        return acc && acc.type === 'expense';
+                    })
+                    .reduce((s, line) => s + line.debit, 0); // Debit increases expense
+            }, 0);
+    }
+
+    // Get balance for specific account
+    getAccountBalance(accountId) {
+        const account = this.accounts.find(a => a.id === accountId);
+        if (!account) return 0;
+
+        return this.entries.reduce((balance, entry) => {
+            const lineItem = entry.entries.find(e => e.accountId === accountId);
+            if (!lineItem) return balance;
+
+            // Asset/Expense: debit increases balance
+            if (['asset', 'expense'].includes(account.type)) {
+                return balance + lineItem.debit - lineItem.credit;
+            }
+            // Liability/Income/Equity: credit increases balance
+            return balance + lineItem.credit - lineItem.debit;
+        }, 0);
+    }
+
+    // Get monthly summary
+    getMonthSummary(month) {
+        const income = this.getMonthIncome(month);
+        const expense = this.getMonthExpense(month);
+        return {
+            income,
+            expense,
+            net: income - expense,
+            count: this.entries.filter(e => e.date.startsWith(month)).length
+        };
+    }
+
+    // Get net worth (all assets - all liabilities)
+    getNetWorth() {
+        const totalAssets = this.accounts
+            .filter(a => a.type === 'asset')
+            .reduce((sum, a) => sum + this.getAccountBalance(a.id), 0);
+
+        const totalLiabilities = this.accounts
+            .filter(a => a.type === 'liability')
+            .reduce((sum, a) => sum + this.getAccountBalance(a.id), 0);
+
+        return totalAssets - totalLiabilities;
+    }
+}
+
+// Usage in main app.js
+let agg = null;
+
+async function loadData() {
+    const accounts = await getAccountsFromDB();
+    const entries = await getJournalEntriesFromDB();
+    agg = new Aggregations(entries, accounts);
+}
+
+function updateSummary() {
+    const summary = agg.getMonthSummary('2026-02');
+    // Display...
+}
+```
+
+**Benefits:**
+- ✅ All aggregation logic in one place
+- ✅ Easy to test
+- ✅ Easy to optimize
+- ✅ Easy to understand
+
+---
+
+**PATTERN 2: Caching Layer (IF PERFORMANCE ISSUES ARISE)**
+
+Cache frequently-needed aggregations:
+
+```javascript
+class AggregationCache {
+    constructor() {
+        this.cache = {
+            monthlyTotals: {},    // Cache by month: "2026-02"
+            accountBalances: {},  // Cache by account
+            netWorth: null,
+            lastUpdate: null
+        };
+    }
+
+    // Clear cache when data changes
+    invalidate() {
+        this.cache = {
+            monthlyTotals: {},
+            accountBalances: {},
+            netWorth: null,
+            lastUpdate: null
+        };
+    }
+
+    getMonthSummary(month) {
+        if (!this.cache.monthlyTotals[month]) {
+            this.cache.monthlyTotals[month] = agg.getMonthSummary(month);
+        }
+        return this.cache.monthlyTotals[month];
+    }
+
+    getAccountBalance(accountId) {
+        if (!this.cache.accountBalances[accountId]) {
+            this.cache.accountBalances[accountId] = agg.getAccountBalance(accountId);
+        }
+        return this.cache.accountBalances[accountId];
+    }
+
+    getNetWorth() {
+        if (this.cache.netWorth === null) {
+            this.cache.netWorth = agg.getNetWorth();
+        }
+        return this.cache.netWorth;
+    }
+}
+
+// Usage
+const cache = new AggregationCache();
+
+function saveJournalEntry(entry) {
+    // ... save entry ...
+    cache.invalidate(); // Clear cache when data changes
+    updateUI();
+}
+```
+
+**When to use:**
+- If you have > 5,000 transactions
+- If aggregation calls are noticeably slow
+- Don't add prematurely; measure first
+
+---
+
+**PATTERN 3: IndexedDB Indexes (FOR SCALE)**
+
+Add database indexes for common queries:
+
+```javascript
+const DB_VERSION = 2; // Increment when adding indexes
+
+function initDB() {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+
+        // Store: journal_entries
+        if (!db.objectStoreNames.contains('journal_entries')) {
+            const store = db.createObjectStore('journal_entries', { keyPath: 'id' });
+            
+            // Index by date (for month filtering)
+            store.createIndex('date_idx', 'date');
+            
+            // Composite index for queries
+            store.createIndex('date_type_idx', ['date', 'type']);
+        }
+
+        // Store: accounts
+        if (!db.objectStoreNames.contains('accounts')) {
+            const store = db.createObjectStore('accounts', { keyPath: 'id' });
+            
+            // Index by type (get all expenses, all income)
+            store.createIndex('type_idx', 'type');
+        }
+    };
+}
+```
+
+**When to use:**
+- If you have > 10,000 transactions
+- Only after measuring that queries are slow
+
+---
+
+#### Implementation Timeline
+
+| Phase | What | When | Why |
+|-------|------|------|-----|
+| **v4.0 MVP** | Pattern 1 only (basic aggregations) | Weeks 1-6 | Simple, fast enough for most cases |
+| **v4.1** | Add Pattern 2 if needed | Week 8+ | Only if users report slowness |
+| **v4.2** | Add Pattern 3 if scale demands it | Later | Only if > 10k transactions common |
+
+**Key Principle:** Start simple. Measure. Optimize only if needed. Don't over-engineer prematurely.
+
+---
+
+#### Testing Aggregations (Critical)
+
+```javascript
+// Test suite examples
+function testAggregations() {
+    // Test 1: Single expense transaction
+    const agg = new Aggregations(
+        [sampleExpenseEntry],
+        sampleAccounts
+    );
+    assert(agg.getMonthExpense('2026-02') === 50);
+
+    // Test 2: Single income transaction
+    assert(agg.getMonthIncome('2026-02') === 2000);
+
+    // Test 3: Account balance (asset: debit increases)
+    assert(agg.getAccountBalance('1100') === 100);
+
+    // Test 4: Account balance (liability: credit increases)
+    assert(agg.getAccountBalance('2000') === 50);
+
+    // Test 5: Multiple transactions
+    // Test 6: Transfer transactions (should not affect income/expense)
+    // Test 7: Net worth calculation
+}
+```
+
+---
+
 ## 6. Honest Assessment & Recommendations
 
 ### 6.1 What Actually Matters
