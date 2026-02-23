@@ -25,14 +25,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Pre-configured issue templates (bug report, feature request, general feedback)
   - Email fallback for users without GitHub accounts
   - Feedback button in header navigation for easy access
+  - Feedback button in Settings page for better discoverability
   - Modal with organized feedback options
+
+- **Automated Release System** - Streamlined release process
+  - `release.sh` - One-command automated release process
+  - `bump-version.sh` - Automatic version updates across all files
+  - GitHub Actions workflow for automated releases and tagging
+  - RELEASE.md documentation with detailed release guide
+  - Pull request template for code contributions
 
 ### Technical
 - New feedback modal UI component with responsive design
 - New functions: `openFeedbackModal()`, `closeFeedbackModal()`
 - GitHub issue templates in `.github/ISSUE_TEMPLATE/`
+- GitHub Actions release workflow in `.github/workflows/release.yml`
 - Feedback modal styled to match app design system
 - Mobile-responsive feedback interface
+- Version consistency validation in CI/CD pipeline
+- Automatic changelog extraction for release notes
 
 ---
 
