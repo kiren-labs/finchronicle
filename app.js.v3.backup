@@ -2627,15 +2627,15 @@ if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
         .then(registration => {
             console.log('✅ Service Worker registered - App works offline!');
 
-            // Check for updates every time the app is opened
+            // Check for updates when app is opened
             registration.update()
                 .catch(err => console.warn('⚠️ Service Worker update check failed:', err));
 
-            // Check for updates periodically (every 60 seconds)
-            setInterval(() => {
+            // Check for updates when user returns from another tab
+            window.addEventListener('focus', () => {
                 registration.update()
                     .catch(err => console.warn('⚠️ Service Worker update check failed:', err));
-            }, 60000);
+            });
 
             // Listen for updates
             registration.addEventListener('updatefound', () => {
