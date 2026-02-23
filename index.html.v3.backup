@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Simple offline-first personal finance tracker. Track expenses and income, filter by category, export to CSV, and manage your money with beautiful charts. Works completely offline, no internet required.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="FinChronicle">
+    <meta name="theme-color" content="#0051D5">
+    <title>FinChronicle - Track Your Financial Journey</title>
+
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet"
+        integrity="sha384-RwhG+8423fpoSoUMjpibFzMxLQeaO7oBV45/+IxuLaxxiUOFL9R+OzbK5rBpSazc" crossorigin="anonymous">
+
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="./css/tokens.css">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./css/dark-mode.css">
+</head>
+
+<body>
+    <!-- Skip to Main Content Link (Accessibility) -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">Transaction saved!</div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-title">Delete Transaction?</div>
+            <div class="modal-text">This action cannot be undone.</div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restore Preview Modal -->
+    <div class="modal" id="restorePreviewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ri-file-list-line"></i> Backup Preview</h3>
+                <button class="close-btn" onclick="closeRestorePreview()" aria-label="Close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div class="backup-preview-info">
+                <div class="preview-item">
+                    <span class="preview-label">Backup Date:</span>
+                    <span class="preview-value" id="previewBackupDate">-</span>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Transaction Count:</span>
+                    <span class="preview-value" id="previewCount">-</span>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Date Range:</span>
+                    <span class="preview-value" id="previewDateRange">-</span>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Currency:</span>
+                    <span class="preview-value" id="previewCurrency">-</span>
+                </div>
+            </div>
+
+            <div class="modal-info">
+                <i class="ri-information-line"></i>
+                <strong>Merge Mode:</strong> Your existing transactions will be preserved.
+                New transactions from the backup will be added, and duplicates will be automatically skipped.
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" onclick="closeRestorePreview()">
+                    Cancel
+                </button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmRestore()">
+                    Restore Backup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restore Report Modal -->
+    <div class="modal" id="restoreReportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ri-file-check-line"></i> Restore Complete</h3>
+                <button class="close-btn" onclick="closeRestoreReport()" aria-label="Close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div class="restore-report-info">
+                <div class="report-stat">
+                    <i class="ri-file-list-line report-icon"></i>
+                    <div class="report-details">
+                        <span class="report-label">Total in backup</span>
+                        <span class="report-value" id="reportBackupTotal">-</span>
+                    </div>
+                </div>
+                <div class="report-stat success">
+                    <i class="ri-check-line report-icon"></i>
+                    <div class="report-details">
+                        <span class="report-label">New transactions added</span>
+                        <span class="report-value" id="reportAdded">-</span>
+                    </div>
+                </div>
+                <div class="report-stat warning">
+                    <i class="ri-alert-line report-icon"></i>
+                    <div class="report-details">
+                        <span class="report-label">Duplicates skipped</span>
+                        <span class="report-value" id="reportDuplicates">-</span>
+                    </div>
+                </div>
+                <div class="report-stat total">
+                    <i class="ri-database-2-line report-icon"></i>
+                    <div class="report-details">
+                        <span class="report-label">Total transactions now</span>
+                        <span class="report-value" id="reportCurrentTotal">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-confirm" onclick="closeRestoreReport()">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ri-feedback-line"></i> Send Feedback</h3>
+                <button class="close-btn" onclick="closeFeedbackModal()" aria-label="Close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div class="feedback-options">
+                <div class="feedback-option">
+                    <div class="feedback-icon">
+                        <i class="ri-github-fill"></i>
+                    </div>
+                    <div class="feedback-content">
+                        <h4>GitHub Issues</h4>
+                        <p>Report bugs, request features, or share general feedback</p>
+                        <div class="feedback-links">
+                            <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=bug_report.md"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="feedback-link">
+                                <i class="ri-bug-line"></i> Report Bug
+                            </a>
+                            <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=feature_request.md"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="feedback-link">
+                                <i class="ri-lightbulb-line"></i> Request Feature
+                            </a>
+                            <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=feedback.md"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="feedback-link">
+                                <i class="ri-chat-3-line"></i> General Feedback
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feedback-divider">
+                    <span>OR</span>
+                </div>
+
+                <div class="feedback-option">
+                    <div class="feedback-icon">
+                        <i class="ri-mail-line"></i>
+                    </div>
+                    <div class="feedback-content">
+                        <h4>Email Us</h4>
+                        <p>Don't have a GitHub account? Send us an email</p>
+                        <a href="mailto:feedbackfinchronicle@gmail.com?subject=FinChronicle%20Feedback"
+                           class="feedback-link feedback-link-primary">
+                            <i class="ri-send-plane-line"></i> Send Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <h1><i class="ri-donut-chart-line"></i> <span class="title-text"><span class="fin-text">Fin</span><span class="chronicle-text">Chronicle</span></span></h1>
+                <div class="header-meta">
+                    <span class="status-inline"><span class="status-dot"></span> Offline</span>
+                    <span class="version" id="appVersion">v3.7.1</span>
+                    <button class="header-btn" onclick="openFeedbackModal()" aria-label="Send Feedback" title="Send Feedback">
+                        <i class="ri-feedback-line"></i>
+                    </button>
+                    <button class="header-btn" onclick="quickAddTransaction()" aria-label="Quick Add Transaction" title="Quick Add">
+                        <i class="ri-add-line"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+
+            <!-- Update Available Notification -->
+            <div class="update-prompt" id="updatePrompt">
+                <h3><i class="ri-sparkling-line"></i> Update Available!</h3>
+                <p>A new version is available. Reload to get the latest features and improvements.</p>
+                <div class="update-actions">
+                    <button class="update-btn-primary" onclick="reloadApp()">Update Now</button>
+                    <button class="update-btn-secondary" onclick="dismissUpdate()">Later</button>
+                </div>
+            </div>
+
+            <!-- Install Prompt (iOS) -->
+            <div class="install-prompt" id="installPrompt" style="display: none;">
+                <h3><i class="ri-smartphone-line"></i> Install App</h3>
+                <p>Tap Share → Add to Home Screen for best experience</p>
+                <button onclick="hideInstallPrompt()">Got it!</button>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-section">
+                <div class="summary-header" onclick="toggleSummaryCollapse()">
+                    <div class="summary-header-content">
+                        <h2 class="summary-title">Summary</h2>
+                        <div class="summary-compact" id="summaryCompact">
+                            <span class="compact-stat" id="compactNet">฿0</span>
+                            <span class="compact-separator">•</span>
+                            <span class="compact-stat-small"><i class="ri-file-list-line"></i> <span id="compactEntries">0</span></span>
+                            <span class="compact-separator">•</span>
+                            <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i> <span id="compactIncome">฿0</span></span>
+                            <span class="compact-separator">•</span>
+                            <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i> <span id="compactExpense">฿0</span></span>
+                        </div>
+                    </div>
+                    <button class="collapse-btn" onclick="event.stopPropagation(); toggleSummaryCollapse();" aria-label="Toggle Summary">
+                        <i class="ri-arrow-up-s-line" id="summaryCollapseIcon"></i>
+                    </button>
+                </div>
+                <div class="summary" id="summaryCards">
+                <div class="summary-card"
+                     onclick="onSummaryTileClick('this-month')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();onSummaryTileClick('this-month')}"
+                     role="button"
+                     tabindex="0"
+                     aria-label="View transactions for this month">
+                    <div class="card-icon">
+                        <i class="ri-calendar-check-line"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="summary-label">This Month</div>
+                        <div class="summary-value" id="monthNet">0</div>
+                        <div class="summary-trend" id="monthNetTrend"></div>
+                    </div>
+                </div>
+                <div class="summary-card"
+                     onclick="onSummaryTileClick('total-entries')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();onSummaryTileClick('total-entries')}"
+                     role="button"
+                     tabindex="0"
+                     aria-label="View all transactions for this month">
+                    <div class="card-icon">
+                        <i class="ri-list-check-2"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="summary-label">Total Entries</div>
+                        <div class="summary-value" id="totalEntries">0</div>
+                        <div class="summary-meta" id="totalEntriesMeta">This month</div>
+                    </div>
+                </div>
+                <div class="summary-card positive"
+                     onclick="onSummaryTileClick('income')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();onSummaryTileClick('income')}"
+                     role="button"
+                     tabindex="0"
+                     aria-label="View income transactions for this month">
+                    <div class="card-icon">
+                        <i class="ri-arrow-up-circle-fill"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="summary-label">Income</div>
+                        <div class="summary-value" id="monthIncome">0</div>
+                        <div class="summary-trend" id="monthIncomeTrend"></div>
+                    </div>
+                </div>
+                <div class="summary-card negative"
+                     onclick="onSummaryTileClick('expenses')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();onSummaryTileClick('expenses')}"
+                     role="button"
+                     tabindex="0"
+                     aria-label="View expense transactions for this month">
+                    <div class="card-icon">
+                        <i class="ri-arrow-down-circle-fill"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="summary-label">Expenses</div>
+                        <div class="summary-value" id="monthExpense">0</div>
+                        <div class="summary-meta" id="monthExpenseMeta"></div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <!-- Currency Selector Modal -->
+            <div id="currencyModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Select Currency</h3>
+                        <button class="close-btn" onclick="closeCurrencySelector()" aria-label="Close"><i
+                                class="ri-close-line"></i></button>
+                    </div>
+                    <div class="currency-list" id="currencyList">
+                        <!-- Currency options will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tabs" role="tablist" aria-label="Main navigation">
+                <button id="add-tab" class="tab active" onclick="switchTab('add')" role="tab" aria-selected="true"
+                    aria-controls="addTab"><i class="ri-add-line"></i> Add</button>
+                <button id="list-tab" class="tab" onclick="switchTab('list')" role="tab" aria-selected="false"
+                    aria-controls="listTab"><i class="ri-list-check"></i> List</button>
+                <button id="groups-tab" class="tab" onclick="switchTab('groups')" role="tab" aria-selected="false"
+                    aria-controls="groupsTab"><i class="ri-bar-chart-2-line"></i> Groups</button>
+                <button id="settings-tab" class="tab" onclick="switchTab('settings')" role="tab" aria-selected="false"
+                    aria-controls="settingsTab"><i class="ri-settings-3-line"></i> Settings</button>
+            </div>
+
+            <!-- Add Transaction Tab -->
+            <div id="addTab" class="tab-content active" role="tabpanel" aria-labelledby="add-tab">
+                <div class="card" id="main-content">
+                    <h2 id="formTitle" style="font-size: 20px; margin-bottom: 16px;">Add Transaction</h2>
+                    <form id="transactionForm" aria-label="Add transaction form">
+                        <div class="form-group">
+                            <label>Type</label>
+                            <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
+                                <button type="button" class="type-option active" data-type="expense"
+                                    onclick="selectType('expense')" role="radio" aria-checked="true">
+                                    <i class="ri-arrow-down-circle-line"></i> Expense
+                                </button>
+                                <button type="button" class="type-option" data-type="income"
+                                    onclick="selectType('income')" role="radio" aria-checked="false">
+                                    <i class="ri-arrow-up-circle-line"></i> Income
+                                </button>
+                            </div>
+                            <input type="hidden" id="type" value="expense">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Amount (₹)</label>
+                            <input type="number" id="amount" placeholder="1000" required min="0.01" max="10000000" step="0.01" inputmode="decimal" aria-label="Transaction amount in selected currency">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" required>
+                                <option value="" disabled selected>Select category</option>
+                                <!-- Categories will be populated dynamically -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes">Notes (Optional)</label>
+                            <input type="text" id="notes" placeholder="Add a note...">
+                        </div>
+
+                        <input type="hidden" id="editId" value="">
+
+                        <button type="submit" class="primary" id="submitBtn">Save Transaction</button>
+                        <button type="button" class="primary" id="cancelEditBtn" onclick="cancelEdit()"
+                            style="background: #6e6e73; margin-top: 12px; display: none;" aria-label="Cancel editing">Cancel</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- List Tab -->
+            <div id="listTab" class="tab-content" role="tabpanel" aria-labelledby="list-tab">
+                <div class="filters" id="monthFilters"></div>
+                <div style="margin-bottom: 16px;">
+                    <label for="categoryFilter" class="filter-label">Filter by Category</label>
+                    <select class="category-filter" id="categoryFilter" onchange="filterByCategory()"
+                        aria-label="Filter transactions by category">
+                        <option value="all">All Categories</option>
+                    </select>
+                </div>
+                <div class="card">
+                    <div id="transactionsList"></div>
+                </div>
+                <div id="paginationControls" class="pagination-container" style="display: none;">
+                    <button onclick="prevPage()" id="prevBtn" class="pagination-btn pagination-btn-prev" aria-label="Previous page">
+                        <i class="ri-arrow-left-s-line"></i>
+                        <span>Previous</span>
+                    </button>
+                    <div id="pageInfo" class="pagination-info"></div>
+                    <button onclick="nextPage()" id="nextBtn" class="pagination-btn pagination-btn-next" aria-label="Next page">
+                        <span>Next</span>
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Groups Tab -->
+            <div id="groupsTab" class="tab-content" role="tabpanel" aria-labelledby="groups-tab">
+                <div class="filters">
+                    <button class="filter-btn active" onclick="changeGrouping('month', event)">By Month</button>
+                    <button class="filter-btn" onclick="changeGrouping('category', event)">By Category</button>
+                </div>
+                <div id="groupedContent"></div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="tab-content" role="tabpanel" aria-labelledby="settings-tab">
+                <div class="card">
+                    <h2 style="font-size: 20px; margin-bottom: 16px;">Settings</h2>
+                    <div class="settings-actions">
+                        <button class="toolbar-btn" onclick="exportToCSV()" aria-label="Export CSV">
+                            <i class="ri-download-2-line"></i>
+                            <span>Export CSV</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="triggerImport()" aria-label="Import CSV">
+                            <i class="ri-upload-2-line"></i>
+                            <span>Import CSV</span>
+                        </button>
+                        <input type="file" id="importFile" accept=".csv,text/csv" style="display: none;"
+                            onchange="handleImport(event)" aria-label="Select CSV file to import">
+                        <button class="toolbar-btn" onclick="createBackup()" aria-label="Create Backup">
+                            <i class="ri-save-line"></i>
+                            <span>Create Backup</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="triggerRestore()" aria-label="Restore from Backup">
+                            <i class="ri-upload-cloud-line"></i>
+                            <span>Restore Backup</span>
+                        </button>
+                        <input type="file" id="restoreFile" accept=".csv,text/csv" style="display: none;"
+                            onchange="handleRestore(event)" aria-label="Select backup file to restore">
+                        <button class="toolbar-btn" onclick="checkForUpdates()" aria-label="Check for updates"
+                            id="updateCheckBtn">
+                            <i class="ri-refresh-line"></i>
+                            <span>Check Updates</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="toggleCurrencySelector()" aria-label="Change currency"
+                            id="currencyBtn">
+                            <i class="ri-exchange-dollar-line"></i>
+                            <span>Currency</span>
+                            <span class="currency-display">
+                                <span id="currencySymbol">₹</span>
+                                <span id="currencyCode">INR</span>
+                            </span>
+                        </button>
+                        <button class="toolbar-btn" onclick="toggleDarkMode()" aria-label="Toggle dark mode"
+                            id="darkModeBtn">
+                            <i class="ri-contrast-2-line" id="darkModeIcon"></i>
+                            <span>Dark Mode</span>
+                        </button>
+                        <button class="toolbar-btn" onclick="openFeedbackModal()" aria-label="Send Feedback"
+                            id="feedbackBtn">
+                            <i class="ri-feedback-line"></i>
+                            <span>Send Feedback</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Backup Status Card (v3.9.0) -->
+                <div id="backupStatusContainer"></div>
+
+                <!-- FAQ Section (v3.9.0) -->
+                <div id="faqContainer"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav" role="tablist" aria-label="Main navigation">
+        <button id="add-nav" class="nav-item active" onclick="switchTab('add')" role="tab" aria-selected="true" aria-controls="addTab">
+            <i class="ri-add-line nav-item-icon"></i>
+            <span>Add</span>
+        </button>
+        <button id="list-nav" class="nav-item" onclick="switchTab('list')" role="tab" aria-selected="false" aria-controls="listTab">
+            <i class="ri-list-check nav-item-icon"></i>
+            <span>List</span>
+        </button>
+        <button id="groups-nav" class="nav-item" onclick="switchTab('groups')" role="tab" aria-selected="false" aria-controls="groupsTab">
+            <i class="ri-bar-chart-2-line nav-item-icon"></i>
+            <span>Groups</span>
+        </button>
+        <button id="settings-nav" class="nav-item" onclick="switchTab('settings')" role="tab" aria-selected="false" aria-controls="settingsTab">
+            <i class="ri-settings-3-line nav-item-icon"></i>
+            <span>Settings</span>
+        </button>
+    </nav>
+
+    <script src="./app.js"></script>
+</body>
+
+</html>
