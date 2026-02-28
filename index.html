@@ -431,32 +431,32 @@
                 <div class="card">
                     <h2 style="font-size: 20px; margin-bottom: 16px;">Settings</h2>
                     <div class="settings-actions">
-                        <button class="toolbar-btn" onclick="exportToCSV()" aria-label="Export CSV">
+                        <button class="toolbar-btn" aria-label="Export CSV">
                             <i class="ri-download-2-line"></i>
                             <span>Export CSV</span>
                         </button>
-                        <button class="toolbar-btn" onclick="triggerImport()" aria-label="Import CSV">
+                        <button class="toolbar-btn" aria-label="Import CSV">
                             <i class="ri-upload-2-line"></i>
                             <span>Import CSV</span>
                         </button>
                         <input type="file" id="importFile" accept=".csv,text/csv" style="display: none;"
-                            onchange="handleImport(event)" aria-label="Select CSV file to import">
-                        <button class="toolbar-btn" onclick="createBackup()" aria-label="Create Backup">
+                            aria-label="Select CSV file to import">
+                        <button class="toolbar-btn" aria-label="Create Backup">
                             <i class="ri-save-line"></i>
                             <span>Create Backup</span>
                         </button>
-                        <button class="toolbar-btn" onclick="triggerRestore()" aria-label="Restore from Backup">
+                        <button class="toolbar-btn" aria-label="Restore from Backup">
                             <i class="ri-upload-cloud-line"></i>
                             <span>Restore Backup</span>
                         </button>
                         <input type="file" id="restoreFile" accept=".csv,text/csv" style="display: none;"
-                            onchange="handleRestore(event)" aria-label="Select backup file to restore">
-                        <button class="toolbar-btn" onclick="checkForUpdates()" aria-label="Check for updates"
+                            aria-label="Select backup file to restore">
+                        <button class="toolbar-btn" aria-label="Check for updates"
                             id="updateCheckBtn">
                             <i class="ri-refresh-line"></i>
                             <span>Check Updates</span>
                         </button>
-                        <button class="toolbar-btn" onclick="toggleCurrencySelector()" aria-label="Change currency"
+                        <button class="toolbar-btn" aria-label="Change currency"
                             id="currencyBtn">
                             <i class="ri-exchange-dollar-line"></i>
                             <span>Currency</span>
@@ -465,12 +465,12 @@
                                 <span id="currencyCode">INR</span>
                             </span>
                         </button>
-                        <button class="toolbar-btn" onclick="toggleDarkMode()" aria-label="Toggle dark mode"
+                        <button class="toolbar-btn" aria-label="Toggle dark mode"
                             id="darkModeBtn">
                             <i class="ri-contrast-2-line" id="darkModeIcon"></i>
                             <span>Dark Mode</span>
                         </button>
-                        <button class="toolbar-btn" onclick="openFeedbackModal()" aria-label="Send Feedback"
+                        <button class="toolbar-btn" aria-label="Send Feedback"
                             id="feedbackBtn">
                             <i class="ri-feedback-line"></i>
                             <span>Send Feedback</span>
