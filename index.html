@@ -209,10 +209,10 @@
                 <div class="header-meta">
                     <span class="status-inline"><span class="status-dot"></span> Offline</span>
                     <span class="version" id="appVersion">v3.7.1</span>
-                    <button class="header-btn" onclick="openFeedbackModal()" aria-label="Send Feedback" title="Send Feedback">
+                    <button class="header-btn" aria-label="Send Feedback" title="Send Feedback">
                         <i class="ri-feedback-line"></i>
                     </button>
-                    <button class="header-btn" onclick="quickAddTransaction()" aria-label="Quick Add Transaction" title="Quick Add">
+                    <button class="header-btn" aria-label="Quick Add Transaction" title="Quick Add">
                         <i class="ri-add-line"></i>
                     </button>
                 </div>
@@ -227,8 +227,8 @@
                 <h3><i class="ri-sparkling-line"></i> Update Available!</h3>
                 <p>A new version is available. Reload to get the latest features and improvements.</p>
                 <div class="update-actions">
-                    <button class="update-btn-primary" onclick="reloadApp()">Update Now</button>
-                    <button class="update-btn-secondary" onclick="dismissUpdate()">Later</button>
+                    <button class="update-btn-primary">Update Now</button>
+                    <button class="update-btn-secondary">Later</button>
                 </div>
             </div>
 
@@ -236,12 +236,12 @@
             <div class="install-prompt" id="installPrompt" style="display: none;">
                 <h3><i class="ri-smartphone-line"></i> Install App</h3>
                 <p>Tap Share → Add to Home Screen for best experience</p>
-                <button onclick="hideInstallPrompt()">Got it!</button>
+                <button>Got it!</button>
             </div>
 
             <!-- Summary Cards -->
             <div class="summary-section">
-                <div class="summary-header" onclick="toggleSummaryCollapse()">
+                <div class="summary-header">
                     <div class="summary-header-content">
                         <h2 class="summary-title">Summary</h2>
                         <div class="summary-compact" id="summaryCompact">
@@ -254,7 +254,7 @@
                             <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i> <span id="compactExpense">฿0</span></span>
                         </div>
                     </div>
-                    <button class="collapse-btn" onclick="event.stopPropagation(); toggleSummaryCollapse();" aria-label="Toggle Summary">
+                    <button class="collapse-btn" aria-label="Toggle Summary">
                         <i class="ri-arrow-up-s-line" id="summaryCollapseIcon"></i>
                     </button>
                 </div>
