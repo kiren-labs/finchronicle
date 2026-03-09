@@ -1,7 +1,12 @@
 /* FinChronicle - Dark Mode Styles */
-/* Version: 3.7.1 */
-/* # */
-/* Dark mode token overrides */
+/* Version: 3.10.3 */
+/* Audited: redundant token-reapplying rules removed (57% reduction) */
+
+/* ==========================================================================
+   Dark mode token overrides
+   All elements using var(--color-*) tokens automatically adapt via cascade.
+   Only rules that remap to a DIFFERENT token or use hardcoded values remain.
+   ========================================================================== */
 body.dark-mode {
     --color-bg: #000000;
     --color-surface: #1c1c1e;
@@ -19,33 +24,25 @@ body.dark-mode {
     --color-toggle-bg: #2c2c2e;
     --color-toggle-active-bg: #1c1c1e;
 
-    /* Lighter semantic colors for dark mode - optimized for #1c1c1e surface */
+    /* Semantic colors optimized for #1c1c1e surface */
     --color-success: #32D74B;
     --color-success-strong: #30E85D;
     --color-danger: #FF453A;
     --color-danger-strong: #FF6B6B;
 
-    /* Header title colors for dark mode - Brighter versions of brand colors */
-    --color-fin: #5B8DEF;          /* Lighter navy blue (better contrast on dark bg) */
-    --color-chronicle: #7EE847;    /* Brighter green (more vibrant on dark bg) */
+    /* Brand wordmark — brighter for dark backgrounds */
+    --color-fin: #5B8DEF;
+    --color-chronicle: #7EE847;
 
     --shadow-sm: 0 var(--space-2xs) var(--space-sm) rgba(0, 0, 0, 0.4);
     --shadow-md: 0 var(--space-2xs) var(--space-md) rgba(0, 0, 0, 0.4);
 }
 
-/* Dark mode pagination controls */
-body.dark-mode .pagination-container {
-    background: var(--color-surface);
-    box-shadow: var(--shadow-sm);
-}
-
-body.dark-mode .pagination-btn {
-    background: var(--color-primary);
-    color: var(--color-on-primary);
-}
+/* ==========================================================================
+   Pagination — custom glow (base uses --shadow-primary token)
+   ========================================================================== */
 
 body.dark-mode .pagination-btn:hover:not(:disabled) {
-    background: var(--color-primary-hover);
     box-shadow: 0 var(--space-2xs) var(--space-md) rgba(0, 97, 245, 0.4);
 }
 
@@ -53,108 +50,48 @@ body.dark-mode .pagination-btn:active:not(:disabled) {
     box-shadow: 0 var(--space-2xs) var(--space-xs) rgba(0, 97, 245, 0.3);
 }
 
-body.dark-mode .pagination-btn:disabled {
-    background: var(--color-disabled-bg);
-    color: var(--color-disabled-text);
-}
-
-body.dark-mode .pagination-btn:disabled:hover {
-    background: var(--color-disabled-bg);
-}
-
-body.dark-mode .pagination-info {
-    color: var(--color-text-muted);
-}
-
 /* ==========================================================================
-   Dark Mode Containers
+   Token remap overrides (different token than light-mode base)
    ========================================================================== */
 
-body.dark-mode .card,
-body.dark-mode header,
-body.dark-mode .summary-card,
-body.dark-mode .tabs,
-body.dark-mode .bottom-nav,
-body.dark-mode .toolbar-btn,
-body.dark-mode .category-filter,
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea {
-    background: var(--color-surface);
-    color: var(--color-text);
-    border-color: var(--color-border);
-}
-
-/* ==========================================================================
-   Dark Mode Text Colors
-   ========================================================================== */
-
-body.dark-mode h1,
-body.dark-mode .transaction-category,
-body.dark-mode label,
-body.dark-mode .group-header,
-body.dark-mode .modal-title {
-    color: var(--color-text);
-}
-
+/* Summary labels: muted → full contrast */
 body.dark-mode .summary-label {
     color: var(--color-text);
 }
 
-body.dark-mode .transaction-note,
-body.dark-mode .transaction-date,
-body.dark-mode .group-total,
-body.dark-mode .modal-text {
-    color: var(--color-text-muted);
-}
-
-body.dark-mode .tab,
-body.dark-mode .nav-item,
+/* Filter buttons: full → muted */
 body.dark-mode .filter-btn {
     color: var(--color-text-muted);
 }
 
-body.dark-mode .tab.active,
-body.dark-mode .nav-item.active,
-body.dark-mode .filter-btn.active {
+/* Active nav item: primary → on-primary */
+body.dark-mode .nav-item.active {
     color: var(--color-on-primary);
 }
 
-/* ==========================================================================
-   Dark Mode Type Toggle
-   ========================================================================== */
-
-body.dark-mode .type-toggle {
+/* Version badge: bg → toggle-bg */
+body.dark-mode .version {
     background: var(--color-toggle-bg);
+    color: var(--color-text-muted);
 }
 
+/* Type toggle active: custom dark shadow */
 body.dark-mode .type-option.active {
     background: var(--color-toggle-active-bg);
     color: var(--color-text);
     box-shadow: 0 var(--space-2xs) var(--space-2xs) rgba(255, 255, 255, 0.05);
 }
 
-/* ==========================================================================
-   Dark Mode Status & Version
-   ========================================================================== */
-
-body.dark-mode .status {
-    color: var(--color-status);
-}
-
-body.dark-mode .version {
-    background: var(--color-toggle-bg);
-    color: var(--color-text-muted);
-}
-
-/* ==========================================================================
-   Dark Mode Transactions
-   ========================================================================== */
-
+/* Transaction separator: --color-bg → --color-border */
 body.dark-mode .transaction-item {
     border-bottom-color: var(--color-border);
 }
 
+/* ==========================================================================
+   Hardcoded dark colors (no token equivalent)
+   ========================================================================== */
+
+/* Transaction icons (display: none in base, styled for future use) */
 body.dark-mode .transaction-icon.income {
     background: #1a3a23;
     color: #30d158;
@@ -166,20 +103,12 @@ body.dark-mode .transaction-icon.expense {
 }
 
 /* ==========================================================================
-   Dark Mode Modals
+   Modal overrides
    ========================================================================== */
-
-body.dark-mode .modal-content {
-    background: var(--color-surface);
-}
 
 body.dark-mode .modal-btn-cancel {
     background: var(--color-border);
     color: var(--color-on-primary);
-}
-
-body.dark-mode .close-btn {
-    color: var(--color-text-muted);
 }
 
 body.dark-mode .close-btn:hover {
@@ -187,92 +116,52 @@ body.dark-mode .close-btn:hover {
 }
 
 /* ==========================================================================
-   Dark Mode Currency Selector
+   Interactive hover/active — bg → toggle-bg or surface swap
    ========================================================================== */
-
-body.dark-mode .currency-item {
-    background: var(--color-surface);
-    border-color: var(--color-border);
-}
 
 body.dark-mode .currency-item:hover {
     background: var(--color-toggle-bg);
     border-color: var(--color-primary);
 }
 
-body.dark-mode .currency-item.active {
-    background: var(--color-primary-soft);
-    border-color: var(--color-primary);
+body.dark-mode .toolbar-btn:active {
+    background: var(--color-toggle-bg);
 }
 
-body.dark-mode .currency-code {
-    color: var(--color-text);
+body.dark-mode .faq-question:hover {
+    background: var(--color-surface);
 }
 
-body.dark-mode .currency-name {
-    color: var(--color-text-muted);
+body.dark-mode .faq-answer {
+    background: var(--color-surface);
+}
+
+body.dark-mode .faq-answer code {
+    background: var(--color-bg);
 }
 
 /* ==========================================================================
-   Monthly Insights - Dark Mode
+   Primary → Primary-strong for better dark contrast
    ========================================================================== */
 
-body.dark-mode .insights-section,
-body.dark-mode .budget-health-section,
-body.dark-mode .top-categories-section {
-    background: var(--color-surface);
-    border-color: var(--color-border);
-}
-
-body.dark-mode .insight-card,
-body.dark-mode .category-row {
-    background: var(--color-bg);
-    border-color: var(--color-border);
-}
-
-body.dark-mode .insights-header h3,
-body.dark-mode .budget-health-title h3,
-body.dark-mode .section-header h3,
-body.dark-mode .insight-value,
-body.dark-mode .metric-value,
-body.dark-mode .category-name {
-    color: var(--color-text);
-}
-
-body.dark-mode .insight-label,
-body.dark-mode .metric-label,
-body.dark-mode .category-count,
-body.dark-mode .category-percent {
-    color: var(--color-text-muted);
-}
-
-body.dark-mode .insights-month-selector {
-    background: var(--color-bg);
-    border-color: var(--color-border);
-    color: var(--color-text);
-}
-
-body.dark-mode .insights-month-selector:hover {
-    background: var(--color-surface);
-    border-color: var(--color-primary);
-}
-
-/* ==========================================================================
-   Backup & FAQ - Dark Mode (v3.9.0)
-   ========================================================================== */
-
-body.dark-mode .backup-status-card,
-body.dark-mode .faq-section {
-    background: var(--color-surface);
-}
-
-body.dark-mode .backup-header h3 {
-    color: var(--color-text);
-}
-
-body.dark-mode .backup-header .backup-icon {
+body.dark-mode .backup-header .backup-icon,
+body.dark-mode .faq-header i,
+body.dark-mode .faq-section-title i,
+body.dark-mode .faq-item-icon {
     color: var(--color-primary-strong);
 }
+
+body.dark-mode .backup-faq-button {
+    color: var(--color-primary-strong);
+}
+
+body.dark-mode .backup-faq-button:focus {
+    outline-color: var(--color-primary-strong);
+}
+
+/* ==========================================================================
+   Backup status — hardcoded dark palette
+   ========================================================================== */
 
 body.dark-mode .backup-status-good {
     background: #1e4620;
@@ -299,72 +188,4 @@ body.dark-mode .backup-status-danger {
 
 body.dark-mode .backup-status-danger i {
     color: #ff9aa2;
-}
-
-body.dark-mode .backup-faq-button {
-    color: var(--color-primary-strong);
-}
-
-body.dark-mode .backup-faq-button:focus {
-    outline-color: var(--color-primary-strong);
-}
-
-body.dark-mode .faq-header h2 {
-    color: var(--color-text);
-}
-
-body.dark-mode .faq-header i {
-    color: var(--color-primary-strong);
-}
-
-body.dark-mode .faq-section-header {
-    background: var(--color-bg);
-}
-
-body.dark-mode .faq-section-header:hover {
-    background: var(--color-border);
-}
-
-body.dark-mode .faq-section-title h3 {
-    color: var(--color-text);
-}
-
-body.dark-mode .faq-section-title i {
-    color: var(--color-primary-strong);
-}
-
-body.dark-mode .faq-question {
-    color: var(--color-text);
-}
-
-body.dark-mode .faq-item-icon {
-    color: var(--color-primary-strong);
-}
-
-body.dark-mode .faq-question:hover {
-    background: var(--color-surface);
-}
-
-body.dark-mode .faq-answer {
-    background: var(--color-surface);
-}
-
-body.dark-mode .faq-answer code {
-    background: var(--color-bg);
-}
-
-/* ==========================================================================
-   Dark Mode Utility States
-   ========================================================================== */
-
-body.dark-mode .empty-state {
-    color: var(--color-text-muted);
-}
-
-body.dark-mode .toolbar-btn:active {
-    background: var(--color-toggle-bg);
-}
-
-body.dark-mode .filter-label {
-    color: var(--color-text-muted);
 }

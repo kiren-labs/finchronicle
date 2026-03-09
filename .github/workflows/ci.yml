@@ -35,9 +35,9 @@ jobs:
 
     - name: Check service worker registration
       run: |
-        if grep -q "navigator.serviceWorker.register" app.js; then
-          echo "✓ Service worker registration found in app.js"
+        if grep -q "navigator.serviceWorker.register" js/app.js; then
+          echo "✓ Service worker registration found in js/app.js"
         else
-          echo "✗ Service worker registration not found in app.js"
+          echo "✗ Service worker registration not found in js/app.js"
           exit 1
         fi

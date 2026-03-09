@@ -17,6 +17,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.10.4] - 2026-03-09
+
+### Changed
+- **🏗️ Major Code Refactoring (Phase 1)** - Modernized codebase architecture for better maintainability
+  - Broke down monolithic `app.js` (~1,920 lines) into **ES modules** by domain
+  - Implemented **lazy loading** for FAQ and Import/Export modules (loads on-demand)
+  - Streamlined module imports for cleaner dependency management
+  - Removed all **inline event handlers** from HTML for better separation of concerns
+  - Comprehensive **event binding system** replaces inline `onclick` handlers
+
+### Performance
+- **Optimized transaction date handling** with cached timestamps
+  - Reduces redundant date parsing during sorting operations
+  - Improves list rendering performance with large transaction datasets
+- **Lazy module loading** reduces initial JavaScript bundle size
+  - FAQ module loads only when Settings tab is opened
+  - Import/Export module loads only when user triggers import/export
+
+### Technical
+- **Module Structure**: Separated concerns into domain-specific modules
+  - Service worker registration and database integration
+  - Shared application state management across modules
+  - UI rendering utilities and transaction validation functions
+  - Import/Export handlers (refactored from inline implementation)
+- **Dark Mode Improvements**: Better token management and consistency
+  - Added text color variable to body and select elements
+  - Improved CSS variable usage across components
+- **Code Quality**: Removed inline handlers from:
+  - Bottom navigation buttons
+  - Settings page buttons
+  - Currency selector
+  - Tab navigation
+  - Summary cards
+  - Modal buttons
+
+### Developer Experience
+- **Better code organization** - easier to find and modify features
+- **Improved maintainability** - modular structure reduces complexity
+- **Easier testing** - isolated modules can be tested independently
+- **Documentation added**: `UNUSED_CODE_ANALYSIS.md`, `ARCHITECTURE-IMPROVEMENTS.md`, `P3-REFACTORING-COMPLETION.md`
+
+### Notes
+- **No user-facing changes** - all functionality remains identical
+- **No data migration required** - purely architectural improvements
+- This is a **refactoring release** focused on code quality and maintainability
+
+---
+
 ## [3.10.3] - 2026-02-23
 
 ### Added

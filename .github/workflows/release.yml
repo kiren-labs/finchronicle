@@ -30,9 +30,9 @@ jobs:
           VERSION=${{ steps.get_version.outputs.version }}
           
           # Check app.js
-          APP_VERSION=$(grep "const APP_VERSION = " app.js | sed "s/.*'\(.*\)'.*/\1/")
+          APP_VERSION=$(grep "const APP_VERSION = " js/app.js | sed "s/.*'\(.*\)'.*/\1/")
           if [ "$APP_VERSION" != "$VERSION" ]; then
-            echo "Error: Version mismatch in app.js (expected $VERSION, got $APP_VERSION)"
+            echo "Error: Version mismatch in js/app.js (expected $VERSION, got $APP_VERSION)"
             exit 1
           fi
           

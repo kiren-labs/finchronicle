@@ -261,6 +261,7 @@ i {
 body {
     font-family: var(--font-family-base);
     background: var(--color-bg);
+    color: var(--color-text);
     padding-bottom: 80px;
     font-variant-numeric: tabular-nums;
 }
@@ -709,6 +710,7 @@ select {
     border-radius: var(--radius-md);
     font-size: var(--font-lg);
     font-family: inherit;
+    color: var(--color-text);
     background: var(--color-surface);
     min-height: 48px;
 }
