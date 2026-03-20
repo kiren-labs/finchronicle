@@ -13,7 +13,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Budget tracking per category
 - Recurring transactions
 - Search functionality
-- Charts and graphs
+
+---
+
+## [3.10.5] - 2026-03-20
+
+### Added
+- **Category Spending Pie Chart** — CSS conic-gradient donut chart in the Groups tab
+  - Renders top 7 expense categories with an "Other" bucket for the remainder
+  - Hover a legend row to highlight that category's amount in the chart centre
+  - Micro progress bar per row shows relative proportion at a glance
+  - Staggered entrance animations and a tick-ring outer decoration
+  - Syncs with the existing Monthly Insights month selector
+  - Zero external libraries — pure CSS + Vanilla JS (`js/chart.js`, `css/chart.css`)
+
+### Fixed
+- **Accessibility — WCAG AA contrast violations** (Lighthouse audit)
+  - `legend-pct` percentage labels now use `--color-text` instead of the chart segment colour; chart colours (e.g. `#34C759`, `#5AC8FA`) fail the 4.5:1 ratio on white
+  - `Budget Health` status badge colours promoted to strong variants:
+    - On Track: `--color-success` → `--color-success-strong` (light `#147A33` 9.7:1, dark `#30E85D`)
+    - Caution: `#f59e0b` → `--color-warning-text` (light `#856404` 5.7:1, dark `#FCD34D` 11:1)
+    - Over Pace: `--color-danger` → `--color-danger-strong` (light `#C41E1A` 6:1, dark `#FF6B6B`)
+  - Category spending amounts in grouped view: `--color-danger` → `--color-danger-strong`
+  - Added `--color-warning-text: #FCD34D` dark mode override (was unset; `#856404` fails on `#1c1c1e`)
+- **Accessibility — Chart ARIA**
+  - Donut wrapper: `role="img"` + `aria-label` describing total spend
+  - Decorative elements (`chart-donut`, `legend-swatch`, `legend-bar`) marked `aria-hidden="true"`
+  - Legend: `role="list"` with `aria-label`; each row `role="listitem"` with a full sentence `aria-label` (name, percent, amount)
+  - Empty state: `role="status"` + `aria-live="polite"`
+
+### Developer Experience
+- Pre-commit version-sync hook — blocks `git commit` if `APP_VERSION`, `CACHE_NAME`, and `manifest.json` version are out of sync
+- Tightened `finchronicle-dev` sub-agent description for more reliable auto-routing
+
+### Technical
+- New files: `js/chart.js`, `css/chart.css`
+- New tokens: `--chart-c1..c8` in `css/tokens.css`
+- `css/chart.css` linked in `index.html` between `styles.css` and `dark-mode.css`
+- Both new files added to `CACHE_URLS` in `sw.js` for offline support
+- `js/ui.js`: imports `renderCategoryPieChart`, `buildCategoryData` from `chart.js`; chart renders in `updateGroupedView()`
 
 ---
 
@@ -762,6 +800,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+- **v3.10.5** - Category pie chart, WCAG AA contrast fixes, chart ARIA (2026-03-20)
 - **v3.6.0** - iOS optimizations, enhanced mobile UX (2026-02-07)
 - **v3.5.1** - Bottom navigation, design tokens, UI refinements (2026-02-06)
 - **v3.5.0** - Backup and restore system with preview (2026-02-06)

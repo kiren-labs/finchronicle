@@ -7,6 +7,7 @@ import { sanitizeHTML, formatDate, formatMonth, showMessage } from './utils.js';
 import { formatCurrency, getCurrency } from './currency.js';
 import { deleteTransactionFromDB } from './db.js';
 import { updateSettingsContent } from './settings.js';
+import { renderCategoryPieChart, buildCategoryData } from './chart.js';
 
 // ---- Master UI Refresh ----
 
@@ -275,6 +276,15 @@ export function updateGroupedView() {
     }
 
     content.innerHTML = html;
+
+    // Render category pie chart
+    const chartContainer = document.getElementById('categoryChart');
+    if (chartContainer) {
+        const chartMonth = state.insightsMonth === 'current'
+            ? new Date().toISOString().slice(0, 7)
+            : state.insightsMonth;
+        renderCategoryPieChart(buildCategoryData(state.transactions, chartMonth), chartContainer);
+    }
 
     // Attach change listener for insights month selector
     const monthSelector = document.getElementById('insightsMonthSelector');

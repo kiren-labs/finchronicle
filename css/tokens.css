@@ -123,6 +123,16 @@
 
     --color-on-primary: #ffffff;
     --color-on-danger: #ffffff;
+
+    /* Category pie chart palette */
+    --chart-c1: #FF9F0A;   /* amber   — Food */
+    --chart-c2: #FF6B35;   /* coral   — Groceries / Housing */
+    --chart-c3: #0051D5;   /* blue    — Transport */
+    --chart-c4: #5AC8FA;   /* sky     — Utilities / Bills */
+    --chart-c5: #BF5AF2;   /* purple  — Personal / Shopping */
+    --chart-c6: #FF3B30;   /* red     — Healthcare / Debt */
+    --chart-c7: #34C759;   /* green   — Savings / Investments */
+    --chart-c8: #8E8E93;   /* slate   — Misc / Other */
 }
 
 /* Mobile (≤480px) token adjustments */

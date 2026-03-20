@@ -1,0 +1,348 @@
+/* FinChronicle — Category Pie Chart (v1.0)
+ *
+ * Pure CSS conic-gradient donut. The JS render function (js/chart.js) sets
+ * background-image only, leaving background-color intact so transparent gaps
+ * between segments always show the surface token — light or dark mode.
+ *
+ * New tokens to append to css/tokens.css :root:
+ *   --chart-c1..c8  (see bottom of this file for the block to copy)
+ * =========================================================================== */
+
+/* === Layout ================================================================ */
+
+.category-chart {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: var(--space-2xl);
+    align-items: center;
+    padding: var(--space-xl);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+    margin-bottom: var(--space-xl);
+}
+
+/* Empty state spans both columns */
+.category-chart:has(.chart-empty) {
+    grid-template-columns: 1fr;
+}
+
+/* === Donut wrapper ========================================================= */
+
+.chart-donut-wrapper {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    flex-shrink: 0;
+    margin: auto;
+}
+
+/* Outer compass tick ring — 12 marks via repeating-conic + mask */
+.chart-donut-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(
+        from 0deg,
+        transparent 0deg 28deg,
+        var(--color-border) 28deg 30deg
+    );
+    -webkit-mask-image: radial-gradient(
+        farthest-side,
+        transparent calc(100% - 7px),
+        #000 calc(100% - 7px)
+    );
+    mask-image: radial-gradient(
+        farthest-side,
+        transparent calc(100% - 7px),
+        #000 calc(100% - 7px)
+    );
+    opacity: 0;
+    animation: tick-appear 0.35s 0.55s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes tick-appear {
+    to { opacity: 0.45; }
+}
+
+/* === Donut ring ============================================================ */
+
+.chart-donut {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+
+    /* background-color shows through transparent gaps — adapts via dark-mode token */
+    background-color: var(--color-surface);
+    transition: background-color var(--transition-fast);
+
+    /* background-image is set by JS: donut.style.backgroundImage = conic-gradient(...) */
+
+    /* Start from 12 o'clock */
+    transform: rotate(-90deg);
+    animation: donut-bloom 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+@keyframes donut-bloom {
+    from {
+        transform: rotate(-90deg) scale(0.8);
+        opacity: 0;
+        filter: blur(1px);
+    }
+    to {
+        transform: rotate(-90deg) scale(1);
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+/* Donut hole — surface-coloured circle punched through the centre */
+.chart-donut::after {
+    content: '';
+    position: absolute;
+    inset: 28%;
+    border-radius: 50%;
+    background: var(--color-surface);
+    transition: background var(--transition-fast);
+    z-index: 1;
+}
+
+/* === Centre display ======================================================== */
+
+.chart-center-info {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    pointer-events: none;
+    /* constrain text to the visible hole (~80px) */
+    padding: 32%;
+    box-sizing: border-box;
+}
+
+.chart-center-amount {
+    font-size: var(--font-md);
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: -0.3px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+    transition: color var(--transition-fast);
+    animation: center-appear 0.3s 0.6s ease both;
+}
+
+.chart-center-label {
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-top: 3px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    transition: color var(--transition-fast);
+    animation: center-appear 0.3s 0.7s ease both;
+}
+
+@keyframes center-appear {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* === Legend ================================================================ */
+
+.chart-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    max-height: 256px;
+    overflow-y: auto;
+    /* subtle scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+
+.chart-legend::-webkit-scrollbar        { width: 3px; }
+.chart-legend::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: 2px; }
+.chart-legend::-webkit-scrollbar-track  { background: transparent; }
+
+/* Dim all siblings while any one row is hovered */
+.chart-legend:has(.legend-item:hover) .legend-item:not(:hover) {
+    opacity: 0.22;
+}
+
+.legend-item {
+    display: grid;
+    grid-template-columns: 8px 1fr auto auto;
+    align-items: center;
+    gap: var(--space-sm);
+    /* bottom padding leaves room for the micro-bar */
+    padding: 5px var(--space-sm) 10px var(--space-sm);
+    border-radius: var(--radius-sm);
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    transition:
+        opacity    var(--transition-fast),
+        background var(--transition-fast);
+    /* staggered entrance — delay set by JS via --legend-delay */
+    animation: legend-enter 0.35s ease both;
+    animation-delay: var(--legend-delay, 0s);
+}
+
+@keyframes legend-enter {
+    from { opacity: 0; transform: translateX(-7px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.legend-item:hover {
+    background: var(--color-bg);
+}
+
+/* Coloured swatch */
+.legend-swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--item-color, var(--color-text-muted));
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+
+.legend-item:hover .legend-swatch {
+    transform: scale(1.55);
+}
+
+/* Category name */
+.legend-name {
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+/* Percentage — uses text color for WCAG AA contrast (swatch encodes the category color) */
+.legend-pct {
+    font-size: var(--font-sm);
+    font-weight: 700;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Amount */
+.legend-amt {
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+    min-width: 52px;
+}
+
+/* Micro progress bar — pinned to bottom of each row */
+.legend-bar {
+    position: absolute;
+    bottom: 2px;
+    left: var(--space-sm);
+    right: var(--space-sm);
+    height: 1.5px;
+    background: var(--color-border);
+    border-radius: 1px;
+    overflow: hidden;
+}
+
+.legend-bar-fill {
+    height: 100%;
+    width: var(--item-pct, 0%);
+    background: var(--item-color, var(--color-text-muted));
+    border-radius: 1px;
+    transform-origin: left;
+    transform: scaleX(0);
+    /* delay = legend-delay + 0.25s so bars arrive after rows */
+    animation: bar-grow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(var(--legend-delay, 0s) + 0.25s);
+}
+
+@keyframes bar-grow {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+/* === Empty / no-data state ================================================= */
+
+.chart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3xl) var(--space-xl);
+    color: var(--color-text-muted);
+    gap: var(--space-sm);
+    font-size: var(--font-md);
+    width: 100%;
+}
+
+.chart-empty i {
+    font-size: 36px;
+    opacity: 0.2;
+    display: block;
+}
+
+/* === Section header (optional title above chart) =========================== */
+
+.chart-section-title {
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: var(--space-md);
+}
+
+/* === Responsive ============================================================ */
+
+@media (max-width: 480px) {
+    .category-chart {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+        padding: var(--space-lg);
+    }
+
+    .chart-donut-wrapper {
+        width: 160px;
+        height: 160px;
+    }
+
+    .chart-legend {
+        max-height: 200px;
+    }
+}
+
+/* =============================================================================
+ * TOKENS TO ADD TO css/tokens.css  (inside the :root { } block)
+ * ---------------------------------------------------------------------------
+ *   --chart-c1: #FF9F0A;   amber   — Food
+ *   --chart-c2: #FF6B35;   coral   — Groceries / Housing
+ *   --chart-c3: #0051D5;   blue    — Transport (matches --color-primary)
+ *   --chart-c4: #5AC8FA;   sky     — Utilities / Bills
+ *   --chart-c5: #BF5AF2;   purple  — Personal / Shopping
+ *   --chart-c6: #FF3B30;   red     — Healthcare (matches --color-danger)
+ *   --chart-c7: #34C759;   green   — Savings (matches --color-success)
+ *   --chart-c8: #8E8E93;   slate   — Misc / Other
+ * ============================================================================= */
