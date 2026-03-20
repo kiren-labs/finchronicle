@@ -56,8 +56,8 @@ export function renderCategoryPieChart(data, container) {
 
     if (!data || data.length === 0 || total === 0) {
         container.innerHTML = `
-            <div class="chart-empty">
-                <i class="ri-pie-chart-2-line"></i>
+            <div class="chart-empty" role="status" aria-live="polite">
+                <i class="ri-pie-chart-2-line" aria-hidden="true"></i>
                 <span>No expenses to display</span>
             </div>`;
         return;
