@@ -235,11 +235,11 @@
     min-width: 0;
 }
 
-/* Percentage — coloured to match swatch */
+/* Percentage — uses text color for WCAG AA contrast (swatch encodes the category color) */
 .legend-pct {
     font-size: var(--font-sm);
     font-weight: 700;
-    color: var(--item-color, var(--color-text-muted));
+    color: var(--color-text);
     font-variant-numeric: tabular-nums;
     text-align: right;
     white-space: nowrap;

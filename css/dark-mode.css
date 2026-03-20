@@ -29,6 +29,7 @@ body.dark-mode {
     --color-success-strong: #30E85D;
     --color-danger: #FF453A;
     --color-danger-strong: #FF6B6B;
+    --color-warning-text: #FCD34D;
 
     /* Brand wordmark — brighter for dark backgrounds */
     --color-fin: #5B8DEF;

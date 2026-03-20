@@ -105,24 +105,26 @@ export function renderCategoryPieChart(data, container) {
 
     // --- Render HTML --------------------------------------------------------
     container.innerHTML = `
-        <div class="chart-donut-wrapper">
-            <div class="chart-donut"></div>
-            <div class="chart-center-info">
+        <div class="chart-donut-wrapper" role="img" aria-label="Expense spending by category donut chart. Total: ${totalFormatted}">
+            <div class="chart-donut" aria-hidden="true"></div>
+            <div class="chart-center-info" aria-hidden="true">
                 <span class="chart-center-amount">${totalFormatted}</span>
                 <span class="chart-center-label">Total Spent</span>
             </div>
         </div>
-        <div class="chart-legend">
+        <div class="chart-legend" role="list" aria-label="Category spending breakdown">
             ${rows.map(row => `
                 <div class="legend-item"
+                     role="listitem"
+                     aria-label="${row.name}: ${row.pctLabel} of expenses, ${row.amount}"
                      style="--item-color:${row.color};--item-pct:${row.pctValue}%;--legend-delay:${row.delay}"
                      data-amt="${row.amount}"
                      data-name="${row.name}">
-                    <span class="legend-swatch"></span>
-                    <span class="legend-name">${row.name}</span>
-                    <span class="legend-pct">${row.pctLabel}</span>
-                    <span class="legend-amt">${row.amount}</span>
-                    <div class="legend-bar">
+                    <span class="legend-swatch" aria-hidden="true"></span>
+                    <span class="legend-name" aria-hidden="true">${row.name}</span>
+                    <span class="legend-pct" aria-hidden="true">${row.pctLabel}</span>
+                    <span class="legend-amt" aria-hidden="true">${row.amount}</span>
+                    <div class="legend-bar" aria-hidden="true">
                         <div class="legend-bar-fill"></div>
                     </div>
                 </div>`).join('')}
