@@ -516,8 +516,10 @@
     letter-spacing: -0.2px;
 }
 
-.bar-net-label.positive { color: var(--color-success); }
-.bar-net-label.negative { color: var(--color-danger); }
+/* -strong variants are dark enough for WCAG AA on light bg (≥4.5:1)
+   dark-mode.css remaps them to bright values that pass on dark surfaces */
+.bar-net-label.positive { color: var(--color-success-strong); }
+.bar-net-label.negative { color: var(--color-danger-strong); }
 
 .bar-chart-legend {
     display: flex;
