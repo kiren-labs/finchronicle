@@ -376,7 +376,7 @@ export function renderWeeklyChart(data, container) {
             trendHtml = `<span class="week-trend same" aria-label="No change">—</span>`;
         }
         return `
-            <div class="week-row" style="--week-delay:${delay}s"
+            <div class="week-row" role="listitem" style="--week-delay:${delay}s"
                  aria-label="${w.label}: ${formatCurrency(w.total)}">
                 <div class="week-label">${w.label}</div>
                 <div class="week-bar-track">

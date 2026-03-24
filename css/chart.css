@@ -574,8 +574,8 @@
     white-space: nowrap;
 }
 
-.week-trend.up   { color: var(--color-danger); }
-.week-trend.down { color: var(--color-success); }
+.week-trend.up   { color: var(--color-danger-strong); }
+.week-trend.down { color: var(--color-success-strong); }
 .week-trend.same { color: var(--color-text-muted); }
 
 /* === Day-of-month heatmap ================================================== */
