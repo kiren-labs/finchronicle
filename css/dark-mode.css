@@ -247,8 +247,13 @@ body.dark-mode .week-bar-track {
 }
 
 body.dark-mode .heatmap-cell {
-    background: var(--color-bg);
+    background: var(--color-surface);
     border-color: var(--color-border);
+}
+
+body.dark-mode .heatmap-cell.active {
+    background: rgba(var(--chart-heat), calc(0.15 + var(--cell-intensity, 0) * 0.80));
+    border-color: transparent;
 }
 
 body.dark-mode .chart-empty-sm {
