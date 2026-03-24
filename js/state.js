@@ -3,13 +3,14 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = '3.10.5';
+export const APP_VERSION = '3.11.0';
 export const VERSION_KEY = 'app_version';
 
 // IndexedDB Configuration
 export const DB_NAME = 'FinChronicleDB';
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 export const STORE_NAME = 'transactions';
+export const RECURRING_STORE = 'recurringTemplates';
 
 // Pagination
 export const ITEMS_PER_PAGE = 20;
@@ -30,6 +31,7 @@ export const state = {
     lastBackupTimestamp: null,
     pendingRestoreData: null,
     currentPage: 1,
+    recurringTemplates: [],
 };
 
 // Category definitions

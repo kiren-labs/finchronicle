@@ -190,3 +190,20 @@ body.dark-mode .backup-status-danger {
 body.dark-mode .backup-status-danger i {
     color: #ff9aa2;
 }
+
+/* ==========================================================================
+   Recurring Transactions (v3.11.0)
+   ========================================================================== */
+
+body.dark-mode .recurring-frequency-chip {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-strong);
+}
+
+body.dark-mode .recurring-title i {
+    color: var(--color-primary-strong);
+}
+
+body.dark-mode .recurring-empty i {
+    color: var(--color-border);
+}

@@ -19,6 +19,11 @@ import {
     checkAppVersion, checkForUpdates, reloadApp, dismissUpdate,
     loadBackupTimestamp, showUpdatePrompt, updateSettingsContent
 } from './settings.js';
+import {
+    loadRecurringIntoState, checkRecurringTransactions,
+    openRecurringModal, closeRecurringModal,
+    saveRecurringTemplate, selectRecurringType
+} from './recurring.js';
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -168,6 +173,26 @@ function bindStaticEvents() {
     // ---- Feedback modal close ----
     document.querySelector('#feedbackModal .close-btn')
         .addEventListener('click', closeFeedbackModal);
+
+    // ---- Recurring modal ----
+    document.querySelector('#recurringModal .close-btn')
+        .addEventListener('click', closeRecurringModal);
+    document.getElementById('recurringCancelBtn')
+        .addEventListener('click', closeRecurringModal);
+    document.getElementById('recurringSaveBtn')
+        .addEventListener('click', saveRecurringTemplate);
+
+    document.getElementById('recurringTypeExpense')
+        .addEventListener('click', () => selectRecurringType('expense'));
+    document.getElementById('recurringTypeIncome')
+        .addEventListener('click', () => selectRecurringType('income'));
+
+    document.getElementById('recurringFrequency')
+        .addEventListener('change', () => {
+            const freq = document.getElementById('recurringFrequency').value;
+            document.getElementById('recurringDayGroup').style.display =
+                freq === 'monthly' ? 'block' : 'none';
+        });
 
     // ---- Restore Preview modal close (X button) ----
     document.querySelector('#restorePreviewModal .close-btn')
@@ -458,6 +483,8 @@ async function init() {
         await initDB();
         await migrateFromLocalStorage();
         await loadDataFromDB();
+        await loadRecurringIntoState();
+        await checkRecurringTransactions();
 
         // Set up UI defaults
         document.getElementById('date').valueAsDate = new Date();
