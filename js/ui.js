@@ -317,12 +317,17 @@ export function updateGroupedView() {
   }
 }
 
-const RANGE_LABELS = { '3m': 'Last 3 Months', '6m': 'Last 6 Months', '1y': 'Last 12 Months', 'all': 'All Time' };
+const RANGE_LABELS = {
+  "3m": "Last 3 Months",
+  "6m": "Last 6 Months",
+  "1y": "Last 12 Months",
+  all: "All Time",
+};
 
 function _renderGroupCharts() {
   const range = state.reportRange;
   const txns = state.transactions;
-  const rangeLabel = RANGE_LABELS[range] || '';
+  const rangeLabel = RANGE_LABELS[range] || "";
 
   // Sync active range pill
   document.querySelectorAll(".range-pill").forEach((btn) => {
