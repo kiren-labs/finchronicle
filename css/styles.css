@@ -2542,6 +2542,18 @@ button.primary.loading .btn-spinner {
     margin-bottom: var(--space-2xs);
 }
 
+/* 5-item nav: tighten icon + label on mobile */
+@media (max-width: 480px) {
+    .nav-item {
+        font-size: var(--font-sm);
+        padding: var(--space-xs);
+    }
+
+    .nav-item-icon {
+        font-size: var(--font-3xl);
+    }
+}
+
 /* ==========================================================================
    Animations
    ========================================================================== */

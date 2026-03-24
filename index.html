@@ -488,8 +488,8 @@
                 </div>
             </div>
 
-            <!-- Groups Tab -->
-            <div id="groupsTab" class="tab-content" role="tabpanel" aria-labelledby="groups-tab">
+            <!-- Reports Tab -->
+            <div id="reportsTab" class="tab-content" role="tabpanel" aria-label="Reports">
 
                 <!-- Chart date range selector -->
                 <div class="chart-range-bar">
@@ -500,6 +500,7 @@
                         <button class="range-pill" data-range="1y" type="button">1Y</button>
                         <button class="range-pill" data-range="all" type="button">All</button>
                     </div>
+                    <span class="range-date-span" id="rangeSpan" aria-live="polite"></span>
                 </div>
 
                 <!-- Spending by Category (pie) -->
@@ -511,14 +512,16 @@
                 <div id="incomeExpenseChart" class="bar-chart-card"></div>
 
                 <!-- Weekly Spending -->
-                <p class="chart-section-title">Weekly Spending</p>
+                <p class="chart-section-title">Weekly Spending — Last 4 Weeks</p>
                 <div id="weeklyChart" class="weekly-chart-card"></div>
 
                 <!-- Day of Month Heatmap -->
-                <p class="chart-section-title">Spending by Day of Month</p>
+                <p class="chart-section-title" id="heatmapTitle">Spending by Day of Month</p>
                 <div id="dayHeatmap" class="day-heatmap-card"></div>
+            </div>
 
-                <!-- Grouped list -->
+            <!-- Groups Tab -->
+            <div id="groupsTab" class="tab-content" role="tabpanel" aria-labelledby="groups-tab">
                 <div class="filters">
                     <button class="filter-btn active">By Month</button>
                     <button class="filter-btn">By Category</button>
@@ -600,8 +603,12 @@
             <i class="ri-list-check nav-item-icon"></i>
             <span>List</span>
         </button>
-        <button id="groups-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="groupsTab">
+        <button id="reports-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="reportsTab">
             <i class="ri-bar-chart-2-line nav-item-icon"></i>
+            <span>Reports</span>
+        </button>
+        <button id="groups-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="groupsTab">
+            <i class="ri-stack-line nav-item-icon"></i>
             <span>Groups</span>
         </button>
         <button id="settings-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="settingsTab">
