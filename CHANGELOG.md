@@ -33,6 +33,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `css/chart.css` — Added styles for range selector, bar chart columns, weekly rows, heatmap grid and legend
 - `css/dark-mode.css` — Added `--chart-heat` RGB token override and dark mode chart surface overrides
 
+### Changed
+- **CSS refactor — token consistency and best-practice fixes** (no visual changes)
+  - `--chart-heat` token moved from `css/chart.css :root {}` to its canonical location in `css/tokens.css`
+  - Removed 6 no-op declarations from `tokens.css` mobile media query that re-declared values identical to the base tokens
+  - `.type-option` `border-radius` corrected from spacing token `var(--space-sm)` to radius token `var(--radius-md)`
+  - `.bottom-nav` duplicate `padding-bottom` declaration removed (already covered by padding shorthand)
+  - `transition: background 0.2s ease` and `transition: transform 0.3s ease` literals replaced with `var(--transition-fast)` / `var(--transition-med)` in `.faq-section-header`, `.faq-section-arrow`, `.faq-question`, `.backup-faq-button`, and `.insights-month-selector`
+  - `.filter-label`, `.group-content`, `.group-row`, `.group-row.with-border`, `.group-value.large` hardcoded `px` values replaced with appropriate space/font tokens
+  - `.backup-status-good/warning/danger` hardcoded hex colors replaced with existing semantic tokens (`--color-chip-positive-bg`, `--color-success-strong`, `--color-success-deep`, `--color-warning-*`, `--color-chip-negative-bg`, `--color-danger-strong`, `--color-danger`)
+  - `.recurring-empty-sub` three `!important` overrides removed by fixing specificity — changed `.recurring-empty p` selector to `.recurring-empty p:not(.recurring-empty-sub)`
+
 ---
 
 ## [3.11.0] - 2026-03-24
