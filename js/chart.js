@@ -490,7 +490,7 @@ export function renderDayHeatmap(data, container) {
 
   const cells = data
     .map((d) => {
-      const intensity = d.total > 0 ? Math.max(0.12, d.total / maxTotal) : 0;
+      const intensity = d.total > 0 ? Math.sqrt(d.total / maxTotal) : 0;
       const label =
         d.total > 0
           ? `Day ${d.day}: ${formatCurrency(d.total)}`

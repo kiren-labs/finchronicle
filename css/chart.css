@@ -636,7 +636,7 @@
 }
 
 .heatmap-cell.active {
-    background: rgba(var(--chart-heat), calc(0.12 + var(--cell-intensity, 0) * 0.78));
+    background: rgba(var(--chart-heat), calc(0.15 + var(--cell-intensity, 0) * 0.80));
     border-color: transparent;
 }
 
