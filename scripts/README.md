@@ -186,7 +186,6 @@ chmod +x scripts/*.sh
 
 - [RELEASE.md](../RELEASE.md) - Complete release guide
 - [CHANGELOG.md](../CHANGELOG.md) - Version history
-- [CLAUDE.md](../CLAUDE.md) - Development guide
 
 ---
 
