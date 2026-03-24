@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # FinChronicle Version Bump Script
-# Updates version in app.js, sw.js, and manifest.json
+# Updates version in js/state.js, sw.js, and manifest.json
 
 set -e  # Exit on error
 
@@ -16,7 +16,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
 # Files to update (relative to repo root)
-APP_JS="app.js"
+APP_JS="js/state.js"
 SW_JS="sw.js"
 MANIFEST_JSON="manifest.json"
 
@@ -53,7 +53,7 @@ CURRENT_SW_VERSION=$(grep "// Version: " "$SW_JS" | head -1 | sed 's/.*: //')
 CURRENT_MANIFEST_VERSION=$(grep '"version":' "$MANIFEST_JSON" | sed 's/.*: "\(.*\)".*/\1/')
 
 echo "Current versions:"
-echo "  app.js:        $CURRENT_APP_VERSION"
+echo "  js/state.js:   $CURRENT_APP_VERSION"
 echo "  sw.js:         $CURRENT_SW_VERSION"
 echo "  manifest.json: $CURRENT_MANIFEST_VERSION"
 echo ""
@@ -77,7 +77,7 @@ rm -f "$MANIFEST_JSON.bak"
 echo -e "\n${GREEN}✓ Version updated successfully!${NC}\n"
 
 echo "Updated versions:"
-echo "  app.js:        $(grep "const APP_VERSION = " "$APP_JS" | sed "s/.*'\(.*\)'.*/\1/")"
+echo "  js/state.js:   $(grep "const APP_VERSION = " "$APP_JS" | sed "s/.*'\(.*\)'.*/\1/")"
 echo "  sw.js:         $(grep "// Version: " "$SW_JS" | head -1 | sed 's/.*: //')"
 echo "  manifest.json: $(grep '"version":' "$MANIFEST_JSON" | sed 's/.*: "\(.*\)".*/\1/')"
 

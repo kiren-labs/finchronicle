@@ -77,7 +77,7 @@ fi
 
 # Step 6: Review changes
 echo -e "\n${YELLOW}Changes to be committed:${NC}"
-git diff HEAD app.js sw.js manifest.json
+git diff HEAD js/state.js sw.js manifest.json
 
 read -p "$(echo -e ${YELLOW}Continue with release? (y/N)${NC}) " -n 1 -r
 echo
@@ -88,7 +88,7 @@ fi
 
 # Step 7: Commit version bump
 echo -e "\n${YELLOW}Committing version bump...${NC}"
-git add app.js sw.js manifest.json CHANGELOG.md
+git add js/state.js sw.js manifest.json CHANGELOG.md
 git commit -m "chore: release v$NEW_VERSION" || true
 
 # Step 8: Create and push tag
