@@ -226,10 +226,20 @@ body.dark-mode {
     --chart-heat: 255, 80, 68;
 }
 
-body.dark-mode .chart-range-select {
-    background: var(--color-surface);
-    color: var(--color-text);
+body.dark-mode .range-pill {
+    color: var(--color-text-muted);
     border-color: var(--color-border);
+}
+
+body.dark-mode .range-pill:hover {
+    color: var(--color-primary-strong);
+    border-color: var(--color-primary-strong);
+}
+
+body.dark-mode .range-pill.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #ffffff;
 }
 
 body.dark-mode .week-bar-track {

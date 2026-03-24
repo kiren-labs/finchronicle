@@ -382,24 +382,36 @@
     white-space: nowrap;
 }
 
-.chart-range-select {
-    font-size: var(--font-sm);
-    font-weight: 500;
-    color: var(--color-text);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 5px var(--space-md);
-    cursor: pointer;
-    transition:
-        border-color var(--transition-fast),
-        background var(--transition-fast);
-    outline: none;
+.range-pills {
+    display: flex;
+    gap: 4px;
 }
 
-.chart-range-select:focus {
+.range-pill {
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1.5px solid var(--color-border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition:
+        color var(--transition-fast),
+        background var(--transition-fast),
+        border-color var(--transition-fast);
+    line-height: 1.4;
+}
+
+.range-pill:hover {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(0, 81, 213, 0.12);
+    color: var(--color-primary);
+}
+
+.range-pill.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-on-primary);
 }
 
 /* === Small empty state (for new charts) ==================================== */
@@ -494,6 +506,18 @@
     white-space: nowrap;
     text-align: center;
 }
+
+.bar-net-label {
+    font-size: 9px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-align: center;
+    letter-spacing: -0.2px;
+}
+
+.bar-net-label.positive { color: var(--color-success); }
+.bar-net-label.negative { color: var(--color-danger); }
 
 .bar-chart-legend {
     display: flex;

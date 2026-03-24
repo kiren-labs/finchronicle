@@ -137,10 +137,12 @@ function bindStaticEvents() {
         });
     });
 
-    // ---- Groups tab: chart date range selector ----
-    document.getElementById('reportRangeSelect')
-        .addEventListener('change', (e) => {
-            state.reportRange = e.target.value;
+    // ---- Groups tab: chart date range pills ----
+    document.querySelector('.range-pills')
+        .addEventListener('click', (e) => {
+            const btn = e.target.closest('.range-pill');
+            if (!btn) return;
+            state.reportRange = btn.dataset.range;
             updateGroupedView();
         });
 

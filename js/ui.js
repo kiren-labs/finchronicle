@@ -302,9 +302,10 @@ function _renderGroupCharts() {
     const range = state.reportRange;
     const txns  = state.transactions;
 
-    // Sync the range selector UI value
-    const rangeSelect = document.getElementById('reportRangeSelect');
-    if (rangeSelect) rangeSelect.value = range;
+    // Sync active range pill
+    document.querySelectorAll('.range-pill').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.range === range);
+    });
 
     // Pie chart — filtered by the selected range
     const pieContainer = document.getElementById('categoryChart');

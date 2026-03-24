@@ -238,13 +238,14 @@ export function buildIncomeExpenseData(transactions, range) {
     if (months === null) {
         keys = Object.keys(byMonth).sort();
     } else {
-        keys = months; // already oldest-first, include all even if no data
+        // Only include months that have at least one transaction
+        keys = months.filter(m => byMonth[m]);
     }
 
     return keys.map(m => ({
         month: m,
         label: _monthShort(m),
-        income: byMonth[m]?.income || 0,
+        income:  byMonth[m]?.income  || 0,
         expense: byMonth[m]?.expense || 0,
     }));
 }
@@ -276,12 +277,18 @@ export function renderIncomeExpenseChart(data, container) {
     const maxVal = Math.max(...data.map(d => Math.max(d.income, d.expense)), 1);
 
     const cols = data.map((d, i) => {
-        const incH = ((d.income  / maxVal) * 100).toFixed(1);
-        const expH = ((d.expense / maxVal) * 100).toFixed(1);
+        const incH  = ((d.income  / maxVal) * 100).toFixed(1);
+        const expH  = ((d.expense / maxVal) * 100).toFixed(1);
         const delay = (i * 0.045).toFixed(3);
+        const net   = d.income - d.expense;
+        const netLabel = net > 0
+            ? `<span class="bar-net-label positive">+${formatCurrency(net)}</span>`
+            : net < 0
+            ? `<span class="bar-net-label negative">−${formatCurrency(-net)}</span>`
+            : '';
         return `
             <div class="bar-col" style="--bar-delay:${delay}s"
-                 aria-label="${d.label}: Income ${formatCurrency(d.income)}, Expenses ${formatCurrency(d.expense)}">
+                 aria-label="${d.label}: Income ${formatCurrency(d.income)}, Expenses ${formatCurrency(d.expense)}, Net ${formatCurrency(net)}">
                 <div class="bar-group">
                     <div class="bar income-bar" style="--bar-h:${incH}%"
                          title="Income ${formatCurrency(d.income)}"></div>
@@ -289,6 +296,7 @@ export function renderIncomeExpenseChart(data, container) {
                          title="Expenses ${formatCurrency(d.expense)}"></div>
                 </div>
                 <div class="bar-month-label">${d.label}</div>
+                ${netLabel}
             </div>`;
     }).join('');
 
