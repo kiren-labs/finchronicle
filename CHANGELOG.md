@@ -11,7 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 - Budget tracking per category
-- Search functionality
+- Tags & Search
+
+---
+
+## [3.12.0] - 2026-03-24
+
+### Added
+- **Reports: Complete Visualization Suite** — The Groups tab is now a full analytics dashboard
+  - **Date range selector** — Choose Last 3 months / 6 months / 12 months / All time; all four charts respond instantly
+  - **Income vs Expenses bar chart** — Side-by-side monthly bars with animated entry; scrollable on mobile for long ranges
+  - **Weekly Spending chart** — Last 4 rolling weeks with trend arrows (↑ ↓) and percentage change vs prior week
+  - **Day-of-Month Heatmap** — 31-cell heat grid showing which days of the month you spend most; intensity scales with amount
+  - Category pie chart now responds to the shared date range selector (previously was per-month only)
+
+### Technical
+- `js/chart.js` — Added `getRangeMonths()`, `buildIncomeExpenseData()` / `renderIncomeExpenseChart()`, `buildWeeklyData()` / `renderWeeklyChart()`, `buildDayHeatmapData()` / `renderDayHeatmap()`; extended `buildCategoryData()` to accept a month array for range filtering
+- `js/ui.js` — `updateGroupedView()` now calls `_renderGroupCharts()` helper; pie chart driven by `state.reportRange`
+- `js/app.js` — Bound `#reportRangeSelect` change event in `bindStaticEvents()`
+- `js/state.js` — Added `reportRange: '6m'` to state object
+- `css/chart.css` — Added styles for range selector, bar chart columns, weekly rows, heatmap grid and legend
+- `css/dark-mode.css` — Added `--chart-heat` RGB token override and dark mode chart surface overrides
 
 ---
 
