@@ -540,8 +540,7 @@ function registerServiceWorker() {
     window.location.reload();
   });
 
-  navigator.serviceWorker
-    .register("./sw.js")
+  navigator.serviceWorker.register("./sw.js")
     .then((registration) => {
       console.log("✅ Service Worker registered - App works offline!");
       registration.update();
