@@ -1121,6 +1121,7 @@ button.primary.loading .btn-spinner {
 .toolbar-btn {
     padding: var(--space-sm) var(--space-lg);
     background: var(--color-surface);
+    color: var(--color-text);
     border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: var(--font-md);

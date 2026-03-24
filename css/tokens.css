@@ -1,13 +1,6 @@
 /* FinChronicle - Design Tokens */
 /* Version: 3.7.1 */
 
-/* Override Remix Icon font-display to avoid render-blocking */
-@font-face {
-    font-family: 'remixicon';
-    font-display: swap;
-    src: url('https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.woff2?t=1704138790695') format('woff2');
-}
-
 :root {
     --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     --font-family-mono: ui-monospace, 'SF Mono', Monaco, 'Segoe UI Mono', 'Consolas', 'Liberation Mono', monospace;
