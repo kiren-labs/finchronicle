@@ -346,3 +346,339 @@
  *   --chart-c7: #34C759;   green   — Savings (matches --color-success)
  *   --chart-c8: #8E8E93;   slate   — Misc / Other
  * ============================================================================= */
+
+
+/* =============================================================================
+ * v3.12.0 — Reports: range selector, bar chart, weekly chart, day heatmap
+ * ============================================================================= */
+
+/* === Shared card shell for new charts ====================================== */
+
+.bar-chart-card,
+.weekly-chart-card,
+.day-heatmap-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* === Chart date range selector ============================================= */
+
+.chart-range-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.chart-range-label {
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+.chart-range-select {
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 5px var(--space-md);
+    cursor: pointer;
+    transition:
+        border-color var(--transition-fast),
+        background var(--transition-fast);
+    outline: none;
+}
+
+.chart-range-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 81, 213, 0.12);
+}
+
+/* === Small empty state (for new charts) ==================================== */
+
+.chart-empty-sm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-2xl) var(--space-xl);
+    color: var(--color-text-muted);
+    font-size: var(--font-sm);
+}
+
+.chart-empty-sm i {
+    font-size: 20px;
+    opacity: 0.35;
+    flex-shrink: 0;
+}
+
+/* === Income vs Expenses bar chart ========================================= */
+
+.bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.bar-cols {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-sm);
+    height: 120px;
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--color-border);
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+}
+
+.bar-cols::-webkit-scrollbar       { height: 3px; }
+.bar-cols::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+.bar-cols::-webkit-scrollbar-track { background: transparent; }
+
+.bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    flex: 1;
+    min-width: 36px;
+    animation: col-enter 0.35s ease both;
+    animation-delay: var(--bar-delay, 0s);
+}
+
+@keyframes col-enter {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.bar-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 100px;
+    width: 100%;
+    justify-content: center;
+}
+
+.bar {
+    flex: 1;
+    max-width: 14px;
+    min-height: 2px;
+    height: var(--bar-h, 0%);
+    border-radius: 3px 3px 0 0;
+    transform-origin: bottom;
+    animation: bar-rise 0.55s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+    animation-delay: var(--bar-delay, 0s);
+}
+
+@keyframes bar-rise {
+    from { transform: scaleY(0); }
+    to   { transform: scaleY(1); }
+}
+
+.bar.income-bar  { background: var(--color-success); }
+.bar.expense-bar { background: var(--color-danger); }
+
+.bar-month-label {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    text-align: center;
+}
+
+.bar-chart-legend {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+}
+
+.bar-legend-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.bar-legend-dot.income-dot  { background: var(--color-success); }
+.bar-legend-dot.expense-dot { background: var(--color-danger); }
+
+/* === Weekly spending chart ================================================= */
+
+.weekly-chart {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.week-row {
+    display: grid;
+    grid-template-columns: 90px 1fr auto auto;
+    align-items: center;
+    gap: var(--space-md);
+    animation: legend-enter 0.35s ease both;
+    animation-delay: var(--week-delay, 0s);
+}
+
+.week-label {
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+.week-bar-track {
+    height: 6px;
+    background: var(--color-bg);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.week-bar-fill {
+    height: 100%;
+    width: var(--week-w, 0%);
+    background: var(--color-primary);
+    border-radius: 3px;
+    transform-origin: left;
+    transform: scaleX(0);
+    animation: bar-grow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(var(--week-delay, 0s) + 0.15s);
+}
+
+.week-amount {
+    font-size: var(--font-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    min-width: 52px;
+    text-align: right;
+}
+
+.week-trend {
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.week-trend.up   { color: var(--color-danger); }
+.week-trend.down { color: var(--color-success); }
+.week-trend.same { color: var(--color-text-muted); }
+
+/* === Day-of-month heatmap ================================================== */
+
+/*
+ * Cell intensity: rgba of the danger colour, scaled by --cell-intensity.
+ * Light: rgb 255, 59, 48 (--color-danger)
+ * Dark:  rgb 255, 80, 68  (override via dark-mode.css token --chart-heat)
+ */
+:root { --chart-heat: 255, 59, 48; }
+
+.day-heatmap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    background: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    transition: transform var(--transition-fast);
+    border: 1px solid var(--color-border);
+}
+
+.heatmap-cell.active {
+    background: rgba(var(--chart-heat), calc(0.12 + var(--cell-intensity, 0) * 0.78));
+    border-color: transparent;
+}
+
+.heatmap-cell:hover {
+    transform: scale(1.15);
+    z-index: 1;
+    position: relative;
+}
+
+.heatmap-day {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    pointer-events: none;
+    line-height: 1;
+}
+
+.heatmap-cell.active .heatmap-day {
+    color: var(--color-text);
+}
+
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    justify-content: flex-end;
+}
+
+.heatmap-legend-scale {
+    width: 64px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(
+        to right,
+        rgba(var(--chart-heat), 0.12),
+        rgba(var(--chart-heat), 0.90)
+    );
+}
+
+/* === Responsive ============================================================ */
+
+@media (max-width: 480px) {
+    .bar-chart-card,
+    .weekly-chart-card,
+    .day-heatmap-card {
+        padding: var(--space-lg);
+    }
+
+    .bar-cols {
+        height: 100px;
+        gap: var(--space-xs);
+    }
+
+    .bar-group {
+        height: 80px;
+    }
+
+    .week-row {
+        grid-template-columns: 76px 1fr auto auto;
+        gap: var(--space-sm);
+    }
+
+    .heatmap-grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3px;
+    }
+}
