@@ -317,9 +317,12 @@ export function updateGroupedView() {
   }
 }
 
+const RANGE_LABELS = { '3m': 'Last 3 Months', '6m': 'Last 6 Months', '1y': 'Last 12 Months', 'all': 'All Time' };
+
 function _renderGroupCharts() {
   const range = state.reportRange;
   const txns = state.transactions;
+  const rangeLabel = RANGE_LABELS[range] || '';
 
   // Sync active range pill
   document.querySelectorAll(".range-pill").forEach((btn) => {
@@ -348,7 +351,11 @@ function _renderGroupCharts() {
     renderWeeklyChart(buildWeeklyData(txns), weeklyContainer);
   }
 
-  // Day-of-month heatmap
+  // Day-of-month heatmap — update title to show active period
+  const heatmapTitle = document.getElementById("heatmapTitle");
+  if (heatmapTitle) {
+    heatmapTitle.textContent = `Spending by Day of Month — ${rangeLabel}`;
+  }
   const heatmapContainer = document.getElementById("dayHeatmap");
   if (heatmapContainer) {
     renderDayHeatmap(buildDayHeatmapData(txns, range), heatmapContainer);
