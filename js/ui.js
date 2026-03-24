@@ -262,6 +262,9 @@ function scrollToTop() {
 export function updateGroupedView() {
     const content = getDOM().groupedContent;
 
+    // Always refresh charts (they render their own empty states)
+    _renderGroupCharts();
+
     if (state.transactions.length === 0) {
         content.innerHTML = `
             <div class="card">
@@ -285,22 +288,47 @@ export function updateGroupedView() {
 
     content.innerHTML = html;
 
-    // Render category pie chart
-    const chartContainer = document.getElementById('categoryChart');
-    if (chartContainer) {
-        const chartMonth = state.insightsMonth === 'current'
-            ? new Date().toISOString().slice(0, 7)
-            : state.insightsMonth;
-        renderCategoryPieChart(buildCategoryData(state.transactions, chartMonth), chartContainer);
-    }
-
-    // Attach change listener for insights month selector
+    // Attach change listener for insights month selector (element recreated each render)
     const monthSelector = document.getElementById('insightsMonthSelector');
     if (monthSelector) {
         monthSelector.addEventListener('change', function (e) {
             state.insightsMonth = e.target.value;
             updateGroupedView();
         });
+    }
+}
+
+function _renderGroupCharts() {
+    const range = state.reportRange;
+    const txns  = state.transactions;
+
+    // Sync the range selector UI value
+    const rangeSelect = document.getElementById('reportRangeSelect');
+    if (rangeSelect) rangeSelect.value = range;
+
+    // Pie chart — filtered by the selected range
+    const pieContainer = document.getElementById('categoryChart');
+    if (pieContainer) {
+        const months = getRangeMonths(range); // null = all, array = specific months
+        renderCategoryPieChart(buildCategoryData(txns, months === null ? 'all' : months), pieContainer);
+    }
+
+    // Income vs Expenses bar chart
+    const barContainer = document.getElementById('incomeExpenseChart');
+    if (barContainer) {
+        renderIncomeExpenseChart(buildIncomeExpenseData(txns, range), barContainer);
+    }
+
+    // Weekly spending
+    const weeklyContainer = document.getElementById('weeklyChart');
+    if (weeklyContainer) {
+        renderWeeklyChart(buildWeeklyData(txns), weeklyContainer);
+    }
+
+    // Day-of-month heatmap
+    const heatmapContainer = document.getElementById('dayHeatmap');
+    if (heatmapContainer) {
+        renderDayHeatmap(buildDayHeatmapData(txns, range), heatmapContainer);
     }
 }
 

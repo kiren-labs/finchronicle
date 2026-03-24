@@ -8,7 +8,7 @@ import { initDB, migrateFromLocalStorage, loadDataFromDB, saveTransactionToDB } 
 import { setCurrency, updateCurrencyDisplay, toggleCurrencySelector, closeCurrencySelector, getCurrency } from './currency.js';
 import { validateTransaction } from './validation.js';
 import {
-    updateUI, switchTab, quickAddTransaction, toggleSummaryCollapse, loadSummaryState,
+    updateUI, updateGroupedView, switchTab, quickAddTransaction, toggleSummaryCollapse, loadSummaryState,
     onSummaryTileClick, changeGrouping, editTransaction, deleteTransaction,
     confirmDelete, closeDeleteModal, cancelEdit, selectType, updateCategoryOptions,
     filterByMonth, filterByCategory, nextPage, prevPage,
@@ -136,6 +136,13 @@ function bindStaticEvents() {
             changeGrouping(type, e);
         });
     });
+
+    // ---- Groups tab: chart date range selector ----
+    document.getElementById('reportRangeSelect')
+        .addEventListener('change', (e) => {
+            state.reportRange = e.target.value;
+            updateGroupedView();
+        });
 
     // ---- Settings toolbar buttons ----
     bindSettingsButtons();
