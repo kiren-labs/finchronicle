@@ -82,7 +82,6 @@ export const currencies = {
   GBP: { symbol: "£", name: "British Pound" },
   HKD: { symbol: "HK$", name: "Hong Kong Dollar" },
   IDR: { symbol: "Rp", name: "Indonesian Rupiah" },
-
   JPY: { symbol: "¥", name: "Japanese Yen" },
   KRW: { symbol: "₩", name: "South Korean Won" },
   MXN: { symbol: "$", name: "Mexican Peso" },
@@ -92,7 +91,6 @@ export const currencies = {
   SAR: { symbol: "SR", name: "Saudi Riyal" },
   SGD: { symbol: "S$", name: "Singapore Dollar" },
 
-  TRY: { symbol: "₺", name: "Turkish Lira" },
   USD: { symbol: "$", name: "US Dollar" },
   VND: { symbol: "₫", name: "Vietnamese Dong" },
   ZAR: { symbol: "R", name: "South African Rand" },

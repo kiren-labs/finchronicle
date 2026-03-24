@@ -387,6 +387,15 @@
     gap: 4px;
 }
 
+.range-date-span {
+    margin-left: auto;
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    align-self: center;
+    font-variant-numeric: tabular-nums;
+}
+
 .range-pill {
     font-size: var(--font-sm);
     font-weight: 600;
@@ -679,6 +688,12 @@
 }
 
 /* === Responsive ============================================================ */
+
+@media (max-width: 400px) {
+    .range-date-span {
+        display: none;
+    }
+}
 
 @media (max-width: 480px) {
     .bar-chart-card,

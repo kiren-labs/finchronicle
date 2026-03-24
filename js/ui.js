@@ -356,6 +356,22 @@ function _renderGroupCharts() {
     renderWeeklyChart(buildWeeklyData(txns), weeklyContainer);
   }
 
+  // Range date span — show exact from–to dates
+  const rangeSpan = document.getElementById("rangeSpan");
+  if (rangeSpan) {
+    const fmt = (d) => d.toLocaleString("default", { month: "short", day: "numeric", year: "numeric" });
+    const today = new Date();
+    let fromDate;
+    if (range === "all") {
+      const sorted = txns.map((t) => t.date).sort();
+      fromDate = sorted.length > 0 ? new Date(sorted[0] + "T00:00:00") : today;
+    } else {
+      const months = getRangeMonths(range);
+      fromDate = new Date(months[0] + "-01T00:00:00");
+    }
+    rangeSpan.textContent = `${fmt(fromDate)} – ${fmt(today)}`;
+  }
+
   // Day-of-month heatmap — update title to show active period
   const heatmapTitle = document.getElementById("heatmapTitle");
   if (heatmapTitle) {
