@@ -158,15 +158,20 @@ export function renderCategoryPieChart(data, container) {
 /**
  * Aggregate transactions into category totals for the pie chart.
  *
- * @param {Array}   transactions  state.transactions (all loaded transactions)
- * @param {string}  month         'YYYY-MM' or 'all'
- * @param {number}  [topN=7]      Max categories before collapsing into "Other"
+ * @param {Array}          transactions  state.transactions
+ * @param {string|Array}   month         'YYYY-MM', 'all', or string[] of 'YYYY-MM' months
+ * @param {number}         [topN=7]      Max categories before collapsing into "Other"
  * @returns {Array<{category: string, amount: number}>} Sorted descending.
  */
 export function buildCategoryData(transactions, month, topN = 7) {
-    const filtered = month === 'all'
-        ? transactions.filter(t => t.type === 'expense')
-        : transactions.filter(t => t.type === 'expense' && t.date.startsWith(month));
+    let filtered;
+    if (month === 'all') {
+        filtered = transactions.filter(t => t.type === 'expense');
+    } else if (Array.isArray(month)) {
+        filtered = transactions.filter(t => t.type === 'expense' && month.includes(t.date.slice(0, 7)));
+    } else {
+        filtered = transactions.filter(t => t.type === 'expense' && t.date.startsWith(month));
+    }
 
     const totals = {};
     filtered.forEach(t => {
@@ -184,4 +189,275 @@ export function buildCategoryData(transactions, month, topN = 7) {
     const other = sorted.slice(topN).reduce((s, d) => s + d.amount, 0);
     if (other > 0) top.push({ category: 'Other', amount: other });
     return top;
+}
+
+// ---------------------------------------------------------------------------
+// getRangeMonths — derive array of 'YYYY-MM' strings from a range key
+// ---------------------------------------------------------------------------
+
+/**
+ * @param {string} range  '3m' | '6m' | '1y' | 'all'
+ * @returns {string[]|null}  Sorted oldest-first array, or null for 'all'
+ */
+export function getRangeMonths(range) {
+    if (range === 'all') return null;
+    const count = range === '3m' ? 3 : range === '6m' ? 6 : 12;
+    const months = [];
+    const now = new Date();
+    for (let i = count - 1; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+    return months; // oldest → newest
+}
+
+// ---------------------------------------------------------------------------
+// buildIncomeExpenseData / renderIncomeExpenseChart
+// ---------------------------------------------------------------------------
+
+/**
+ * Aggregate income and expense totals per month for the bar chart.
+ *
+ * @param {Array}  transactions
+ * @param {string} range  '3m' | '6m' | '1y' | 'all'
+ * @returns {Array<{month, label, income, expense}>} oldest-first
+ */
+export function buildIncomeExpenseData(transactions, range) {
+    const months = getRangeMonths(range);
+
+    // Aggregate by month
+    const byMonth = {};
+    transactions.forEach(t => {
+        const m = t.date.slice(0, 7);
+        if (!byMonth[m]) byMonth[m] = { income: 0, expense: 0 };
+        if (t.type === 'income') byMonth[m].income += t.amount;
+        else byMonth[m].expense += t.amount;
+    });
+
+    let keys;
+    if (months === null) {
+        keys = Object.keys(byMonth).sort();
+    } else {
+        keys = months; // already oldest-first, include all even if no data
+    }
+
+    return keys.map(m => ({
+        month: m,
+        label: _monthShort(m),
+        income: byMonth[m]?.income || 0,
+        expense: byMonth[m]?.expense || 0,
+    }));
+}
+
+function _monthShort(ym) {
+    const [y, mo] = ym.split('-');
+    return new Date(parseInt(y), parseInt(mo) - 1, 1)
+        .toLocaleString('default', { month: 'short' });
+}
+
+/**
+ * Render an income-vs-expense bar chart into container.
+ *
+ * @param {Array}       data       Output of buildIncomeExpenseData
+ * @param {HTMLElement} container  .bar-chart-card element
+ */
+export function renderIncomeExpenseChart(data, container) {
+    const hasData = data && data.some(d => d.income > 0 || d.expense > 0);
+
+    if (!hasData) {
+        container.innerHTML = `
+            <div class="chart-empty-sm" role="status">
+                <i class="ri-bar-chart-2-line" aria-hidden="true"></i>
+                <span>No data for this period</span>
+            </div>`;
+        return;
+    }
+
+    const maxVal = Math.max(...data.map(d => Math.max(d.income, d.expense)), 1);
+
+    const cols = data.map((d, i) => {
+        const incH = ((d.income  / maxVal) * 100).toFixed(1);
+        const expH = ((d.expense / maxVal) * 100).toFixed(1);
+        const delay = (i * 0.045).toFixed(3);
+        return `
+            <div class="bar-col" style="--bar-delay:${delay}s"
+                 aria-label="${d.label}: Income ${formatCurrency(d.income)}, Expenses ${formatCurrency(d.expense)}">
+                <div class="bar-group">
+                    <div class="bar income-bar" style="--bar-h:${incH}%"
+                         title="Income ${formatCurrency(d.income)}"></div>
+                    <div class="bar expense-bar" style="--bar-h:${expH}%"
+                         title="Expenses ${formatCurrency(d.expense)}"></div>
+                </div>
+                <div class="bar-month-label">${d.label}</div>
+            </div>`;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="bar-chart" role="img" aria-label="Income vs expenses bar chart">
+            <div class="bar-cols">${cols}</div>
+            <div class="bar-chart-legend" aria-hidden="true">
+                <span class="bar-legend-dot income-dot"></span><span>Income</span>
+                <span class="bar-legend-dot expense-dot"></span><span>Expenses</span>
+            </div>
+        </div>`;
+}
+
+// ---------------------------------------------------------------------------
+// buildWeeklyData / renderWeeklyChart
+// ---------------------------------------------------------------------------
+
+/**
+ * Compute expense totals for the last 4 rolling 7-day windows.
+ *
+ * @param {Array} transactions
+ * @returns {Array<{label, total, changePct, changeDir}>} oldest-first
+ */
+export function buildWeeklyData(transactions) {
+    const now = new Date();
+    const weeks = [];
+
+    for (let w = 3; w >= 0; w--) {
+        const endDate  = new Date(now.getFullYear(), now.getMonth(), now.getDate() - w * 7);
+        const startDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 6);
+
+        const toStr = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        const startStr = toStr(startDate);
+        const endStr   = toStr(endDate);
+
+        const total = transactions
+            .filter(t => t.type === 'expense' && t.date >= startStr && t.date <= endStr)
+            .reduce((s, t) => s + t.amount, 0);
+
+        const startLabel = startDate.toLocaleString('default', { month: 'short', day: 'numeric' });
+        const endLabel   = endDate.toLocaleString('default', { day: 'numeric' });
+
+        weeks.push({ label: `${startLabel}–${endLabel}`, total });
+    }
+
+    return weeks.map((w, i) => {
+        const prev = i > 0 ? weeks[i - 1].total : null;
+        const changePct = prev === null || prev === 0 ? null
+            : Math.round((w.total - prev) / prev * 100);
+        const changeDir = prev === null ? null
+            : w.total > prev ? 'up' : w.total < prev ? 'down' : 'same';
+        return { ...w, changePct, changeDir };
+    });
+}
+
+/**
+ * Render a week-over-week spending comparison into container.
+ *
+ * @param {Array}       data       Output of buildWeeklyData
+ * @param {HTMLElement} container  .weekly-chart-card element
+ */
+export function renderWeeklyChart(data, container) {
+    const hasData = data && data.some(w => w.total > 0);
+
+    if (!hasData) {
+        container.innerHTML = `
+            <div class="chart-empty-sm" role="status">
+                <i class="ri-calendar-line" aria-hidden="true"></i>
+                <span>No expense data yet</span>
+            </div>`;
+        return;
+    }
+
+    const maxTotal = Math.max(...data.map(w => w.total), 1);
+
+    const rows = data.map((w, i) => {
+        const barW  = ((w.total / maxTotal) * 100).toFixed(1);
+        const delay = (i * 0.07).toFixed(3);
+        let trendHtml = '';
+        if (w.changeDir === 'up') {
+            trendHtml = `<span class="week-trend up" aria-label="Up ${Math.abs(w.changePct)}%">↑ ${Math.abs(w.changePct)}%</span>`;
+        } else if (w.changeDir === 'down') {
+            trendHtml = `<span class="week-trend down" aria-label="Down ${Math.abs(w.changePct)}%">↓ ${Math.abs(w.changePct)}%</span>`;
+        } else if (w.changeDir === 'same') {
+            trendHtml = `<span class="week-trend same" aria-label="No change">—</span>`;
+        }
+        return `
+            <div class="week-row" style="--week-delay:${delay}s"
+                 aria-label="${w.label}: ${formatCurrency(w.total)}">
+                <div class="week-label">${w.label}</div>
+                <div class="week-bar-track">
+                    <div class="week-bar-fill" style="--week-w:${barW}%"></div>
+                </div>
+                <div class="week-amount">${formatCurrency(w.total)}</div>
+                ${trendHtml}
+            </div>`;
+    }).join('');
+
+    container.innerHTML = `<div class="weekly-chart" role="list" aria-label="Weekly spending comparison">${rows}</div>`;
+}
+
+// ---------------------------------------------------------------------------
+// buildDayHeatmapData / renderDayHeatmap
+// ---------------------------------------------------------------------------
+
+/**
+ * Sum expense amounts per day-of-month across the selected range.
+ *
+ * @param {Array}  transactions
+ * @param {string} range  '3m' | '6m' | '1y' | 'all'
+ * @returns {Array<{day: number, total: number}>} days 1–31
+ */
+export function buildDayHeatmapData(transactions, range) {
+    const months = getRangeMonths(range);
+    const filtered = transactions.filter(t => {
+        if (t.type !== 'expense') return false;
+        return months === null || months.includes(t.date.slice(0, 7));
+    });
+
+    const byDay = {};
+    filtered.forEach(t => {
+        const day = parseInt(t.date.slice(8, 10), 10);
+        byDay[day] = (byDay[day] || 0) + t.amount;
+    });
+
+    return Array.from({ length: 31 }, (_, i) => ({ day: i + 1, total: byDay[i + 1] || 0 }));
+}
+
+/**
+ * Render a day-of-month spending heatmap into container.
+ *
+ * @param {Array}       data       Output of buildDayHeatmapData
+ * @param {HTMLElement} container  .day-heatmap-card element
+ */
+export function renderDayHeatmap(data, container) {
+    const hasData = data && data.some(d => d.total > 0);
+
+    if (!hasData) {
+        container.innerHTML = `
+            <div class="chart-empty-sm" role="status">
+                <i class="ri-calendar-2-line" aria-hidden="true"></i>
+                <span>No expense data for this period</span>
+            </div>`;
+        return;
+    }
+
+    const maxTotal = Math.max(...data.map(d => d.total), 1);
+
+    const cells = data.map(d => {
+        const intensity = d.total > 0 ? Math.max(0.12, d.total / maxTotal) : 0;
+        const label = d.total > 0
+            ? `Day ${d.day}: ${formatCurrency(d.total)}`
+            : `Day ${d.day}: no spending`;
+        return `
+            <div class="heatmap-cell ${d.total > 0 ? 'active' : ''}"
+                 style="--cell-intensity:${intensity.toFixed(3)}"
+                 title="${label}"
+                 aria-label="${label}">
+                <span class="heatmap-day">${d.day}</span>
+            </div>`;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="day-heatmap" aria-label="Spending by day of month">
+            <div class="heatmap-grid">${cells}</div>
+            <div class="heatmap-legend" aria-hidden="true">
+                <span>Less</span>
+                <div class="heatmap-legend-scale"></div>
+                <span>More</span>
+            </div>
+        </div>`;
 }
