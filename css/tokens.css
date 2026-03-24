@@ -142,12 +142,6 @@
 @media (max-width: 480px) {
     :root {
         --space-lg: 14px;
-        --space-md: 12px;
-        --font-lg: 16px;
-        --font-md: 14px;
-        --font-sm: 12px;
-        --font-xs: 11px;
-        --button-padding-y: 12px;
     }
 }
 

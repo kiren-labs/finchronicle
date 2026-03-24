@@ -611,8 +611,6 @@
  * Light: rgb 255, 59, 48 (--color-danger)
  * Dark:  rgb 255, 80, 68  (override via dark-mode.css token --chart-heat)
  */
-:root { --chart-heat: 255, 59, 48; }
-
 .day-heatmap {
     display: flex;
     flex-direction: column;
