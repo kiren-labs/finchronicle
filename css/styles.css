@@ -1879,7 +1879,7 @@ button.primary.loading .btn-spinner {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
     min-width: 180px;
 }
 
@@ -2238,30 +2238,30 @@ button.primary.loading .btn-spinner {
 }
 
 .backup-status-good {
-    background: #d4edda;
-    color: #155724;
+    background: var(--color-chip-positive-bg);
+    color: var(--color-success-strong);
 }
 
 .backup-status-good i {
-    color: #28a745;
+    color: var(--color-success-deep);
 }
 
 .backup-status-warning {
-    background: #fff3cd;
-    color: #856404;
+    background: var(--color-warning-bg);
+    color: var(--color-warning-text);
 }
 
 .backup-status-warning i {
-    color: #ffc107;
+    color: var(--color-warning-border);
 }
 
 .backup-status-danger {
-    background: #f8d7da;
-    color: #721c24;
+    background: var(--color-chip-negative-bg);
+    color: var(--color-danger-strong);
 }
 
 .backup-status-danger i {
-    color: #dc3545;
+    color: var(--color-danger);
 }
 
 .backup-info {
@@ -2730,16 +2730,16 @@ button.primary.loading .btn-spinner {
     color: var(--color-border);
 }
 
-.recurring-empty p {
+.recurring-empty p:not(.recurring-empty-sub) {
     margin: 0 0 var(--space-xs) 0;
     font-size: var(--font-md);
     font-weight: 500;
 }
 
 .recurring-empty-sub {
-    font-size: var(--font-sm) !important;
-    font-weight: 400 !important;
-    color: var(--color-text-subtle) !important;
+    font-size: var(--font-sm);
+    font-weight: 400;
+    color: var(--color-text-subtle);
 }
 
 /* Recurring badge in transaction list */
