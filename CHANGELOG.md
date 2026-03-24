@@ -15,6 +15,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.12.1] - 2026-03-24
+
+### Added
+- **Reports tab** — Split the former Groups tab into two dedicated tabs in the bottom nav
+  - **Reports** (new) — Houses all four analytics charts (category pie, income vs expenses, weekly, heatmap) with the date range selector
+  - **Groups** (retained) — Now exclusively shows the By Month / By Category transaction grouping list
+  - Bottom nav updated to 5 items: Add · List · Reports · Groups · Settings; mobile nav icon and font scaled down to keep all items comfortable at 75px each
+- **Range date span** — Exact from/to dates displayed beside the range pills (e.g. "Sep 25, 2025 – Mar 24, 2026"); automatically reflects the earliest transaction date when "All" is selected; hidden on screens narrower than 400px
+
+### Changed
+- **Heatmap — colour separability** — Intensity formula changed from linear (`total / max`) to square-root (`√(total / max)`); days with low-but-real spending are now visually distinct instead of all collapsing to the same faint pink
+- **Heatmap — period label** — Section title now shows the active range (e.g. "Spending by Day of Month — Last 6 Months") so it's clear the heatmap responds to the range selector, not the month dropdown below
+- **Weekly Spending — label clarity** — Title updated to "Weekly Spending — Last 4 Weeks" to make explicit that this chart always shows the most recent 4 rolling weeks regardless of the selected range
+
+### Technical
+- `js/ui.js` — `_renderGroupCharts()` promoted to exported `updateReportsView()`; removed from `updateGroupedView()` so the two tabs are fully independent
+- `js/app.js` — Tab list extended to include `"reports"`; range pills handler updated to call `updateReportsView()`; unused `updateGroupedView` import removed
+- `js/chart.js` — Heatmap intensity: `Math.max(0.12, total/max)` → `Math.sqrt(total/max)`
+- `css/chart.css` — Heatmap active cell formula updated to `calc(0.15 + var(--cell-intensity) * 0.80)`; added `.range-date-span` styles; `.range-date-span` hidden below 400px
+- `css/styles.css` — Added `@media (max-width: 480px)` rules for 5-item bottom nav (font-size `14px → 12px`, icon `26px → 22px`)
+
+---
+
 ## [3.12.0] - 2026-03-24
 
 ### Added

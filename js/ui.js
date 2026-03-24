@@ -33,6 +33,9 @@ export function updateUI() {
     case "list":
       updateTransactionsList();
       break;
+    case "reports":
+      updateReportsView();
+      break;
     case "groups":
       updateGroupedView();
       break;
@@ -281,9 +284,6 @@ function scrollToTop() {
 export function updateGroupedView() {
   const content = getDOM().groupedContent;
 
-  // Always refresh charts (they render their own empty states)
-  _renderGroupCharts();
-
   if (state.transactions.length === 0) {
     content.innerHTML = `
             <div class="card">
@@ -324,7 +324,7 @@ const RANGE_LABELS = {
   all: "All Time",
 };
 
-function _renderGroupCharts() {
+export function updateReportsView() {
   const range = state.reportRange;
   const txns = state.transactions;
   const rangeLabel = RANGE_LABELS[range] || "";
@@ -514,6 +514,9 @@ export function switchTab(tab) {
       updateTransactionsList();
       updateMonthFilters();
       updateCategoryFilter();
+      break;
+    case "reports":
+      updateReportsView();
       break;
     case "groups":
       updateGroupedView();

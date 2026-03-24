@@ -20,7 +20,7 @@ import {
 import { validateTransaction } from "./validation.js";
 import {
   updateUI,
-  updateGroupedView,
+  updateReportsView,
   switchTab,
   quickAddTransaction,
   toggleSummaryCollapse,
@@ -148,7 +148,7 @@ function bindStaticEvents() {
     .addEventListener("click", closeCurrencySelector);
 
   // ---- Tab navigation (top tabs + bottom nav) ----
-  ["add", "list", "groups", "settings"].forEach((tab) => {
+  ["add", "list", "reports", "groups", "settings"].forEach((tab) => {
     const topTab = document.getElementById(`${tab}-tab`);
     if (topTab) topTab.addEventListener("click", () => switchTab(tab));
 
@@ -187,12 +187,12 @@ function bindStaticEvents() {
       });
     });
 
-  // ---- Groups tab: chart date range pills ----
+  // ---- Reports tab: chart date range pills ----
   document.querySelector(".range-pills").addEventListener("click", (e) => {
     const btn = e.target.closest(".range-pill");
     if (!btn) return;
     state.reportRange = btn.dataset.range;
-    updateGroupedView();
+    updateReportsView();
   });
 
   // ---- Settings toolbar buttons ----
