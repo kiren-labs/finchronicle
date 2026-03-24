@@ -490,11 +490,39 @@
 
             <!-- Groups Tab -->
             <div id="groupsTab" class="tab-content" role="tabpanel" aria-labelledby="groups-tab">
+
+                <!-- Chart date range selector -->
+                <div class="chart-range-bar">
+                    <label for="reportRangeSelect" class="chart-range-label">Period:</label>
+                    <select id="reportRangeSelect" class="chart-range-select" aria-label="Select chart date range">
+                        <option value="3m">Last 3 months</option>
+                        <option value="6m" selected>Last 6 months</option>
+                        <option value="1y">Last 12 months</option>
+                        <option value="all">All time</option>
+                    </select>
+                </div>
+
+                <!-- Spending by Category (pie) -->
+                <p class="chart-section-title">Spending by Category</p>
+                <div id="categoryChart" class="category-chart"></div>
+
+                <!-- Income vs Expenses (bar) -->
+                <p class="chart-section-title">Income vs Expenses</p>
+                <div id="incomeExpenseChart" class="bar-chart-card"></div>
+
+                <!-- Weekly Spending -->
+                <p class="chart-section-title">Weekly Spending</p>
+                <div id="weeklyChart" class="weekly-chart-card"></div>
+
+                <!-- Day of Month Heatmap -->
+                <p class="chart-section-title">Spending by Day of Month</p>
+                <div id="dayHeatmap" class="day-heatmap-card"></div>
+
+                <!-- Grouped list -->
                 <div class="filters">
                     <button class="filter-btn active">By Month</button>
                     <button class="filter-btn">By Category</button>
                 </div>
-                <div id="categoryChart" class="category-chart"></div>
                 <div id="groupedContent"></div>
             </div>
 

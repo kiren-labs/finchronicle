@@ -7,7 +7,12 @@ import { sanitizeHTML, formatDate, formatMonth, showMessage } from './utils.js';
 import { formatCurrency, getCurrency } from './currency.js';
 import { deleteTransactionFromDB } from './db.js';
 import { updateSettingsContent } from './settings.js';
-import { renderCategoryPieChart, buildCategoryData } from './chart.js';
+import {
+    renderCategoryPieChart, buildCategoryData, getRangeMonths,
+    buildIncomeExpenseData, renderIncomeExpenseChart,
+    buildWeeklyData, renderWeeklyChart,
+    buildDayHeatmapData, renderDayHeatmap,
+} from './chart.js';
 
 // ---- Master UI Refresh ----
 
