@@ -130,7 +130,6 @@ finchronicle/
 │   └── maskable-icon-512.png
 ├── CHANGELOG.md            - Version history
 ├── README.md               - User documentation
-└── CLAUDE.md               - Developer instructions
 ```
 
 ### index.html - UI Structure (440 lines)
@@ -1709,7 +1708,7 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 ### Understanding the Codebase
 
 **Start here:**
-1. Read `CLAUDE.md` - Development guidelines
+1. Read `README.md` - Overview and setup
 2. Read `CHANGELOG.md` - Feature evolution
 3. Open `index.html` - See UI structure
 4. Open `app.js` - Read initialization (line 2340)

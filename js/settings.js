@@ -6,6 +6,7 @@ import { APP_VERSION, VERSION_KEY, state } from './state.js';
 import { formatDate, showMessage } from './utils.js';
 import { getCurrency } from './currency.js';
 import { renderFAQ } from './faq.js';
+import { renderRecurringSection } from './recurring.js';
 
 // ---- Dark Mode ----
 
@@ -264,6 +265,8 @@ export function renderBackupStatus() {
 export function updateSettingsContent() {
     const backupContainer = document.getElementById('backupStatusContainer');
     const faqContainer = document.getElementById('faqContainer');
+
+    renderRecurringSection();
 
     if (backupContainer) {
         backupContainer.innerHTML = renderBackupStatus();

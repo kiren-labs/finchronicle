@@ -147,7 +147,10 @@ export function updateTransactionsList() {
                 <i class="ri-arrow-${isIncome ? 'up' : 'down'}-circle-fill"></i>
             </div>
             <div class="transaction-details">
-                <div class="transaction-category">${sanitizeHTML(t.category)}</div>
+                <div class="transaction-category">
+                    ${sanitizeHTML(t.category)}
+                    ${t.recurringId ? '<span class="recurring-badge" title="Auto-generated recurring transaction"><i class="ri-repeat-line"></i></span>' : ''}
+                </div>
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ''}
                 <div class="transaction-date">${formatDate(t.date)}</div>
             </div>
@@ -409,6 +412,10 @@ export function switchTab(tab) {
     // Update tab content
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.getElementById(tab + 'Tab').classList.add('active');
+
+    // Hide summary on settings tab, show on all others
+    const summarySection = document.querySelector('.summary-section');
+    if (summarySection) summarySection.style.display = tab === 'settings' ? 'none' : '';
 
     // Refresh the newly visible tab's content (P1: lazy-render)
     switch (tab) {

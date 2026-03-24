@@ -11,8 +11,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 - Budget tracking per category
-- Recurring transactions
 - Search functionality
+
+---
+
+## [3.11.0] - 2026-03-24
+
+### Added
+- **Recurring Transactions** — Auto-generate predictable expenses and income on a schedule
+  - Supported frequencies: Daily, Weekly, Every 2 Weeks, Monthly, Quarterly, Yearly
+  - Optional "Day of Month" field (1–28) for monthly recurrences to pin a specific day
+  - Templates checked on every app load; due transactions are created automatically
+  - Generated transactions marked with a repeat badge (`ri-repeat-line`) in the transaction list
+  - Manage recurring templates from the Settings tab: Add, Edit, Pause/Resume, Delete
+  - Pause a recurring without deleting it; resume any time
+  - Deleting a template does not remove already-created transactions
+
+### Technical
+- New module: `js/recurring.js` — IDB CRUD, date computation, rendering, modal logic
+- New IDB store: `recurringTemplates` (DB_VERSION bumped 1 → 2)
+  - Indexes: `nextDueDate`, `enabled`
+- Transaction schema: added optional `recurringId: number | null` field
+- `js/state.js`: `DB_VERSION` bumped to 2, `RECURRING_STORE` constant added, `state.recurringTemplates` added
+- `js/db.js`: `onupgradeneeded` refactored with `oldVersion` guards; 3 new exports: `loadRecurringTemplatesFromDB`, `saveRecurringTemplateToDB`, `deleteRecurringTemplateFromDB`
+- `js/settings.js`: imports and calls `renderRecurringSection()` from `updateSettingsContent()`
+- `js/ui.js`: recurring badge rendered for transactions with `recurringId`
+- `js/app.js`: `loadRecurringIntoState()` and `checkRecurringTransactions()` called on init
+- `index.html`: `#recurringContainer` in Settings tab; `#recurringModal` with full form
+- `css/styles.css`: recurring section, list, item, frequency chip, empty state, badge, modal body, form hint styles
+- `css/dark-mode.css`: dark mode overrides for recurring components
+- `sw.js`: `js/recurring.js` added to `CACHE_URLS`; cache version bumped to `3.11.0`
 
 ---
 

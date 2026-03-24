@@ -16,6 +16,8 @@
     <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
     <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet"
         integrity="sha384-RwhG+8423fpoSoUMjpibFzMxLQeaO7oBV45/+IxuLaxxiUOFL9R+OzbK5rBpSazc" crossorigin="anonymous">
 
@@ -136,6 +138,74 @@
                 <button class="modal-btn modal-btn-confirm">
                     Done
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recurring Transaction Modal (v3.11.0) -->
+    <div class="modal" id="recurringModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ri-repeat-line"></i> Add Recurring</h3>
+                <button class="close-btn" aria-label="Close recurring modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Type</label>
+                    <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
+                        <button type="button" class="type-option active" id="recurringTypeExpense"
+                            data-rtype="expense" role="radio" aria-checked="true">
+                            <i class="ri-arrow-down-circle-line"></i> Expense
+                        </button>
+                        <button type="button" class="type-option" id="recurringTypeIncome"
+                            data-rtype="income" role="radio" aria-checked="false">
+                            <i class="ri-arrow-up-circle-line"></i> Income
+                        </button>
+                    </div>
+                    <input type="hidden" id="recurringType" value="expense">
+                </div>
+                <div class="form-group">
+                    <label for="recurringAmount">Amount</label>
+                    <input type="number" id="recurringAmount" placeholder="1000"
+                        min="0.01" max="999999999" step="0.01" inputmode="decimal">
+                </div>
+                <div class="form-group">
+                    <label for="recurringCategory">Category</label>
+                    <select id="recurringCategory">
+                        <option value="" disabled selected>Select category</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="recurringNotes">Notes (Optional)</label>
+                    <input type="text" id="recurringNotes" placeholder="e.g. Monthly rent">
+                </div>
+                <div class="form-group">
+                    <label for="recurringFrequency">Frequency</label>
+                    <select id="recurringFrequency">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Every 2 Weeks</option>
+                        <option value="monthly" selected>Monthly</option>
+                        <option value="quarterly">Quarterly (every 3 months)</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <div class="form-group" id="recurringDayGroup">
+                    <label for="recurringDay">Day of Month <span class="form-hint-inline">(1–28)</span></label>
+                    <input type="number" id="recurringDay" min="1" max="28"
+                        placeholder="e.g. 1" inputmode="numeric">
+                    <div class="form-hint">Leave blank to use the same day as the start date</div>
+                </div>
+                <div class="form-group">
+                    <label for="recurringStartDate">Start Date</label>
+                    <input type="date" id="recurringStartDate">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" id="recurringCancelBtn">Cancel</button>
+                <button class="modal-btn modal-btn-confirm" id="recurringSaveBtn">Save</button>
             </div>
         </div>
     </div>
@@ -479,6 +549,9 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Recurring Transactions (v3.11.0) -->
+                <div id="recurringContainer"></div>
 
                 <!-- Backup Status Card (v3.9.0) -->
                 <div id="backupStatusContainer"></div>

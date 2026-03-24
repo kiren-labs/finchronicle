@@ -37,6 +37,10 @@ body.dark-mode {
 
     --shadow-sm: 0 var(--space-2xs) var(--space-sm) rgba(0, 0, 0, 0.4);
     --shadow-md: 0 var(--space-2xs) var(--space-md) rgba(0, 0, 0, 0.4);
+
+    /* Mobile amount chips — override light-mode pastel backgrounds */
+    --color-chip-negative-bg: #3a1a1a;
+    --color-chip-positive-bg: #1a3a23;
 }
 
 /* ==========================================================================
@@ -60,9 +64,14 @@ body.dark-mode .summary-label {
     color: var(--color-text);
 }
 
-/* Filter buttons: full → muted */
+/* Filter buttons: full → muted (inactive only) */
 body.dark-mode .filter-btn {
     color: var(--color-text-muted);
+}
+
+/* Active filter button must keep white text on primary background */
+body.dark-mode .filter-btn.active {
+    color: var(--color-on-primary);
 }
 
 /* Active nav item: primary → on-primary */
@@ -189,4 +198,21 @@ body.dark-mode .backup-status-danger {
 
 body.dark-mode .backup-status-danger i {
     color: #ff9aa2;
+}
+
+/* ==========================================================================
+   Recurring Transactions (v3.11.0)
+   ========================================================================== */
+
+body.dark-mode .recurring-frequency-chip {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-strong);
+}
+
+body.dark-mode .recurring-title i {
+    color: var(--color-primary-strong);
+}
+
+body.dark-mode .recurring-empty i {
+    color: var(--color-border);
 }
