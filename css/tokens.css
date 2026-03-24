@@ -133,6 +133,9 @@
     --chart-c6: #FF3B30;   /* red     — Healthcare / Debt */
     --chart-c7: #34C759;   /* green   — Savings / Investments */
     --chart-c8: #8E8E93;   /* slate   — Misc / Other */
+
+    /* Day-of-month heatmap heat colour (RGB components only — used in rgba()) */
+    --chart-heat: 255, 59, 48;   /* matches --color-danger; dark-mode.css overrides */
 }
 
 /* Mobile (≤480px) token adjustments */
