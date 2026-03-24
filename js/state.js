@@ -3,7 +3,7 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = '3.11.0';
+export const APP_VERSION = '3.12.0';
 export const VERSION_KEY = 'app_version';
 
 // IndexedDB Configuration
@@ -32,6 +32,7 @@ export const state = {
     pendingRestoreData: null,
     currentPage: 1,
     recurringTemplates: [],
+    reportRange: '6m',
 };
 
 // Category definitions

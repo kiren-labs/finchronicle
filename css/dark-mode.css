@@ -216,3 +216,41 @@ body.dark-mode .recurring-title i {
 body.dark-mode .recurring-empty i {
     color: var(--color-border);
 }
+
+/* ==========================================================================
+   Reports Charts (v3.12.0)
+   ========================================================================== */
+
+/* Heat colour for the day-of-month heatmap — danger orange-red on dark bg */
+body.dark-mode {
+    --chart-heat: 255, 80, 68;
+}
+
+body.dark-mode .range-pill {
+    color: var(--color-text-muted);
+    border-color: var(--color-border);
+}
+
+body.dark-mode .range-pill:hover {
+    color: var(--color-primary-strong);
+    border-color: var(--color-primary-strong);
+}
+
+body.dark-mode .range-pill.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #ffffff;
+}
+
+body.dark-mode .week-bar-track {
+    background: var(--color-bg);
+}
+
+body.dark-mode .heatmap-cell {
+    background: var(--color-bg);
+    border-color: var(--color-border);
+}
+
+body.dark-mode .chart-empty-sm {
+    color: var(--color-text-muted);
+}

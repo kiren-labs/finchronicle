@@ -827,7 +827,7 @@ button.primary.loading .btn-spinner {
     flex: 1;
     padding: var(--space-lg);
     border: none;
-    border-radius: var(--space-sm);
+    border-radius: var(--radius-md);
     background: transparent;
     font-size: var(--font-lg);
     font-weight: 600;
@@ -1065,9 +1065,9 @@ button.primary.loading .btn-spinner {
 
 .filter-label {
     display: block;
-    font-size: 14px;
+    font-size: var(--font-md);
     color: var(--color-text-muted);
-    margin-bottom: 8px;
+    margin-bottom: var(--space-sm);
     font-weight: 500;
 }
 
@@ -1807,13 +1807,13 @@ button.primary.loading .btn-spinner {
 }
 
 .group-content {
-    padding: 12px 16px;
+    padding: var(--space-md) var(--space-lg);
 }
 
 .group-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-sm);
 }
 
 .group-row:last-child {
@@ -1821,7 +1821,7 @@ button.primary.loading .btn-spinner {
 }
 
 .group-row.with-border {
-    padding-top: 8px;
+    padding-top: var(--space-sm);
     border-top: 1px solid var(--color-border);
 }
 
@@ -1841,7 +1841,7 @@ button.primary.loading .btn-spinner {
 }
 
 .group-value.large {
-    font-size: 20px;
+    font-size: var(--font-2xl);
 }
 
 /* ==========================================================================
@@ -1879,7 +1879,7 @@ button.primary.loading .btn-spinner {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
     min-width: 180px;
 }
 
@@ -2238,30 +2238,30 @@ button.primary.loading .btn-spinner {
 }
 
 .backup-status-good {
-    background: #d4edda;
-    color: #155724;
+    background: var(--color-chip-positive-bg);
+    color: var(--color-success-strong);
 }
 
 .backup-status-good i {
-    color: #28a745;
+    color: var(--color-success-deep);
 }
 
 .backup-status-warning {
-    background: #fff3cd;
-    color: #856404;
+    background: var(--color-warning-bg);
+    color: var(--color-warning-text);
 }
 
 .backup-status-warning i {
-    color: #ffc107;
+    color: var(--color-warning-border);
 }
 
 .backup-status-danger {
-    background: #f8d7da;
-    color: #721c24;
+    background: var(--color-chip-negative-bg);
+    color: var(--color-danger-strong);
 }
 
 .backup-status-danger i {
-    color: #dc3545;
+    color: var(--color-danger);
 }
 
 .backup-info {
@@ -2306,7 +2306,7 @@ button.primary.loading .btn-spinner {
     padding: var(--space-sm);
     font-family: inherit;
     text-decoration: none;
-    transition: background 0.2s ease;
+    transition: background var(--transition-fast);
     border-radius: var(--radius-md);
     align-self: flex-start;
 }
@@ -2359,7 +2359,7 @@ button.primary.loading .btn-spinner {
     padding: var(--space-md) var(--space-lg);
     cursor: pointer;
     background: var(--color-bg);
-    transition: background 0.2s ease;
+    transition: background var(--transition-fast);
     width: 100%;
     border: none;
     text-align: left;
@@ -2395,7 +2395,7 @@ button.primary.loading .btn-spinner {
 
 .faq-section-arrow {
     font-size: var(--font-xl);
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-med);
     color: var(--color-text-muted);
 }
 
@@ -2421,7 +2421,7 @@ button.primary.loading .btn-spinner {
     color: var(--color-text);
     padding: var(--space-sm);
     border-radius: var(--radius-md);
-    transition: background 0.2s ease;
+    transition: background var(--transition-fast);
     width: 100%;
     border: none;
     background: transparent;
@@ -2514,7 +2514,6 @@ button.primary.loading .btn-spinner {
     border-top: 1px solid var(--color-border);
     display: flex;
     padding: var(--space-sm) 0;
-    padding-bottom: var(--space-sm);
     box-shadow: 0 -2px var(--space-sm) rgba(0, 0, 0, 0.05);
 }
 
@@ -2731,16 +2730,16 @@ button.primary.loading .btn-spinner {
     color: var(--color-border);
 }
 
-.recurring-empty p {
+.recurring-empty p:not(.recurring-empty-sub) {
     margin: 0 0 var(--space-xs) 0;
     font-size: var(--font-md);
     font-weight: 500;
 }
 
 .recurring-empty-sub {
-    font-size: var(--font-sm) !important;
-    font-weight: 400 !important;
-    color: var(--color-text-subtle) !important;
+    font-size: var(--font-sm);
+    font-weight: 400;
+    color: var(--color-text-subtle);
 }
 
 /* Recurring badge in transaction list */
