@@ -600,7 +600,7 @@
 }
 
 .heatmap-cell {
-    aspect-ratio: 1;
+    height: 32px;
     border-radius: var(--radius-sm);
     background: var(--color-bg);
     display: flex;
@@ -680,5 +680,9 @@
     .heatmap-grid {
         grid-template-columns: repeat(7, 1fr);
         gap: 3px;
+    }
+
+    .heatmap-cell {
+        height: 28px;
     }
 }

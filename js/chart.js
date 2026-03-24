@@ -109,7 +109,7 @@ export function renderCategoryPieChart(data, container) {
             <div class="chart-donut" aria-hidden="true"></div>
             <div class="chart-center-info" aria-hidden="true">
                 <span class="chart-center-amount">${totalFormatted}</span>
-                <span class="chart-center-label">Total Spent</span>
+                <span class="chart-center-label">Spent</span>
             </div>
         </div>
         <div class="chart-legend" role="list" aria-label="Category spending breakdown">
@@ -146,7 +146,7 @@ export function renderCategoryPieChart(data, container) {
         });
         item.addEventListener('mouseleave', () => {
             amtEl.textContent   = totalFormatted;
-            labelEl.textContent = 'Total Spent';
+            labelEl.textContent = 'Spent';
         });
     });
 }
@@ -338,7 +338,7 @@ export function buildWeeklyData(transactions) {
         const prev = i > 0 ? weeks[i - 1].total : null;
         const changePct = prev === null || prev === 0 ? null
             : Math.round((w.total - prev) / prev * 100);
-        const changeDir = prev === null ? null
+        const changeDir = prev === null || prev === 0 ? null
             : w.total > prev ? 'up' : w.total < prev ? 'down' : 'same';
         return { ...w, changePct, changeDir };
     });
