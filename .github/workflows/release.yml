@@ -30,7 +30,7 @@ jobs:
           VERSION=${{ steps.get_version.outputs.version }}
           
           # Check js/state.js
-          APP_VERSION=$(grep "const APP_VERSION = " js/state.js | sed "s/.*'\(.*\)'.*/\1/")
+          APP_VERSION=$(grep "const APP_VERSION = " js/state.js | sed 's/.*["'"'"']\(.*\)["'"'"'].*/\1/')
           if [ "$APP_VERSION" != "$VERSION" ]; then
             echo "Error: Version mismatch in js/state.js (expected $VERSION, got $APP_VERSION)"
             exit 1
