@@ -2694,7 +2694,25 @@ button.primary.loading .btn-spinner {
 }
 
 .recurring-item.paused {
-    opacity: 0.55;
+    /* No blanket opacity — it tanks contrast of all child text.
+       Instead, individual elements are muted via explicit color overrides below. */
+}
+
+.recurring-item.paused .recurring-item-title {
+    color: var(--color-text-muted);
+}
+
+.recurring-item.paused .recurring-frequency-chip {
+    color: var(--color-text-muted);
+    background: transparent;
+}
+
+.recurring-item.paused .recurring-item-meta {
+    color: var(--color-text-muted);
+}
+
+.recurring-item.paused .recurring-item-actions {
+    opacity: 0.6;
 }
 
 .recurring-item-info {

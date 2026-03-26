@@ -206,7 +206,7 @@ body.dark-mode .backup-status-danger i {
 
 body.dark-mode .recurring-frequency-chip {
     background: var(--color-primary-soft);
-    color: var(--color-primary-strong);
+    color: var(--color-text); /* white on #1a2a3a = 13:1, vs #409CFF = 4.9:1 at 11px */
 }
 
 body.dark-mode .recurring-title i {
