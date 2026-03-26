@@ -43,6 +43,16 @@ export async function saveBudget(budget) {
       throw new Error("Alert threshold must be between 0 and 100");
     }
 
+    // Block duplicate categories (only on new budgets, not edits)
+    if (!budget.id) {
+      const exists = state.budgets.find(
+        (b) => b.category === budget.category
+      );
+      if (exists) {
+        throw new Error(`A budget for "${budget.category}" already exists. Edit it instead.`);
+      }
+    }
+
     // Set timestamps
     if (!budget.id) {
       budget.id = Date.now();
@@ -357,7 +367,7 @@ export function renderBudgetModal(budget = null) {
   };
 }
 
-// Render budget alert banner
+// Render budget alert banner — always one compact line regardless of alert count
 export function renderBudgetAlerts() {
   const alerts = getActiveBudgetAlerts();
   const container = document.getElementById("budgetAlerts");
@@ -369,29 +379,25 @@ export function renderBudgetAlerts() {
     return;
   }
 
-  const alertsHTML = alerts
-    .map((alert) => {
-      const percentage = Math.min(
-        100,
-        (alert.spent / alert.limit) * 100
-      );
-      const icon = alert.isExceeded
-        ? "ri-alert-fill"
-        : "ri-alert-line";
-      const className = alert.isExceeded
-        ? "alert-danger"
-        : "alert-warning";
+  const exceeded = alerts.filter((a) => a.isExceeded);
+  const warning  = alerts.filter((a) => a.isWarning);
+  const hasExceeded = exceeded.length > 0;
 
-      return `
-        <div class="budget-alert ${className}">
-          <i class="${icon}"></i>
-          <div class="alert-content">
-            <strong>${alert.category}</strong>: ${formatCurrency(alert.spent)} of ${formatCurrency(alert.limit)} (${Math.round(percentage)}%)
-          </div>
-        </div>
-      `;
-    })
-    .join("");
+  // Build a compact summary: show first 2 names, then "+N more" if needed
+  const named = alerts.slice(0, 2).map((a) => {
+    const pct = Math.min(100, Math.round((a.spent / a.limit) * 100));
+    return a.isExceeded ? `${a.category} exceeded` : `${a.category} at ${pct}%`;
+  });
+  if (alerts.length > 2) named.push(`+${alerts.length - 2} more`);
 
-  container.innerHTML = alertsHTML;
+  const summaryText = named.join(" · ");
+  const className   = hasExceeded ? "alert-danger" : "alert-warning";
+  const icon        = hasExceeded ? "ri-alert-fill" : "ri-error-warning-line";
+
+  container.innerHTML = `
+    <div class="budget-alert ${className}">
+      <i class="${icon}"></i>
+      <span class="budget-alert-text">${summaryText}</span>
+    </div>
+  `;
 }

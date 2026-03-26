@@ -379,3 +379,16 @@ body.dark-mode .form-group small {
 body.dark-mode .budget-collapse-title { color: var(--color-text); }
 body.dark-mode .budget-mini-bar       { background: var(--color-border); }
 body.dark-mode .budget-row-name       { color: var(--color-text); }
+
+/* ── Budget Alert Banners dark mode (v3.13.0) ── */
+body.dark-mode .budget-alert.alert-warning {
+    background: rgba(255, 193, 7, 0.12);
+    border-color: var(--color-warning-border);
+    color: #ffc107;
+}
+
+body.dark-mode .budget-alert.alert-danger {
+    background: rgba(255, 59, 48, 0.12);
+    border-color: var(--color-danger);
+    color: #ff6b60;
+}
