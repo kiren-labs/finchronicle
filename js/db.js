@@ -59,6 +59,14 @@ export function initDB() {
           });
         }
       }
+
+      // v4: tags multiEntry index on transactions store
+      if (oldVersion < 4) {
+        const txStore = event.target.transaction.objectStore(STORE_NAME);
+        if (!txStore.indexNames.contains("tags")) {
+          txStore.createIndex("tags", "tags", { unique: false, multiEntry: true });
+        }
+      }
     };
   });
 }

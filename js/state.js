@@ -3,12 +3,12 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "3.13.0";
+export const APP_VERSION = "3.14.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
 export const DB_NAME = "FinChronicleDB";
-export const DB_VERSION = 3;
+export const DB_VERSION = 4;
 export const STORE_NAME = "transactions";
 export const RECURRING_STORE = "recurringTemplates";
 export const BUDGETS_STORE = "budgets";
@@ -36,6 +36,8 @@ export const state = {
   recurringTemplates: [],
   reportRange: "6m",
   budgets: [],
+  searchQuery: "",
+  searchTags: [],
 };
 
 // Category definitions
