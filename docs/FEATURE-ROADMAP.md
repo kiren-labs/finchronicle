@@ -14,7 +14,7 @@
 | v3.10.5 | Category Pie Chart + WCAG fixes | DONE |
 | v3.11.0 | Recurring Transactions | DONE |
 | v3.12.0 | Complete Reports (trends, weekly) | DONE |
-| v3.13.0 | Budget Limits & Alerts | NOT STARTED |
+| v3.13.0 | Budget Limits & Alerts | DONE |
 | v3.14.0 | Tags & Search | NOT STARTED |
 | v3.15.0 | Optional Fields System | NOT STARTED |
 | v3.16.0 | Split Transactions | NOT STARTED |
