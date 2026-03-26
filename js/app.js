@@ -275,11 +275,10 @@ function bindStaticEvents() {
         freq === "monthly" ? "block" : "none";
     });
 
-  // ---- Add Budget button ----
-  const addBudgetBtn = document.getElementById("addBudgetBtn");
-  if (addBudgetBtn) {
-    addBudgetBtn.addEventListener("click", openBudgetModal);
-  }
+  // ---- Add Budget button (delegated — button is re-rendered by renderBudgetList) ----
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#addBudgetBtn")) openBudgetModal();
+  });
 
   // ---- Restore Preview modal close (X button) ----
   document

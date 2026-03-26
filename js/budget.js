@@ -171,10 +171,21 @@ export function renderBudgetList() {
   const container = document.getElementById("budgetContainer");
   if (!container) return;
 
+  const headerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 style="margin:0;">Monthly Budgets</h3>
+      <button class="toolbar-btn" id="addBudgetBtn" aria-label="Add Budget">
+        <i class="ri-add-line"></i>
+        <span>Add Budget</span>
+      </button>
+    </div>
+  `;
+
   if (state.budgets.length === 0) {
     container.innerHTML = `
       <div class="card">
-        <p style="text-align: center; color: var(--text-secondary);">
+        ${headerHTML}
+        <p style="text-align: center; color: var(--text-secondary); padding: 20px 0;">
           No budgets set yet. Add one to start tracking spending limits.
         </p>
       </div>
@@ -246,7 +257,7 @@ export function renderBudgetList() {
 
   container.innerHTML = `
     <div class="card">
-      <h3>Monthly Budgets</h3>
+      ${headerHTML}
       <div class="budget-list">
         ${budgetHTML}
       </div>
@@ -259,10 +270,7 @@ export function renderBudgetModal(budget = null) {
   const isEdit = !!budget;
   const title = isEdit ? "Edit Budget" : "Add Budget";
 
-  const categoryOptions = [
-    ...categories.expense,
-    ...categories.income,
-  ]
+  const categoryOptions = [...categories.expense]
     .sort()
     .map(
       (cat) =>
@@ -321,8 +329,11 @@ export function renderBudgetModal(budget = null) {
   container.innerHTML = html;
   document.body.appendChild(container);
 
+  const modalEl = container.querySelector("#budgetModal");
+  modalEl.classList.add("show");
+
   return {
-    element: container.querySelector("#budgetModal"),
+    element: modalEl,
     getFormData() {
       return {
         id: budget?.id,
