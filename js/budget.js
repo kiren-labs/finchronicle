@@ -181,9 +181,11 @@ export function renderBudgetList() {
   const container = document.getElementById("budgetContainer");
   if (!container) return;
 
-  // Preserve expanded state across re-renders
+  // Preserve expanded state: DOM first (re-render), then localStorage (page reload)
   const prevBody = container.querySelector(".budget-collapse-body");
-  const isExpanded = prevBody ? !prevBody.hidden : false;
+  const isExpanded = prevBody
+    ? !prevBody.hidden
+    : localStorage.getItem("budgetListExpanded") === "true";
 
   if (state.budgets.length === 0) {
     container.innerHTML = `

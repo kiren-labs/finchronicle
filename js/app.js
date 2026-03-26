@@ -379,6 +379,7 @@ function bindDelegatedEvents() {
         body.hidden = !body.hidden;
         chevron && chevron.classList.toggle("expanded", !body.hidden);
         toggleHeader.setAttribute("aria-expanded", String(!body.hidden));
+        localStorage.setItem("budgetListExpanded", String(!body.hidden));
       }
       return;
     }
