@@ -627,6 +627,34 @@ function registerServiceWorker() {
 function openBudgetModal(budget = null) {
   const modal = renderBudgetModal(budget);
 
+  // Inline duplicate warning — injected below the category select
+  const categorySelect = modal.element.querySelector("#budgetCategory");
+  const confirmBtn     = modal.element.querySelector(".modal-btn-confirm");
+
+  const dupWarning = document.createElement("p");
+  dupWarning.className = "budget-dup-warning";
+  dupWarning.hidden = true;
+  categorySelect.insertAdjacentElement("afterend", dupWarning);
+
+  function checkDuplicate() {
+    const selected = categorySelect.value;
+    const existing = state.budgets.find(
+      (b) => b.category === selected && b.id !== budget?.id
+    );
+    if (existing) {
+      dupWarning.textContent = `⚠ A budget for "${selected}" already exists. Edit it from the list instead.`;
+      dupWarning.hidden = false;
+      confirmBtn.disabled = true;
+    } else {
+      dupWarning.hidden = true;
+      confirmBtn.disabled = false;
+    }
+  }
+
+  categorySelect.addEventListener("change", checkDuplicate);
+  // Run on open in case modal is pre-filled (edit mode)
+  if (categorySelect.value) checkDuplicate();
+
   // Close button
   modal.element.querySelector(".close-btn").addEventListener("click", () => {
     modal.close();
@@ -638,7 +666,7 @@ function openBudgetModal(budget = null) {
   });
 
   // Confirm button
-  modal.element.querySelector(".modal-btn-confirm").addEventListener("click", async () => {
+  confirmBtn.addEventListener("click", async () => {
     try {
       const formData = modal.getFormData();
 
