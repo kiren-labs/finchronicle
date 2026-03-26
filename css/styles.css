@@ -3361,3 +3361,262 @@ button.primary.loading .btn-spinner {
     margin-top: 6px;
     line-height: 1.4;
 }
+
+/* ── Search Bar (v3.14.0) ── */
+.search-bar-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--color-text-muted);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 9px 36px 9px 36px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 14px;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+.search-clear-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    font-size: 16px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: var(--radius-sm);
+}
+
+.search-clear-btn:hover {
+    color: var(--color-text);
+    background: var(--color-bg);
+}
+
+/* ── Tag Chips — form input (v3.14.0) ── */
+.tag-input-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    cursor: text;
+    min-height: 40px;
+    transition: border-color 0.15s;
+}
+
+.tag-input-wrapper:focus-within {
+    border-color: var(--color-primary);
+}
+
+.tag-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--color-text);
+    font-size: 14px;
+    flex: 1;
+    min-width: 80px;
+    padding: 0;
+}
+
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.tag-chip-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-primary);
+    font-size: 14px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+    line-height: 1;
+}
+
+.tag-chip-remove:hover {
+    opacity: 1;
+}
+
+/* ── Tag Suggestions dropdown (v3.14.0) ── */
+.tag-suggestions {
+    margin-top: 4px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.tag-suggestion-item {
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--color-text);
+}
+
+.tag-suggestion-item:hover,
+.tag-suggestion-item.active {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+
+/* ── Tag chips — transaction list (v3.14.0) ── */
+.tx-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.tx-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 7px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.tx-tag:hover {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+/* Active tag filter pill in search area */
+.active-tag-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.active-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    background: var(--color-primary);
+    color: #fff;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.active-tag-pill-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    font-size: 14px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    opacity: 0.8;
+    line-height: 1;
+}
+
+.active-tag-pill-remove:hover {
+    opacity: 1;
+}
+
+/* ── Tag Management — Settings (v3.14.0) ── */
+.tag-manage-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.tag-manage-row:last-child {
+    border-bottom: none;
+}
+
+.tag-manage-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.tag-manage-count {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-left: 6px;
+}
+
+.tag-manage-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.tag-manage-btn {
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.tag-manage-btn-rename {
+    background: var(--color-edit-bg);
+    color: var(--color-edit-active-text);
+    border-color: var(--color-edit-border);
+}
+
+.tag-manage-btn-rename:hover {
+    background: var(--color-edit-active-bg);
+}
+
+.tag-manage-btn-delete {
+    background: var(--color-delete-bg);
+    color: var(--color-delete-active-text);
+    border-color: var(--color-delete-border);
+}
+
+.tag-manage-btn-delete:hover {
+    background: var(--color-delete-active-bg);
+}
