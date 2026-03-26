@@ -3,7 +3,7 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "3.12.1";
+export const APP_VERSION = "3.13.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration

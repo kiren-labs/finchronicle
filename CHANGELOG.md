@@ -10,8 +10,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Budget tracking per category
 - Tags & Search
+
+---
+
+## [3.13.0] - 2026-03-26
+
+### Added
+- **Budget Limits & Alerts** — Set monthly spending limits per expense category with configurable alert thresholds
+  - Add, view, and delete budgets from the Settings tab (Budget Limits section)
+  - Alert banner on the dashboard shows categories approaching or exceeding their limit, with percentage and amounts
+  - Progress bars in the budget list indicate spending level per category (neutral / warning / exceeded states)
+  - Alert threshold configurable 1–100% (default 80%); alerts fire when monthly spending reaches the threshold
+  - Dark mode fully supported for all budget UI
+  - All budget data stored in IndexedDB (`budgets` store); no data leaves the device
+
+### Technical
+- `js/budget.js` — New module: `loadBudgets`, `getBudgetForCategory`, `getSpentForCategory`, `checkBudgetAlerts`, `renderBudgetList`, `saveBudget`, `deleteBudget`, modal open/close, category select population
+- `js/db.js` — Added `budgets` object store in `onupgradeneeded` (DB_VERSION 3); added `getBudgetsFromDB`, `saveBudgetToDB`, `deleteBudgetFromDB`; `getAllFromStore` now guards against missing stores (returns `[]`)
+- `js/state.js` — `DB_VERSION` bumped to 3; `budgets: []` added to `state` object
+- `js/ui.js` — `updateUI()` now calls `renderBudgetList()` and `checkBudgetAlerts()` on every refresh
+- `js/app.js` — Budget module imported; event listeners wired for budget modal, form submit, and delete; boot sequence wraps `loadBudgets()` in try/catch
+- `index.html` — Budget alert banner container (dashboard); Budget Limits section (Settings tab); budget add modal
+- `css/styles.css` — Budget list, item, progress bar, warning/exceeded states, alert banner styles
+- `css/dark-mode.css` — Dark mode overrides for budget alert banners and list items
+- `sw.js` — `js/budget.js` added to `CACHE_URLS`
+
+### Known Limitations
+- Rollover carry-forward not yet implemented (planned for a future v3.13.x patch)
+- Budget alerts are scoped to the current tab session; a budget added in a second tab requires a reload to appear in the first
 
 ---
 
