@@ -367,8 +367,21 @@ function bindDelegatedEvents() {
     showMessage(`Currency changed to ${currencies[code].name}`);
   });
 
-  // Budget container: edit / delete budget buttons
+  // Budget container: collapse toggle + edit / delete
   document.getElementById("budgetContainer").addEventListener("click", (e) => {
+    // Collapse toggle — ignore clicks on the Add button inside the header
+    const toggleHeader = e.target.closest("[data-toggle-budget-collapse]");
+    if (toggleHeader && !e.target.closest("#addBudgetBtn")) {
+      const body    = toggleHeader.closest(".card").querySelector(".budget-collapse-body");
+      const chevron = toggleHeader.querySelector(".budget-chevron");
+      if (body) {
+        body.hidden = !body.hidden;
+        chevron && chevron.classList.toggle("expanded", !body.hidden);
+        toggleHeader.setAttribute("aria-expanded", String(!body.hidden));
+      }
+      return;
+    }
+
     const editBtn = e.target.closest("[data-edit-budget]");
     if (editBtn) {
       const budgetId = Number(editBtn.dataset.editBudget);

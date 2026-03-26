@@ -375,3 +375,7 @@ body.dark-mode .form-group select:focus {
 body.dark-mode .form-group small {
     color: var(--color-text-subtle);
 }
+/* ── Budget Collapsible dark mode (v3.13.0) ── */
+body.dark-mode .budget-collapse-title { color: var(--color-text); }
+body.dark-mode .budget-mini-bar       { background: var(--color-border); }
+body.dark-mode .budget-row-name       { color: var(--color-text); }

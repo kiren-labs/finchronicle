@@ -166,90 +166,84 @@ export function getActiveBudgetAlerts() {
   return alerts;
 }
 
-// Render budget list in Settings tab
+// Render budget list in Settings tab — collapsible with compact rows
 export function renderBudgetList() {
   const container = document.getElementById("budgetContainer");
   if (!container) return;
 
-  const headerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <h3 style="margin:0;">Monthly Budgets</h3>
-      <button class="toolbar-btn" id="addBudgetBtn" aria-label="Add Budget">
-        <i class="ri-add-line"></i>
-        <span>Add Budget</span>
-      </button>
-    </div>
-  `;
+  // Preserve expanded state across re-renders
+  const prevBody = container.querySelector(".budget-collapse-body");
+  const isExpanded = prevBody ? !prevBody.hidden : false;
 
   if (state.budgets.length === 0) {
     container.innerHTML = `
       <div class="card">
-        ${headerHTML}
-        <p style="text-align: center; color: var(--text-secondary); padding: 20px 0;">
-          No budgets set yet. Add one to start tracking spending limits.
-        </p>
+        <div class="budget-collapse-header">
+          <div class="budget-collapse-info">
+            <span class="budget-collapse-title">Monthly Budgets</span>
+            <span class="budget-collapse-summary">No budgets set</span>
+          </div>
+          <button class="toolbar-btn" id="addBudgetBtn" aria-label="Add Budget">
+            <i class="ri-add-line"></i>
+            <span>Add</span>
+          </button>
+        </div>
       </div>
     `;
     return;
   }
 
   const today = new Date();
-  const budgetHTML = state.budgets
-    .map((budget) => {
-      const spent = getCategorySpending(budget.category, today);
-      const { isWarning, isExceeded } = checkBudgetAlert(
-        budget.category,
-        spent
-      );
-      const percentage = Math.min(100, (spent / budget.monthlyLimit) * 100);
+  const budgetsWithStatus = state.budgets.map((budget) => {
+    const spent = getCategorySpending(budget.category, today);
+    const { isWarning, isExceeded } = checkBudgetAlert(budget.category, spent);
+    const pct = budget.monthlyLimit > 0
+      ? Math.min(100, Math.round((spent / budget.monthlyLimit) * 100))
+      : 0;
+    return { budget, spent, isWarning, isExceeded, pct };
+  });
 
-      let statusClass = "";
-      let statusText = "On track";
-      if (isExceeded) {
-        statusClass = "budget-exceeded";
-        statusText = "Exceeded";
-      } else if (isWarning) {
-        statusClass = "budget-warning";
-        statusText = "Warning";
-      }
+  // Build summary line showing worst alert
+  const exceeded = budgetsWithStatus.filter((b) => b.isExceeded);
+  const warning  = budgetsWithStatus.filter((b) => b.isWarning);
+  const count = state.budgets.length;
+  let summaryText  = `${count} budget${count !== 1 ? "s" : ""} active`;
+  let summaryClass = "";
+  if (exceeded.length > 0) {
+    summaryText  += ` · ⚠ ${exceeded[0].budget.category} exceeded`;
+    summaryClass  = "budget-summary-danger";
+  } else if (warning.length > 0) {
+    summaryText  += ` · ⚠ ${warning[0].budget.category} at ${warning[0].pct}%`;
+    summaryClass  = "budget-summary-warn";
+  } else {
+    summaryText += " · All on track";
+  }
 
+  const rowsHTML = budgetsWithStatus
+    .map(({ budget, spent, isWarning, isExceeded, pct }) => {
+      const dotClass  = isExceeded ? "budget-dot-danger" : isWarning ? "budget-dot-warn" : "budget-dot-ok";
+      const fillClass = isExceeded ? "budget-fill-danger" : isWarning ? "budget-fill-warn" : "";
+      const pctStyle  = isExceeded
+        ? "color:var(--color-danger)"
+        : isWarning
+        ? "color:var(--color-warning-border)"
+        : "color:var(--color-text-muted)";
       return `
-        <div class="card budget-card">
-          <div class="budget-header">
-            <div class="budget-title">
-              <h3>${budget.category}</h3>
-              <span class="budget-status ${statusClass}">${statusText}</span>
-            </div>
-            <div class="budget-actions">
-              <button class="icon-btn" data-edit-budget="${budget.id}" aria-label="Edit budget">
-                <i class="ri-edit-line"></i>
-              </button>
-              <button class="icon-btn" data-delete-budget="${budget.id}" aria-label="Delete budget">
-                <i class="ri-delete-bin-line"></i>
-              </button>
+        <div class="budget-compact-row">
+          <span class="budget-dot ${dotClass}"></span>
+          <span class="budget-row-name">${budget.category}</span>
+          <div class="budget-mini-bar-wrap">
+            <div class="budget-mini-bar">
+              <div class="budget-mini-fill ${fillClass}" style="width:${pct}%"></div>
             </div>
           </div>
-
-          <div class="budget-progress">
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: ${percentage}%"></div>
-            </div>
-            <div class="progress-text">
-              <span>${formatCurrency(spent)} / ${formatCurrency(budget.monthlyLimit)}</span>
-              <span>${Math.round(percentage)}%</span>
-            </div>
-          </div>
-
-          <div class="budget-details">
-            <div class="detail-item">
-              <span class="detail-label">Alert at</span>
-              <span class="detail-value">${budget.alertThreshold}%</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Rollover</span>
-              <span class="detail-value">${budget.rolloverEnabled ? "Enabled" : "Disabled"}</span>
-            </div>
-          </div>
+          <span class="budget-row-pct" style="${pctStyle}">${pct}%</span>
+          <button class="icon-btn" data-edit-budget="${budget.id}" aria-label="Edit ${budget.category} budget">
+            <i class="ri-edit-line"></i>
+          </button>
+          <button class="icon-btn" data-delete-budget="${budget.id}" aria-label="Delete ${budget.category} budget">
+            <i class="ri-delete-bin-line"></i>
+          </button>
         </div>
       `;
     })
@@ -257,9 +251,23 @@ export function renderBudgetList() {
 
   container.innerHTML = `
     <div class="card">
-      ${headerHTML}
-      <div class="budget-list">
-        ${budgetHTML}
+      <div class="budget-collapse-header" data-toggle-budget-collapse aria-expanded="${isExpanded}">
+        <div class="budget-collapse-info">
+          <span class="budget-collapse-title">Monthly Budgets</span>
+          <span class="budget-collapse-summary ${summaryClass}">${summaryText}</span>
+        </div>
+        <div class="budget-collapse-actions">
+          <button class="toolbar-btn" id="addBudgetBtn" aria-label="Add Budget">
+            <i class="ri-add-line"></i>
+            <span>Add</span>
+          </button>
+          <span class="budget-chevron${isExpanded ? " expanded" : ""}">
+            <i class="ri-arrow-down-s-line"></i>
+          </span>
+        </div>
+      </div>
+      <div class="budget-collapse-body" ${isExpanded ? "" : "hidden"}>
+        ${rowsHTML}
       </div>
     </div>
   `;
