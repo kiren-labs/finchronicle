@@ -376,6 +376,7 @@ export function renderBudgetAlerts() {
 
   if (alerts.length === 0) {
     container.innerHTML = "";
+    _updateBudgetBadge([], false);
     return;
   }
 
@@ -400,4 +401,24 @@ export function renderBudgetAlerts() {
       <span class="budget-alert-text">${summaryText}</span>
     </div>
   `;
+
+  // Update collapsed-state badge in summary header
+  _updateBudgetBadge(alerts, hasExceeded);
+}
+
+function _updateBudgetBadge(alerts, hasExceeded) {
+  const badge = document.getElementById("budgetAlertBadge");
+  if (!badge) return;
+  if (alerts.length === 0) {
+    badge.hidden = true;
+    badge.className = "budget-alert-badge";
+    badge.textContent = "";
+    return;
+  }
+  badge.hidden = false;
+  badge.className = "budget-alert-badge " + (hasExceeded ? "badge-danger" : "badge-warn");
+  const n = alerts.length;
+  badge.textContent = hasExceeded
+    ? (n > 1 ? n + " budgets exceeded" : "Budget exceeded")
+    : (n > 1 ? n + " budget warnings" : "Budget warning");
 }

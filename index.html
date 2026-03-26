@@ -323,6 +323,7 @@
                             <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i> <span id="compactIncome">฿0</span></span>
                             <span class="compact-separator">•</span>
                             <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i> <span id="compactExpense">฿0</span></span>
+                            <span id="budgetAlertBadge" class="budget-alert-badge" hidden></span>
                         </div>
                     </div>
                     <button class="collapse-btn" aria-label="Toggle Summary">
@@ -383,6 +384,7 @@
                     </div>
                 </div>
             </div>
+                <div id="budgetAlerts"></div>
             </div>
             <!-- Currency Selector Modal -->
             <div id="currencyModal" class="modal" style="display: none;">
@@ -397,9 +399,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Budget Alerts (v3.13.0) — visible on all tabs -->
-            <div id="budgetAlerts"></div>
 
             <!-- Tab Navigation -->
             <div class="tabs" role="tablist" aria-label="Main navigation">

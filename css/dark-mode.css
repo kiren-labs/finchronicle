@@ -392,3 +392,15 @@ body.dark-mode .budget-alert.alert-danger {
     border-color: var(--color-danger);
     color: #ff6b60;
 }
+
+body.dark-mode .budget-alert-badge.badge-danger {
+    background: rgba(255, 59, 48, 0.15);
+    color: #ff6b60;
+    border-color: var(--color-danger);
+}
+
+body.dark-mode .budget-alert-badge.badge-warn {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border-color: #d97706;
+}
