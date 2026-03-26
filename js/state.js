@@ -28,6 +28,7 @@ export const state = {
   insightsMonth: "current",
   editingId: null,
   deleteId: null,
+  deleteBudgetId: null,
   updateAvailable: false,
   lastBackupTimestamp: null,
   pendingRestoreData: null,

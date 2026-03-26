@@ -7,7 +7,7 @@ import { sanitizeHTML, formatDate, formatMonth, showMessage } from "./utils.js";
 import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
-import { renderBudgetAlerts } from "./budget.js";
+import { renderBudgetAlerts, renderBudgetList, deleteBudget } from "./budget.js";
 import {
   renderCategoryPieChart,
   buildCategoryData,
@@ -662,11 +662,30 @@ export function cancelEdit() {
 
 export function deleteTransaction(id) {
   state.deleteId = id;
+  state.deleteBudgetId = null;
+  document.querySelector("#deleteModal .modal-title").textContent = "Delete Transaction?";
+  document.getElementById("deleteModal").classList.add("show");
+}
+
+export function deleteBudgetConfirm(budgetId) {
+  state.deleteBudgetId = budgetId;
+  state.deleteId = null;
+  document.querySelector("#deleteModal .modal-title").textContent = "Delete Budget?";
   document.getElementById("deleteModal").classList.add("show");
 }
 
 export async function confirmDelete() {
-  if (state.deleteId) {
+  if (state.deleteBudgetId) {
+    try {
+      await deleteBudget(state.deleteBudgetId);
+      renderBudgetList();
+      renderBudgetAlerts();
+      updateUI();
+    } catch (err) {
+      console.error("Budget delete failed:", err);
+    }
+    state.deleteBudgetId = null;
+  } else if (state.deleteId) {
     try {
       await deleteTransactionFromDB(state.deleteId);
       state.transactions = state.transactions.filter(

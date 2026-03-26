@@ -31,6 +31,7 @@ import {
   deleteTransaction,
   confirmDelete,
   closeDeleteModal,
+  deleteBudgetConfirm,
   cancelEdit,
   selectType,
   updateCategoryOptions,
@@ -394,13 +395,7 @@ function bindDelegatedEvents() {
     const deleteBtn = e.target.closest("[data-delete-budget]");
     if (deleteBtn) {
       const budgetId = Number(deleteBtn.dataset.deleteBudget);
-      if (confirm("Delete this budget?")) {
-        deleteBudget(budgetId).then(() => {
-          renderBudgetList();
-          renderBudgetAlerts();
-          updateUI();
-        });
-      }
+      deleteBudgetConfirm(budgetId);
     }
   });
 
