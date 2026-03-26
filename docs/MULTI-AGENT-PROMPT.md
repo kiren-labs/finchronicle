@@ -1,8 +1,69 @@
-# FinChronicle Multi-Agent Workflow Prompt
+# FinChronicle Multi-Agent Workflow
 
-## Context
+---
 
-FinChronicle is a **zero-dependency, offline-first PWA** built in vanilla JavaScript. All data lives in IndexedDB. The architecture is non-negotiable:
+## Part 1: What Is Multi-Agent in Claude Code? (KT)
+
+### The Core Mental Model
+
+Think of it like a software team — but you are the **engineering manager**, and each agent is a **focused contractor** you hire for a specific job. You give them a task, they do the work and hand you back a result. They don't talk to each other directly — **everything flows through you**.
+
+```
+You (Orchestrator)
+    ├── spawn → Feature Lead agent    → returns: files changed, test notes
+    ├── spawn → QA agent              → returns: pass/fail report
+    ├── spawn → Edge Case agent       → returns: blocker/nice-to-have list
+    └── you handle: version bumps, commits, PR creation
+```
+
+### How Agents Work in Claude Code
+
+| Concept | What it means |
+|---------|---------------|
+| **Agent** | A subprocess with its own context window. Stateless — it has no memory of previous agent calls. |
+| **Orchestrator** | You, in the main conversation. You coordinate agents and pass context forward. |
+| **Agent tool** | How Claude Code launches an agent: `subagent_type`, `prompt`, optionally `isolation: "worktree"`. |
+| **Foreground** | Agent runs and blocks until done. Use when you need the result before continuing. |
+| **Background** | Agent runs in parallel while you continue. Use for independent work (e.g. QA + Edge Case simultaneously). |
+| **Worktree** | Isolated git branch for the agent. Changes don't touch `main` until you merge. |
+
+### When TO Use Multi-Agent
+
+- **Full feature development** — Feature Lead implements, QA validates, you review and ship
+- **Parallel independent work** — QA + Edge Case reviewing the same code at the same time
+- **Keeping main context clean** — long file reads, large implementations; send to an agent, get back a summary
+- **Specialized review** — accessibility audit, security review, constraint validation
+- **Risky changes** — use worktree isolation so main is never polluted
+
+### When NOT To Use Multi-Agent
+
+- **Simple edits** — changing a CSS value, fixing a typo, bumping a version string. Just do it directly.
+- **Exploratory questions** — "what does this function do?" Just read the file.
+- **Sequential tasks with no parallelism** — if Task B depends on Task A's output, running them as separate agents adds overhead with no benefit.
+- **Version bumps and commits** — these are 2-minute mechanical tasks. Do them yourself in the main context.
+
+### The Communication Reality
+
+Agents **cannot message each other**. If you need Agent B to know what Agent A found, you:
+1. Read Agent A's output
+2. Copy the relevant findings into Agent B's prompt
+
+This is deliberate — it forces you to review what each agent produces before passing it forward, which is where bugs get caught.
+
+### The `finchronicle-dev` Agent
+
+This project has a custom agent at `.claude/agents/finchronicle-dev.md`. It knows:
+- All project constraints (zero deps, XSS safety, updateUI(), etc.)
+- The correct code patterns (validateTransaction → save → updateUI)
+- Which files to touch for which operations
+
+**All agents in this workflow should use `subagent_type: "finchronicle-dev"`**. You give each one a role-specific prompt on top of that shared knowledge.
+
+---
+
+## Part 2: Project Context
+
+FinChronicle is a **zero-dependency, offline-first PWA** built in vanilla JavaScript. The architecture is non-negotiable:
 
 - **Zero npm dependencies** — no frameworks, no build tools besides `scripts/build.js`
 - **Offline-first** — every feature must work without internet
@@ -13,394 +74,340 @@ FinChronicle is a **zero-dependency, offline-first PWA** built in vanilla JavaSc
 - **Single state object** — all UI state in `state` object (`js/state.js`)
 - **Master refresh cycle** — `updateUI()` in `js/ui.js` is the canonical refresh function
 
-## Feature Release Sequencing (from FEATURE-ROADMAP.md)
+---
+
+## Part 3: Feature Release Sequencing
 
 ```
-v3.13.0 Budget Limits & Alerts        (DB_VERSION 3)
+v3.13.0 Budget Limits & Alerts        (DB_VERSION → 3)
     ↓
-v3.14.0 Tags & Search                 (DB_VERSION 4)
+v3.14.0 Tags & Search                 (DB_VERSION → 4)
     ↓
-v3.15.0 Optional Fields System        (DB_VERSION 5)
+v3.15.0 Optional Fields System        (DB_VERSION → 5)
     ↓
-v3.16.0 Split Transactions            (DB_VERSION 6)
+v3.16.0 Split Transactions            (no DB bump)
     ↓
-v3.17.0 Savings Goals                 (DB_VERSION 7)
+v3.17.0 Savings Goals                 (DB_VERSION → 6)
     ↓
-v3.18.0 Receipt Photos                (DB_VERSION 8)
+v3.18.0 Receipt Photos                (DB_VERSION → 7)
 ```
 
-**Key constraint:** Only **ONE feature per release**. Only **ONE DB_VERSION bump per release**. Features must complete sequentially; do NOT parallelize releases.
+**Key constraint:** Only **one feature per release**. Only **one DB_VERSION bump per release**. Features ship sequentially — v3.13.0 must be on `main` before v3.14.0 starts.
 
-## Multi-Agent Team Structure
+---
+
+## Part 4: Agent Roles
+
+All agents use `subagent_type: "finchronicle-dev"`. The role-specific prompt is what differentiates them.
 
 ### Role 1: Feature Lead
-**Goal:** Deliver one complete feature end-to-end, from spec to merged PR.
+**Goal:** Implement one complete feature end-to-end.
 
-**Responsibilities:**
-- Implement the feature spec from FEATURE-ROADMAP.md
-- Modify IndexedDB schema (if needed) — document DB_VERSION increment
-- Add new `js/` modules or modify existing ones
-- Update HTML, CSS, dark mode CSS
-- Call `updateUI()` after state changes
-- Update CACHE_URLS in `sw.js` if needed
-- Create unit-testable logic (validation, DB operations)
+**Outputs to you:**
+- List of files changed and why
+- Any decisions made (e.g. why a certain DB schema shape)
+- Manual test results (offline, dark mode, mobile)
+- Any open questions or risks
 
-**Success criteria:**
-- Feature works in offline mode
-- No console errors in DevTools
-- Mobile responsive (< 480px viewport)
-- Dark mode supported
-- Accessibility (WCAG AA) for any new UI components
-- All validation runs *before* save
+**Does NOT:**
+- Bump DB_VERSION, APP_VERSION, or CACHE_NAME (Coordinator does that)
+- Commit to main (you do that after review)
 
 ---
 
 ### Role 2: QA & Constraint Validator
-**Goal:** Catch violations of FinChronicle's non-negotiable constraints before merge.
+**Goal:** Catch violations of FinChronicle's constraints before they reach main.
 
-**Responsibilities:**
-- Review code for zero-dependency violations
-- Verify all IndexedDB logic uses `db.js` operations
-- Check XSS safety: no `innerHTML` with user input, use `sanitizeHTML()` when needed
-- Verify offline-first: simulate offline in DevTools, test core flows
-- Check dark mode CSS is updated
-- Accessibility spot-check: buttons, modals, forms have proper labels/ARIA
-- Verify `updateUI()` is called after state mutations
-- Test on mobile viewport (< 480px) and desktop
+**Inputs from you:** Summary of what Feature Lead changed + specific files to review.
 
-**Test checklist per feature:**
-- [ ] Works offline (DevTools > Network > Offline)
+**Outputs to you:** PASS or FAIL with specific findings.
+
+**Test checklist:**
+- [ ] Works offline (DevTools → Network → Offline)
 - [ ] No external API calls or CDN requests
 - [ ] Data persists after reload
 - [ ] Dark mode looks correct
-- [ ] Mobile viewport (< 480px) is responsive
-- [ ] No XSS vulnerabilities (test with HTML in notes field)
-- [ ] All new code is vanilla JS (no npm imports)
+- [ ] Mobile viewport (< 480px) responsive
+- [ ] No XSS (test `<img src=x onerror=alert(1)>` in notes field)
+- [ ] All code is vanilla JS — no npm imports
 - [ ] IndexedDB operations only via `db.js`
+- [ ] `updateUI()` called after state mutations
 - [ ] No console errors
 
 ---
 
-### Role 3: Version & Deploy Coordinator
-**Goal:** Manage version bumps, cache invalidation, and changeset documentation.
+### Role 3: Edge Case Analyst
+**Goal:** Find failure modes and race conditions before users do.
 
-**Responsibilities:**
-- Coordinate DB_VERSION increments (only one per release)
-- Update APP_VERSION in `js/state.js` (e.g., `v3.13.0`)
-- Update CACHE_NAME in `sw.js` (e.g., `finchronicle-v3.13.0`)
-- Update `version` in `manifest.json`
-- Update `CHANGELOG.md` with feature summary
-- Update version badge in `README.md`
-- Ensure only one DB_VERSION bump and one APP_VERSION per release
-- Flag conflicts if Feature Lead tries to bump DB_VERSION incorrectly
+**Inputs from you:** Summary of what Feature Lead changed + specific files to review.
 
-**Deploy checklist:**
-- [ ] APP_VERSION, CACHE_NAME, manifest.json all match
-- [ ] CHANGELOG.md updated with feature notes
-- [ ] CACHE_URLS in `sw.js` includes all new `.js` files
-- [ ] No other version files were modified (only the 3 above)
-- [ ] README.md version badge updated
+**Outputs to you:** Scenario list with BLOCKER or NICE_TO_HAVE classification.
 
----
+**Standard scenarios to probe:**
+- 5000+ transactions — does the feature still load fast?
+- IndexedDB quota at 90% — error handling?
+- Two tabs open with conflicting state
+- User deletes a record mid-operation (e.g. deletes a budget while a transaction is being categorized against it)
+- Leap year / month-end edge dates
+- Mobile soft keyboard covers form inputs
 
-### Role 4: Edge Case & Failure Scenario Analyst
-**Goal:** Identify gaps, race conditions, and failure modes *before* they hit users.
-
-**Responsibilities:**
-- Brainstorm failure scenarios: network restore mid-operation, IndexedDB quota exceeded, duplicate recurring triggers, edge dates (leap years, month-end), large datasets (1000+ transactions), browser plugin conflicts
-- Validate error handling: does the UI gracefully handle IndexedDB errors? Validation failures? Missing data?
-- Test concurrent scenarios: two tabs modifying state, one tab offline while another syncs
-- Verify data integrity: can corrupt states happen? Can transactions get lost? Duplicated?
-- Challenge assumptions: "What if the user deletes the recurring template while a transaction is being generated?"
-
-**Report format:**
-- Scenario → Failure mode → Mitigation → Test steps
-
-**Example scenarios to test per feature:**
-- User has 5000+ transactions; does the feature still load fast?
-- IndexedDB quota is 90% full; error handling?
-- Recurring template is deleted while a transaction is mid-generation?
-- Two browser tabs open; state sync issues?
-- User toggles dark mode mid-modal?
-- Mobile: soft keyboard covers form inputs?
-
----
-
-## Execution Flow
-
-### Phase 1: Feature Lead Implements (Solo)
-1. Read feature spec from FEATURE-ROADMAP.md (provided above)
-2. Design DB schema (if needed) — **do NOT bump DB_VERSION yet**
-3. Implement feature in new `js/module.js` or modify existing modules
-4. Update HTML, CSS, dark-mode CSS
-5. Update `sw.js` CACHE_URLS
-6. Manual testing: offline, dark mode, mobile
-7. **Commit with message:** `feat: add [feature name] (wip)`
-
-### Phase 2: QA Validates (Solo)
-1. Run full test checklist (see above)
-2. Test on real mobile device or DevTools mobile viewport
-3. Test offline mode (DevTools > Network > Offline)
-4. Document failures and edge cases found
-5. **Report:** Pass/Fail + findings
-   - If Fail: return to Feature Lead with specific issues
-   - If Pass: proceed
-
-### Phase 3: Edge Case Analyst Probes (Solo)
-1. Review Feature Lead's implementation
-2. Brainstorm 5–10 failure scenarios relevant to the feature
-3. Test concurrent/race conditions
-4. Test data integrity edge cases
-5. **Report:** Blocker-level findings vs. nice-to-have improvements
-
-### Phase 4: Coordinator Prepares Release
-1. Review all findings; coordinate with Feature Lead on blockers
-2. **After Feature Lead confirms fixes:**
-   - Increment DB_VERSION (if applicable)
-   - Update APP_VERSION, CACHE_NAME, manifest.json
-   - Update CHANGELOG.md, README.md
-   - Add `js/[module].js` to CACHE_URLS in `sw.js`
-3. **Do NOT commit version files until all roles sign off**
-
-### Phase 5: Review & Merge
-1. All 4 roles review the final PR
-2. Sign-off checklist:
-   - [ ] Feature Lead: Implementation complete
-   - [ ] QA: All tests pass
-   - [ ] Edge Case: Mitigations in place, no blockers
-   - [ ] Coordinator: Version files updated correctly
-3. Merge to `main`
-
----
-
-## Communication Protocol
-
-**Blockers:**
-- Feature Lead → QA: "Test found XSS issue in notes field"
-- QA → Feature Lead: "Need to call `sanitizeHTML()` before saving notes"
-- Feature Lead → Edge Case: "Is the race condition between recurring trigger and manual delete a blocker?"
-- Edge Case → Coordinator: "Yes, need retry logic in `generateTransaction()`"
-- Coordinator → Feature Lead: "Cannot release until retry logic is added; DB_VERSION bump is blocked"
-
-**Dependencies:**
-- Coordinator announces: "v3.13.0 is tagged; v3.14.0 can now start (DB_VERSION 4 reserved)"
-- Feature Lead for v3.14.0 can begin implementation knowing the DB schema baseline
-
-**Parallel work allowed:**
-- QA validates v3.13.0 while Feature Lead preps v3.14.0 POC
-- Edge Case probes v3.13.0 while Feature Lead writes DB migration tests
-- **But:** Only ONE feature in active development per release cycle
-
----
-
-## Rules & Constraints
-
-1. **No npm packages.** Ever. If a helper is needed, write vanilla JS.
-2. **All DB operations via `db.js`.** Don't open IndexedDB directly.
-3. **All state mutations trigger `updateUI()`.** No exceptions.
-4. **One DB_VERSION bump per release.** If two features modify IndexedDB schema, they cannot ship together.
-5. **Version files must all match.** `APP_VERSION`, `CACHE_NAME`, `manifest.json#version` are always in sync.
-6. **Offline-first non-negotiable.** Every feature must work without internet.
-7. **XSS safety always.** Use `textContent`, never `innerHTML` with user data.
-8. **No unhandled IndexedDB errors.** All `.catch()` must provide user feedback via `showMessage()`.
-
----
-
-## Example: v3.13.0 Budget Limits Feature Flow
-
-### Feature Lead Implementation Plan
+**Report format per scenario:**
 ```
-1. Add `budgets` store to DB schema (js/db.js)
-   - Schema: { id, category, monthlyLimit, alertThreshold, rolloverEnabled, ... }
-   - Index: category (one budget per category)
-   - DO NOT bump DB_VERSION yet
-
-2. Create js/budget.js
-   - exportBudgetForCategory(category)
-   - getAvailableBudget(category, month)
-   - checkBudgetAlert(category, spent)
-   - UI functions for modal/list
-
-3. Update js/app.js
-   - Import js/budget.js
-   - Add event listeners for budget modal open/close
-
-4. Update index.html
-   - Add Budget section in Settings tab
-   - List of budgets, Add/Edit/Delete modals
-
-5. Update css/styles.css
-   - Budget list styles, warning colors, threshold visual
-
-6. Update css/dark-mode.css
-   - Dark mode colors for budget alerts
-
-7. Update sw.js
-   - Add js/budget.js to CACHE_URLS
-
-8. Manual test offline, dark mode, mobile
-```
-
-### QA Test Checklist
-```
-✓ Offline: Add budget, create transaction, verify alert triggers
-✓ Dark mode: Colors visible, no contrast issues
-✓ Mobile: Form fits in < 480px, scrolling works
-✓ XSS: Enter "<img src=x onerror=alert()>" in category; no alert fires
-✓ IndexedDB: Budget persists after reload
-✓ updateUI(): Toggle budget, verify UI refreshes
-✓ No console errors
-✓ Validation: Cannot save empty category, negative limit, etc.
-```
-
-### Edge Case Scenarios
-```
-1. User hits IndexedDB storage quota while saving a budget
-   → Error handling? Retry? User message?
-
-2. User creates budget for "Food" at $500, then changes category name
-   → Does budget stay linked to old name?
-
-3. User deletes all transactions for "Food", then deletes budget
-   → Orphaned budget? Clean state?
-
-4. Two tabs open: one adds budget, one creates transaction
-   → Alert fires correctly in both tabs?
-
-5. User toggles rolloverEnabled while a transaction is auto-generating
-   → Calculation uses old or new rule?
-```
-
-### Coordinator Release Prep
-```
-After Feature Lead & QA sign off:
-- js/state.js: APP_VERSION = 'v3.13.0'
-- sw.js: CACHE_NAME = 'finchronicle-v3.13.0'
-- manifest.json: "version": "v3.13.0"
-- js/state.js: DB_VERSION = 3 (was 2)
-- CHANGELOG.md: Add Budget Limits feature notes
-- README.md: Update version badge
-- sw.js: Add js/budget.js to CACHE_URLS
-- Commit: "release: v3.13.0 Budget Limits & Alerts"
+Scenario: [name]
+Failure mode: [what bad thing happens]
+Mitigation: [how to handle it]
+Test steps: [how QA can verify]
+Classification: BLOCKER | NICE_TO_HAVE
 ```
 
 ---
 
-## Kickoff Prompts for Each Role
+### What You Handle Directly (No Agent Needed)
+
+After Feature Lead, QA, and Edge Case all sign off:
+1. Update `js/state.js` — `APP_VERSION` and `DB_VERSION`
+2. Update `sw.js` — `CACHE_NAME` and `CACHE_URLS` (add new `.js` file)
+3. Update `manifest.json` — `version`
+4. Update `CHANGELOG.md`
+5. Update `README.md` version badge
+6. Commit and create PR
+
+These are mechanical 2-minute edits — no agent needed.
+
+---
+
+## Part 5: How to Execute This in Claude Code
+
+This is the step-by-step you follow in the **main Claude Code conversation**.
+
+### Step 1 — Launch Feature Lead (foreground, with worktree isolation)
+
+```
+Use the Agent tool:
+  subagent_type: "finchronicle-dev"
+  isolation: "worktree"          ← gives it a private git branch
+  prompt: [paste Feature Lead kickoff prompt from Part 6]
+```
+
+Wait for the agent to return. Read its output carefully — note what files it changed and any decisions it flagged.
+
+---
+
+### Step 2 — Launch QA + Edge Case (background, in parallel)
+
+Once Feature Lead returns, fire both agents **at the same time** in a single message:
+
+```
+Message with TWO Agent tool calls:
+
+Agent call 1:
+  subagent_type: "finchronicle-dev"
+  run_in_background: true
+  prompt: [QA kickoff prompt] + [Feature Lead's output summary]
+
+Agent call 2:
+  subagent_type: "finchronicle-dev"
+  run_in_background: true
+  prompt: [Edge Case kickoff prompt] + [Feature Lead's output summary]
+```
+
+You'll be notified when each finishes. You don't need to wait — continue reading Feature Lead's output while they run.
+
+---
+
+### Step 3 — Review findings
+
+Read both reports. Classify findings:
+- **Blockers** → go back to Feature Lead with a fix prompt (repeat from Step 1, no worktree needed for a patch)
+- **NICE_TO_HAVE** → log in CHANGELOG as "known limitations / future work"
+
+---
+
+### Step 4 — You handle the release
+
+When all roles are clear:
+- Edit version files directly (no agent)
+- Commit: `release: v3.13.0 Budget Limits & Alerts`
+- Create PR via `gh pr create`
+
+---
+
+### Visual: What runs when
+
+```
+Step 1  [Feature Lead]────────────────────────────────────┐
+                                                           ↓ (you review output, extract summary)
+Step 2                     [QA]────────┐
+                           [Edge Case]─┘  (both in background, parallel)
+                                           ↓ (notifications arrive, you review)
+Step 3  You review → blockers? → re-run Feature Lead (targeted fix)
+                                           ↓ (clear)
+Step 4  You: version bumps → commit → PR
+```
+
+---
+
+## Part 6: Kickoff Prompts
+
+Paste these into the Agent tool's `prompt` field. Replace `[FEATURE_LEAD_SUMMARY]` with what the Feature Lead agent returned.
 
 ### Feature Lead (v3.13.0)
+
 ```
-You are the Feature Lead for v3.13.0 Budget Limits & Alerts in FinChronicle.
+You are implementing v3.13.0 Budget Limits & Alerts for FinChronicle.
 
-Your goal: Implement the complete feature as specified in FEATURE-ROADMAP.md, 
-including DB schema changes, UI, validation, and error handling.
+GOAL: Deliver a complete, working feature. Return a structured summary of what you built.
 
-Constraints:
-- Zero npm dependencies (vanilla JS only)
-- All DB operations via js/db.js
-- Call updateUI() after any state change
-- Use sanitizeHTML() before saving user input
-- DO NOT bump DB_VERSION — the Coordinator will do that
-- Test offline, dark mode, mobile (< 480px)
+IMPLEMENTATION PLAN:
+1. Add `budgets` object store to IndexedDB in js/db.js
+   Schema: { id, category, monthlyLimit, alertThreshold, rolloverEnabled, createdAt }
+   Index: category
+   DO NOT bump DB_VERSION — that will be done outside this agent after sign-off
 
-Your implementation steps:
-1. Create js/budget.js with all feature logic
-2. Modify js/db.js to add budgets store schema
-3. Update index.html with Budget UI
-4. Update css/styles.css and css/dark-mode.css
-5. Update sw.js CACHE_URLS (do NOT change CACHE_NAME)
-6. Manual test offline, dark mode, mobile
-7. Commit with "feat: add budget limits (wip)"
-8. Notify QA when ready for testing
+2. Create js/budget.js
+   - getBudgetForCategory(category)
+   - getSpentForCategory(category, month) — queries transactions store
+   - checkBudgetAlerts() — called from updateUI()
+   - UI: modal to add/edit/delete budgets, budget list view
+
+3. Update js/app.js — import js/budget.js, add event listeners
+
+4. Update index.html — Budget section in Settings tab
+
+5. Update css/styles.css — budget list, warning colors, threshold visual
+
+6. Update css/dark-mode.css — dark mode for budget alerts
+
+7. Update sw.js CACHE_URLS — add js/budget.js (DO NOT change CACHE_NAME)
+
+CONSTRAINTS (non-negotiable):
+- Zero npm packages — vanilla JS only
+- All DB operations via js/db.js — never open IndexedDB directly
+- Call updateUI() after every state mutation
+- Use sanitizeHTML() before saving any user text input
+- Use textContent not innerHTML for user-supplied content
+- Error handling: all IndexedDB .catch() must call showMessage() with user-friendly message
+
+MANUAL TESTS TO RUN before returning:
+- Offline mode: add a budget, create a transaction, verify alert triggers
+- Dark mode: toggle .dark-mode, verify budget UI colors are correct
+- Mobile: viewport < 480px, form is usable
+
+RETURN FORMAT:
+1. Files changed (name + one-line summary of change)
+2. DB schema design decisions and why
+3. Manual test results (pass/fail per test)
+4. Any open questions or risks you found
 ```
 
-### QA (v3.13.0)
+---
+
+### QA & Constraint Validator (v3.13.0)
+
 ```
-You are the QA & Constraint Validator for v3.13.0 Budget Limits.
+You are the QA & Constraint Validator for v3.13.0 Budget Limits in FinChronicle.
 
-Your goal: Ensure the Feature Lead's implementation adheres to all of 
-FinChronicle's constraints and works correctly.
+FEATURE LEAD SUMMARY:
+[FEATURE_LEAD_SUMMARY]
 
-Test checklist:
-- [ ] Works offline (DevTools > Network > Offline)
-- [ ] No external API calls
-- [ ] Data persists after reload
-- [ ] Dark mode looks correct
-- [ ] Mobile responsive (< 480px)
-- [ ] No XSS vulnerabilities (test HTML in notes)
-- [ ] All code is vanilla JS
-- [ ] IndexedDB operations only via db.js
-- [ ] updateUI() called after state changes
-- [ ] No console errors
+GOAL: Review the implementation for correctness and constraint adherence.
+Read the files listed in the Feature Lead summary. Do not make changes.
 
-Report findings as: PASS (with notes) or FAIL (with specific issues).
-If FAIL, return to Feature Lead with minimal reproducible steps.
+TEST CHECKLIST — verify each one:
+- [ ] Works offline (review code path: does it use any fetch() or network calls?)
+- [ ] No external API calls or CDN resources
+- [ ] Data persists: budget store is in IndexedDB, not localStorage
+- [ ] Dark mode: dark-mode.css has rules for all new budget UI classes
+- [ ] Mobile responsive: no fixed pixel widths > 480px for budget modals/forms
+- [ ] XSS: notes/category inputs — is sanitizeHTML() called before save? textContent used for display?
+- [ ] All imports are from local js/ files (no npm, no CDN)
+- [ ] All DB operations route through js/db.js functions
+- [ ] updateUI() is called after every add/edit/delete budget action
+- [ ] All IndexedDB errors caught with .catch() → showMessage()
+- [ ] No console errors (review for any unhandled promise rejections)
+
+RETURN FORMAT:
+Overall: PASS | FAIL
+For each checklist item: ✓ PASS or ✗ FAIL — [specific file:line if fail]
+If FAIL: list exact issues Feature Lead must fix before release
 ```
+
+---
 
 ### Edge Case Analyst (v3.13.0)
+
 ```
-You are the Edge Case & Failure Scenario Analyst for v3.13.0 Budget Limits.
+You are the Edge Case & Failure Scenario Analyst for v3.13.0 Budget Limits in FinChronicle.
 
-Your goal: Identify failure modes, race conditions, and data integrity 
-issues that could cause problems for users.
+FEATURE LEAD SUMMARY:
+[FEATURE_LEAD_SUMMARY]
 
-Analyze the Feature Lead's implementation for:
-1. Concurrent scenarios (two tabs, IndexedDB locks)
-2. Resource constraints (5000+ transactions, IndexedDB quota)
-3. State conflicts (budget deleted while transaction uses it)
-4. Calculation edge cases (leap years, month-end, rollover logic)
-5. Error paths (network restore, IndexedDB errors, validation failures)
+GOAL: Find failure modes before users do. Read the implementation files.
+Produce 5–8 scenarios specific to the Budget Limits feature.
 
-For each scenario, report:
-- Scenario name & description
-- Failure mode (what bad thing happens)
-- Mitigation (how Feature Lead should handle it)
-- Test steps (how QA can verify the fix)
+SCENARIOS TO INVESTIGATE (check all that apply):
+1. User has 5000+ transactions — does getSpentForCategory() still perform?
+2. IndexedDB quota at 90% — what happens when saving a new budget?
+3. User deletes a budget while a transaction is mid-save to that category
+4. Two tabs open: Tab 1 adds a budget, Tab 2 creates a transaction against it
+5. User changes a category name — does the budget stay linked?
+6. User creates a budget for a category with no transactions — zero-state handling?
+7. rolloverEnabled toggled while month-end calculation is running
+8. Budget alertThreshold = 0 or 100 — edge values handled?
 
-Flag as BLOCKER or NICE_TO_HAVE. Blockers must be fixed before release.
-```
+For each scenario use this format:
+Scenario: [name]
+Failure mode: [what bad thing happens]
+Mitigation: [what code change prevents it]
+Test steps: [how to reproduce and verify the fix]
+Classification: BLOCKER | NICE_TO_HAVE
 
-### Coordinator (v3.13.0)
-```
-You are the Version & Deploy Coordinator for v3.13.0 Budget Limits.
-
-Your goal: Manage version bumps, cache invalidation, and ensure 
-all release files stay in sync.
-
-Wait for sign-off from Feature Lead, QA, and Edge Case Analyst.
-
-Then execute:
-1. Update js/state.js: APP_VERSION = 'v3.13.0'
-2. Update sw.js: CACHE_NAME = 'finchronicle-v3.13.0'
-3. Update manifest.json: "version": "v3.13.0"
-4. Update js/state.js: DB_VERSION = 3
-5. Update sw.js: Add js/budget.js to CACHE_URLS
-6. Update CHANGELOG.md with feature summary
-7. Update README.md version badge
-8. Commit: "release: v3.13.0 Budget Limits & Alerts"
-
-Verify no other version files were changed.
-Flag conflicts if Feature Lead modifies DB_VERSION or CACHE_NAME.
+RETURN FORMAT:
+- Numbered list of scenarios
+- Summary: total BLOCKERs found
+- If 0 BLOCKERs: "CLEAR FOR RELEASE"
+- If BLOCKERs exist: "BLOCKED — [count] issues must be fixed"
 ```
 
 ---
 
-## Notes for Running the Team
+## Part 7: Rules & Constraints
 
-- **Start with one feature (v3.13.0 Budget Limits).** Validate the workflow before scaling.
-- **Strict sequencing.** v3.13.0 must fully release (main branch) before v3.14.0 starts.
-- **Async coordination.** Roles don't need to run in parallel; they can overlap (QA on v3.13 while Feature Lead preps v3.14 POC).
-- **Escalation path.** If Edge Case finds a blocker, Feature Lead pauses development and fixes it immediately.
-- **Documentation over meetings.** Each role submits findings in writing; no real-time chat debates.
-- **Single source of truth.** All decisions logged in commit messages and CHANGELOG.md.
+1. **No npm packages.** If a helper is needed, write vanilla JS.
+2. **All DB operations via `db.js`.** Never open IndexedDB directly in feature modules.
+3. **All state mutations trigger `updateUI()`.** No exceptions.
+4. **One DB_VERSION bump per release.** Two features that both need schema changes cannot ship together.
+5. **Three version files must always match.** `APP_VERSION` in `state.js`, `CACHE_NAME` in `sw.js`, `version` in `manifest.json`.
+6. **Offline-first non-negotiable.** Every feature must work without internet.
+7. **XSS safety always.** `textContent` for display, `sanitizeHTML()` before save.
+8. **No unhandled IndexedDB errors.** Every `.catch()` must call `showMessage()`.
 
 ---
 
-## Success Metrics
+## Part 8: Practical Tips for Using This Workflow
 
-- 🟢 Feature works offline, on mobile, in dark mode
-- 🟢 Zero XSS vulnerabilities
-- 🟢 All tests pass, no console errors
-- 🟢 Data persists across reloads and browser restarts
-- 🟢 One DB_VERSION bump per release, all version files in sync
-- 🟢 Feature shipped in < 1 week
+### Do this once to learn the pattern
+Run the full v3.13.0 workflow manually. You'll see how each agent specializes and how findings chain together. After that, it becomes intuitive.
+
+### Copy-paste agent outputs into a scratch file
+Between phases, paste each agent's output into a temporary note. When you write the next agent's prompt, you already have the context ready to include.
+
+### Trust the blockers, triage the nice-to-haves
+Edge Case often finds theoretical issues. If something is NICE_TO_HAVE, log it in CHANGELOG as a known limitation and ship. Don't let perfect block good.
+
+### You are the quality gate
+Agents can miss things. You reviewing agent output before passing it forward is the most important step. An agent that returns "PASS" on QA doesn't mean you skip reading it.
+
+### Don't over-agent
+For a 3-line CSS fix or a typo, just edit directly. Multi-agent is for full feature releases where thoroughness matters.
+
+---
+
+## Part 9: Success Metrics
+
+- Feature works offline, on mobile, in dark mode
+- Zero XSS vulnerabilities
+- All QA tests pass, no console errors
+- Data persists across reloads and browser restarts
+- One DB_VERSION bump per release, all three version files match
+- No npm packages introduced
