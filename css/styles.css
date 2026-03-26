@@ -2715,8 +2715,8 @@ button.primary.loading .btn-spinner {
 
 .recurring-frequency-chip {
     font-size: var(--font-xs);
-    font-weight: 500;
-    color: var(--color-primary);
+    font-weight: 600;
+    color: var(--color-primary-hover);
     background: var(--color-primary-soft);
     padding: 2px var(--space-xs);
     border-radius: var(--radius-pill);
@@ -2726,13 +2726,13 @@ button.primary.loading .btn-spinner {
 
 .recurring-item-meta {
     font-size: var(--font-md);
-    color: var(--color-text-muted);
+    color: var(--color-text);
     font-family: var(--font-family-mono);
 }
 
 .recurring-item-note {
     font-size: var(--font-sm);
-    color: var(--color-text-subtle);
+    color: var(--color-text-muted);
     margin-top: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -3151,8 +3151,8 @@ button.primary.loading .btn-spinner {
     color: var(--color-text-muted);
 }
 
-.budget-collapse-summary.budget-summary-warn   { color: var(--color-warning-border); }
-.budget-collapse-summary.budget-summary-danger { color: var(--color-danger); }
+.budget-collapse-summary.budget-summary-warn   { color: var(--color-warning-text); }
+.budget-collapse-summary.budget-summary-danger { color: var(--color-danger-strong); }
 
 .budget-collapse-actions {
     display: flex;

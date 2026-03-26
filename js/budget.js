@@ -236,9 +236,9 @@ export function renderBudgetList() {
       const dotClass  = isExceeded ? "budget-dot-danger" : isWarning ? "budget-dot-warn" : "budget-dot-ok";
       const fillClass = isExceeded ? "budget-fill-danger" : isWarning ? "budget-fill-warn" : "";
       const pctStyle  = isExceeded
-        ? "color:var(--color-danger)"
+        ? "color:var(--color-danger-strong)"
         : isWarning
-        ? "color:var(--color-warning-border)"
+        ? "color:var(--color-warning-text)"
         : "color:var(--color-text-muted)";
       const spentStr = formatCurrency(spent);
       const limitStr = formatCurrency(budget.monthlyLimit);
@@ -268,7 +268,7 @@ export function renderBudgetList() {
 
   container.innerHTML = `
     <div class="card">
-      <div class="budget-collapse-header" data-toggle-budget-collapse aria-expanded="${isExpanded}">
+      <div class="budget-collapse-header" data-toggle-budget-collapse role="button" tabindex="0" aria-expanded="${isExpanded}" aria-label="Toggle budget list">
         <div class="budget-collapse-info">
           <span class="budget-collapse-title">Monthly Budgets</span>
           <span class="budget-collapse-summary ${summaryClass}">${summaryText}</span>
