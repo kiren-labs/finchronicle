@@ -36,10 +36,10 @@ export async function saveBudget(budget) {
     if (!budget.category || budget.category.trim() === "") {
       throw new Error("Category is required");
     }
-    if (budget.monthlyLimit <= 0) {
-      throw new Error("Monthly limit must be greater than 0");
+    if (!isFinite(budget.monthlyLimit) || budget.monthlyLimit <= 0) {
+      throw new Error("Monthly limit must be a valid number greater than 0");
     }
-    if (budget.alertThreshold < 0 || budget.alertThreshold > 100) {
+    if (!isFinite(budget.alertThreshold) || budget.alertThreshold < 0 || budget.alertThreshold > 100) {
       throw new Error("Alert threshold must be between 0 and 100");
     }
 
@@ -238,10 +238,15 @@ export function renderBudgetList() {
         : isWarning
         ? "color:var(--color-warning-border)"
         : "color:var(--color-text-muted)";
+      const spentStr = formatCurrency(spent);
+      const limitStr = formatCurrency(budget.monthlyLimit);
       return `
         <div class="budget-compact-row">
           <span class="budget-dot ${dotClass}"></span>
-          <span class="budget-row-name">${budget.category}</span>
+          <div class="budget-row-info">
+            <span class="budget-row-name">${budget.category}</span>
+            <span class="budget-row-amounts" style="${pctStyle}">${spentStr} / ${limitStr}</span>
+          </div>
           <div class="budget-mini-bar-wrap">
             <div class="budget-mini-bar">
               <div class="budget-mini-fill ${fillClass}" style="width:${pct}%"></div>

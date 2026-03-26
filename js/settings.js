@@ -7,6 +7,7 @@ import { formatDate, showMessage } from "./utils.js";
 import { getCurrency } from "./currency.js";
 import { renderFAQ } from "./faq.js";
 import { renderRecurringSection } from "./recurring.js";
+import { renderBudgetList } from "./budget.js";
 
 // ---- Dark Mode ----
 
@@ -286,6 +287,7 @@ export function updateSettingsContent() {
   const faqContainer = document.getElementById("faqContainer");
 
   renderRecurringSection();
+  renderBudgetList();
 
   if (backupContainer) {
     backupContainer.innerHTML = renderBackupStatus();
