@@ -31,6 +31,7 @@ import {
   deleteTransaction,
   confirmDelete,
   closeDeleteModal,
+  deleteBudgetConfirm,
   cancelEdit,
   selectType,
   updateCategoryOptions,
@@ -62,6 +63,14 @@ import {
   saveRecurringTemplate,
   selectRecurringType,
 } from "./recurring.js";
+import {
+  initBudgets,
+  renderBudgetList,
+  renderBudgetAlerts,
+  saveBudget,
+  deleteBudget,
+  renderBudgetModal,
+} from "./budget.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -267,6 +276,11 @@ function bindStaticEvents() {
         freq === "monthly" ? "block" : "none";
     });
 
+  // ---- Add Budget button (delegated — button is re-rendered by renderBudgetList) ----
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("#addBudgetBtn")) openBudgetModal();
+  });
+
   // ---- Restore Preview modal close (X button) ----
   document
     .querySelector("#restorePreviewModal .close-btn")
@@ -352,6 +366,38 @@ function bindDelegatedEvents() {
     updateUI();
     closeCurrencySelector();
     showMessage(`Currency changed to ${currencies[code].name}`);
+  });
+
+  // Budget container: collapse toggle + edit / delete
+  document.getElementById("budgetContainer").addEventListener("click", (e) => {
+    // Collapse toggle — ignore clicks on the Add button inside the header
+    const toggleHeader = e.target.closest("[data-toggle-budget-collapse]");
+    if (toggleHeader && !e.target.closest("#addBudgetBtn")) {
+      const body    = toggleHeader.closest(".card").querySelector(".budget-collapse-body");
+      const chevron = toggleHeader.querySelector(".budget-chevron");
+      if (body) {
+        body.hidden = !body.hidden;
+        chevron && chevron.classList.toggle("expanded", !body.hidden);
+        toggleHeader.setAttribute("aria-expanded", String(!body.hidden));
+        localStorage.setItem("budgetListExpanded", String(!body.hidden));
+      }
+      return;
+    }
+
+    const editBtn = e.target.closest("[data-edit-budget]");
+    if (editBtn) {
+      const budgetId = Number(editBtn.dataset.editBudget);
+      const budget = state.budgets.find((b) => b.id === budgetId);
+      if (budget) {
+        openBudgetModal(budget);
+      }
+    }
+
+    const deleteBtn = e.target.closest("[data-delete-budget]");
+    if (deleteBtn) {
+      const budgetId = Number(deleteBtn.dataset.deleteBudget);
+      deleteBudgetConfirm(budgetId);
+    }
   });
 
   // FAQ sections & items (delegated from faqContainer) - Lazy-loaded
@@ -571,6 +617,79 @@ function registerServiceWorker() {
 }
 
 // ============================================================================
+// Budget Modal Handler
+// ============================================================================
+
+function openBudgetModal(budget = null) {
+  const modal = renderBudgetModal(budget);
+
+  // Inline duplicate warning — injected below the category select
+  const categorySelect = modal.element.querySelector("#budgetCategory");
+  const confirmBtn     = modal.element.querySelector(".modal-btn-confirm");
+
+  const dupWarning = document.createElement("p");
+  dupWarning.className = "budget-dup-warning";
+  dupWarning.hidden = true;
+  categorySelect.insertAdjacentElement("afterend", dupWarning);
+
+  function checkDuplicate() {
+    const selected = categorySelect.value;
+    const existing = state.budgets.find(
+      (b) => b.category === selected && b.id !== budget?.id
+    );
+    if (existing) {
+      dupWarning.textContent = `⚠ A budget for "${selected}" already exists. Edit it from the list instead.`;
+      dupWarning.hidden = false;
+      confirmBtn.disabled = true;
+    } else {
+      dupWarning.hidden = true;
+      confirmBtn.disabled = false;
+    }
+  }
+
+  categorySelect.addEventListener("change", checkDuplicate);
+  // Run on open in case modal is pre-filled (edit mode)
+  if (categorySelect.value) checkDuplicate();
+
+  // Close button
+  modal.element.querySelector(".close-btn").addEventListener("click", () => {
+    modal.close();
+  });
+
+  // Cancel button
+  modal.element.querySelector(".modal-btn-cancel").addEventListener("click", () => {
+    modal.close();
+  });
+
+  // Confirm button
+  confirmBtn.addEventListener("click", async () => {
+    try {
+      const formData = modal.getFormData();
+
+      // Validation
+      if (!formData.category) {
+        showMessage("Please select a category", "error");
+        return;
+      }
+      if (!formData.monthlyLimit || formData.monthlyLimit <= 0) {
+        showMessage("Monthly limit must be greater than 0", "error");
+        return;
+      }
+
+      await saveBudget(formData);
+      modal.close();
+
+      // Refresh the budget list and alerts
+      renderBudgetList();
+      renderBudgetAlerts();
+      updateUI();
+    } catch (error) {
+      console.error("Error saving budget:", error);
+    }
+  });
+}
+
+// ============================================================================
 // App Initialisation
 // ============================================================================
 
@@ -580,6 +699,7 @@ async function init() {
     await migrateFromLocalStorage();
     await loadDataFromDB();
     await loadRecurringIntoState();
+    await initBudgets();
     await checkRecurringTransactions();
 
     // Set up UI defaults
@@ -593,6 +713,8 @@ async function init() {
 
     // First render
     updateUI();
+    renderBudgetList();
+    renderBudgetAlerts();
 
     // Post-render setup
     checkAppVersion();

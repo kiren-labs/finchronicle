@@ -7,6 +7,7 @@ import { sanitizeHTML, formatDate, formatMonth, showMessage } from "./utils.js";
 import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
+import { renderBudgetAlerts, renderBudgetList, deleteBudget } from "./budget.js";
 import {
   renderCategoryPieChart,
   buildCategoryData,
@@ -23,6 +24,7 @@ import {
 
 export function updateUI() {
   updateSummary();
+  renderBudgetAlerts();
 
   // Always update filters (lightweight)
   updateMonthFilters();
@@ -49,6 +51,17 @@ export function updateUI() {
 
 export function updateSummary() {
   const currentMonth = new Date().toISOString().slice(0, 7);
+
+  // Update section title: selected month or "All Time"
+  const monthLabel = document.getElementById("summaryMonthLabel");
+  if (monthLabel) {
+    if (state.selectedMonth === "all") {
+      monthLabel.textContent = "All Time";
+    } else {
+      const [y, m] = state.selectedMonth.split("-");
+      monthLabel.textContent = new Date(y, parseInt(m) - 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    }
+  }
 
   const { income, expense, count } = state.transactions.reduce(
     (acc, t) => {
@@ -649,11 +662,30 @@ export function cancelEdit() {
 
 export function deleteTransaction(id) {
   state.deleteId = id;
+  state.deleteBudgetId = null;
+  document.querySelector("#deleteModal .modal-title").textContent = "Delete Transaction?";
+  document.getElementById("deleteModal").classList.add("show");
+}
+
+export function deleteBudgetConfirm(budgetId) {
+  state.deleteBudgetId = budgetId;
+  state.deleteId = null;
+  document.querySelector("#deleteModal .modal-title").textContent = "Delete Budget?";
   document.getElementById("deleteModal").classList.add("show");
 }
 
 export async function confirmDelete() {
-  if (state.deleteId) {
+  if (state.deleteBudgetId) {
+    try {
+      await deleteBudget(state.deleteBudgetId);
+      renderBudgetList();
+      renderBudgetAlerts();
+      updateUI();
+    } catch (err) {
+      console.error("Budget delete failed:", err);
+    }
+    state.deleteBudgetId = null;
+  } else if (state.deleteId) {
     try {
       await deleteTransactionFromDB(state.deleteId);
       state.transactions = state.transactions.filter(

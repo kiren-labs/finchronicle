@@ -314,7 +314,10 @@
             <div class="summary-section">
                 <div class="summary-header">
                     <div class="summary-header-content">
-                        <h2 class="summary-title">Summary</h2>
+                        <h2 class="summary-title">
+                            <i class="ri-bar-chart-2-line summary-title-icon"></i>
+                            <span id="summaryMonthLabel">Summary</span>
+                        </h2>
                         <div class="summary-compact" id="summaryCompact">
                             <span class="compact-stat" id="compactNet">฿0</span>
                             <span class="compact-separator">•</span>
@@ -323,6 +326,7 @@
                             <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i> <span id="compactIncome">฿0</span></span>
                             <span class="compact-separator">•</span>
                             <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i> <span id="compactExpense">฿0</span></span>
+                            <span id="budgetAlertBadge" class="budget-alert-badge" hidden></span>
                         </div>
                     </div>
                     <button class="collapse-btn" aria-label="Toggle Summary">
@@ -383,6 +387,7 @@
                     </div>
                 </div>
             </div>
+                <div id="budgetAlerts"></div>
             </div>
             <!-- Currency Selector Modal -->
             <div id="currencyModal" class="modal" style="display: none;">
@@ -583,6 +588,22 @@
 
                 <!-- Recurring Transactions (v3.11.0) -->
                 <div id="recurringContainer"></div>
+
+                <!-- Budgets (v3.13.0) -->
+                <div id="budgetContainer">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3>Monthly Budgets</h3>
+                            <button class="toolbar-btn" aria-label="Add Budget" id="addBudgetBtn">
+                                <i class="ri-add-line"></i>
+                                <span>Add Budget</span>
+                            </button>
+                        </div>
+                        <div style="text-align: center; color: var(--text-secondary); padding: 20px 0;">
+                            No budgets set yet. Add one to start tracking spending limits.
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Backup Status Card (v3.9.0) -->
                 <div id="backupStatusContainer"></div>
