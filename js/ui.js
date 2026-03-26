@@ -52,6 +52,17 @@ export function updateUI() {
 export function updateSummary() {
   const currentMonth = new Date().toISOString().slice(0, 7);
 
+  // Update section title: selected month or "All Time"
+  const monthLabel = document.getElementById("summaryMonthLabel");
+  if (monthLabel) {
+    if (state.selectedMonth === "all") {
+      monthLabel.textContent = "All Time";
+    } else {
+      const [y, m] = state.selectedMonth.split("-");
+      monthLabel.textContent = new Date(y, parseInt(m) - 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    }
+  }
+
   const { income, expense, count } = state.transactions.reduce(
     (acc, t) => {
       if (t.date.startsWith(currentMonth)) {

@@ -176,6 +176,8 @@
     .summary-section.collapsed .summary-title {
         font-size: var(--font-sm);
     }
+    .summary-section.collapsed .summary-title-icon { display: inline; }
+    .summary-section.collapsed #summaryMonthLabel { display: none; }
 
     .summary {
         gap: var(--space-sm);
@@ -422,7 +424,16 @@ h1 i {
     min-width: 0;
 }
 
+.summary-title-icon {
+    display: none;
+    font-size: 1rem;
+    color: var(--color-text-muted);
+}
+
 .summary-title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
     font-size: var(--font-md);
     font-weight: 600;
     color: var(--color-text-muted);
@@ -450,6 +461,10 @@ h1 i {
     color: var(--color-text-muted);
     flex-shrink: 0;
 }
+
+/* Collapsed: icon only, no text */
+.summary-section.collapsed .summary-title-icon { display: inline; }
+.summary-section.collapsed #summaryMonthLabel { display: none; }
 
 .compact-stat {
     font-weight: 700;
