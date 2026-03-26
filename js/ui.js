@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { state, getDOM, categories, ITEMS_PER_PAGE } from "./state.js";
+import { filterTransactions } from "./search.js";
 import { sanitizeHTML, formatDate, formatMonth, showMessage } from "./utils.js";
 import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
@@ -144,6 +145,29 @@ export function updateTransactionsList() {
     filtered = filtered.filter((t) => t.type === state.selectedType);
   }
 
+  // Search + tag filter (v3.14.0)
+  filtered = filterTransactions(filtered);
+
+  // Render active tag filter pills
+  const activeTagFilters = document.getElementById("activeTagFilters");
+  if (activeTagFilters) {
+    if (state.searchTags.length > 0) {
+      activeTagFilters.innerHTML = state.searchTags
+        .map(
+          (tag) => `
+          <span class="active-tag-pill">
+            <i class="ri-price-tag-3-line"></i> ${sanitizeHTML(tag)}
+            <button class="active-tag-pill-remove" data-remove-tag="${sanitizeHTML(tag)}" aria-label="Remove tag filter ${sanitizeHTML(tag)}">
+              <i class="ri-close-line"></i>
+            </button>
+          </span>`,
+        )
+        .join("");
+    } else {
+      activeTagFilters.innerHTML = "";
+    }
+  }
+
   if (filtered.length === 0) {
     list.innerHTML = `
             <div class="empty-state">
@@ -183,6 +207,7 @@ export function updateTransactionsList() {
                 </div>
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
                 <div class="transaction-date">${formatDate(t.date)}</div>
+                ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}">${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
             </div>
             <div class="transaction-amount ${amountClass}">
                 ${sign}${formatCurrency(t.amount)}
@@ -636,6 +661,8 @@ export function editTransaction(id) {
   document.getElementById("amount").value = transaction.amount;
   document.getElementById("date").value = transaction.date;
   document.getElementById("notes").value = transaction.notes;
+  state.formTags = [...(transaction.tags || [])];
+  renderFormTagChips();
 
   updateCategoryOptions(transaction.type);
   document.getElementById("category").value = transaction.category;
@@ -652,6 +679,8 @@ export function cancelEdit() {
   state.editingId = null;
   document.getElementById("transactionForm").reset();
   document.getElementById("date").valueAsDate = new Date();
+  state.formTags = [];
+  renderFormTagChips();
 
   selectType("expense");
 
@@ -1056,6 +1085,35 @@ export function renderMonthlyInsights() {
   }
 
   return summaryHTML + budgetHealthHTML + categoriesHTML;
+}
+
+// ---- Tag Form Chips (v3.14.0) ----
+
+export function renderFormTagChips() {
+  const container = document.getElementById("formTagChips");
+  if (!container) return;
+  container.innerHTML = "";
+  (state.formTags || []).forEach((tag) => {
+    const chip = document.createElement("span");
+    chip.className = "tag-chip";
+
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = tag;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "tag-chip-remove";
+    removeBtn.setAttribute("aria-label", `Remove tag ${tag}`);
+    removeBtn.type = "button";
+    removeBtn.innerHTML = '<i class="ri-close-line"></i>';
+    removeBtn.addEventListener("click", () => {
+      state.formTags = state.formTags.filter((t) => t !== tag);
+      renderFormTagChips();
+    });
+
+    chip.appendChild(nameSpan);
+    chip.appendChild(removeBtn);
+    container.appendChild(chip);
+  });
 }
 
 // ---- Feedback Modal ----

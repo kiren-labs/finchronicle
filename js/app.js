@@ -41,7 +41,10 @@ import {
   prevPage,
   openFeedbackModal,
   closeFeedbackModal,
+  renderFormTagChips,
 } from "./ui.js";
+import { getAllTags, renameTag, deleteTag } from "./search.js";
+import { renderTagManagement } from "./settings.js";
 import {
   toggleDarkMode,
   loadDarkMode,
@@ -302,6 +305,12 @@ function bindStaticEvents() {
       const mod = await getImportExportModule();
       mod.handleRestore(e);
     });
+
+  // ---- Search bar (v3.14.0) ----
+  bindSearchEvents();
+
+  // ---- Tag chip input in form (v3.14.0) ----
+  bindTagInputEvents();
 }
 
 function bindSettingsButtons() {
@@ -341,13 +350,24 @@ function bindSettingsButtons() {
 // ============================================================================
 
 function bindDelegatedEvents() {
-  // Transaction list: edit / delete buttons
+  // Transaction list: edit / delete buttons + tag click-to-filter (v3.14.0)
   document.getElementById("transactionsList").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-action]");
-    if (!btn) return;
-    const id = Number(btn.dataset.id);
-    if (btn.dataset.action === "edit") editTransaction(id);
-    if (btn.dataset.action === "delete") deleteTransaction(id);
+    if (btn) {
+      const id = Number(btn.dataset.id);
+      if (btn.dataset.action === "edit") editTransaction(id);
+      if (btn.dataset.action === "delete") deleteTransaction(id);
+      return;
+    }
+    const tagEl = e.target.closest("[data-tag]");
+    if (tagEl) {
+      const tag = tagEl.dataset.tag;
+      if (!state.searchTags.includes(tag)) {
+        state.searchTags = [...state.searchTags, tag];
+        state.currentPage = 1;
+        updateUI();
+      }
+    }
   });
 
   // Month filter buttons
@@ -400,6 +420,80 @@ function bindDelegatedEvents() {
     }
   });
 
+  // Active tag filter pills — remove (v3.14.0)
+  document.getElementById("activeTagFilters").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-remove-tag]");
+    if (!btn) return;
+    const tag = btn.dataset.removeTag;
+    state.searchTags = state.searchTags.filter((t) => t !== tag);
+    state.currentPage = 1;
+    updateUI();
+  });
+
+  // Tag management — rename / delete (v3.14.0)
+  document.getElementById("tagManagementContainer").addEventListener("click", async (e) => {
+    const renameBtn = e.target.closest("[data-rename-tag]");
+    if (renameBtn) {
+      const oldName = renameBtn.dataset.renameTag;
+      const row = renameBtn.closest(".tag-manage-row");
+      const nameSpan = row.querySelector(".tag-manage-name");
+      const actionsDiv = row.querySelector(".tag-manage-actions");
+
+      // Inline rename input
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = oldName;
+      input.className = "search-input";
+      input.style.cssText = "padding: 4px 8px; font-size: 13px; width: 140px;";
+
+      const saveBtn = document.createElement("button");
+      saveBtn.className = "tag-manage-btn tag-manage-btn-rename";
+      saveBtn.textContent = "Save";
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.className = "tag-manage-btn";
+      cancelBtn.textContent = "Cancel";
+      cancelBtn.style.cssText = "background: var(--color-bg); border-color: var(--color-border);";
+
+      nameSpan.replaceWith(input);
+      actionsDiv.innerHTML = "";
+      actionsDiv.appendChild(saveBtn);
+      actionsDiv.appendChild(cancelBtn);
+      input.focus();
+      input.select();
+
+      const doSave = async () => {
+        const newName = input.value.trim().toLowerCase();
+        if (newName && newName !== oldName) {
+          await renameTag(oldName, newName);
+          // Update searchTags if the renamed tag is active
+          if (state.searchTags.includes(oldName)) {
+            state.searchTags = state.searchTags.map((t) => (t === oldName ? newName : t));
+          }
+        }
+        renderTagManagement();
+        updateUI();
+      };
+
+      saveBtn.addEventListener("click", doSave);
+      input.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") doSave();
+        if (ev.key === "Escape") { renderTagManagement(); }
+      });
+      cancelBtn.addEventListener("click", () => renderTagManagement());
+      return;
+    }
+
+    const deleteBtn = e.target.closest("[data-delete-tag]");
+    if (deleteBtn) {
+      const tagName = deleteBtn.dataset.deleteTag;
+      await deleteTag(tagName);
+      state.searchTags = state.searchTags.filter((t) => t !== tagName);
+      renderTagManagement();
+      updateUI();
+    }
+  });
+
   // FAQ sections & items (delegated from faqContainer) - Lazy-loaded
   document
     .getElementById("faqContainer")
@@ -434,6 +528,101 @@ function bindDelegatedEvents() {
         mod.scrollToFAQ();
       }
     });
+}
+
+// ============================================================================
+// Search & Tag Events (v3.14.0)
+// ============================================================================
+
+function bindSearchEvents() {
+  const searchInput = document.getElementById("searchInput");
+  const clearBtn = document.getElementById("searchClearBtn");
+  if (!searchInput) return;
+
+  searchInput.addEventListener("input", () => {
+    state.searchQuery = searchInput.value;
+    clearBtn.hidden = !searchInput.value;
+    state.currentPage = 1;
+    if (state.currentTab === "list") updateUI();
+  });
+
+  clearBtn.addEventListener("click", () => {
+    state.searchQuery = "";
+    searchInput.value = "";
+    clearBtn.hidden = true;
+    state.currentPage = 1;
+    if (state.currentTab === "list") updateUI();
+  });
+}
+
+function bindTagInputEvents() {
+  const tagInput = document.getElementById("tagInput");
+  const suggestions = document.getElementById("tagSuggestions");
+  if (!tagInput) return;
+
+  // Add a tag from the current input value
+  function addTag(value) {
+    const tag = value.trim().toLowerCase().replace(/,/g, "");
+    if (!tag || tag.length > 30) return;
+    if (state.formTags.includes(tag)) {
+      tagInput.value = "";
+      hideSuggestions();
+      return;
+    }
+    if (state.formTags.length >= 15) return;
+    state.formTags = [...state.formTags, tag];
+    renderFormTagChips();
+    tagInput.value = "";
+    hideSuggestions();
+  }
+
+  function showSuggestions(query) {
+    const existing = getAllTags().filter(
+      (t) => t.includes(query) && !state.formTags.includes(t),
+    );
+    if (!query || existing.length === 0) {
+      hideSuggestions();
+      return;
+    }
+    suggestions.innerHTML = existing
+      .slice(0, 8)
+      .map((t) => `<div class="tag-suggestion-item" data-suggestion="${t}">${t}</div>`)
+      .join("");
+    suggestions.hidden = false;
+  }
+
+  function hideSuggestions() {
+    suggestions.hidden = true;
+    suggestions.innerHTML = "";
+  }
+
+  tagInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
+      if (tagInput.value.trim()) {
+        e.preventDefault();
+        addTag(tagInput.value);
+      }
+    } else if (e.key === "Backspace" && !tagInput.value && state.formTags.length > 0) {
+      state.formTags = state.formTags.slice(0, -1);
+      renderFormTagChips();
+    }
+  });
+
+  tagInput.addEventListener("input", () => {
+    showSuggestions(tagInput.value.trim().toLowerCase());
+  });
+
+  suggestions.addEventListener("click", (e) => {
+    const item = e.target.closest("[data-suggestion]");
+    if (item) addTag(item.dataset.suggestion);
+  });
+
+  // Hide suggestions when focus leaves the tag input area
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#tagInputWrapper") && !e.target.closest("#tagSuggestions")) {
+      hideSuggestions();
+    }
+  });
 }
 
 // ============================================================================
@@ -478,6 +667,7 @@ function bindFormSubmit() {
         category: document.getElementById("category").value,
         date: document.getElementById("date").value,
         notes: document.getElementById("notes").value,
+        tags: [...state.formTags],
         createdAt: state.editingId
           ? state.transactions.find((t) => t.id === state.editingId)?.createdAt
           : new Date().toISOString(),
@@ -532,6 +722,8 @@ function bindFormSubmit() {
           document.getElementById("transactionForm").reset();
           document.getElementById("date").valueAsDate = new Date();
           state.editingId = null;
+          state.formTags = [];
+          renderFormTagChips();
           document.getElementById("formTitle").textContent = "Add Transaction";
           document.getElementById("cancelEditBtn").style.display = "none";
 

@@ -38,6 +38,7 @@ export const state = {
   budgets: [],
   searchQuery: "",
   searchTags: [],
+  formTags: [],
 };
 
 // Category definitions

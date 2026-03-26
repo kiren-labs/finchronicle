@@ -3,11 +3,12 @@
 // ============================================================================
 
 import { APP_VERSION, VERSION_KEY, state } from "./state.js";
-import { formatDate, showMessage } from "./utils.js";
+import { formatDate, showMessage, sanitizeHTML } from "./utils.js";
 import { getCurrency } from "./currency.js";
 import { renderFAQ } from "./faq.js";
 import { renderRecurringSection } from "./recurring.js";
 import { renderBudgetList } from "./budget.js";
+import { getAllTags, renameTag, deleteTag } from "./search.js";
 
 // ---- Dark Mode ----
 
@@ -288,6 +289,7 @@ export function updateSettingsContent() {
 
   renderRecurringSection();
   renderBudgetList();
+  renderTagManagement();
 
   if (backupContainer) {
     backupContainer.innerHTML = renderBackupStatus();
@@ -296,4 +298,41 @@ export function updateSettingsContent() {
   if (faqContainer) {
     faqContainer.innerHTML = renderFAQ();
   }
+}
+
+// ---- Tag Management (v3.14.0) ----
+
+export function renderTagManagement() {
+  const container = document.getElementById("tagManagementList");
+  if (!container) return;
+
+  const tags = getAllTags();
+
+  if (tags.length === 0) {
+    container.innerHTML = '<div style="text-align: center; color: var(--color-text-muted); padding: 20px 0;">No tags yet. Add tags to transactions to organize them.</div>';
+    return;
+  }
+
+  // Count occurrences per tag
+  const tagCounts = {};
+  state.transactions.forEach((t) => {
+    (t.tags || []).forEach((tag) => {
+      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+    });
+  });
+
+  container.innerHTML = tags
+    .map(
+      (tag) => `
+      <div class="tag-manage-row">
+        <span class="tag-manage-name">
+          ${sanitizeHTML(tag)}<span class="tag-manage-count">${tagCounts[tag] || 0} transaction${tagCounts[tag] !== 1 ? "s" : ""}</span>
+        </span>
+        <div class="tag-manage-actions">
+          <button class="tag-manage-btn tag-manage-btn-rename" data-rename-tag="${sanitizeHTML(tag)}">Rename</button>
+          <button class="tag-manage-btn tag-manage-btn-delete" data-delete-tag="${sanitizeHTML(tag)}">Delete</button>
+        </div>
+      </div>`,
+    )
+    .join("");
 }
