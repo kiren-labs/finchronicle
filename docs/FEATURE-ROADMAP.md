@@ -15,7 +15,7 @@
 | v3.11.0 | Recurring Transactions | DONE |
 | v3.12.0 | Complete Reports (trends, weekly) | DONE |
 | v3.13.0 | Budget Limits & Alerts | DONE |
-| v3.14.0 | Tags & Search | NOT STARTED |
+| v3.14.0 | Tags & Search | DONE |
 | v3.15.0 | Optional Fields System | NOT STARTED |
 | v3.16.0 | Split Transactions | NOT STARTED |
 | v3.17.0 | Savings Goals | NOT STARTED |

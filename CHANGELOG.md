@@ -10,7 +10,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Tags & Search
+- Optional Fields System
+
+---
+
+## [3.14.0] - 2026-03-26
+
+### Added
+- **Tags & Search** — Organise and find transactions fast with free-form tags and a real-time search bar
+  - Chip-style tag input in the Add/Edit transaction form; type and press Enter, comma, or Tab to add a tag
+  - Autocomplete suggestions from existing tags while typing
+  - Tags displayed as clickable chips on each transaction in the List tab — click a chip to filter by that tag
+  - Active tag filter pills appear above the transaction list; click × to remove a filter
+  - Search bar in the List tab header filters across amount, category, notes, and tags in real time
+  - Clear button appears in the search bar when input is non-empty
+  - Tag management section in Settings: rename (inline edit) or delete tags — changes propagate to all matching transactions
+  - All tag data stored in IndexedDB on the `transactions` store; no data leaves the device
+  - Full dark mode support for all new UI elements
+
+### Technical
+- `js/search.js` — New module: `filterTransactions`, `getAllTags`, `renameTag`, `deleteTag`
+- `js/db.js` — DB_VERSION 3→4: added `tags` multiEntry index on `transactions` store in `onupgradeneeded`
+- `js/state.js` — `DB_VERSION` bumped to 4; `searchQuery`, `searchTags`, `formTags` added to `state`
+- `js/validation.js` — Tags sanitized via `sanitizeHTML`, max 30 chars/tag, max 15 tags per transaction
+- `js/ui.js` — `updateTransactionsList()` applies `filterTransactions()`; renders active tag pills and tag chips on items; new `renderFormTagChips()` export; `editTransaction()` and `cancelEdit()` sync `state.formTags`
+- `js/settings.js` — `renderTagManagement()` renders rename/delete rows; called from `updateSettingsContent()`
+- `js/app.js` — `bindSearchEvents()` and `bindTagInputEvents()` wired in init; form submit includes `tags` field; delegated events for tag-click-to-filter, active pill removal, and tag management actions
+- `index.html` — Search bar, active tag filter container, tag chip input + suggestions in form, tag management card in Settings
+- `css/styles.css` — Search bar, tag chip, tag suggestion, active tag pill, tag management row styles
+- `css/dark-mode.css` — Dark mode overrides for all new elements
+- `sw.js` — `js/search.js` added to `CACHE_URLS`; cache version bumped to `finchronicle-v3.14.0`
 
 ---
 
