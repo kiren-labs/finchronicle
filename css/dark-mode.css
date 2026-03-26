@@ -259,3 +259,119 @@ body.dark-mode .heatmap-cell.active {
 body.dark-mode .chart-empty-sm {
     color: var(--color-text-muted);
 }
+
+/* ==========================================================================
+   Budget Management (v3.13.0)
+   ========================================================================== */
+
+body.dark-mode .budget-card {
+    border-left-color: var(--color-primary-strong);
+}
+
+body.dark-mode .budget-card:hover {
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .budget-title h3 {
+    color: var(--color-text-primary);
+}
+
+body.dark-mode .budget-status {
+    background: var(--color-success-soft);
+    color: var(--color-success-strong);
+}
+
+body.dark-mode .budget-status.budget-warning {
+    background: var(--color-warning-soft);
+    color: var(--color-warning-strong);
+}
+
+body.dark-mode .budget-status.budget-exceeded {
+    background: var(--color-danger-soft);
+    color: var(--color-danger-strong);
+}
+
+body.dark-mode .icon-btn {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+}
+
+body.dark-mode .icon-btn:hover {
+    background: var(--color-primary);
+    color: #ffffff;
+}
+
+body.dark-mode .progress-bar {
+    background: var(--color-bg-secondary);
+}
+
+body.dark-mode .progress-fill {
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-strong));
+}
+
+body.dark-mode .budget-card.budget-warning .progress-fill {
+    background: linear-gradient(90deg, var(--color-warning), var(--color-warning-strong));
+}
+
+body.dark-mode .budget-card.budget-exceeded .progress-fill {
+    background: linear-gradient(90deg, var(--color-danger), var(--color-danger-strong));
+}
+
+body.dark-mode .progress-text {
+    color: var(--color-text-secondary);
+}
+
+body.dark-mode .budget-details {
+    border-top-color: var(--color-border);
+}
+
+body.dark-mode .detail-label {
+    color: var(--color-text-subtle);
+}
+
+body.dark-mode .detail-value {
+    color: var(--color-text-primary);
+}
+
+body.dark-mode .budget-alert {
+    background: var(--color-warning-soft);
+    border-left-color: var(--color-warning);
+}
+
+body.dark-mode .budget-alert.alert-danger {
+    background: var(--color-danger-soft);
+    border-left-color: var(--color-danger);
+}
+
+body.dark-mode .budget-alert i {
+    color: var(--color-warning-strong);
+}
+
+body.dark-mode .budget-alert.alert-danger i {
+    color: var(--color-danger-strong);
+}
+
+body.dark-mode .alert-content {
+    color: var(--color-text-primary);
+}
+
+body.dark-mode .form-group label {
+    color: var(--color-text-primary);
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group select {
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+}
+
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(0, 81, 213, 0.15);
+}
+
+body.dark-mode .form-group small {
+    color: var(--color-text-subtle);
+}

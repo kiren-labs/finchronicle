@@ -8,6 +8,7 @@ import {
   DB_VERSION,
   STORE_NAME,
   RECURRING_STORE,
+  BUDGETS_STORE,
 } from "./state.js";
 
 // Initialize IndexedDB
@@ -44,6 +45,18 @@ export function initDB() {
             unique: false,
           });
           recurringStore.createIndex("enabled", "enabled", { unique: false });
+        }
+      }
+
+      // v3: budgets store
+      if (oldVersion < 3) {
+        if (!database.objectStoreNames.contains(BUDGETS_STORE)) {
+          const budgetsStore = database.createObjectStore(BUDGETS_STORE, {
+            keyPath: "id",
+          });
+          budgetsStore.createIndex("category", "category", {
+            unique: false,
+          });
         }
       }
     };
@@ -187,6 +200,65 @@ export function deleteRecurringTemplateFromDB(id) {
     const store = tx.objectStore(RECURRING_STORE);
     const request = store.delete(id);
     request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// ---- Budgets ----
+
+export function loadBudgetsFromDB() {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      resolve([]);
+      return;
+    }
+    const tx = state.db.transaction([BUDGETS_STORE], "readonly");
+    const store = tx.objectStore(BUDGETS_STORE);
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function saveBudgetToDB(budget) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([BUDGETS_STORE], "readwrite");
+    const store = tx.objectStore(BUDGETS_STORE);
+    const request = store.put(budget);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function deleteBudgetFromDB(id) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([BUDGETS_STORE], "readwrite");
+    const store = tx.objectStore(BUDGETS_STORE);
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function getBudgetByCategory(category) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      resolve(null);
+      return;
+    }
+    const tx = state.db.transaction([BUDGETS_STORE], "readonly");
+    const store = tx.objectStore(BUDGETS_STORE);
+    const index = store.index("category");
+    const request = index.get(category);
+    request.onsuccess = () => resolve(request.result || null);
     request.onerror = () => reject(request.error);
   });
 }

@@ -11,6 +11,7 @@ export const DB_NAME = "FinChronicleDB";
 export const DB_VERSION = 2;
 export const STORE_NAME = "transactions";
 export const RECURRING_STORE = "recurringTemplates";
+export const BUDGETS_STORE = "budgets";
 
 // Pagination
 export const ITEMS_PER_PAGE = 20;
@@ -33,6 +34,7 @@ export const state = {
   currentPage: 1,
   recurringTemplates: [],
   reportRange: "6m",
+  budgets: [],
 };
 
 // Category definitions

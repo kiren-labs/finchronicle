@@ -20,6 +20,7 @@ const CACHE_URLS = [
   "./js/settings.js",
   "./js/chart.js",
   "./js/recurring.js",
+  "./js/budget.js",
   "./manifest.json",
   "./css/tokens.css",
   "./css/styles.css",

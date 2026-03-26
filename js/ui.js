@@ -7,6 +7,7 @@ import { sanitizeHTML, formatDate, formatMonth, showMessage } from "./utils.js";
 import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
+import { renderBudgetAlerts } from "./budget.js";
 import {
   renderCategoryPieChart,
   buildCategoryData,
@@ -23,6 +24,7 @@ import {
 
 export function updateUI() {
   updateSummary();
+  renderBudgetAlerts();
 
   // Always update filters (lightweight)
   updateMonthFilters();
