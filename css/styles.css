@@ -3214,3 +3214,37 @@ button.primary.loading .btn-spinner {
     text-align: right;
     flex-shrink: 0;
 }
+
+/* ── Budget Alert Banners (v3.13.0) ────────────────────────────────────── */
+#budgetAlerts {
+    padding: 0 12px;
+}
+
+.budget-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.budget-alert i {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.budget-alert.alert-warning {
+    background: var(--color-warning-bg);
+    border: 1px solid var(--color-warning-border);
+    color: var(--color-warning-text);
+}
+
+.budget-alert.alert-danger {
+    background: #fff0ef;
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger-strong);
+}
