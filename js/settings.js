@@ -8,7 +8,7 @@ import { getCurrency } from "./currency.js";
 import { renderFAQ } from "./faq.js";
 import { renderRecurringSection } from "./recurring.js";
 import { renderBudgetList } from "./budget.js";
-import { getAllTags, renameTag, deleteTag } from "./search.js";
+import { getAllTags, renameTag, deleteTag, getTagColor, TAG_PALETTE } from "./search.js";
 
 // ---- Dark Mode ----
 
@@ -322,17 +322,20 @@ export function renderTagManagement() {
   });
 
   container.innerHTML = tags
-    .map(
-      (tag) => `
+    .map((tag) => {
+      const color = getTagColor(tag);
+      const count = tagCounts[tag] || 0;
+      return `
       <div class="tag-manage-row">
         <span class="tag-manage-name">
-          ${sanitizeHTML(tag)}<span class="tag-manage-count">${tagCounts[tag] || 0} transaction${tagCounts[tag] !== 1 ? "s" : ""}</span>
+          <button class="tag-color-dot" data-color-tag="${sanitizeHTML(tag)}" style="background:${color}" title="Click to change color" aria-label="Change color for ${sanitizeHTML(tag)}"></button>
+          ${sanitizeHTML(tag)}<span class="tag-manage-count">${count} transaction${count !== 1 ? "s" : ""}</span>
         </span>
         <div class="tag-manage-actions">
           <button class="tag-manage-btn tag-manage-btn-rename" data-rename-tag="${sanitizeHTML(tag)}">Rename</button>
           <button class="tag-manage-btn tag-manage-btn-delete" data-delete-tag="${sanitizeHTML(tag)}">Delete</button>
         </div>
-      </div>`,
-    )
+      </div>`;
+    })
     .join("");
 }

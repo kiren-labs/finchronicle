@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { state, getDOM, categories, ITEMS_PER_PAGE } from "./state.js";
-import { filterTransactions } from "./search.js";
+import { filterTransactions, getAllTags, getTagColor } from "./search.js";
 import { sanitizeHTML, formatDate, formatMonth, showMessage } from "./utils.js";
 import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
@@ -153,15 +153,15 @@ export function updateTransactionsList() {
   if (activeTagFilters) {
     if (state.searchTags.length > 0) {
       activeTagFilters.innerHTML = state.searchTags
-        .map(
-          (tag) => `
-          <span class="active-tag-pill">
-            <i class="ri-price-tag-3-line"></i> ${sanitizeHTML(tag)}
+        .map((tag) => {
+          const color = getTagColor(tag);
+          return `<span class="active-tag-pill" style="background:${color}">
+            <span class="tag-dot tag-dot-sm" style="background:#ffffff55"></span>${sanitizeHTML(tag)}
             <button class="active-tag-pill-remove" data-remove-tag="${sanitizeHTML(tag)}" aria-label="Remove tag filter ${sanitizeHTML(tag)}">
               <i class="ri-close-line"></i>
             </button>
-          </span>`,
-        )
+          </span>`;
+        })
         .join("");
     } else {
       activeTagFilters.innerHTML = "";
@@ -207,7 +207,7 @@ export function updateTransactionsList() {
                 </div>
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
                 <div class="transaction-date">${formatDate(t.date)}</div>
-                ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}">${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
+                ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
             </div>
             <div class="transaction-amount ${amountClass}">
                 ${sign}${formatCurrency(t.amount)}
@@ -548,6 +548,9 @@ export function switchTab(tab) {
 
   // Refresh the newly visible tab's content (P1: lazy-render)
   switch (tab) {
+    case "add":
+      renderTagPicker();
+      break;
     case "list":
       updateTransactionsList();
       updateMonthFilters();
@@ -1097,6 +1100,10 @@ export function renderFormTagChips() {
     const chip = document.createElement("span");
     chip.className = "tag-chip";
 
+    const dot = document.createElement("span");
+    dot.className = "tag-dot";
+    dot.style.background = getTagColor(tag);
+
     const nameSpan = document.createElement("span");
     nameSpan.textContent = tag;
 
@@ -1110,10 +1117,36 @@ export function renderFormTagChips() {
       renderFormTagChips();
     });
 
+    chip.appendChild(dot);
     chip.appendChild(nameSpan);
     chip.appendChild(removeBtn);
     container.appendChild(chip);
   });
+
+  renderTagPicker();
+}
+
+// Render the existing-tags picker row above the tag text input.
+export function renderTagPicker() {
+  const row = document.getElementById("tagPickerRow");
+  if (!row) return;
+
+  const allTags = getAllTags();
+  if (allTags.length === 0) {
+    row.hidden = true;
+    return;
+  }
+
+  row.hidden = false;
+  row.innerHTML = allTags
+    .map((tag) => {
+      const color = getTagColor(tag);
+      const isActive = (state.formTags || []).includes(tag);
+      return `<button type="button" class="tag-picker-chip${isActive ? " active" : ""}" data-pick-tag="${sanitizeHTML(tag)}" style="${isActive ? `background:${color};border-color:${color};color:#fff` : `--pick-dot:${color}`}">
+        <span class="tag-dot" style="background:${isActive ? "#ffffff99" : color}"></span>${sanitizeHTML(tag)}
+      </button>`;
+    })
+    .join("");
 }
 
 // ---- Feedback Modal ----

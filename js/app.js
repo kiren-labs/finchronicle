@@ -42,8 +42,9 @@ import {
   openFeedbackModal,
   closeFeedbackModal,
   renderFormTagChips,
+  renderTagPicker,
 } from "./ui.js";
-import { getAllTags, renameTag, deleteTag } from "./search.js";
+import { getAllTags, renameTag, deleteTag, cycleTagColor, ensureTagColor, initTagColors } from "./search.js";
 import { renderTagManagement } from "./settings.js";
 import {
   toggleDarkMode,
@@ -432,6 +433,15 @@ function bindDelegatedEvents() {
 
   // Tag management — rename / delete (v3.14.0)
   document.getElementById("tagManagementContainer").addEventListener("click", async (e) => {
+    // Color dot click — cycle to next palette color
+    const colorDot = e.target.closest("[data-color-tag]");
+    if (colorDot) {
+      cycleTagColor(colorDot.dataset.colorTag);
+      renderTagManagement();
+      updateUI();
+      return;
+    }
+
     const renameBtn = e.target.closest("[data-rename-tag]");
     if (renameBtn) {
       const oldName = renameBtn.dataset.renameTag;
@@ -570,11 +580,27 @@ function bindTagInputEvents() {
       return;
     }
     if (state.formTags.length >= 15) return;
+    ensureTagColor(tag);
     state.formTags = [...state.formTags, tag];
-    renderFormTagChips();
+    renderFormTagChips(); // also calls renderTagPicker()
     tagInput.value = "";
     hideSuggestions();
   }
+
+  // Tag picker chip click — toggle the tag in formTags
+  document.getElementById("tagPickerRow").addEventListener("click", (e) => {
+    const chip = e.target.closest("[data-pick-tag]");
+    if (!chip) return;
+    const tag = chip.dataset.pickTag;
+    if (state.formTags.includes(tag)) {
+      state.formTags = state.formTags.filter((t) => t !== tag);
+    } else {
+      if (state.formTags.length < 15) {
+        state.formTags = [...state.formTags, tag];
+      }
+    }
+    renderFormTagChips(); // also calls renderTagPicker()
+  });
 
   function showSuggestions(query) {
     const existing = getAllTags().filter(
@@ -893,6 +919,7 @@ async function init() {
     await loadRecurringIntoState();
     await initBudgets();
     await checkRecurringTransactions();
+    initTagColors();
 
     // Set up UI defaults
     document.getElementById("date").valueAsDate = new Date();
@@ -907,6 +934,7 @@ async function init() {
     updateUI();
     renderBudgetList();
     renderBudgetAlerts();
+    renderTagPicker();
 
     // Post-render setup
     checkAppVersion();
