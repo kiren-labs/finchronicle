@@ -66,6 +66,7 @@ import {
   closeRecurringModal,
   saveRecurringTemplate,
   selectRecurringType,
+  initRecurringTagEvents,
 } from "./recurring.js";
 import {
   initBudgets,
@@ -312,6 +313,7 @@ function bindStaticEvents() {
 
   // ---- Tag chip input in form (v3.14.0) ----
   bindTagInputEvents();
+  initRecurringTagEvents();
 }
 
 function bindSettingsButtons() {

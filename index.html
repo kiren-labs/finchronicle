@@ -202,6 +202,16 @@
                     <label for="recurringStartDate">Start Date</label>
                     <input type="date" id="recurringStartDate">
                 </div>
+                <div class="form-group">
+                    <label>Tags (Optional)</label>
+                    <div id="recurringTagPickerRow" class="tag-picker-row" hidden></div>
+                    <div class="tag-input-wrapper" id="recurringTagInputWrapper">
+                        <div class="tag-chips" id="recurringTagChips"></div>
+                        <input type="text" id="recurringTagInput" class="tag-input"
+                            placeholder="Add tag…" autocomplete="off" aria-label="Add tags">
+                    </div>
+                    <div class="tag-suggestions" id="recurringTagSuggestions" hidden></div>
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="modal-btn modal-btn-cancel" id="recurringCancelBtn">Cancel</button>
