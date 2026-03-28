@@ -72,6 +72,16 @@ export function validateTransaction(transaction) {
   }
   transaction.notes = sanitizeHTML(transaction.notes || "");
 
+  // 6. Tags sanitization and length validation
+  const rawTags = Array.isArray(transaction.tags) ? transaction.tags : [];
+  const sanitizedTags = rawTags
+    .map((tag) => sanitizeHTML(String(tag).trim()))
+    .filter((tag) => tag.length > 0 && tag.length <= 30);
+  if (sanitizedTags.length > 15) {
+    errors.push({ field: "tags", message: "Maximum 15 tags allowed" });
+  }
+  transaction.tags = sanitizedTags.slice(0, 15);
+
   return {
     valid: errors.length === 0,
     errors: errors,

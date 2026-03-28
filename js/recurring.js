@@ -5,6 +5,7 @@
 import { state, categories } from "./state.js";
 import { sanitizeHTML, formatDate, showMessage } from "./utils.js";
 import { formatCurrency } from "./currency.js";
+import { getAllTags, getTagColor, ensureTagColor } from "./search.js";
 import {
   loadRecurringTemplatesFromDB,
   saveRecurringTemplateToDB,
@@ -92,6 +93,7 @@ export async function checkRecurringTransactions() {
       category: template.category,
       date: template.nextDueDate,
       notes: template.notes || "",
+      tags: template.tags || [],
       createdAt: new Date().toISOString(),
       recurringId: template.id,
     };
@@ -177,6 +179,7 @@ export function renderRecurringSection() {
                         </div>
                         <div class="recurring-item-meta">${formatCurrency(t.amount)} · Next: ${nextLabel}</div>
                         ${t.notes ? `<div class="recurring-item-note">${sanitizeHTML(t.notes)}</div>` : ""}
+                        ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
                     </div>
                     <div class="recurring-item-actions">
                         <button class="action-btn recurring-toggle-btn"
@@ -232,6 +235,117 @@ export function renderRecurringSection() {
 // ---- Modal ----
 
 let _editingRecurringId = null;
+let _recurringFormTags = [];
+
+function renderRecurringTagChips() {
+  const container = document.getElementById("recurringTagChips");
+  if (!container) return;
+  container.innerHTML = "";
+  _recurringFormTags.forEach((tag) => {
+    const chip = document.createElement("span");
+    chip.className = "tag-chip";
+    const dot = document.createElement("span");
+    dot.className = "tag-dot";
+    dot.style.background = getTagColor(tag);
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = tag;
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "tag-chip-remove";
+    removeBtn.setAttribute("aria-label", `Remove tag ${tag}`);
+    removeBtn.type = "button";
+    removeBtn.innerHTML = '<i class="ri-close-line"></i>';
+    removeBtn.addEventListener("click", () => {
+      _recurringFormTags = _recurringFormTags.filter((t) => t !== tag);
+      renderRecurringTagChips();
+      renderRecurringTagPicker();
+    });
+    chip.appendChild(dot);
+    chip.appendChild(nameSpan);
+    chip.appendChild(removeBtn);
+    container.appendChild(chip);
+  });
+  renderRecurringTagPicker();
+}
+
+function renderRecurringTagPicker() {
+  const row = document.getElementById("recurringTagPickerRow");
+  if (!row) return;
+  const allTags = getAllTags();
+  if (allTags.length === 0) { row.hidden = true; return; }
+  row.hidden = false;
+  row.innerHTML = allTags.map((tag) => {
+    const color = getTagColor(tag);
+    const isActive = _recurringFormTags.includes(tag);
+    return `<button type="button" class="tag-picker-chip${isActive ? " active" : ""}" data-recurring-pick-tag="${sanitizeHTML(tag)}" style="${isActive ? `background:${color};border-color:${color};color:#fff` : `--pick-dot:${color}`}">
+      <span class="tag-dot" style="background:${isActive ? "#ffffff99" : color}"></span>${sanitizeHTML(tag)}
+    </button>`;
+  }).join("");
+}
+
+export function initRecurringTagEvents() {
+  const tagInput = document.getElementById("recurringTagInput");
+  const suggestions = document.getElementById("recurringTagSuggestions");
+  const pickerRow = document.getElementById("recurringTagPickerRow");
+  if (!tagInput) return;
+
+  function addTag(value) {
+    const tag = value.trim().toLowerCase().replace(/,/g, "");
+    if (!tag || tag.length > 30 || _recurringFormTags.includes(tag) || _recurringFormTags.length >= 15) return;
+    ensureTagColor(tag);
+    _recurringFormTags = [..._recurringFormTags, tag];
+    renderRecurringTagChips();
+    tagInput.value = "";
+    hideSuggestions();
+  }
+
+  function showSuggestions(query) {
+    const existing = getAllTags().filter((t) => t.includes(query) && !_recurringFormTags.includes(t));
+    if (!query || existing.length === 0) { hideSuggestions(); return; }
+    suggestions.hidden = false;
+    suggestions.innerHTML = existing.map((t) =>
+      `<div class="tag-suggestion-item" data-suggestion="${sanitizeHTML(t)}">${sanitizeHTML(t)}</div>`
+    ).join("");
+  }
+
+  function hideSuggestions() {
+    suggestions.hidden = true;
+    suggestions.innerHTML = "";
+  }
+
+  tagInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
+      if (tagInput.value.trim()) { e.preventDefault(); addTag(tagInput.value); }
+    } else if (e.key === "Backspace" && !tagInput.value && _recurringFormTags.length > 0) {
+      _recurringFormTags = _recurringFormTags.slice(0, -1);
+      renderRecurringTagChips();
+    }
+  });
+
+  tagInput.addEventListener("input", () => {
+    showSuggestions(tagInput.value.trim().toLowerCase());
+  });
+
+  suggestions.addEventListener("click", (e) => {
+    const item = e.target.closest("[data-suggestion]");
+    if (item) { addTag(item.dataset.suggestion); tagInput.focus(); }
+  });
+
+  pickerRow.addEventListener("click", (e) => {
+    const chip = e.target.closest("[data-recurring-pick-tag]");
+    if (!chip) return;
+    const tag = chip.dataset.recurringPickTag;
+    if (_recurringFormTags.includes(tag)) {
+      _recurringFormTags = _recurringFormTags.filter((t) => t !== tag);
+    } else if (_recurringFormTags.length < 15) {
+      _recurringFormTags = [..._recurringFormTags, tag];
+    }
+    renderRecurringTagChips();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!tagInput.contains(e.target) && !suggestions.contains(e.target)) hideSuggestions();
+  });
+}
 
 function _updateRecurringCategoryOptions(type) {
   const select = document.getElementById("recurringCategory");
@@ -278,6 +392,8 @@ export function openRecurringModal(id = null) {
   document.getElementById("recurringDay").value = "";
   document.getElementById("recurringStartDate").valueAsDate = new Date();
   document.getElementById("recurringDayGroup").style.display = "block";
+  _recurringFormTags = [];
+  renderRecurringTagChips();
 
   if (id !== null) {
     const template = state.recurringTemplates.find((t) => t.id === id);
@@ -293,6 +409,8 @@ export function openRecurringModal(id = null) {
         template.nextDueDate;
       document.getElementById("recurringDayGroup").style.display =
         template.frequency === "monthly" ? "block" : "none";
+      _recurringFormTags = [...(template.tags || [])];
+      renderRecurringTagChips();
     }
   } else {
     modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Add Recurring';
@@ -352,6 +470,8 @@ export async function saveRecurringTemplate() {
 
   const isEditing = _editingRecurringId !== null;
 
+  const tags = [..._recurringFormTags];
+
   if (isEditing) {
     const template = state.recurringTemplates.find(
       (t) => t.id === _editingRecurringId,
@@ -364,6 +484,7 @@ export async function saveRecurringTemplate() {
     template.frequency = frequency;
     template.dayOfMonth = dayOfMonth;
     template.nextDueDate = startDate;
+    template.tags = tags;
     await saveRecurringTemplateToDB(template);
   } else {
     const template = {
@@ -378,6 +499,7 @@ export async function saveRecurringTemplate() {
       nextDueDate: startDate,
       lastExecuted: null,
       enabled: true,
+      tags,
       createdAt: new Date().toISOString(),
     };
     state.recurringTemplates.push(template);

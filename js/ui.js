@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { state, getDOM, categories, ITEMS_PER_PAGE } from "./state.js";
+import { filterTransactions, getAllTags, getTagColor } from "./search.js";
 import { sanitizeHTML, formatDate, formatMonth, showMessage } from "./utils.js";
 import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
@@ -144,6 +145,29 @@ export function updateTransactionsList() {
     filtered = filtered.filter((t) => t.type === state.selectedType);
   }
 
+  // Search + tag filter (v3.14.0)
+  filtered = filterTransactions(filtered);
+
+  // Render active tag filter pills
+  const activeTagFilters = document.getElementById("activeTagFilters");
+  if (activeTagFilters) {
+    if (state.searchTags.length > 0) {
+      activeTagFilters.innerHTML = state.searchTags
+        .map((tag) => {
+          const color = getTagColor(tag);
+          return `<span class="active-tag-pill" style="background:${color}">
+            <span class="tag-dot tag-dot-sm" style="background:#ffffff55"></span>${sanitizeHTML(tag)}
+            <button class="active-tag-pill-remove" data-remove-tag="${sanitizeHTML(tag)}" aria-label="Remove tag filter ${sanitizeHTML(tag)}">
+              <i class="ri-close-line"></i>
+            </button>
+          </span>`;
+        })
+        .join("");
+    } else {
+      activeTagFilters.innerHTML = "";
+    }
+  }
+
   if (filtered.length === 0) {
     list.innerHTML = `
             <div class="empty-state">
@@ -183,6 +207,7 @@ export function updateTransactionsList() {
                 </div>
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
                 <div class="transaction-date">${formatDate(t.date)}</div>
+                ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
             </div>
             <div class="transaction-amount ${amountClass}">
                 ${sign}${formatCurrency(t.amount)}
@@ -523,6 +548,9 @@ export function switchTab(tab) {
 
   // Refresh the newly visible tab's content (P1: lazy-render)
   switch (tab) {
+    case "add":
+      renderTagPicker();
+      break;
     case "list":
       updateTransactionsList();
       updateMonthFilters();
@@ -636,6 +664,8 @@ export function editTransaction(id) {
   document.getElementById("amount").value = transaction.amount;
   document.getElementById("date").value = transaction.date;
   document.getElementById("notes").value = transaction.notes;
+  state.formTags = [...(transaction.tags || [])];
+  renderFormTagChips();
 
   updateCategoryOptions(transaction.type);
   document.getElementById("category").value = transaction.category;
@@ -652,6 +682,8 @@ export function cancelEdit() {
   state.editingId = null;
   document.getElementById("transactionForm").reset();
   document.getElementById("date").valueAsDate = new Date();
+  state.formTags = [];
+  renderFormTagChips();
 
   selectType("expense");
 
@@ -1056,6 +1088,65 @@ export function renderMonthlyInsights() {
   }
 
   return summaryHTML + budgetHealthHTML + categoriesHTML;
+}
+
+// ---- Tag Form Chips (v3.14.0) ----
+
+export function renderFormTagChips() {
+  const container = document.getElementById("formTagChips");
+  if (!container) return;
+  container.innerHTML = "";
+  (state.formTags || []).forEach((tag) => {
+    const chip = document.createElement("span");
+    chip.className = "tag-chip";
+
+    const dot = document.createElement("span");
+    dot.className = "tag-dot";
+    dot.style.background = getTagColor(tag);
+
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = tag;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "tag-chip-remove";
+    removeBtn.setAttribute("aria-label", `Remove tag ${tag}`);
+    removeBtn.type = "button";
+    removeBtn.innerHTML = '<i class="ri-close-line"></i>';
+    removeBtn.addEventListener("click", () => {
+      state.formTags = state.formTags.filter((t) => t !== tag);
+      renderFormTagChips();
+    });
+
+    chip.appendChild(dot);
+    chip.appendChild(nameSpan);
+    chip.appendChild(removeBtn);
+    container.appendChild(chip);
+  });
+
+  renderTagPicker();
+}
+
+// Render the existing-tags picker row above the tag text input.
+export function renderTagPicker() {
+  const row = document.getElementById("tagPickerRow");
+  if (!row) return;
+
+  const allTags = getAllTags();
+  if (allTags.length === 0) {
+    row.hidden = true;
+    return;
+  }
+
+  row.hidden = false;
+  row.innerHTML = allTags
+    .map((tag) => {
+      const color = getTagColor(tag);
+      const isActive = (state.formTags || []).includes(tag);
+      return `<button type="button" class="tag-picker-chip${isActive ? " active" : ""}" data-pick-tag="${sanitizeHTML(tag)}" style="${isActive ? `background:${color};border-color:${color};color:#fff` : `--pick-dot:${color}`}">
+        <span class="tag-dot" style="background:${isActive ? "#ffffff99" : color}"></span>${sanitizeHTML(tag)}
+      </button>`;
+    })
+    .join("");
 }
 
 // ---- Feedback Modal ----

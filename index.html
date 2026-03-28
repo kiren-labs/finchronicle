@@ -202,6 +202,16 @@
                     <label for="recurringStartDate">Start Date</label>
                     <input type="date" id="recurringStartDate">
                 </div>
+                <div class="form-group">
+                    <label>Tags (Optional)</label>
+                    <div id="recurringTagPickerRow" class="tag-picker-row" hidden></div>
+                    <div class="tag-input-wrapper" id="recurringTagInputWrapper">
+                        <div class="tag-chips" id="recurringTagChips"></div>
+                        <input type="text" id="recurringTagInput" class="tag-input"
+                            placeholder="Add tag…" autocomplete="off" aria-label="Add tags">
+                    </div>
+                    <div class="tag-suggestions" id="recurringTagSuggestions" hidden></div>
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="modal-btn modal-btn-cancel" id="recurringCancelBtn">Cancel</button>
@@ -458,6 +468,17 @@
                             <input type="text" id="notes" placeholder="Add a note...">
                         </div>
 
+                        <div class="form-group">
+                            <label>Tags (Optional)</label>
+                            <div id="tagPickerRow" class="tag-picker-row" hidden></div>
+                            <div class="tag-input-wrapper" id="tagInputWrapper">
+                                <div class="tag-chips" id="formTagChips"></div>
+                                <input type="text" id="tagInput" class="tag-input"
+                                    placeholder="Add tag…" autocomplete="off" aria-label="Add tags">
+                            </div>
+                            <div class="tag-suggestions" id="tagSuggestions" hidden></div>
+                        </div>
+
                         <input type="hidden" id="editId" value="">
 
                         <button type="submit" class="primary" id="submitBtn">Save Transaction</button>
@@ -470,6 +491,16 @@
             <!-- List Tab -->
             <div id="listTab" class="tab-content" role="tabpanel" aria-labelledby="list-tab">
                 <div class="filters" id="monthFilters"></div>
+                <div class="search-bar-wrapper">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="Search amount, category, notes, tags…"
+                        aria-label="Search transactions" autocomplete="off">
+                    <button class="search-clear-btn" id="searchClearBtn" aria-label="Clear search" hidden>
+                        <i class="ri-close-line"></i>
+                    </button>
+                </div>
+                <div id="activeTagFilters" class="active-tag-filters"></div>
                 <div style="margin-bottom: 16px;">
                     <label for="categoryFilter" class="filter-label">Filter by Category</label>
                     <select class="category-filter" id="categoryFilter"
@@ -601,6 +632,20 @@
                         </div>
                         <div style="text-align: center; color: var(--text-secondary); padding: 20px 0;">
                             No budgets set yet. Add one to start tracking spending limits.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tags (v3.14.0) -->
+                <div id="tagManagementContainer">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3>Tags</h3>
+                        </div>
+                        <div id="tagManagementList">
+                            <div style="text-align: center; color: var(--text-secondary); padding: 20px 0;">
+                                No tags yet. Add tags to transactions to organize them.
+                            </div>
                         </div>
                     </div>
                 </div>
