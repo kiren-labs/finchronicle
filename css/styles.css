@@ -2846,7 +2846,7 @@ button.primary.loading .btn-spinner {
 .budget-card {
     position: relative;
     padding: var(--space-lg);
-    border-left: 4px solid var(--color-primary);
+    border-left: 5px solid var(--color-primary);
     transition: all var(--transition-normal);
 }
 
@@ -2931,9 +2931,9 @@ button.primary.loading .btn-spinner {
 
 .progress-bar {
     width: 100%;
-    height: 8px;
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-full);
+    height: 10px;
+    background: var(--color-border);
+    border-radius: var(--radius-pill);
     overflow: hidden;
     margin-bottom: var(--space-sm);
 }
@@ -2941,16 +2941,34 @@ button.primary.loading .btn-spinner {
 .progress-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--color-primary), var(--color-primary-hover));
-    border-radius: var(--radius-full);
-    transition: width var(--transition-normal);
+    border-radius: var(--radius-pill);
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: progress-shimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes progress-shimmer {
+    0%   { left: -60%; }
+    100% { left: 160%; }
 }
 
 .budget-card.budget-warning .progress-fill {
-    background: linear-gradient(90deg, var(--color-warning), var(--color-warning-hover));
+    background: linear-gradient(90deg, var(--color-warning), #d97706);
 }
 
 .budget-card.budget-exceeded .progress-fill {
-    background: linear-gradient(90deg, var(--color-danger), var(--color-danger-hover));
+    background: linear-gradient(90deg, var(--color-danger), #dc2626);
 }
 
 .progress-text {
@@ -3567,22 +3585,38 @@ button.primary.loading .btn-spinner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 0;
+    padding: 10px var(--space-sm);
+    border-left: 3px solid var(--row-accent, var(--color-border));
     border-bottom: 1px solid var(--color-border);
+    transition: background var(--transition-fast);
 }
 
 .tag-manage-row:last-child {
     border-bottom: none;
 }
 
+.tag-manage-row:hover {
+    background: var(--color-bg);
+}
+
 .tag-manage-name {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
     font-size: 14px;
     font-weight: 500;
     color: var(--color-text);
 }
 
 .tag-manage-count {
-    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 600;
     color: var(--color-text-muted);
     margin-left: 6px;
 }
@@ -3590,15 +3624,26 @@ button.primary.loading .btn-spinner {
 .tag-manage-actions {
     display: flex;
     gap: 6px;
+    flex-shrink: 0;
 }
 
 .tag-manage-btn {
-    padding: 4px 10px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
     border-radius: var(--radius-sm);
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 500;
     cursor: pointer;
     border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.tag-manage-btn:hover {
+    transform: scale(1.05);
 }
 
 .tag-manage-btn-rename {
@@ -3668,19 +3713,20 @@ button.primary.loading .btn-spinner {
 
 /* ── Color dot in Settings tag management (v3.14.0) ── */
 .tag-color-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-sm);
   border: 2px solid rgba(0, 0, 0, 0.12);
   cursor: pointer;
   flex-shrink: 0;
   padding: 0;
-  transition: transform 0.15s, border-color 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
   vertical-align: middle;
   margin-right: 4px;
 }
 
 .tag-color-dot:hover {
-  transform: scale(1.25);
+  transform: scale(1.15);
+  box-shadow: var(--shadow-sm);
   border-color: rgba(0, 0, 0, 0.28);
 }

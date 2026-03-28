@@ -154,6 +154,10 @@ body.dark-mode .faq-answer code {
    Primary → Primary-strong for better dark contrast
    ========================================================================== */
 
+body.dark-mode .faq-header h2 {
+    color: var(--color-text);
+}
+
 body.dark-mode .backup-header .backup-icon,
 body.dark-mode .faq-header i,
 body.dark-mode .faq-section-title i,
@@ -464,6 +468,19 @@ body.dark-mode .tag-suggestion-item.active {
 /* ── Tag management dark mode (v3.14.0) ── */
 body.dark-mode .tag-manage-row {
     border-color: var(--color-border);
+}
+
+body.dark-mode .tag-manage-row:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+body.dark-mode .tag-manage-count {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .tag-color-dot {
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 body.dark-mode .tag-manage-name {

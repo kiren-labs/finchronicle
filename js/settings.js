@@ -326,14 +326,14 @@ export function renderTagManagement() {
       const color = getTagColor(tag);
       const count = tagCounts[tag] || 0;
       return `
-      <div class="tag-manage-row">
+      <div class="tag-manage-row" style="--row-accent: ${color}">
         <span class="tag-manage-name">
           <button class="tag-color-dot" data-color-tag="${sanitizeHTML(tag)}" style="background:${color}" title="Click to change color" aria-label="Change color for ${sanitizeHTML(tag)}"></button>
           ${sanitizeHTML(tag)}<span class="tag-manage-count">${count} transaction${count !== 1 ? "s" : ""}</span>
         </span>
         <div class="tag-manage-actions">
-          <button class="tag-manage-btn tag-manage-btn-rename" data-rename-tag="${sanitizeHTML(tag)}">Rename</button>
-          <button class="tag-manage-btn tag-manage-btn-delete" data-delete-tag="${sanitizeHTML(tag)}">Delete</button>
+          <button class="tag-manage-btn tag-manage-btn-rename" data-rename-tag="${sanitizeHTML(tag)}" title="Rename ${sanitizeHTML(tag)}" aria-label="Rename ${sanitizeHTML(tag)}"><i class="ri-pencil-line"></i></button>
+          <button class="tag-manage-btn tag-manage-btn-delete" data-delete-tag="${sanitizeHTML(tag)}" title="Delete ${sanitizeHTML(tag)}" aria-label="Delete ${sanitizeHTML(tag)}"><i class="ri-delete-bin-line"></i></button>
         </div>
       </div>`;
     })
