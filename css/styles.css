@@ -3538,7 +3538,7 @@ button.primary.loading .btn-spinner {
     align-items: center;
     gap: 4px;
     padding: 3px 10px;
-    background: var(--color-primary);
+    /* background set via inline style using tag's color */
     color: #fff;
     border-radius: var(--radius-pill);
     font-size: 12px;

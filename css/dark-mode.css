@@ -489,3 +489,24 @@ body.dark-mode .tag-manage-btn-delete {
 body.dark-mode .tag-manage-btn-delete:hover {
     background: rgba(255, 59, 48, 0.2);
 }
+
+/* ── Tag picker dark mode (v3.14.0) ── */
+body.dark-mode .tag-picker-chip {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+body.dark-mode .tag-picker-chip:hover:not(.active) {
+  border-color: var(--color-text-muted);
+  color: var(--color-text);
+}
+
+/* ── Color dot in Settings dark mode (v3.14.0) ── */
+body.dark-mode .tag-color-dot {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .tag-color-dot:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+}
