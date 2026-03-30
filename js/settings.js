@@ -16,7 +16,7 @@ export function toggleDarkMode() {
   document.body.classList.toggle("dark-mode");
   const isDark = document.body.classList.contains("dark-mode");
   const icon = document.getElementById("darkModeIcon");
-  icon.className = isDark ? "ri-sun-line" : "ri-moon-line";
+  icon.textContent = isDark ? "○" : "◑";
   document
     .getElementById("darkModeBtn")
     .setAttribute(
@@ -31,7 +31,7 @@ export function loadDarkMode() {
   if (darkMode === "enabled") {
     document.body.classList.add("dark-mode");
     const icon = document.getElementById("darkModeIcon");
-    icon.className = "ri-sun-line";
+    icon.textContent = "○";
     document
       .getElementById("darkModeBtn")
       .setAttribute("aria-label", "Switch to light mode");
@@ -220,29 +220,29 @@ export function renderBackupStatus() {
 
   if (days === null) {
     statusClass = "backup-status-danger";
-    statusIcon = "ri-alert-line";
+    statusIcon = "⚠";
     statusLabel = "Never backed up";
     statusMessage =
       "Your data is at risk! Export a backup now to protect your financial records.";
   } else if (days === 0) {
     statusClass = "backup-status-good";
-    statusIcon = "ri-checkbox-circle-line";
+    statusIcon = "✓";
     statusLabel = "Backed up today";
     statusMessage =
       "Your data is safe. Great job keeping your records protected!";
   } else if (days <= 7) {
     statusClass = "backup-status-good";
-    statusIcon = "ri-checkbox-circle-line";
+    statusIcon = "✓";
     statusLabel = `Last backup: ${days} ${days === 1 ? "day" : "days"} ago`;
     statusMessage = "Your data is protected.";
   } else if (days <= 30) {
     statusClass = "backup-status-warning";
-    statusIcon = "ri-error-warning-line";
+    statusIcon = "⚠";
     statusLabel = `Last backup: ${days} days ago`;
     statusMessage = "Consider creating a new backup soon.";
   } else {
     statusClass = "backup-status-danger";
-    statusIcon = "ri-alert-line";
+    statusIcon = "⚠";
     statusLabel = `Last backup: ${days} days ago`;
     statusMessage =
       "⚠️ Backup is outdated! Export now to protect your recent transactions.";
@@ -251,12 +251,12 @@ export function renderBackupStatus() {
   return `
         <div class="backup-status-card">
             <div class="backup-header">
-                <i class="ri-shield-check-line backup-icon" aria-hidden="true"></i>
+                <span class="icon backup-icon" aria-hidden="true">✓</span>
                 <h3 id="backupSectionHeading">Data Backup</h3>
             </div>
 
             <div class="backup-status ${statusClass}" role="status" aria-live="polite" aria-atomic="true">
-                <i class="${statusIcon}" aria-hidden="true"></i>
+                <span class="icon" aria-hidden="true">${statusIcon}</span>
                 <div class="backup-info">
                     <div class="backup-label">${statusLabel}</div>
                     <div class="backup-message">${statusMessage}</div>
@@ -270,11 +270,11 @@ export function renderBackupStatus() {
 
             <div class="backup-actions">
                 <button class="btn btn-primary" data-action="exportBackup" type="button" aria-label="Export all transactions to CSV backup file">
-                    <i class="ri-download-line" aria-hidden="true"></i> Export Backup Now
+                    <span class="icon" aria-hidden="true">↓</span> Export Backup Now
                 </button>
 
                 <button class="backup-faq-button" data-action="scrollToFAQ" type="button" aria-label="Jump to frequently asked questions about backups">
-                    <i class="ri-question-line" aria-hidden="true"></i> Learn more about backups in FAQ
+                    <span class="icon" aria-hidden="true">?</span> Learn more about backups in FAQ
                 </button>
             </div>
         </div>
@@ -332,8 +332,8 @@ export function renderTagManagement() {
           ${sanitizeHTML(tag)}<span class="tag-manage-count">${count} transaction${count !== 1 ? "s" : ""}</span>
         </span>
         <div class="tag-manage-actions">
-          <button class="tag-manage-btn tag-manage-btn-rename" data-rename-tag="${sanitizeHTML(tag)}" title="Rename ${sanitizeHTML(tag)}" aria-label="Rename ${sanitizeHTML(tag)}"><i class="ri-pencil-line"></i></button>
-          <button class="tag-manage-btn tag-manage-btn-delete" data-delete-tag="${sanitizeHTML(tag)}" title="Delete ${sanitizeHTML(tag)}" aria-label="Delete ${sanitizeHTML(tag)}"><i class="ri-delete-bin-line"></i></button>
+          <button class="tag-manage-btn tag-manage-btn-rename" data-rename-tag="${sanitizeHTML(tag)}" title="Rename ${sanitizeHTML(tag)}" aria-label="Rename ${sanitizeHTML(tag)}"><span class="icon" aria-hidden="true">✎</span></button>
+          <button class="tag-manage-btn tag-manage-btn-delete" data-delete-tag="${sanitizeHTML(tag)}" title="Delete ${sanitizeHTML(tag)}" aria-label="Delete ${sanitizeHTML(tag)}"><span class="icon" aria-hidden="true">✕</span></button>
         </div>
       </div>`;
     })

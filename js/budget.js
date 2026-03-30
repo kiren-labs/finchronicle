@@ -196,7 +196,7 @@ export function renderBudgetList() {
             <span class="budget-collapse-summary">No budgets set</span>
           </div>
           <button class="toolbar-btn" id="addBudgetBtn" aria-label="Add Budget">
-            <i class="ri-add-line"></i>
+            <span class="icon" aria-hidden="true">+</span>
             <span>Add</span>
           </button>
         </div>
@@ -256,10 +256,10 @@ export function renderBudgetList() {
           </div>
           <span class="budget-row-pct" style="${pctStyle}">${pct}%</span>
           <button class="icon-btn" data-edit-budget="${budget.id}" aria-label="Edit ${budget.category} budget">
-            <i class="ri-edit-line"></i>
+            <span class="icon" aria-hidden="true">✎</span>
           </button>
           <button class="icon-btn" data-delete-budget="${budget.id}" aria-label="Delete ${budget.category} budget">
-            <i class="ri-delete-bin-line"></i>
+            <span class="icon" aria-hidden="true">✕</span>
           </button>
         </div>
       `;
@@ -275,11 +275,11 @@ export function renderBudgetList() {
         </div>
         <div class="budget-collapse-actions">
           <button class="toolbar-btn" id="addBudgetBtn" aria-label="Add Budget">
-            <i class="ri-add-line"></i>
+            <span class="icon" aria-hidden="true">+</span>
             <span>Add</span>
           </button>
           <span class="budget-chevron${isExpanded ? " expanded" : ""}">
-            <i class="ri-arrow-down-s-line"></i>
+            <span class="icon" aria-hidden="true">↓</span>
           </span>
         </div>
       </div>
@@ -309,7 +309,7 @@ export function renderBudgetModal(budget = null) {
         <div class="modal-header">
           <h3>${title}</h3>
           <button class="close-btn" aria-label="Close">
-            <i class="ri-close-line"></i>
+            <span class="icon" aria-hidden="true">✕</span>
           </button>
         </div>
 
@@ -400,11 +400,11 @@ export function renderBudgetAlerts() {
 
   const summaryText = named.join(" · ");
   const className   = hasExceeded ? "alert-danger" : "alert-warning";
-  const icon        = hasExceeded ? "ri-alert-fill" : "ri-error-warning-line";
+  const icon        = hasExceeded ? "⚠" : "⚠";
 
   container.innerHTML = `
     <div class="budget-alert ${className}">
-      <i class="${icon}"></i>
+      <span class="icon" aria-hidden="true">${icon}</span>
       <span class="budget-alert-text">${summaryText}</span>
     </div>
   `;

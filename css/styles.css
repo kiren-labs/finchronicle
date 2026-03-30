@@ -862,12 +862,21 @@ button.primary.loading .btn-spinner {
     box-shadow: var(--shadow-sm);
 }
 
-.type-option.active .ri-arrow-up-circle-line {
+.type-option[data-type="income"].active .icon,
+.type-option[data-rtype="income"].active .icon {
     color: var(--color-success-strong);
 }
 
-.type-option.active .ri-arrow-down-circle-line {
+.type-option[data-type="expense"].active .icon,
+.type-option[data-rtype="expense"].active .icon {
     color: var(--color-danger-strong);
+}
+
+.icon {
+    font-style: normal;
+    display: inline-block;
+    line-height: 1;
+    vertical-align: middle;
 }
 
 .type-option:active {

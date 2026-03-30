@@ -155,7 +155,7 @@ export function renderRecurringSection() {
   const listHTML =
     templates.length === 0
       ? `<div class="recurring-empty">
-               <i class="ri-repeat-line"></i>
+               <span class="icon" aria-hidden="true">↻</span>
                <p>No recurring transactions yet</p>
                <p class="recurring-empty-sub">Add rent, salary, or subscriptions to auto-track them</p>
            </div>`
@@ -170,7 +170,7 @@ export function renderRecurringSection() {
             return `
                 <div class="recurring-item${isPaused ? " paused" : ""}">
                     <div class="transaction-icon ${t.type}">
-                        <i class="ri-arrow-${iconDir}-circle-fill"></i>
+                        <span class="icon" aria-hidden="true">${iconDir === "up" ? "↑" : "↓"}</span>
                     </div>
                     <div class="recurring-item-info">
                         <div class="recurring-item-title">
@@ -186,17 +186,17 @@ export function renderRecurringSection() {
                             data-action="toggle-recurring" data-id="${t.id}"
                             aria-label="${isPaused ? "Resume" : "Pause"} recurring transaction"
                             title="${isPaused ? "Resume" : "Pause"}">
-                            <i class="${isPaused ? "ri-play-circle-line" : "ri-pause-circle-line"}"></i>
+                            <span class="icon" aria-hidden="true">${isPaused ? "▶" : "‖"}</span>
                         </button>
                         <button class="action-btn edit-btn"
                             data-action="edit-recurring" data-id="${t.id}"
                             aria-label="Edit recurring transaction">
-                            <i class="ri-edit-line"></i>
+                            <span class="icon" aria-hidden="true">✎</span>
                         </button>
                         <button class="action-btn delete-btn"
                             data-action="delete-recurring" data-id="${t.id}"
                             aria-label="Delete recurring transaction">
-                            <i class="ri-delete-bin-line"></i>
+                            <span class="icon" aria-hidden="true">✕</span>
                         </button>
                     </div>
                 </div>`;
@@ -207,11 +207,11 @@ export function renderRecurringSection() {
         <div class="card recurring-section">
             <div class="recurring-header">
                 <div class="recurring-header-left">
-                    <h3 class="recurring-title"><i class="ri-repeat-line"></i> Recurring Transactions</h3>
+                    <h3 class="recurring-title"><span class="icon" aria-hidden="true">↻</span> Recurring Transactions</h3>
                     <p class="recurring-subtitle">Auto-add predictable expenses and income</p>
                 </div>
                 <button class="toolbar-btn recurring-add-btn" id="addRecurringBtn" aria-label="Add recurring transaction">
-                    <i class="ri-add-line"></i>
+                    <span class="icon" aria-hidden="true">+</span>
                     <span>Add</span>
                 </button>
             </div>
@@ -253,7 +253,7 @@ function renderRecurringTagChips() {
     removeBtn.className = "tag-chip-remove";
     removeBtn.setAttribute("aria-label", `Remove tag ${tag}`);
     removeBtn.type = "button";
-    removeBtn.innerHTML = '<i class="ri-close-line"></i>';
+    removeBtn.innerHTML = '<span class="icon" aria-hidden="true">✕</span>';
     removeBtn.addEventListener("click", () => {
       _recurringFormTags = _recurringFormTags.filter((t) => t !== tag);
       renderRecurringTagChips();
@@ -398,7 +398,7 @@ export function openRecurringModal(id = null) {
   if (id !== null) {
     const template = state.recurringTemplates.find((t) => t.id === id);
     if (template) {
-      modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Edit Recurring';
+      modalTitle.innerHTML = '<span class="icon" aria-hidden="true">↻</span> Edit Recurring';
       selectRecurringType(template.type);
       document.getElementById("recurringAmount").value = template.amount;
       document.getElementById("recurringCategory").value = template.category;
@@ -413,7 +413,7 @@ export function openRecurringModal(id = null) {
       renderRecurringTagChips();
     }
   } else {
-    modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Add Recurring';
+    modalTitle.innerHTML = '<span class="icon" aria-hidden="true">↻</span> Add Recurring';
   }
 
   modal.style.display = "flex";

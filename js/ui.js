@@ -21,6 +21,28 @@ import {
   renderDayHeatmap,
 } from "./chart.js";
 
+function getFilteredTransactions() {
+  let filtered = state.transactions;
+
+  if (state.selectedMonth !== "all") {
+    filtered = filtered.filter((t) => t.date.startsWith(state.selectedMonth));
+  }
+  if (state.selectedCategory !== "all") {
+    filtered = filtered.filter((t) => t.category === state.selectedCategory);
+  }
+  if (state.selectedType !== "all") {
+    filtered = filtered.filter((t) => t.type === state.selectedType);
+  }
+
+  return filterTransactions(filtered);
+}
+
+function setListFilters(month, category, type) {
+  state.selectedMonth = month;
+  state.selectedCategory = category;
+  state.selectedType = type;
+}
+
 // ---- Master UI Refresh ----
 
 export function updateUI() {
@@ -96,7 +118,7 @@ export function updateSummary() {
   // Update This Month trend
   if (netDelta && netDelta.pct !== null) {
     const sign = netDelta.abs >= 0 ? "+" : "";
-    $.monthNetTrend.innerHTML = `<i class="ri-arrow-${netDelta.direction === "up" ? "up" : netDelta.direction === "down" ? "down" : "right"}-line"></i> ${sign}${Math.abs(netDelta.pct).toFixed(1)}% vs last month`;
+    $.monthNetTrend.innerHTML = `<span class="icon" aria-hidden="true">${netDelta.direction === "up" ? "↑" : netDelta.direction === "down" ? "↓" : "→"}</span> ${sign}${Math.abs(netDelta.pct).toFixed(1)}% vs last month`;
     $.monthNetTrend.className = `summary-trend ${netDelta.direction === "up" ? "positive" : netDelta.direction === "down" ? "negative" : "neutral"}`;
   } else {
     $.monthNetTrend.textContent = "";
@@ -105,7 +127,7 @@ export function updateSummary() {
   // Update Income trend
   if (incomeDelta && incomeDelta.pct !== null) {
     const sign = incomeDelta.abs >= 0 ? "+" : "";
-    $.monthIncomeTrend.innerHTML = `<i class="ri-arrow-${incomeDelta.direction === "up" ? "up" : incomeDelta.direction === "down" ? "down" : "right"}-line"></i> ${sign}${Math.abs(incomeDelta.pct).toFixed(1)}% vs last month`;
+    $.monthIncomeTrend.innerHTML = `<span class="icon" aria-hidden="true">${incomeDelta.direction === "up" ? "↑" : incomeDelta.direction === "down" ? "↓" : "→"}</span> ${sign}${Math.abs(incomeDelta.pct).toFixed(1)}% vs last month`;
     $.monthIncomeTrend.className = `summary-trend ${incomeDelta.direction === "up" ? "positive" : incomeDelta.direction === "down" ? "negative" : "neutral"}`;
   } else {
     $.monthIncomeTrend.textContent = "";
@@ -133,20 +155,7 @@ export function updateTransactionsList() {
   const $ = getDOM();
   const list = $.transactionsList;
   const paginationControls = $.paginationControls;
-  let filtered = state.transactions;
-
-  if (state.selectedMonth !== "all") {
-    filtered = filtered.filter((t) => t.date.startsWith(state.selectedMonth));
-  }
-  if (state.selectedCategory !== "all") {
-    filtered = filtered.filter((t) => t.category === state.selectedCategory);
-  }
-  if (state.selectedType !== "all") {
-    filtered = filtered.filter((t) => t.type === state.selectedType);
-  }
-
-  // Search + tag filter (v3.14.0)
-  filtered = filterTransactions(filtered);
+  const filtered = getFilteredTransactions();
 
   // Render active tag filter pills
   const activeTagFilters = document.getElementById("activeTagFilters");
@@ -158,7 +167,7 @@ export function updateTransactionsList() {
           return `<span class="active-tag-pill" style="background:${color}">
             <span class="tag-dot tag-dot-sm" style="background:#ffffff55"></span>${sanitizeHTML(tag)}
             <button class="active-tag-pill-remove" data-remove-tag="${sanitizeHTML(tag)}" aria-label="Remove tag filter ${sanitizeHTML(tag)}">
-              <i class="ri-close-line"></i>
+              <span class="icon" aria-hidden="true">✕</span>
             </button>
           </span>`;
         })
@@ -171,7 +180,7 @@ export function updateTransactionsList() {
   if (filtered.length === 0) {
     list.innerHTML = `
             <div class="empty-state">
-                <div class="empty-state-icon"><i class="ri-file-list-3-line"></i></div>
+                <div class="empty-state-icon"><span class="icon" aria-hidden="true">≡</span></div>
                 <div>No transactions yet</div>
             </div>
         `;
@@ -198,12 +207,12 @@ export function updateTransactionsList() {
 
     item.innerHTML = `
             <div class="transaction-icon ${t.type}">
-                <i class="ri-arrow-${isIncome ? "up" : "down"}-circle-fill"></i>
+                <span class="icon" aria-hidden="true">${isIncome ? "↑" : "↓"}</span>
             </div>
             <div class="transaction-details">
                 <div class="transaction-category">
                     ${sanitizeHTML(t.category)}
-                    ${t.recurringId ? '<span class="recurring-badge" title="Auto-generated recurring transaction"><i class="ri-repeat-line"></i></span>' : ""}
+                    ${t.recurringId ? '<span class="recurring-badge" title="Auto-generated recurring transaction"><span class="icon" aria-hidden="true">↻</span></span>' : ""}
                 </div>
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
                 <div class="transaction-date">${formatDate(t.date)}</div>
@@ -213,8 +222,8 @@ export function updateTransactionsList() {
                 ${sign}${formatCurrency(t.amount)}
             </div>
             <div class="transaction-actions">
-                <button class="action-btn edit-btn" data-action="edit" data-id="${t.id}" aria-label="Edit transaction"><i class="ri-edit-line"></i></button>
-                <button class="action-btn delete-btn" data-action="delete" data-id="${t.id}" aria-label="Delete transaction"><i class="ri-delete-bin-line"></i></button>
+                <button class="action-btn edit-btn" data-action="edit" data-id="${t.id}" aria-label="Edit transaction"><span class="icon" aria-hidden="true">✎</span></button>
+                <button class="action-btn delete-btn" data-action="delete" data-id="${t.id}" aria-label="Delete transaction"><span class="icon" aria-hidden="true">✕</span></button>
             </div>
         `;
 
@@ -326,7 +335,7 @@ export function updateGroupedView() {
     content.innerHTML = `
             <div class="card">
                 <div class="empty-state">
-                    <div class="empty-state-icon"><i class="ri-bar-chart-box-line"></i></div>
+                    <div class="empty-state-icon"><span class="icon" aria-hidden="true">▦</span></div>
                     <div>No data to group yet</div>
                 </div>
             </div>
@@ -608,24 +617,16 @@ export function onSummaryTileClick(tileType) {
 
   switch (tileType) {
     case "this-month":
-      state.selectedMonth = currentMonth;
-      state.selectedCategory = "all";
-      state.selectedType = "all";
+      setListFilters(currentMonth, "all", "all");
       break;
     case "total-entries":
-      state.selectedMonth = currentMonth;
-      state.selectedCategory = "all";
-      state.selectedType = "all";
+      setListFilters(currentMonth, "all", "all");
       break;
     case "income":
-      state.selectedMonth = currentMonth;
-      state.selectedCategory = "all";
-      state.selectedType = "income";
+      setListFilters(currentMonth, "all", "income");
       break;
     case "expenses":
-      state.selectedMonth = currentMonth;
-      state.selectedCategory = "all";
-      state.selectedType = "expense";
+      setListFilters(currentMonth, "all", "expense");
       break;
   }
 
@@ -779,15 +780,27 @@ export function getPreviousMonth(currentMonth) {
 }
 
 export function getMonthTotals(month) {
-  const filtered = state.transactions.filter((t) => t.date.startsWith(month));
-  const income = filtered
-    .filter((t) => t.type === "income")
-    .reduce((sum, t) => sum + t.amount, 0);
-  const expense = filtered
-    .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + t.amount, 0);
+  const totals = state.transactions.reduce(
+    (acc, t) => {
+      if (!t.date.startsWith(month)) return acc;
 
-  return { income, expense, net: income - expense, count: filtered.length };
+      acc.count += 1;
+      if (t.type === "income") {
+        acc.income += t.amount;
+      } else if (t.type === "expense") {
+        acc.expense += t.amount;
+      }
+      return acc;
+    },
+    { income: 0, expense: 0, count: 0 },
+  );
+
+  return {
+    income: totals.income,
+    expense: totals.expense,
+    net: totals.income - totals.expense,
+    count: totals.count,
+  };
 }
 
 export function calculateMoMDelta(currentMonth, previousMonth) {
@@ -908,13 +921,13 @@ export function calculateBudgetHealth(month) {
   let status, statusIcon;
   if (variancePercent < 20) {
     status = "On Track";
-    statusIcon = "check-line";
+    statusIcon = "✓";
   } else if (variancePercent < 50) {
     status = "Caution";
-    statusIcon = "alert-line";
+    statusIcon = "⚠";
   } else {
     status = "Over Pace";
-    statusIcon = "close-circle-line";
+    statusIcon = "✕";
   }
 
   return {
@@ -960,7 +973,7 @@ export function renderMonthlyInsights() {
           ? "negative"
           : "neutral";
     return `<span class="insight-trend ${colorClass}">
-            <i class="ri-arrow-${arrow}-line"></i> ${sign}${Math.abs(delta.pct).toFixed(1)}%
+            <span class="icon" aria-hidden="true">${arrow === "up" ? "↑" : arrow === "down" ? "↓" : "→"}</span> ${sign}${Math.abs(delta.pct).toFixed(1)}%
         </span>`;
   };
 
@@ -976,7 +989,7 @@ export function renderMonthlyInsights() {
 
             <div class="insights-cards">
                 <div class="insight-card income-card">
-                    <div class="insight-icon"><i class="ri-arrow-up-circle-line"></i></div>
+                    <div class="insight-icon"><span class="icon" aria-hidden="true">↑</span></div>
                     <div class="insight-content">
                         <div class="insight-label">Income</div>
                         <div class="insight-value">${formatCurrency(insights.income)}</div>
@@ -985,7 +998,7 @@ export function renderMonthlyInsights() {
                 </div>
 
                 <div class="insight-card expense-card">
-                    <div class="insight-icon"><i class="ri-arrow-down-circle-line"></i></div>
+                    <div class="insight-icon"><span class="icon" aria-hidden="true">↓</span></div>
                     <div class="insight-content">
                         <div class="insight-label">Expenses</div>
                         <div class="insight-value">${formatCurrency(insights.expense)}</div>
@@ -994,7 +1007,7 @@ export function renderMonthlyInsights() {
                 </div>
 
                 <div class="insight-card savings-card">
-                    <div class="insight-icon"><i class="ri-wallet-3-line"></i></div>
+                    <div class="insight-icon"><span class="icon" aria-hidden="true">⊡</span></div>
                     <div class="insight-content">
                         <div class="insight-label">Savings (Net)</div>
                         <div class="insight-value ${insights.savings >= 0 ? "positive" : "negative"}">
@@ -1005,7 +1018,7 @@ export function renderMonthlyInsights() {
                 </div>
 
                 <div class="insight-card count-card">
-                    <div class="insight-icon"><i class="ri-file-list-line"></i></div>
+                    <div class="insight-icon"><span class="icon" aria-hidden="true">≡</span></div>
                     <div class="insight-content">
                         <div class="insight-label">Transactions</div>
                         <div class="insight-value">${insights.transactionCount}</div>
@@ -1029,11 +1042,11 @@ export function renderMonthlyInsights() {
             <div class="budget-health-section">
                 <div class="budget-health-header">
                     <div class="budget-health-title">
-                        <i class="ri-pulse-line"></i>
+                        <span class="icon" aria-hidden="true">∿</span>
                         <h3>Budget Health</h3>
                     </div>
                     <div class="budget-health-status ${statusClass}">
-                        <i class="ri-${budgetHealth.statusIcon}"></i>
+                        <span class="icon" aria-hidden="true">${budgetHealth.statusIcon}</span>
                         ${budgetHealth.status}
                     </div>
                 </div>
@@ -1111,7 +1124,7 @@ export function renderFormTagChips() {
     removeBtn.className = "tag-chip-remove";
     removeBtn.setAttribute("aria-label", `Remove tag ${tag}`);
     removeBtn.type = "button";
-    removeBtn.innerHTML = '<i class="ri-close-line"></i>';
+    removeBtn.innerHTML = '<span class="icon" aria-hidden="true">✕</span>';
     removeBtn.addEventListener("click", () => {
       state.formTags = state.formTags.filter((t) => t !== tag);
       renderFormTagChips();

@@ -11,6 +11,13 @@ import {
   BUDGETS_STORE,
 } from "./state.js";
 
+function getObjectStore(storeName, mode = "readonly") {
+  if (!state.db) {
+    throw new Error("Database not initialized");
+  }
+  return state.db.transaction([storeName], mode).objectStore(storeName);
+}
+
 // Initialize IndexedDB
 export function initDB() {
   return new Promise((resolve, reject) => {
@@ -74,14 +81,13 @@ export function initDB() {
 // Load all transactions from IndexedDB
 export function loadDataFromDB() {
   return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
+    let request;
+    try {
+      request = getObjectStore(STORE_NAME, "readonly").getAll();
+    } catch (err) {
+      reject(err);
       return;
     }
-
-    const transaction = state.db.transaction([STORE_NAME], "readonly");
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.getAll();
 
     request.onsuccess = () => {
       state.transactions = request.result || [];
@@ -100,14 +106,13 @@ export function loadDataFromDB() {
 // Save single transaction to IndexedDB
 export function saveTransactionToDB(transaction) {
   return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
+    let request;
+    try {
+      request = getObjectStore(STORE_NAME, "readwrite").put(transaction);
+    } catch (err) {
+      reject(err);
       return;
     }
-
-    const tx = state.db.transaction([STORE_NAME], "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.put(transaction);
 
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
@@ -117,14 +122,13 @@ export function saveTransactionToDB(transaction) {
 // Delete transaction from IndexedDB
 export function deleteTransactionFromDB(id) {
   return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
+    let request;
+    try {
+      request = getObjectStore(STORE_NAME, "readwrite").delete(id);
+    } catch (err) {
+      reject(err);
       return;
     }
-
-    const tx = state.db.transaction([STORE_NAME], "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.delete(id);
 
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);
@@ -134,14 +138,13 @@ export function deleteTransactionFromDB(id) {
 // Clear all transactions from IndexedDB (for restore)
 export function clearAllTransactions() {
   return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
+    let request;
+    try {
+      request = getObjectStore(STORE_NAME, "readwrite").clear();
+    } catch (err) {
+      reject(err);
       return;
     }
-
-    const tx = state.db.transaction([STORE_NAME], "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.clear();
 
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);
@@ -186,13 +189,13 @@ export function loadRecurringTemplatesFromDB() {
 
 export function saveRecurringTemplateToDB(template) {
   return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
+    let request;
+    try {
+      request = getObjectStore(RECURRING_STORE, "readwrite").put(template);
+    } catch (err) {
+      reject(err);
       return;
     }
-    const tx = state.db.transaction([RECURRING_STORE], "readwrite");
-    const store = tx.objectStore(RECURRING_STORE);
-    const request = store.put(template);
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
@@ -200,13 +203,13 @@ export function saveRecurringTemplateToDB(template) {
 
 export function deleteRecurringTemplateFromDB(id) {
   return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
+    let request;
+    try {
+      request = getObjectStore(RECURRING_STORE, "readwrite").delete(id);
+    } catch (err) {
+      reject(err);
       return;
     }
-    const tx = state.db.transaction([RECURRING_STORE], "readwrite");
-    const store = tx.objectStore(RECURRING_STORE);
-    const request = store.delete(id);
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);
   });
@@ -230,13 +233,13 @@ export function loadBudgetsFromDB() {
 
 export function saveBudgetToDB(budget) {
   return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
+    let request;
+    try {
+      request = getObjectStore(BUDGETS_STORE, "readwrite").put(budget);
+    } catch (err) {
+      reject(err);
       return;
     }
-    const tx = state.db.transaction([BUDGETS_STORE], "readwrite");
-    const store = tx.objectStore(BUDGETS_STORE);
-    const request = store.put(budget);
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
@@ -244,13 +247,13 @@ export function saveBudgetToDB(budget) {
 
 export function deleteBudgetFromDB(id) {
   return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
+    let request;
+    try {
+      request = getObjectStore(BUDGETS_STORE, "readwrite").delete(id);
+    } catch (err) {
+      reject(err);
       return;
     }
-    const tx = state.db.transaction([BUDGETS_STORE], "readwrite");
-    const store = tx.objectStore(BUDGETS_STORE);
-    const request = store.delete(id);
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);
   });
@@ -262,10 +265,10 @@ export function getBudgetByCategory(category) {
       resolve(null);
       return;
     }
-    const tx = state.db.transaction([BUDGETS_STORE], "readonly");
-    const store = tx.objectStore(BUDGETS_STORE);
-    const index = store.index("category");
-    const request = index.get(category);
+
+    const request = getObjectStore(BUDGETS_STORE, "readonly")
+      .index("category")
+      .get(category);
     request.onsuccess = () => resolve(request.result || null);
     request.onerror = () => reject(request.error);
   });

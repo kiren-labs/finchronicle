@@ -16,11 +16,6 @@
     <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
     <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet"
-        integrity="sha384-RwhG+8423fpoSoUMjpibFzMxLQeaO7oBV45/+IxuLaxxiUOFL9R+OzbK5rBpSazc" crossorigin="anonymous">
-
     <!-- External Stylesheets -->
     <link rel="stylesheet" href="./css/tokens.css">
     <link rel="stylesheet" href="./css/styles.css">
@@ -51,9 +46,9 @@
     <div class="modal" id="restorePreviewModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="ri-file-list-line"></i> Backup Preview</h3>
+                <h3><span class="icon" aria-hidden="true">≡</span> Backup Preview</h3>
                 <button class="close-btn" aria-label="Close">
-                    <i class="ri-close-line"></i>
+                    <span class="icon" aria-hidden="true">✕</span>
                 </button>
             </div>
 
@@ -77,7 +72,7 @@
             </div>
 
             <div class="modal-info">
-                <i class="ri-information-line"></i>
+                <span class="icon" aria-hidden="true">ℹ</span>
                 <strong>Merge Mode:</strong> Your existing transactions will be preserved.
                 New transactions from the backup will be added, and duplicates will be automatically skipped.
             </div>
@@ -97,36 +92,36 @@
     <div class="modal" id="restoreReportModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="ri-file-check-line"></i> Restore Complete</h3>
+                <h3><span class="icon" aria-hidden="true">✓</span> Restore Complete</h3>
                 <button class="close-btn" aria-label="Close">
-                    <i class="ri-close-line"></i>
+                    <span class="icon" aria-hidden="true">✕</span>
                 </button>
             </div>
 
             <div class="restore-report-info">
                 <div class="report-stat">
-                    <i class="ri-file-list-line report-icon"></i>
+                    <span class="icon report-icon" aria-hidden="true">≡</span>
                     <div class="report-details">
                         <span class="report-label">Total in backup</span>
                         <span class="report-value" id="reportBackupTotal">-</span>
                     </div>
                 </div>
                 <div class="report-stat success">
-                    <i class="ri-check-line report-icon"></i>
+                    <span class="icon report-icon" aria-hidden="true">✓</span>
                     <div class="report-details">
                         <span class="report-label">New transactions added</span>
                         <span class="report-value" id="reportAdded">-</span>
                     </div>
                 </div>
                 <div class="report-stat warning">
-                    <i class="ri-alert-line report-icon"></i>
+                    <span class="icon report-icon" aria-hidden="true">⚠</span>
                     <div class="report-details">
                         <span class="report-label">Duplicates skipped</span>
                         <span class="report-value" id="reportDuplicates">-</span>
                     </div>
                 </div>
                 <div class="report-stat total">
-                    <i class="ri-database-2-line report-icon"></i>
+                    <span class="icon report-icon" aria-hidden="true">⊡</span>
                     <div class="report-details">
                         <span class="report-label">Total transactions now</span>
                         <span class="report-value" id="reportCurrentTotal">-</span>
@@ -146,9 +141,9 @@
     <div class="modal" id="recurringModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="ri-repeat-line"></i> Add Recurring</h3>
+                <h3><span class="icon" aria-hidden="true">↻</span> Add Recurring</h3>
                 <button class="close-btn" aria-label="Close recurring modal">
-                    <i class="ri-close-line"></i>
+                    <span class="icon" aria-hidden="true">✕</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -157,11 +152,11 @@
                     <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
                         <button type="button" class="type-option active" id="recurringTypeExpense"
                             data-rtype="expense" role="radio" aria-checked="true">
-                            <i class="ri-arrow-down-circle-line"></i> Expense
+                            <span class="icon" aria-hidden="true">↓</span> Expense
                         </button>
                         <button type="button" class="type-option" id="recurringTypeIncome"
                             data-rtype="income" role="radio" aria-checked="false">
-                            <i class="ri-arrow-up-circle-line"></i> Income
+                            <span class="icon" aria-hidden="true">↑</span> Income
                         </button>
                     </div>
                     <input type="hidden" id="recurringType" value="expense">
@@ -224,16 +219,16 @@
     <div class="modal" id="feedbackModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="ri-feedback-line"></i> Send Feedback</h3>
+                <h3><span class="icon" aria-hidden="true">✉</span> Send Feedback</h3>
                 <button class="close-btn" aria-label="Close">
-                    <i class="ri-close-line"></i>
+                    <span class="icon" aria-hidden="true">✕</span>
                 </button>
             </div>
 
             <div class="feedback-options">
                 <div class="feedback-option">
                     <div class="feedback-icon">
-                        <i class="ri-github-fill"></i>
+                        <span class="icon" aria-hidden="true">GH</span>
                     </div>
                     <div class="feedback-content">
                         <h4>GitHub Issues</h4>
@@ -243,19 +238,19 @@
                                target="_blank"
                                rel="noopener noreferrer"
                                class="feedback-link">
-                                <i class="ri-bug-line"></i> Report Bug
+                                Report Bug
                             </a>
                             <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=feature_request.md"
                                target="_blank"
                                rel="noopener noreferrer"
                                class="feedback-link">
-                                <i class="ri-lightbulb-line"></i> Request Feature
+                                Request Feature
                             </a>
                             <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=feedback.md"
                                target="_blank"
                                rel="noopener noreferrer"
                                class="feedback-link">
-                                <i class="ri-chat-3-line"></i> General Feedback
+                                General Feedback
                             </a>
                         </div>
                     </div>
@@ -267,14 +262,14 @@
 
                 <div class="feedback-option">
                     <div class="feedback-icon">
-                        <i class="ri-mail-line"></i>
+                        <span class="icon" aria-hidden="true">✉</span>
                     </div>
                     <div class="feedback-content">
                         <h4>Email Us</h4>
                         <p>Don't have a GitHub account? Send us an email</p>
                         <a href="mailto:feedbackfinchronicle@gmail.com?subject=FinChronicle%20Feedback"
                            class="feedback-link feedback-link-primary">
-                            <i class="ri-send-plane-line"></i> Send Email
+                            <span class="icon" aria-hidden="true">→</span> Send Email
                         </a>
                     </div>
                 </div>
@@ -286,15 +281,15 @@
         <!-- Header -->
         <header>
             <div class="header-content">
-                <h1><i class="ri-donut-chart-line"></i> <span class="title-text"><span class="fin-text">Fin</span><span class="chronicle-text">Chronicle</span></span></h1>
+                <h1><span class="icon" aria-hidden="true">◕</span> <span class="title-text"><span class="fin-text">Fin</span><span class="chronicle-text">Chronicle</span></span></h1>
                 <div class="header-meta">
                     <span class="status-inline"><span class="status-dot"></span> Offline</span>
                     <span class="version" id="appVersion">v3.7.1</span>
                     <button class="header-btn" aria-label="Send Feedback" title="Send Feedback">
-                        <i class="ri-feedback-line"></i>
+                        <span class="icon" aria-hidden="true">✉</span>
                     </button>
                     <button class="header-btn" aria-label="Quick Add Transaction" title="Quick Add">
-                        <i class="ri-add-line"></i>
+                        <span class="icon" aria-hidden="true">+</span>
                     </button>
                 </div>
             </div>
@@ -305,7 +300,7 @@
 
             <!-- Update Available Notification -->
             <div class="update-prompt" id="updatePrompt">
-                <h3><i class="ri-sparkling-line"></i> Update Available!</h3>
+                <h3><span class="icon" aria-hidden="true">★</span> Update Available!</h3>
                 <p>A new version is available. Reload to get the latest features and improvements.</p>
                 <div class="update-actions">
                     <button class="update-btn-primary">Update Now</button>
@@ -315,7 +310,7 @@
 
             <!-- Install Prompt (iOS) -->
             <div class="install-prompt" id="installPrompt" style="display: none;">
-                <h3><i class="ri-smartphone-line"></i> Install App</h3>
+                <h3><span class="icon" aria-hidden="true">▣</span> Install App</h3>
                 <p>Tap Share → Add to Home Screen for best experience</p>
                 <button>Got it!</button>
             </div>
@@ -325,22 +320,22 @@
                 <div class="summary-header">
                     <div class="summary-header-content">
                         <h2 class="summary-title">
-                            <i class="ri-bar-chart-2-line summary-title-icon"></i>
+                            <span class="icon summary-title-icon" aria-hidden="true">▦</span>
                             <span id="summaryMonthLabel">Summary</span>
                         </h2>
                         <div class="summary-compact" id="summaryCompact">
                             <span class="compact-stat" id="compactNet">฿0</span>
                             <span class="compact-separator">•</span>
-                            <span class="compact-stat-small"><i class="ri-file-list-line"></i> <span id="compactEntries">0</span></span>
+                            <span class="compact-stat-small"><span class="icon" aria-hidden="true">≡</span> <span id="compactEntries">0</span></span>
                             <span class="compact-separator">•</span>
-                            <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i> <span id="compactIncome">฿0</span></span>
+                            <span class="compact-stat-small compact-income"><span class="icon" aria-hidden="true">↑</span> <span id="compactIncome">฿0</span></span>
                             <span class="compact-separator">•</span>
-                            <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i> <span id="compactExpense">฿0</span></span>
+                            <span class="compact-stat-small compact-expense"><span class="icon" aria-hidden="true">↓</span> <span id="compactExpense">฿0</span></span>
                             <span id="budgetAlertBadge" class="budget-alert-badge" hidden></span>
                         </div>
                     </div>
                     <button class="collapse-btn" aria-label="Toggle Summary">
-                        <i class="ri-arrow-up-s-line" id="summaryCollapseIcon"></i>
+                        <span class="icon" id="summaryCollapseIcon" aria-hidden="true">↑</span>
                     </button>
                 </div>
                 <div class="summary" id="summaryCards">
@@ -349,7 +344,7 @@
                      tabindex="0"
                      aria-label="View transactions for this month">
                     <div class="card-icon">
-                        <i class="ri-calendar-check-line"></i>
+                        <span class="icon" aria-hidden="true">◻</span>
                     </div>
                     <div class="card-content">
                         <div class="summary-label">This Month</div>
@@ -362,7 +357,7 @@
                      tabindex="0"
                      aria-label="View all transactions for this month">
                     <div class="card-icon">
-                        <i class="ri-list-check-2"></i>
+                        <span class="icon" aria-hidden="true">✓</span>
                     </div>
                     <div class="card-content">
                         <div class="summary-label">Total Entries</div>
@@ -375,7 +370,7 @@
                      tabindex="0"
                      aria-label="View income transactions for this month">
                     <div class="card-icon">
-                        <i class="ri-arrow-up-circle-fill"></i>
+                        <span class="icon" aria-hidden="true">↑</span>
                     </div>
                     <div class="card-content">
                         <div class="summary-label">Income</div>
@@ -388,7 +383,7 @@
                      tabindex="0"
                      aria-label="View expense transactions for this month">
                     <div class="card-icon">
-                        <i class="ri-arrow-down-circle-fill"></i>
+                        <span class="icon" aria-hidden="true">↓</span>
                     </div>
                     <div class="card-content">
                         <div class="summary-label">Expenses</div>
@@ -404,8 +399,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h3>Select Currency</h3>
-                        <button class="close-btn" aria-label="Close"><i
-                                class="ri-close-line"></i></button>
+                        <button class="close-btn" aria-label="Close"><span class="icon" aria-hidden="true">✕</span></button>
                     </div>
                     <div class="currency-list" id="currencyList">
                         <!-- Currency options will be populated by JavaScript -->
@@ -416,13 +410,13 @@
             <!-- Tab Navigation -->
             <div class="tabs" role="tablist" aria-label="Main navigation">
                 <button id="add-tab" class="tab active" role="tab" aria-selected="true"
-                    aria-controls="addTab"><i class="ri-add-line"></i> Add</button>
+                    aria-controls="addTab"><span class="icon" aria-hidden="true">+</span> Add</button>
                 <button id="list-tab" class="tab" role="tab" aria-selected="false"
-                    aria-controls="listTab"><i class="ri-list-check"></i> List</button>
+                    aria-controls="listTab"><span class="icon" aria-hidden="true">✓</span> List</button>
                 <button id="groups-tab" class="tab" role="tab" aria-selected="false"
-                    aria-controls="groupsTab"><i class="ri-bar-chart-2-line"></i> Groups</button>
+                    aria-controls="groupsTab"><span class="icon" aria-hidden="true">▦</span> Groups</button>
                 <button id="settings-tab" class="tab" role="tab" aria-selected="false"
-                    aria-controls="settingsTab"><i class="ri-settings-3-line"></i> Settings</button>
+                    aria-controls="settingsTab"><span class="icon" aria-hidden="true">⚙</span> Settings</button>
             </div>
 
             <!-- Add Transaction Tab -->
@@ -435,11 +429,11 @@
                             <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
                                 <button type="button" class="type-option active" data-type="expense"
                                     role="radio" aria-checked="true">
-                                    <i class="ri-arrow-down-circle-line"></i> Expense
+                                    <span class="icon" aria-hidden="true">↓</span> Expense
                                 </button>
                                 <button type="button" class="type-option" data-type="income"
                                     role="radio" aria-checked="false">
-                                    <i class="ri-arrow-up-circle-line"></i> Income
+                                    <span class="icon" aria-hidden="true">↑</span> Income
                                 </button>
                             </div>
                             <input type="hidden" id="type" value="expense">
@@ -492,12 +486,12 @@
             <div id="listTab" class="tab-content" role="tabpanel" aria-labelledby="list-tab">
                 <div class="filters" id="monthFilters"></div>
                 <div class="search-bar-wrapper">
-                    <i class="ri-search-line search-icon"></i>
+                    <span class="icon search-icon" aria-hidden="true">⌕</span>
                     <input type="text" id="searchInput" class="search-input"
                         placeholder="Search amount, category, notes, tags…"
                         aria-label="Search transactions" autocomplete="off">
                     <button class="search-clear-btn" id="searchClearBtn" aria-label="Clear search" hidden>
-                        <i class="ri-close-line"></i>
+                        <span class="icon" aria-hidden="true">✕</span>
                     </button>
                 </div>
                 <div id="activeTagFilters" class="active-tag-filters"></div>
@@ -513,13 +507,13 @@
                 </div>
                 <div id="paginationControls" class="pagination-container" style="display: none;">
                     <button id="prevBtn" class="pagination-btn pagination-btn-prev" aria-label="Previous page">
-                        <i class="ri-arrow-left-s-line"></i>
+                        <span class="icon" aria-hidden="true">‹</span>
                         <span>Previous</span>
                     </button>
                     <div id="pageInfo" class="pagination-info"></div>
                     <button id="nextBtn" class="pagination-btn pagination-btn-next" aria-label="Next page">
                         <span>Next</span>
-                        <i class="ri-arrow-right-s-line"></i>
+                        <span class="icon" aria-hidden="true">›</span>
                     </button>
                 </div>
             </div>
@@ -571,33 +565,33 @@
                     <h2 style="font-size: 20px; margin-bottom: 16px;">Settings</h2>
                     <div class="settings-actions">
                         <button class="toolbar-btn" aria-label="Export CSV">
-                            <i class="ri-download-2-line"></i>
+                            <span class="icon" aria-hidden="true">↓</span>
                             <span>Export CSV</span>
                         </button>
                         <button class="toolbar-btn" aria-label="Import CSV">
-                            <i class="ri-upload-2-line"></i>
+                            <span class="icon" aria-hidden="true">↑</span>
                             <span>Import CSV</span>
                         </button>
                         <input type="file" id="importFile" accept=".csv,text/csv" style="display: none;"
                             aria-label="Select CSV file to import">
                         <button class="toolbar-btn" aria-label="Create Backup">
-                            <i class="ri-save-line"></i>
+                            <span class="icon" aria-hidden="true">↓</span>
                             <span>Create Backup</span>
                         </button>
                         <button class="toolbar-btn" aria-label="Restore from Backup">
-                            <i class="ri-upload-cloud-line"></i>
+                            <span class="icon" aria-hidden="true">↑</span>
                             <span>Restore Backup</span>
                         </button>
                         <input type="file" id="restoreFile" accept=".csv,text/csv" style="display: none;"
                             aria-label="Select backup file to restore">
                         <button class="toolbar-btn" aria-label="Check for updates"
                             id="updateCheckBtn">
-                            <i class="ri-refresh-line"></i>
+                            <span class="icon" aria-hidden="true">↺</span>
                             <span>Check Updates</span>
                         </button>
                         <button class="toolbar-btn" aria-label="Change currency"
                             id="currencyBtn">
-                            <i class="ri-exchange-dollar-line"></i>
+                            <span class="icon" aria-hidden="true">$</span>
                             <span>Currency</span>
                             <span class="currency-display">
                                 <span id="currencySymbol">₹</span>
@@ -606,12 +600,12 @@
                         </button>
                         <button class="toolbar-btn" aria-label="Toggle dark mode"
                             id="darkModeBtn">
-                            <i class="ri-contrast-2-line" id="darkModeIcon"></i>
+                            <span class="icon" id="darkModeIcon" aria-hidden="true">◑</span>
                             <span>Dark Mode</span>
                         </button>
                         <button class="toolbar-btn" aria-label="Send Feedback"
                             id="feedbackBtn">
-                            <i class="ri-feedback-line"></i>
+                            <span class="icon" aria-hidden="true">✉</span>
                             <span>Send Feedback</span>
                         </button>
                     </div>
@@ -626,7 +620,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                             <h3>Monthly Budgets</h3>
                             <button class="toolbar-btn" aria-label="Add Budget" id="addBudgetBtn">
-                                <i class="ri-add-line"></i>
+                                <span class="icon" aria-hidden="true">+</span>
                                 <span>Add Budget</span>
                             </button>
                         </div>
@@ -662,23 +656,23 @@
     <!-- Bottom Navigation -->
     <nav class="bottom-nav" role="tablist" aria-label="Main navigation">
         <button id="add-nav" class="nav-item active" role="tab" aria-selected="true" aria-controls="addTab">
-            <i class="ri-add-line nav-item-icon"></i>
+            <span class="icon nav-item-icon" aria-hidden="true">+</span>
             <span>Add</span>
         </button>
         <button id="list-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="listTab">
-            <i class="ri-list-check nav-item-icon"></i>
+            <span class="icon nav-item-icon" aria-hidden="true">✓</span>
             <span>List</span>
         </button>
         <button id="reports-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="reportsTab">
-            <i class="ri-bar-chart-2-line nav-item-icon"></i>
+            <span class="icon nav-item-icon" aria-hidden="true">▦</span>
             <span>Reports</span>
         </button>
         <button id="groups-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="groupsTab">
-            <i class="ri-stack-line nav-item-icon"></i>
+            <span class="icon nav-item-icon" aria-hidden="true">≡</span>
             <span>Groups</span>
         </button>
         <button id="settings-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="settingsTab">
-            <i class="ri-settings-3-line nav-item-icon"></i>
+            <span class="icon nav-item-icon" aria-hidden="true">⚙</span>
             <span>Settings</span>
         </button>
     </nav>

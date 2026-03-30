@@ -57,7 +57,7 @@ export function renderCategoryPieChart(data, container) {
   if (!data || data.length === 0 || total === 0) {
     container.innerHTML = `
             <div class="chart-empty" role="status" aria-live="polite">
-                <i class="ri-pie-chart-2-line" aria-hidden="true"></i>
+                <span class="icon" aria-hidden="true">◕</span>
                 <span>No expenses to display</span>
             </div>`;
     return;
@@ -281,7 +281,7 @@ export function renderIncomeExpenseChart(data, container) {
   if (!hasData) {
     container.innerHTML = `
             <div class="chart-empty-sm" role="status">
-                <i class="ri-bar-chart-2-line" aria-hidden="true"></i>
+                <span class="icon" aria-hidden="true">▦</span>
                 <span>No data for this period</span>
             </div>`;
     return;
@@ -402,7 +402,7 @@ export function renderWeeklyChart(data, container) {
   if (!hasData) {
     container.innerHTML = `
             <div class="chart-empty-sm" role="status">
-                <i class="ri-calendar-line" aria-hidden="true"></i>
+                <span class="icon" aria-hidden="true">◻</span>
                 <span>No expense data yet</span>
             </div>`;
     return;
@@ -480,7 +480,7 @@ export function renderDayHeatmap(data, container) {
   if (!hasData) {
     container.innerHTML = `
             <div class="chart-empty-sm" role="status">
-                <i class="ri-calendar-2-line" aria-hidden="true"></i>
+                <span class="icon" aria-hidden="true">◻</span>
                 <span>No expense data for this period</span>
             </div>`;
     return;

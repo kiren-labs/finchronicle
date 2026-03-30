@@ -44,7 +44,14 @@ import {
   renderFormTagChips,
   renderTagPicker,
 } from "./ui.js";
-import { getAllTags, renameTag, deleteTag, cycleTagColor, ensureTagColor, initTagColors } from "./search.js";
+import {
+  getAllTags,
+  renameTag,
+  deleteTag,
+  cycleTagColor,
+  ensureTagColor,
+  initTagColors,
+} from "./search.js";
 import { renderTagManagement } from "./settings.js";
 import {
   toggleDarkMode,
@@ -81,23 +88,20 @@ import {
 // Lazy-loading for optional features (FAQ, Import/Export)
 // ============================================================================
 
-// Lazy-load FAQ module
-let faqModule = null;
-async function getFAQModule() {
-  if (!faqModule) {
-    faqModule = await import("./faq.js");
-  }
-  return faqModule;
+function createLazyModuleLoader(importer) {
+  let loadedModule = null;
+  return async function loadModule() {
+    if (!loadedModule) {
+      loadedModule = await importer();
+    }
+    return loadedModule;
+  };
 }
 
-// Lazy-load Import/Export module
-let importExportModule = null;
-async function getImportExportModule() {
-  if (!importExportModule) {
-    importExportModule = await import("./import-export.js");
-  }
-  return importExportModule;
-}
+const getFAQModule = createLazyModuleLoader(() => import("./faq.js"));
+const getImportExportModule = createLazyModuleLoader(
+  () => import("./import-export.js"),
+);
 
 // ============================================================================
 // Event Bindings (replaces all inline onclick/onchange/onkeydown in HTML)
@@ -725,7 +729,7 @@ function bindFormSubmit() {
 
         submitBtn.classList.remove("loading");
         submitBtn.classList.add("success");
-        submitBtn.innerHTML = '<i class="ri-check-line btn-icon"></i> Saved!';
+        submitBtn.innerHTML = '<span class="icon btn-icon" aria-hidden="true">✓</span> Saved!';
 
         if ("vibrate" in navigator) {
           navigator.vibrate(50);

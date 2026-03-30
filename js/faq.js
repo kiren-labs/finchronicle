@@ -5,7 +5,7 @@
 export const faqData = [
   {
     category: "Data Backup & Recovery",
-    icon: "ri-shield-check-line",
+    icon: "✓",
     questions: [
       {
         q: "Where is my data stored?",
@@ -31,7 +31,7 @@ export const faqData = [
   },
   {
     category: "Privacy & Security",
-    icon: "ri-lock-line",
+    icon: "⚿",
     questions: [
       {
         q: "Is my data sent to any servers or the cloud?",
@@ -49,7 +49,7 @@ export const faqData = [
   },
   {
     category: "Usage & Features",
-    icon: "ri-question-line",
+    icon: "?",
     questions: [
       {
         q: "How do I import bank statements?",
@@ -73,7 +73,7 @@ export function renderFAQ() {
 
   html += `
         <div class="faq-header">
-            <i class="ri-questionnaire-line"></i>
+            <span class="icon" aria-hidden="true">?</span>
             <h2>Frequently Asked Questions</h2>
         </div>
     `;
@@ -83,10 +83,10 @@ export function renderFAQ() {
             <div class="faq-section">
                 <button class="faq-section-header" data-faq-section="${sectionIndex}" aria-expanded="false" aria-controls="faqSection${sectionIndex}">
                     <div class="faq-section-title">
-                        <i class="${section.icon}" aria-hidden="true"></i>
+                        <span class="icon" aria-hidden="true">${section.icon}</span>
                         <h3 id="faqSection${sectionIndex}Header">${section.category}</h3>
                     </div>
-                    <i class="ri-arrow-down-s-line faq-section-arrow" id="faqArrow${sectionIndex}" aria-hidden="true"></i>
+                    <span class="icon faq-section-arrow" id="faqArrow${sectionIndex}" aria-hidden="true">↓</span>
                 </button>
                 <div class="faq-section-content" id="faqSection${sectionIndex}" style="display: none;" role="region" aria-labelledby="faqSection${sectionIndex}Header">
         `;
@@ -96,7 +96,7 @@ export function renderFAQ() {
                 <div class="faq-item">
                     <button class="faq-question" data-faq-item="${sectionIndex}-${qIndex}" aria-expanded="false" aria-controls="faqAnswer${sectionIndex}_${qIndex}">
                         <span>${qa.q}</span>
-                        <i class="ri-add-line faq-item-icon" id="faqIcon${sectionIndex}_${qIndex}" aria-hidden="true"></i>
+                        <span class="icon faq-item-icon" id="faqIcon${sectionIndex}_${qIndex}" aria-hidden="true">+</span>
                     </button>
                     <div class="faq-answer" id="faqAnswer${sectionIndex}_${qIndex}" style="display: none;" role="region">
                         ${qa.a}
@@ -144,11 +144,11 @@ export function toggleFAQItem(sectionIndex, qIndex) {
 
   if (isExpanded) {
     answer.style.display = "none";
-    icon.className = "ri-add-line faq-item-icon";
+    icon.textContent = "+";
     question.setAttribute("aria-expanded", "false");
   } else {
     answer.style.display = "block";
-    icon.className = "ri-subtract-line faq-item-icon";
+    icon.textContent = "−";
     question.setAttribute("aria-expanded", "true");
   }
 }

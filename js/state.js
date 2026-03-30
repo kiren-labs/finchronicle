@@ -104,29 +104,34 @@ export const currencies = {
 
 // Cached DOM references (populated once on first use)
 let _dom = null;
+const DOM_CACHE_IDS = [
+  "monthNet",
+  "totalEntries",
+  "monthIncome",
+  "monthExpense",
+  "monthNetTrend",
+  "monthIncomeTrend",
+  "monthExpenseMeta",
+  "compactNet",
+  "compactEntries",
+  "compactIncome",
+  "compactExpense",
+  "transactionsList",
+  "paginationControls",
+  "pageInfo",
+  "prevBtn",
+  "nextBtn",
+  "monthFilters",
+  "categoryFilter",
+  "groupedContent",
+];
+
 export function getDOM() {
   if (!_dom) {
-    _dom = {
-      monthNet: document.getElementById("monthNet"),
-      totalEntries: document.getElementById("totalEntries"),
-      monthIncome: document.getElementById("monthIncome"),
-      monthExpense: document.getElementById("monthExpense"),
-      monthNetTrend: document.getElementById("monthNetTrend"),
-      monthIncomeTrend: document.getElementById("monthIncomeTrend"),
-      monthExpenseMeta: document.getElementById("monthExpenseMeta"),
-      compactNet: document.getElementById("compactNet"),
-      compactEntries: document.getElementById("compactEntries"),
-      compactIncome: document.getElementById("compactIncome"),
-      compactExpense: document.getElementById("compactExpense"),
-      transactionsList: document.getElementById("transactionsList"),
-      paginationControls: document.getElementById("paginationControls"),
-      pageInfo: document.getElementById("pageInfo"),
-      prevBtn: document.getElementById("prevBtn"),
-      nextBtn: document.getElementById("nextBtn"),
-      monthFilters: document.getElementById("monthFilters"),
-      categoryFilter: document.getElementById("categoryFilter"),
-      groupedContent: document.getElementById("groupedContent"),
-    };
+    _dom = DOM_CACHE_IDS.reduce((acc, id) => {
+      acc[id] = document.getElementById(id);
+      return acc;
+    }, {});
   }
   return _dom;
 }

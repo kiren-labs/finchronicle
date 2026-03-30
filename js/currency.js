@@ -55,7 +55,7 @@ export function toggleCurrencySelector() {
                     <div class="currency-name">${curr.name}</div>
                 </div>
             </div>
-            <div class="currency-check"><i class="ri-check-line"></i></div>
+            <div class="currency-check"><span class="icon" aria-hidden="true">✓</span></div>
         </div>
     `,
     )
