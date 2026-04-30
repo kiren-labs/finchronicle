@@ -824,6 +824,60 @@ function bindQuickEntryEvents() {
 }
 
 // ============================================================================
+// Account Events (v3.18.0)
+// ============================================================================
+
+function bindAccountEvents() {
+  // Add account button
+  const addBtn = document.getElementById("addAccountBtn");
+  if (addBtn) {
+    addBtn.addEventListener("click", showAddAccountForm);
+  }
+
+  // Account form save
+  const saveBtn = document.getElementById("accountFormSaveBtn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", handleAccountFormSubmit);
+  }
+
+  // Account form close
+  const closeBtn = document.querySelector(".account-form-close");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeAccountForm);
+  }
+
+  // Close modal on backdrop click
+  const modal = document.getElementById("accountFormModal");
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeAccountForm();
+    });
+  }
+
+  // Account list delegated events (edit, delete)
+  const accountsList = document.getElementById("accountsList");
+  if (accountsList) {
+    accountsList.addEventListener("click", async (e) => {
+      const editBtn = e.target.closest(".account-edit-btn");
+      if (editBtn) {
+        showEditAccountForm(Number(editBtn.dataset.id));
+        return;
+      }
+      const deleteBtn = e.target.closest(".account-delete-btn");
+      if (deleteBtn) {
+        const id = Number(deleteBtn.dataset.id);
+        const account = state.accounts.find((a) => a.id === id);
+        if (account && confirm(`Delete account "${account.name}"?`)) {
+          await removeAccount(id);
+          renderAccountManager();
+          renderNetWorthDashboard();
+        }
+      }
+    });
+  }
+}
+
+// ============================================================================
 // Form Submission Handler
 // ============================================================================
 
@@ -952,6 +1006,7 @@ function bindFormSubmit() {
 
           updateUI();
           renderQuickBar();
+          renderNetWorthDashboard();
         }, 800);
       } catch (err) {
         console.error("Save failed:", err);
