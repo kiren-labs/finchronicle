@@ -20,7 +20,7 @@
 | v3.16.0 | Optional Fields System | DONE |
 | v3.17.0 | Quick Entry + Split Transactions | DONE |
 | v3.18.0 | Accounts & Net Worth | DONE |
-| v3.19.0 | Savings Rate Dashboard | NOT STARTED |
+| v3.19.0 | Savings Rate Dashboard | DONE |
 | v3.20.0 | Savings Goals | NOT STARTED |
 | v3.21.0 | Annual Report & Smart Alerts | NOT STARTED |
 | v3.22.0 | Auto-Backup & Data Safety | NOT STARTED |
