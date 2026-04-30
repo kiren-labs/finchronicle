@@ -128,6 +128,16 @@ import {
 } from "./alerts.js";
 import { renderAnnualReport, exportAnnualCSV } from "./annual-report.js";
 import {
+  initAutoBackup,
+  getBackupSettings,
+  saveBackupSettings,
+  performJsonBackup,
+  performCsvBackup,
+  performEncryptedBackup,
+  importEncryptedBackup,
+  renderStorageHealth,
+} from "./auto-backup.js";
+import {
   initGoals,
   renderGoalsDashboard,
   showGoalForm,
@@ -1371,6 +1381,7 @@ async function init() {
     renderAnnualReport();
     renderAlertBanners(runAlertChecks());
     renderAlertHistory();
+    await initAutoBackup();
     checkAppVersion();
     loadDarkMode();
     loadSummaryState();
