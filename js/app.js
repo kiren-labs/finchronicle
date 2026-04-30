@@ -767,6 +767,8 @@ function bindFormSubmit() {
           state.editingId = null;
           state.formTags = [];
           renderFormTagChips();
+          clearTransferFields();
+          selectType("expense");
           document.getElementById("formTitle").textContent = "Add Transaction";
           document.getElementById("cancelEditBtn").style.display = "none";
 
@@ -946,6 +948,10 @@ async function init() {
     bindStaticEvents();
     bindDelegatedEvents();
     bindFormSubmit();
+
+    // Bind account autocomplete for transfer fields
+    bindAccountAutocomplete("fromAccount", "fromAccountSuggestions");
+    bindAccountAutocomplete("toAccount", "toAccountSuggestions");
 
     // First render
     updateUI();

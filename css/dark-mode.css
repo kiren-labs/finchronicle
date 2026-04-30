@@ -527,3 +527,27 @@ body.dark-mode .tag-color-dot {
 body.dark-mode .tag-color-dot:hover {
   border-color: rgba(255, 255, 255, 0.35);
 }
+
+/* ── Transfer Transaction Type (v3.15.0) ── */
+body.dark-mode .transfer-fields {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .account-suggestions {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .account-suggestion:hover {
+  background: var(--color-surface-raised, #374151);
+}
+
+body.dark-mode .transaction-icon.transfer {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+body.dark-mode .type-option[data-type="transfer"].active {
+  background: #6366f1;
+  border-color: #6366f1;
+}
