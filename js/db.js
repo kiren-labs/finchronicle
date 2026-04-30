@@ -67,6 +67,13 @@ export function initDB() {
           txStore.createIndex("tags", "tags", { unique: false, multiEntry: true });
         }
       }
+
+      // v5: Transfer transaction type support (schema-only, no new stores)
+      // New nullable fields: fromAccount, toAccount, transferNote
+      // No index needed — transfers filtered in-memory via type field
+      if (oldVersion < 5) {
+        // No structural changes needed — existing type index handles 'transfer'
+      }
     };
   });
 }
