@@ -118,6 +118,17 @@ import {
   removeAccount,
 } from "./accounts.js";
 import { renderSavingsDashboard } from "./savings.js";
+import {
+  initGoals,
+  renderGoalsDashboard,
+  showGoalForm,
+  closeGoalForm,
+  handleGoalFormSubmit,
+  showContributionForm,
+  closeContributionForm,
+  handleContributionSubmit,
+  removeGoal,
+} from "./goals.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -365,6 +376,9 @@ function bindStaticEvents() {
 
   // ---- Accounts (v3.18.0) ----
   bindAccountEvents();
+
+  // ---- Goals (v3.20.0) ----
+  bindGoalEvents();
 }
 
 function bindSettingsButtons() {
@@ -880,6 +894,84 @@ function bindAccountEvents() {
 }
 
 // ============================================================================
+// Goal Events (v3.20.0)
+// ============================================================================
+
+function bindGoalEvents() {
+  // Add goal button
+  const addBtn = document.getElementById("addGoalBtn");
+  if (addBtn) {
+    addBtn.addEventListener("click", () => showGoalForm());
+  }
+
+  // Goal form save
+  const saveBtn = document.getElementById("goalFormSaveBtn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", handleGoalFormSubmit);
+  }
+
+  // Goal form close
+  const closeBtn = document.getElementById("goalFormCloseBtn");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeGoalForm);
+  }
+
+  // Goal form modal backdrop
+  const goalModal = document.getElementById("goalFormModal");
+  if (goalModal) {
+    goalModal.addEventListener("click", (e) => {
+      if (e.target === goalModal) closeGoalForm();
+    });
+  }
+
+  // Contribution modal save
+  const contribSaveBtn = document.getElementById("contributionSaveBtn");
+  if (contribSaveBtn) {
+    contribSaveBtn.addEventListener("click", handleContributionSubmit);
+  }
+
+  // Contribution modal close
+  const contribCloseBtn = document.getElementById("contributionCloseBtn");
+  if (contribCloseBtn) {
+    contribCloseBtn.addEventListener("click", closeContributionForm);
+  }
+
+  // Contribution modal backdrop
+  const contribModal = document.getElementById("contributionModal");
+  if (contribModal) {
+    contribModal.addEventListener("click", (e) => {
+      if (e.target === contribModal) closeContributionForm();
+    });
+  }
+
+  // Goals dashboard delegated events (contribute, edit, delete)
+  const goalsDashboard = document.getElementById("goalsDashboard");
+  if (goalsDashboard) {
+    goalsDashboard.addEventListener("click", async (e) => {
+      const contributeBtn = e.target.closest(".goal-contribute-btn");
+      if (contributeBtn) {
+        showContributionForm(Number(contributeBtn.dataset.id));
+        return;
+      }
+      const editBtn = e.target.closest(".goal-edit-btn");
+      if (editBtn) {
+        showGoalForm(Number(editBtn.dataset.id));
+        return;
+      }
+      const deleteBtn = e.target.closest(".goal-delete-btn");
+      if (deleteBtn) {
+        const id = Number(deleteBtn.dataset.id);
+        const goal = state.savingsGoals.find((g) => g.id === id);
+        if (goal && confirm(`Delete goal "${goal.name}"?`)) {
+          await removeGoal(id);
+          renderGoalsDashboard();
+        }
+      }
+    });
+  }
+}
+
+// ============================================================================
 // Form Submission Handler
 // ============================================================================
 
@@ -1172,6 +1264,7 @@ async function init() {
     await initOptionalFields();
     await initQuickEntry();
     await initAccounts();
+    await initGoals();
     initTagColors();
 
     // Set up UI defaults
@@ -1201,6 +1294,7 @@ async function init() {
     renderAccountManager();
     renderNetWorthDashboard();
     renderSavingsDashboard();
+    renderGoalsDashboard();
     checkAppVersion();
     loadDarkMode();
     loadSummaryState();

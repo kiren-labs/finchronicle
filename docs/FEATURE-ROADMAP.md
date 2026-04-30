@@ -1,33 +1,50 @@
-# FinChronicle Feature Roadmap (Revised April 2026)
+# FinChronicle Feature Roadmap (Revised May 2026)
 
-> Last updated: 2026-04-30
-> Previous plan: 2026-03-30
+> Last updated: 2026-05-01
+> Previous plan: 2026-04-30
 
 ---
 
 ## Project Status
 
-| Version | Feature | Status |
-|---------|---------|--------|
-| v3.10.2 | Transaction Validation Layer | DONE |
-| v3.10.4 | ES Module Refactoring | DONE (unplanned) |
-| v3.10.5 | Category Pie Chart + WCAG fixes | DONE |
-| v3.11.0 | Recurring Transactions | DONE |
-| v3.12.0 | Complete Reports (trends, weekly) | DONE |
-| v3.13.0 | Budget Limits & Alerts | DONE |
-| v3.14.0 | Tags & Search | DONE |
-| v3.15.0 | Transfer Transaction Type + Audit Trail | DONE |
-| v3.16.0 | Optional Fields System | DONE |
-| v3.17.0 | Quick Entry + Split Transactions | DONE |
-| v3.18.0 | Accounts & Net Worth | DONE |
-| v3.19.0 | Savings Rate Dashboard | NOT STARTED |
-| v3.20.0 | Savings Goals | NOT STARTED |
-| v3.21.0 | Annual Report & Smart Alerts | NOT STARTED |
-| v3.22.0 | Auto-Backup & Data Safety | NOT STARTED |
-| v3.23.0 | Receipt Photos | NOT STARTED |
-| v3.24.0 | Multi-Currency Transactions | NOT STARTED |
-| v3.25.0 | Push Notifications | NOT STARTED |
-| v3.26.0 | Family Expense Settlement | NOT STARTED |
+| Version | Feature | Status | Notes |
+|---------|---------|--------|-------|
+| v3.10.2 | Transaction Validation Layer | ✅ DONE | |
+| v3.10.4 | ES Module Refactoring | ✅ DONE | Unplanned |
+| v3.10.5 | Category Pie Chart + WCAG fixes | ✅ DONE | |
+| v3.11.0 | Recurring Transactions | ✅ DONE | |
+| v3.12.0 | Complete Reports (trends, weekly) | ✅ DONE | |
+| v3.13.0 | Budget Limits & Alerts | ✅ DONE | |
+| v3.14.0 | Tags & Search | ✅ DONE | |
+| v3.15.0 | Transfer Transaction Type + Audit Trail | ✅ DONE | |
+| v3.16.0 | Optional Fields System | ✅ DONE | Partial — see skipped items |
+| v3.17.0 | Quick Entry Templates | ✅ DONE | Partial — see skipped items |
+| v3.18.0 | Accounts & Net Worth | ✅ DONE | Core only — see skipped items |
+| v3.19.0 | Savings Rate Dashboard | ✅ DONE | All 5 widgets |
+| v3.20.0 | Savings Goals | ✅ DONE | Full feature with milestones |
+| v3.21.0 | Annual Report & Smart Alerts | NOT STARTED | |
+| v3.22.0 | Auto-Backup & Data Safety | NOT STARTED | |
+| v3.23.0 | Receipt Photos | NOT STARTED | |
+| v3.24.0 | Multi-Currency Transactions | NOT STARTED | |
+| v3.25.0 | Push Notifications | NOT STARTED | |
+| v3.26.0 | Family Expense Settlement | NOT STARTED | |
+
+---
+
+## Skipped / Deferred Items
+
+Features that were planned in earlier versions but intentionally skipped during implementation. None are blockers — they can be added later as minor patches or folded into future versions.
+
+| Planned In | Feature | Why Skipped | Effort | Revisit? |
+|-----------|---------|-------------|--------|----------|
+| v3.16.0 | Budget envelope groups | Low user impact — individual category budgets are sufficient for now | Medium | v3.21+ if needed |
+| v3.16.0 | Recurring auto-match suggestions | Complex heuristics, high false-positive risk, not enough recurring variety in real data | High | Maybe never |
+| v3.17.0 | Split Transactions | Rarely needed in practice — only 2-3 split-worthy transactions in 3 months of real data | High | v3.22+ if demand |
+| v3.17.0 | One-time expense flag | Can be approximated with tags (e.g. #one-time); doesn't justify schema change | Low | Likely never |
+| v3.18.0 | Account reconciliation | Requires bank statement import or manual entry workflow; adds complexity for minimal gain on a personal app | Medium | v3.22+ maybe |
+| v3.18.0 | Account-linked expenses/income | Optional field `account` from v3.16 already exists; full balance-from-expenses was over-engineering | Medium | Not needed |
+| v3.18.0 | Net worth trend chart (monthly snapshots) | Would need a snapshot store or monthly cron; current point-in-time value is sufficient | Medium | v3.21+ if requested |
+| v3.20.0 | Contribution creates a Transfer | Adds complexity — user must then see a transfer in their list they didn't manually create; manual amount update is cleaner | Low | Unlikely |
 
 ---
 
@@ -108,50 +125,35 @@ These do not warrant their own version but should be done as part of the specifi
 
 ---
 
-## Architecture Foundation (Current)
+## Architecture Foundation (Current — v3.20.0)
 
 **Module structure:**
 
-| Module | Responsibility |
-|--------|---------------|
-| `js/app.js` | Entry point — imports, DOM events, SW registration |
-| `js/state.js` | `state` object, `APP_VERSION`, `DB_VERSION`, `categories`, `getDOM()` |
-| `js/db.js` | All IndexedDB operations |
-| `js/ui.js` | All DOM rendering, `updateUI()` master refresh |
-| `js/validation.js` | `validateTransaction()` |
-| `js/utils.js` | `formatCurrency`, `formatDate`, `showMessage`, `sanitizeHTML` |
-| `js/settings.js` | Dark mode, SW update flow |
-| `js/currency.js` | Currency selector |
-| `js/recurring.js` | Recurring transactions (added v3.11.0) |
-| `js/budget.js` | Budget limits & alerts (added v3.13.0) |
-| `js/search.js` | Tags & search (added v3.14.0) |
-| `js/transfer.js` | Transfer type & account autocomplete (added v3.15.0) |
-| `js/faq.js` | Lazy-loaded |
-| `js/import-export.js` | Lazy-loaded |
+| Module | Responsibility | Since |
+|--------|---------------|-------|
+| `js/app.js` | Entry point — imports, DOM events, SW registration | v3.10 |
+| `js/state.js` | `state` object, `APP_VERSION`, `DB_VERSION`, `categories`, `getDOM()` | v3.10 |
+| `js/db.js` | All IndexedDB operations | v3.10 |
+| `js/ui.js` | All DOM rendering, `updateUI()` master refresh | v3.10 |
+| `js/validation.js` | `validateTransaction()` | v3.10 |
+| `js/utils.js` | `formatCurrency`, `formatDate`, `showMessage`, `sanitizeHTML` | v3.10 |
+| `js/settings.js` | Dark mode, SW update flow | v3.10 |
+| `js/currency.js` | Currency selector | v3.10 |
+| `js/chart.js` | Category pie chart — CSS conic-gradient donut | v3.10.5 |
+| `js/recurring.js` | Recurring transactions | v3.11.0 |
+| `js/budget.js` | Budget limits & alerts | v3.13.0 |
+| `js/search.js` | Tags & full-text search | v3.14.0 |
+| `js/transfer.js` | Transfer type & account autocomplete | v3.15.0 |
+| `js/optional-fields.js` | Optional fields, payment method, smart suggestions | v3.16.0 |
+| `js/quick-entry.js` | Quick Entry templates | v3.17.0 |
+| `js/accounts.js` | Account CRUD, net worth dashboard | v3.18.0 |
+| `js/savings.js` | Savings rate calculation & dashboard | v3.19.0 |
+| `js/goals.js` | Savings goals with progress tracking | v3.20.0 |
+| `js/faq.js` | Lazy-loaded | v3.10 |
+| `js/import-export.js` | Lazy-loaded | v3.10 |
 
-**Transaction schema (current, DB_VERSION: 5):**
-```javascript
-{
-  id: number,              // Date.now()
-  type: 'expense' | 'income' | 'transfer',
-  amount: number,
-  category: string,
-  date: 'YYYY-MM-DD',
-  notes: string,
-  tags: string[],          // added v3.14.0
-  createdAt: ISO8601,
-  updatedAt: ISO8601,      // added v3.15.0
-  fromAccount: string | null,   // transfer only, added v3.15.0
-  toAccount: string | null,     // transfer only, added v3.15.0
-  deleted: boolean,        // soft delete flag, added v3.15.0
-  deletedAt: ISO8601 | null     // soft delete timestamp, added v3.15.0
-}
-```
-
-**IndexedDB:**
-- DB: `FinChronicleDB`, DB_VERSION: 5
-- Store: `transactions`
-- Indexes: `date`, `type`, `category`, `dateType` (composite), `tags` (multiEntry)
+**IndexedDB (DB_VERSION: 9):**
+- Stores: `transactions`, `recurringTemplates`, `budgets`, `appSettings`, `quickTemplates`, `accounts`, `savingsGoals`
 
 ---
 
@@ -731,20 +733,20 @@ The `attachedTo` field (from v3.16 Optional Fields) tags who a transaction is fo
 
 ## Release Timeline
 
-| Version | Feature | DB Version | Priority | Target Quarter |
-|---------|---------|-----------|---------|---------------|
+| Version | Feature | DB Version | Priority | Status |
+|---------|---------|-----------|---------|--------|
 | v3.15.0 | Transfer Transaction Type + Audit Trail | 5 | HIGH | ✅ Done (Apr 2026) |
-| v3.16.0 | Optional Fields + Smart Suggestions + Envelopes | 6 | MEDIUM | Q2 2026 |
-| v3.17.0 | Quick Entry + Split Transactions + One-Time Flag | 6 | HIGH | Q2 2026 |
-| v3.18.0 | Accounts & Net Worth | 7 | HIGH | Q3 2026 |
-| v3.19.0 | Savings Rate Dashboard | 7 | MEDIUM | Q3 2026 |
-| v3.20.0 | Savings Goals | 8 | MEDIUM | Q3 2026 |
-| v3.21.0 | Annual Report & Smart Spending Alerts | 8 | MEDIUM | Q3 2026 |
-| v3.22.0 | Auto-Backup & Data Safety | 8 | HIGH (Critical) | Q3 2026 |
-| v3.23.0 | Receipt Photos | 9 | LOW | Q4 2026 |
-| v3.24.0 | Multi-Currency Transactions | 9 | LOW | Q4 2026 |
-| v3.25.0 | Push Notifications | 9 | LOW | Q4 2026 |
-| v3.26.0 | Family Expense Settlement | 9 | LOW | Q4 2026 |
+| v3.16.0 | Optional Fields + Smart Suggestions | 6 | MEDIUM | ✅ Done (Apr 2026) |
+| v3.17.0 | Quick Entry Templates | 7 | HIGH | ✅ Done (Apr 2026) |
+| v3.18.0 | Accounts & Net Worth (core) | 8 | HIGH | ✅ Done (Apr 2026) |
+| v3.19.0 | Savings Rate Dashboard | 8 | MEDIUM | ✅ Done (May 2026) |
+| v3.20.0 | Savings Goals | 9 | MEDIUM | ✅ Done (May 2026) |
+| v3.21.0 | Annual Report & Smart Spending Alerts | 9 | MEDIUM | Next up |
+| v3.22.0 | Auto-Backup & Data Safety | 9 | HIGH (Critical) | Planned |
+| v3.23.0 | Receipt Photos | 10 | LOW | Planned |
+| v3.24.0 | Multi-Currency Transactions | 10 | LOW | Planned |
+| v3.25.0 | Push Notifications | 10 | LOW | Planned |
+| v3.26.0 | Family Expense Settlement | 10 | LOW | Planned |
 
 ---
 
@@ -756,11 +758,12 @@ The `attachedTo` field (from v3.16 Optional Fields) tags who a transaction is fo
 | 2 | v3.11.0 | + recurringTemplates store |
 | 3 | v3.13.0 | + budgets store |
 | 4 | v3.14.0 | + tags index on transactions |
-| 5 | v3.15.0 | + transfer type; fromAccount, toAccount, transferNote fields on transactions (nullable) |
+| 5 | v3.15.0 | + transfer type; fromAccount, toAccount fields (nullable) |
 | 6 | v3.16.0 | + appSettings store; optional fields on transactions (all nullable) |
-| 7 | v3.18.0 | + accounts store |
-| 8 | v3.20.0 | + savingsGoals store |
-| 9 | v3.23.0 | + receipts store |
+| 7 | v3.17.0 | + quickTemplates store |
+| 8 | v3.18.0 | + accounts store |
+| 9 | v3.20.0 | + savingsGoals store |
+| 10 | v3.23.0 | + receipts store (planned) |
 
 ---
 

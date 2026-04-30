@@ -408,6 +408,62 @@
                     <h3><i class="ri-seedling-line"></i> Savings</h3>
                     <div id="savingsDashboard"></div>
                 </div>
+                <!-- Savings Goals (v3.20.0) -->
+                <div class="card goals-card" id="goalsSection" hidden>
+                    <div class="goals-header">
+                        <h3><i class="ri-trophy-line"></i> Goals</h3>
+                        <button class="btn-icon" id="addGoalBtn" title="Add Goal"><i class="ri-add-line"></i></button>
+                    </div>
+                    <div id="goalsDashboard"></div>
+                </div>
+            </div>
+            <!-- Goal Form Modal (v3.20.0) -->
+            <div id="goalFormModal" class="modal">
+                <div class="modal-content modal-sm">
+                    <div class="modal-header">
+                        <h3 id="goalFormTitle">New Savings Goal</h3>
+                        <button class="close-btn" id="goalFormCloseBtn" aria-label="Close"><i class="ri-close-line"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="goalNameInput">Goal Name</label>
+                            <input type="text" id="goalNameInput" placeholder="e.g. Emergency Fund" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="goalTargetInput">Target Amount</label>
+                            <input type="number" id="goalTargetInput" placeholder="0" min="1" step="any">
+                        </div>
+                        <div class="form-group">
+                            <label for="goalDeadlineInput">Deadline (optional)</label>
+                            <input type="date" id="goalDeadlineInput">
+                        </div>
+                        <div class="form-group">
+                            <label for="goalLinkedAccount">Linked Account (optional)</label>
+                            <select id="goalLinkedAccount">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <button type="button" id="goalFormSaveBtn" class="btn primary-btn" style="width: 100%; margin-top: 12px;">Save Goal</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Contribution Modal (v3.20.0) -->
+            <div id="contributionModal" class="modal">
+                <div class="modal-content modal-sm">
+                    <div class="modal-header">
+                        <h3>Add Contribution</h3>
+                        <button class="close-btn" id="contributionCloseBtn" aria-label="Close"><i class="ri-close-line"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="contribution-goal-label">To: <strong id="contributionGoalName"></strong></p>
+                        <div class="form-group">
+                            <label for="contributionAmountInput">Amount</label>
+                            <input type="number" id="contributionAmountInput" placeholder="0" min="1" step="any">
+                        </div>
+                        <p class="contribution-remaining" id="contributionRemaining"></p>
+                        <button type="button" id="contributionSaveBtn" class="btn primary-btn" style="width: 100%; margin-top: 12px;">Add</button>
+                    </div>
+                </div>
             </div>
             <!-- Currency Selector Modal -->
             <div id="currencyModal" class="modal" style="display: none;">

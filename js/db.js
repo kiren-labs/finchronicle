@@ -12,6 +12,7 @@ import {
   APP_SETTINGS_STORE,
   QUICK_TEMPLATES_STORE,
   ACCOUNTS_STORE,
+  GOALS_STORE,
   DEFAULT_APP_SETTINGS,
 } from "./state.js";
 
@@ -101,6 +102,14 @@ export function initDB() {
           accStore.createIndex("name", "name", { unique: true });
           accStore.createIndex("type", "type", { unique: false });
           accStore.createIndex("sortOrder", "sortOrder", { unique: false });
+        }
+      }
+
+      // v9: Savings Goals store (v3.20.0)
+      if (oldVersion < 9) {
+        if (!database.objectStoreNames.contains(GOALS_STORE)) {
+          const goalsStore = database.createObjectStore(GOALS_STORE, { keyPath: "id" });
+          goalsStore.createIndex("deadline", "deadline", { unique: false });
         }
       }
     };
@@ -523,6 +532,55 @@ export function deleteAccount(id) {
     }
     const tx = state.db.transaction([ACCOUNTS_STORE], "readwrite");
     const store = tx.objectStore(ACCOUNTS_STORE);
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// ============================================================================
+// Savings Goals CRUD (v3.20.0)
+// ============================================================================
+
+export function loadGoals() {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([GOALS_STORE], "readonly");
+    const store = tx.objectStore(GOALS_STORE);
+    const request = store.getAll();
+    request.onsuccess = () => {
+      state.savingsGoals = request.result || [];
+      resolve(state.savingsGoals);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function saveGoal(goal) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([GOALS_STORE], "readwrite");
+    const store = tx.objectStore(GOALS_STORE);
+    const request = store.put(goal);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function deleteGoal(id) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([GOALS_STORE], "readwrite");
+    const store = tx.objectStore(GOALS_STORE);
     const request = store.delete(id);
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);

@@ -4726,3 +4726,183 @@ button.primary.loading .btn-spinner {
   color: var(--color-text-muted);
   margin-top: 4px;
 }
+
+/* ================================================================
+   Savings Goals (v3.20.0)
+   ================================================================ */
+
+.goals-card {
+  margin-top: var(--space-md);
+}
+
+.goals-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
+.goals-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  margin: 0;
+}
+
+.goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.goal-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.goal-card.goal-complete {
+  opacity: 0.7;
+}
+
+/* Circular progress ring */
+.goal-progress-ring {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.goal-progress-ring svg {
+  width: 56px;
+  height: 56px;
+  transform: rotate(-90deg);
+}
+
+.goal-ring-bg {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 5;
+}
+
+.goal-ring-fill {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.goal-ring-fill.low {
+  stroke: var(--color-expense);
+}
+
+.goal-ring-fill.mid {
+  stroke: var(--color-warning-border);
+}
+
+.goal-ring-fill.high {
+  stroke: var(--color-income);
+}
+
+.goal-ring-fill.complete {
+  stroke: var(--color-income);
+}
+
+.goal-ring-pct {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Goal info */
+.goal-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.goal-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.goal-amounts {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.goal-deadline,
+.goal-deadline-near,
+.goal-overdue {
+  font-size: 10px;
+}
+
+.goal-deadline {
+  color: var(--color-text-muted);
+}
+
+.goal-deadline-near {
+  color: var(--color-warning-text);
+}
+
+.goal-overdue {
+  color: var(--color-expense);
+  font-weight: 600;
+}
+
+/* Goal action buttons */
+.goal-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.goal-actions button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.goal-actions button:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.goal-contribute-btn {
+  color: var(--color-income) !important;
+}
+
+/* Contribution modal extras */
+.contribution-goal-label {
+  font-size: 13px;
+  margin-bottom: var(--space-sm);
+  color: var(--color-text-muted);
+}
+
+.contribution-remaining {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.summary-section.collapsed .goals-card { display: none; }
