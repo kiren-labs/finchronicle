@@ -723,3 +723,21 @@ body.dark-mode .auto-backup-actions button {
 body.dark-mode .auto-backup-actions button:hover {
   background: var(--color-surface);
 }
+
+/* Settlement (v3.26.0) */
+body.dark-mode .settlement-person-card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .settlement-period-btn {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+body.dark-mode .settlement-export-btn {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}

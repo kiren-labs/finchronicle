@@ -337,6 +337,7 @@ const FIELD_LABELS = {
   attachedTo: "Person (Attached To)",
   referenceId: "Reference / Receipt ID",
   location: "Location",
+  transactionCurrency: "Transaction Currency",
 };
 
 /**
