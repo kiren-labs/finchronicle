@@ -1009,7 +1009,8 @@ function bindFormSubmit() {
           updateUI();
           renderQuickBar();
           renderNetWorthDashboard();
-          renderSavingsDashboard(); }, 800);
+          renderSavingsDashboard();
+        }, 800);
       } catch (err) {
         console.error("Save failed:", err);
         submitBtn.classList.remove("loading");
