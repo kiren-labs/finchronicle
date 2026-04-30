@@ -851,23 +851,74 @@ button.primary.loading .btn-spinner {
     font-size: var(--font-lg);
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: flex var(--transition-fast), background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
     color: var(--color-text-muted);
     min-height: 48px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.type-option i {
+    transition: font-size var(--transition-fast);
+}
+
+/* Inactive: icon only — label hidden via max-width collapse */
+.type-option .type-label {
+    display: inline-block;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-width var(--transition-fast), opacity var(--transition-fast);
+    vertical-align: middle;
+}
+
+.type-option.active .type-label {
+    max-width: 100px;
+    opacity: 1;
 }
 
 .type-option.active {
+    flex: 2.5;
     background: var(--color-toggle-active-bg);
     color: var(--color-text);
     box-shadow: var(--shadow-sm);
 }
 
-.type-option.active .ri-arrow-up-circle-line {
+/* Inactive: faint tint so each button is still identifiable */
+.type-option[data-type="expense"] i,
+.type-option[data-rtype="expense"] i {
+    color: var(--color-danger-strong);
+    opacity: 0.4;
+}
+
+.type-option[data-type="income"] i,
+.type-option[data-rtype="income"] i {
+    color: var(--color-success-strong);
+    opacity: 0.4;
+}
+
+.type-option[data-type="transfer"] i {
+    color: var(--color-transfer, #6366f1);
+    opacity: 0.4;
+}
+
+/* Active: full color icon, full opacity */
+.type-option.active i {
+    opacity: 1;
+}
+
+.type-option.active[data-type="expense"] i,
+.type-option.active[data-rtype="expense"] i {
+    color: var(--color-danger-strong);
+}
+
+.type-option.active[data-type="income"] i,
+.type-option.active[data-rtype="income"] i {
     color: var(--color-success-strong);
 }
 
-.type-option.active .ri-arrow-down-circle-line {
-    color: var(--color-danger-strong);
+.type-option.active[data-type="transfer"] i {
+    color: var(--color-transfer, #6366f1);
 }
 
 .type-option:active {
@@ -3735,12 +3786,7 @@ button.primary.loading .btn-spinner {
    Transfer Transaction Type (v3.15.0)
    ============================================================================ */
 
-/* Transfer type toggle button */
-.type-option[data-type="transfer"].active {
-  background: var(--color-transfer, #6366f1);
-  color: #fff;
-  border-color: var(--color-transfer, #6366f1);
-}
+/* Transfer type toggle button — uses shared active style, color lives in the icon */
 
 /* Transfer fields container */
 .transfer-fields {

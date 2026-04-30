@@ -157,11 +157,11 @@
                     <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
                         <button type="button" class="type-option active" id="recurringTypeExpense"
                             data-rtype="expense" role="radio" aria-checked="true">
-                            <i class="ri-arrow-down-circle-line"></i> Expense
+                            <i class="ri-arrow-down-circle-line"></i><span class="type-label"> Expense</span>
                         </button>
                         <button type="button" class="type-option" id="recurringTypeIncome"
                             data-rtype="income" role="radio" aria-checked="false">
-                            <i class="ri-arrow-up-circle-line"></i> Income
+                            <i class="ri-arrow-up-circle-line"></i><span class="type-label"> Income</span>
                         </button>
                     </div>
                     <input type="hidden" id="recurringType" value="expense">
@@ -435,15 +435,15 @@
                             <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
                                 <button type="button" class="type-option active" data-type="expense"
                                     role="radio" aria-checked="true">
-                                    <i class="ri-arrow-down-circle-line"></i> Expense
+                                    <i class="ri-arrow-down-circle-line"></i><span class="type-label"> Expense</span>
                                 </button>
                                 <button type="button" class="type-option" data-type="income"
                                     role="radio" aria-checked="false">
-                                    <i class="ri-arrow-up-circle-line"></i> Income
+                                    <i class="ri-arrow-up-circle-line"></i><span class="type-label"> Income</span>
                                 </button>
                                 <button type="button" class="type-option" data-type="transfer"
                                     role="radio" aria-checked="false">
-                                    <i class="ri-swap-line"></i> Transfer
+                                    <i class="ri-swap-line"></i><span class="type-label"> Transfer</span>
                                 </button>
                             </div>
                             <input type="hidden" id="type" value="expense">
