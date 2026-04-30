@@ -1,7 +1,7 @@
 # FinChronicle Feature Roadmap (Revised March 2026)
 
-> Last updated: 2026-03-24
-> Previous plan: 2026-02-19
+> Last updated: 2026-03-30
+> Previous plan: 2026-03-24
 
 ---
 
@@ -16,30 +16,50 @@
 | v3.12.0 | Complete Reports (trends, weekly) | DONE |
 | v3.13.0 | Budget Limits & Alerts | DONE |
 | v3.14.0 | Tags & Search | DONE |
-| v3.15.0 | Optional Fields System | NOT STARTED |
-| v3.16.0 | Split Transactions | NOT STARTED |
-| v3.17.0 | Savings Goals | NOT STARTED |
-| v3.18.0 | Receipt Photos | NOT STARTED |
+| v3.15.0 | Transfer Transaction Type | NOT STARTED |
+| v3.16.0 | Optional Fields System | NOT STARTED |
+| v3.17.0 | Split Transactions | NOT STARTED |
+| v3.18.0 | Savings Rate Dashboard | NOT STARTED |
+| v3.19.0 | Savings Goals | NOT STARTED |
+| v3.20.0 | Receipt Photos | NOT STARTED |
 
 ---
 
-## What Changed from the February 2026 Plan
+## What Changed from the March 24 Plan
 
-### Wins
+### Why the plan changed
 
-1. **Refactoring completed (v3.10.4)** — Not in the original plan. The codebase is now ES modules with lazy loading, making every future feature cleaner to add. New features get their own `js/` module.
+A 3-month real transaction export (Jan–Mar 2026, 280 transactions) was analysed. It revealed **concrete data integrity problems** that the previous roadmap did not account for:
 
-2. **Pie chart shipped early (v3.10.5)** — Part of v3.12.0 Reports is already done. The chart infrastructure (`js/chart.js`, `css/chart.css`, `--chart-c1..c8` tokens) is in place.
+1. **Credit card payments logged as expenses** — double-counted spending (CC bill on Mar 6 = 9,648 that duplicated all the individual transactions already tracked)
+2. **Savings logged as expenses** — Jan 31 `Other Expense` 25,000 "Savings" inflated expense totals
+3. **No Transfer type** — the app has no way to represent money moving between accounts without corrupting expense totals
+4. **Category drift** — nanny salary appeared under 3 different categories; Kevin's glasses (4,700) under Transport
 
-3. **Foundation is solid** — All transactions on IndexedDB, validation layer live, architecture modular. The risky groundwork is behind us.
+These are not edge cases — they are regular monthly events. Data integrity has higher impact than Optional Fields, so **Transfer Transaction Type is promoted to v3.15.0**.
 
-### Adjustments
+### Changes from the previous plan
 
-1. **v3.12.0 is lighter** — Pie chart is done. Remaining work is bar/trend charts.
-2. **Optional Fields moved to v3.15.0** — It's complex (7 fields, toggle system, IDB settings store, analytics conditionals). Budget Limits and Tags/Search have higher daily value for typical users and should come first.
-3. **Tags & Search bumped to v3.14.0** — Basic UX expectation. Relatively simple (one new IDB index, a search input). Should not be after Split Transactions.
-4. **Split Transactions moved to v3.16.0** — Medium complexity, niche use case. Stays in the plan but lower priority.
-5. **Savings Goals moved to v3.17.0**, Receipt Photos to v3.18.0.
+| Previous | New | Reason |
+|----------|-----|--------|
+| v3.15.0 Optional Fields | → v3.16.0 | Deprioritised relative to data integrity |
+| v3.16.0 Split Transactions | → v3.17.0 | Shifted by one |
+| (new) Transfer Type | → v3.15.0 | Promoted from suggestion to HIGH priority |
+| (new) Savings Rate Dashboard | → v3.18.0 | New — real data showed no savings visibility |
+| v3.17.0 Savings Goals | → v3.19.0 | Shifted by one |
+| v3.18.0 Receipt Photos | → v3.20.0 | Shifted by one |
+
+### Enhancements folded into existing modules
+
+These do not warrant their own version but should be done as part of the specified release:
+
+| Enhancement | Target | Module |
+|------------|--------|--------|
+| Smart category suggestion from note keywords | v3.16 Optional Fields | `js/optional-fields.js` |
+| Recurring auto-match (suggest "this looks like March rent") | v3.16 or v3.15 minor | `js/recurring.js` |
+| Budget envelope groups (combine Food + Groceries into one limit) | v3.16 Optional Fields | `js/budget.js` |
+| Per-person tag as a first-class `person` field | v3.16 Optional Fields | optional field: `attachedTo` |
+| One-time expense flag on transaction form | v3.17 Split Transactions | `js/validation.js` + schema |
 
 ---
 
@@ -61,7 +81,7 @@
 | `js/faq.js` | Lazy-loaded |
 | `js/import-export.js` | Lazy-loaded |
 
-**Transaction schema (current):**
+**Transaction schema (current, DB_VERSION: 4):**
 ```javascript
 {
   id: number,              // Date.now()
@@ -70,14 +90,15 @@
   category: string,
   date: 'YYYY-MM-DD',
   notes: string,
+  tags: string[],          // added v3.14.0
   createdAt: ISO8601
 }
 ```
 
 **IndexedDB:**
-- DB: `FinChronicleDB`, DB_VERSION: 1
+- DB: `FinChronicleDB`, DB_VERSION: 4
 - Store: `transactions`
-- Indexes: `date`, `type`, `category`, `dateType` (composite)
+- Indexes: `date`, `type`, `category`, `dateType` (composite), `tags` (multiEntry)
 
 ---
 
@@ -85,239 +106,73 @@
 
 ---
 
-### v3.11.0 — Recurring Transactions
-**Priority: HIGH (was due mid-March 2026, now overdue)**
-**New file: `js/recurring.js`**
+### v3.15.0 — Transfer Transaction Type
+**Priority: HIGH**
+**New file: `js/transfer.js`**
 
-The most-requested feature. Auto-generate predictable monthly expenses (rent, subscriptions, salary).
+The highest-impact data integrity fix based on real usage. Adds a third transaction type — `transfer` — for money that moves between accounts without being income or expense. This eliminates double-counting of credit card payments, savings deposits, and debt repayments.
 
-**New IDB store: `recurringTemplates` (DB_VERSION → 2)**
+**Why this is blocking:** Until this exists, every monthly CC bill payment (9,648 in March) inflates expense totals. Savings contributions (25,000 in Jan) appear as expenses. The budget and reports views are untrustworthy for heavy users.
 
+**Schema change (DB_VERSION → 5):**
 ```javascript
 {
-  id: number,
-  type: 'expense' | 'income',
-  amount: number,
-  category: string,
-  notes: string,
-  frequency: 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly',
-  dayOfMonth: number | 'last',
-  startDate: 'YYYY-MM-DD',
-  nextDueDate: ISO8601,
-  lastExecuted: ISO8601 | null,
-  enabled: boolean,
-  createdAt: ISO8601
+  // Existing fields unchanged. type gains a new allowed value:
+  type: 'expense' | 'income' | 'transfer',
+
+  // New fields, nullable, only used when type === 'transfer':
+  fromAccount: string | null,   // e.g. "Kasikorn Savings", "Cash"
+  toAccount: string | null,     // e.g. "SCB Credit Card", "Savings Jar"
+  transferNote: string | null   // optional context
 }
-// Indexes: nextDueDate, enabled
 ```
 
-**Core logic:**
+**Core rules:**
+- `transfer` transactions are **excluded from all expense/income totals**, budget calculations, and category charts
+- `amount` still stored (for account-level balance tracking later)
+- `category` field is set to `'Transfer'` automatically and is not user-editable for transfers
+- Existing `income` / `expense` transactions are unaffected
 
+**Validation additions (`js/validation.js`):**
 ```javascript
-// js/recurring.js
-async function checkRecurringTransactions() {
-  const now = new Date();
-  const templates = await loadEnabledTemplates();
-
-  for (const template of templates) {
-    const nextDue = new Date(template.nextDueDate);
-    if (now >= nextDue) {
-      await generateTransaction(template);
-      await updateNextDueDate(template);
-    }
+if (tx.type === 'transfer') {
+  if (!tx.fromAccount && !tx.toAccount) {
+    errors.push('Transfer must have at least a source or destination account');
   }
-}
-
-function computeNextDueDate(template) {
-  const current = new Date(template.nextDueDate);
-  switch (template.frequency) {
-    case 'daily':    current.setDate(current.getDate() + 1); break;
-    case 'weekly':   current.setDate(current.getDate() + 7); break;
-    case 'monthly':
-      current.setMonth(current.getMonth() + 1);
-      if (template.dayOfMonth === 'last') {
-        return new Date(current.getFullYear(), current.getMonth() + 1, 0).toISOString();
-      }
-      current.setDate(Math.min(template.dayOfMonth, daysInMonth(current)));
-      break;
-    case 'yearly': current.setFullYear(current.getFullYear() + 1); break;
-  }
-  return current.toISOString();
+  // amount must still be positive
 }
 ```
 
-**Check runs on:**
-- App startup (in `app.js` after `loadDataFromDB`)
-- Each tab switch (cheap: only runs if `nextDueDate` is past)
+**UI changes:**
+- Transaction form: type selector gains a `Transfer` option
+- When Transfer selected: category field replaced by fromAccount / toAccount inputs with autocomplete from past entries
+- Transaction list: transfer rows visually distinct (e.g. left border in a neutral color, swap icon)
+- Summary tab: transfers shown as a separate collapsed section, not counted in totals
+- Reports: filter toggles to include/exclude transfers
 
-**UI (Settings tab — new section):**
-- List of recurring templates with enable/pause toggle
-- Add/Edit/Delete modal (same fields as transaction form + Frequency + Start Date)
-- Generated transactions marked with `recurringId` field referencing the template
-
-**Transaction schema addition:**
-```javascript
-recurringId: number | null   // null for manual transactions
-```
+**Migration note:** No existing data needs migration. New fields are nullable on existing rows.
 
 **Files:**
-- `js/recurring.js` (new) — CRUD, check logic, date computation
-- `js/db.js` — add `recurringTemplates` store in `onupgradeneeded`
-- `js/state.js` — bump `DB_VERSION` to 2
-- `js/app.js` — import recurring.js, call `checkRecurringTransactions()` on init
-- `index.html` — recurring section in Settings tab, modal HTML
-- `css/styles.css` — recurring list styles, pause/enable toggle
-- `css/dark-mode.css` — dark mode support
-- `sw.js` — add `js/recurring.js` to `CACHE_URLS`, bump cache version
+- `js/transfer.js` (new) — transfer-specific validation, account autocomplete, UI helpers
+- `js/validation.js` — add transfer branch
+- `js/db.js` — bump DB_VERSION to 5 in `onupgradeneeded` (no new store needed, schema change only)
+- `js/state.js` — bump `DB_VERSION` to 5; add `'Transfer'` to categories list as non-editable
+- `js/ui.js` — exclude transfers from summary totals; add transfer row style
+- `js/app.js` — import transfer.js
+- `index.html` — transfer type option, fromAccount/toAccount inputs
+- `css/styles.css` — transfer row style, account input
+- `css/dark-mode.css` — dark mode for transfer elements
+- `sw.js` — add `js/transfer.js` to `CACHE_URLS`, bump `CACHE_NAME`
 
 ---
 
-### v3.12.0 — Reports: Complete the Visualization Suite
-**Priority: HIGH**
-**Builds on: pie chart infrastructure already in `js/chart.js`**
-
-The category pie chart is live. This release completes the Reports section with trend and comparison charts.
-
-**Remaining charts to build:**
-
-1. **Income vs Expense Bar Chart** (monthly, last 6-12 months)
-   - Side-by-side bars per month using CSS height percentages
-   - Same `--chart-c*` tokens from `css/chart.css`
-
-2. **Week-over-Week Spending**
-   - Last 4 weeks comparison
-   - Color-coded trend arrows (up/down vs previous week)
-
-3. **Best/Worst Spending Days**
-   - Heatmap-style row showing day-of-month spending patterns
-   - Useful for spotting payday splurge patterns
-
-**Date range selector:**
-- Dropdown: Last 3 months / 6 months / 1 year / All time
-- Default: Last 6 months
-- All charts respond to the same selector
-
-**Report caching (performance):**
-```javascript
-// In js/chart.js or js/reports.js
-let reportCache = {
-  dateRange: null,
-  transactionCount: 0,
-  data: null,
-  timestamp: null
-};
-// Invalidate on: new/deleted transaction, date range change
-// Cache TTL: 5 minutes (for live use)
-```
-
-**Files:**
-- `js/chart.js` — add new chart renderers alongside existing pie chart
-- `index.html` — add chart containers in Groups/Reports tab
-- `css/chart.css` — bar chart, week comparison, day heatmap styles
-- `css/dark-mode.css` — chart dark mode
-- `sw.js` — bump cache version
-
----
-
-### v3.13.0 — Budget Limits & Alerts
-**Priority: HIGH**
-**New file: `js/budget.js`**
-
-Set monthly spending limits per category with visual warnings when approaching or exceeding.
-
-**New IDB store: `budgets` (DB_VERSION → 3)**
-
-```javascript
-{
-  id: number,
-  category: string,
-  monthlyLimit: number,
-  alertThreshold: number,   // 0-100, default 80 (80%)
-  rolloverEnabled: boolean,
-  createdAt: ISO8601,
-  updatedAt: ISO8601
-}
-// Index: category (one budget per category)
-```
-
-**Budget rollover (envelope budgeting):**
-```javascript
-function getAvailableBudget(category, month) {
-  const budget = getBudget(category);
-  const spent = getCategorySpending(category, month);
-  let available = budget.monthlyLimit;
-
-  if (budget.rolloverEnabled) {
-    const prevMonth = getPreviousMonth(month);
-    const prevSpent = getCategorySpending(category, prevMonth);
-    const savings = budget.monthlyLimit - prevSpent;
-    if (savings > 0) available += savings;
-  }
-
-  return { available, spent, remaining: available - spent, pct: (spent / available) * 100 };
-}
-```
-
-**Alert logic:** Checked on every `saveTransaction()`. Shows a non-blocking warning if threshold crossed.
-
-**UI:**
-- Budget section in Settings tab: list all categories, set limit, see current month status
-- Budget status card in Groups tab: aggregate view ("2 categories over budget")
-- Progress bar per category (green < threshold, yellow approaching, red over)
-- Transaction list: small badge on transactions in over-budget categories
-
-**Files:**
-- `js/budget.js` (new) — CRUD, check logic, rollover calculation
-- `js/db.js` — add `budgets` store
-- `js/state.js` — bump `DB_VERSION` to 3
-- `js/app.js` — import budget.js, call budget check after each save
-- `index.html` — budget management UI
-- `css/styles.css` — progress bars, status badges
-- `sw.js` — bump cache version
-
----
-
-### v3.14.0 — Tags & Search
-**Priority: MEDIUM-HIGH**
-
-Basic but high-impact UX: find transactions fast and group by custom tags.
-
-**Schema addition (DB_VERSION → 4):**
-```javascript
-tags: string[]   // default: []
-// New IDB index: tags (multiEntry: true) on transactions store
-```
-
-**Search:**
-- Search bar in List tab header
-- Real-time filter on: amount (exact/range), category, notes text, tags
-- Works alongside existing month + category filters
-- No new IDB store needed — client-side filter over `state.transactions`
-
-**Tags:**
-- Chip-style multi-tag input in transaction form
-- Autocomplete from existing tags in state
-- Click tag in transaction list to filter by it
-- Tag management in Settings: rename (updates all transactions), delete
-
-**Files:**
-- `js/search.js` (new) — search + tag filter functions
-- `js/db.js` — bump DB version, add `tags` index to transactions store
-- `js/state.js` — bump `DB_VERSION` to 4
-- `js/app.js` — import search.js, bind search input events
-- `index.html` — search bar, tag input in form, tag chips in list
-- `css/styles.css` — tag chips, search bar
-- `sw.js` — bump cache version
-
----
-
-### v3.15.0 — Optional Fields System
+### v3.16.0 — Optional Fields System
 **Priority: MEDIUM**
 **New file: `js/optional-fields.js`**
 
-User-controlled optional transaction fields. Power users enable what they need; basic users see a clean form.
+User-controlled optional transaction fields. Power users enable what they need; basic users see a clean form. Now also includes **smart category suggestions** and **budget envelope groups** (folded in from real-usage analysis).
 
-**New IDB store: `appSettings` (DB_VERSION → 5)**
+**New IDB store: `appSettings` (DB_VERSION → 6)**
 ```javascript
 {
   id: 'config',
@@ -326,55 +181,77 @@ User-controlled optional transaction fields. Power users enable what they need; 
     account: false,
     merchant: false,
     expenseType: false,
-    attachedTo: false,
+    attachedTo: false,   // "per-person tagging" — Kevin, Elvin, Beth, etc.
     referenceId: false,
     location: false
   },
-  appVersion: '3.15.0',
+  budgetEnvelopes: [
+    // { name: 'Eating Out', categories: ['Food', 'Groceries'], limit: 25000 }
+  ],
+  smartCategoryKeywords: {
+    // auto-populated from transaction history, user-editable
+    // e.g. { 'nanny': 'Household', 'fuel': 'Transport', 'rent': 'Rent' }
+  },
+  appVersion: '3.16.0',
   lastUpdated: ISO8601
 }
 ```
 
-**Transaction schema additions (all nullable):**
+**Transaction schema additions (all nullable, DB_VERSION → 6):**
 ```javascript
-paymentMethod: string | null,   // 'cash' | 'upi' | 'credit-card' | 'debit-card' | 'wallet' | 'bank-transfer' | 'other'
-account: string | null,         // free text
+paymentMethod: string | null,   // 'cash' | 'credit-card' | 'debit-card' | 'bank-transfer' | 'wallet' | 'other'
+account: string | null,         // free text — "Kasikorn", "SCB CC"
 merchant: string | null,        // free text with autocomplete
-expenseType: string | null,     // 'personal' | 'business' | 'tax-deductible' | 'reimbursable'
-attachedTo: string | null,      // 'self' | 'spouse' | free text
-referenceId: string | null,     // UPI ID, invoice number
+expenseType: string | null,     // 'personal' | 'business' | 'reimbursable'
+attachedTo: string | null,      // person tag: 'Kevin', 'Elvin', 'Beth', free text
+referenceId: string | null,     // UPI ID, receipt number
 location: string | null         // city/area, free text
 ```
+
+**Smart category suggestions:**
+```javascript
+// In js/optional-fields.js
+function suggestCategory(noteText, history) {
+  // Build keyword → category frequency map from last 90 days of history
+  // Return top match if confidence > 60%
+  // e.g. note contains "nanny" → suggests "Household" based on past entries
+}
+```
+Shown as a dismissible inline suggestion beneath the category dropdown. Never overrides; only suggests.
+
+**Budget envelopes:**
+- User can group categories into named envelopes (e.g. "Eating Out" = Food + Groceries)
+- Envelope totals shown alongside individual category budgets in the Budget section
+- Envelope limits set independently of category limits
 
 **Key behaviors:**
 - Disabled fields do not appear in the transaction form
 - Disabling a field hides it but never deletes its data
-- Editing a transaction that has data in a disabled field: temporarily show that field with an info badge
 - Auto-detect on first load: if any transaction has data in a field, mark it as enabled
-- Reports and budget charts conditionally show breakdowns for enabled fields only
-
-**Settings UI:** "Additional Transaction Fields" section with a toggle per field.
+- `attachedTo` field populates a person filter in the List tab
 
 **Files:**
-- `js/optional-fields.js` (new) — field config, dynamic form rendering, safe get/set
-- `js/db.js` — add `appSettings` store
-- `js/state.js` — bump `DB_VERSION` to 5
+- `js/optional-fields.js` (new) — field config, dynamic form rendering, smart suggestions, envelope logic
+- `js/db.js` — add `appSettings` store, bump to DB_VERSION 6
+- `js/state.js` — bump `DB_VERSION` to 6
+- `js/budget.js` — add envelope group support
 - `js/app.js` — import optional-fields.js
-- `index.html` — field toggle section in Settings, "Additional Details" collapsible in form
-- `css/styles.css` — toggle list, info badges, collapsible section
+- `index.html` — optional field toggles in Settings, envelope group editor, "Additional Details" collapsible in form
+- `css/styles.css` — toggle list, info badges, collapsible section, envelope group card
 - `sw.js` — bump cache version
 
 ---
 
-### v3.16.0 — Split Transactions
+### v3.17.0 — Split Transactions
 **Priority: MEDIUM**
 
-Divide one transaction across multiple categories (e.g. ₹1,000 grocery run = ₹600 Food + ₹400 Household).
+Divide one transaction across multiple categories. Also adds a **one-time expense flag** (from real-usage analysis) so monthly reports can distinguish "base spend" from unusual items like flights or school fees.
 
-**Schema additions:**
+**Schema additions (no DB bump needed — nullable fields):**
 ```javascript
-isSplit: boolean,   // default: false
-splits: [{ category: string, amount: number, notes: string }]
+isSplit: boolean,           // default: false
+splits: [{ category: string, amount: number, notes: string }],
+isOneTime: boolean          // default: false — flags non-recurring unusual expenses
 ```
 
 **Balance validation (accounting integrity):**
@@ -383,34 +260,65 @@ function validateSplitTransaction(tx) {
   const splitTotal = tx.splits.reduce((sum, s) => sum + s.amount, 0);
   const diff = Math.abs(tx.amount - splitTotal);
   if (diff > 0.01) {
-    return { valid: false, error: `Split total ${formatCurrency(splitTotal)} != transaction ${formatCurrency(tx.amount)}` };
+    return { valid: false, error: `Split total ${formatCurrency(splitTotal)} ≠ transaction ${formatCurrency(tx.amount)}` };
   }
   return { valid: true };
 }
 ```
 
-Auto-balance last split option available in the UI.
-
-**Category reports and budget tracking count split amounts correctly per category.**
+**One-time flag UI:**
+- Small toggle in transaction form: "One-time expense"
+- Monthly summary shows: **Base spend: X | One-time items: Y | Total: Z**
+- One-time transactions shown with a distinct badge in list view
+- Reports can toggle one-time items in/out of trend charts
 
 **Files:**
 - `js/validation.js` — add `validateSplitTransaction()`
-- `js/app.js` — integrate split logic into save/edit flows
-- `index.html` — split toggle + split editor UI in form, split badge in list
-- `css/styles.css` — split editor, balance indicator
+- `js/app.js` — integrate split logic and one-time flag into save/edit flows
+- `index.html` — split toggle + split editor UI in form, split badge and one-time badge in list
+- `css/styles.css` — split editor, balance indicator, one-time badge
 - `sw.js` — bump cache version
 
 No DB version bump needed (new fields are nullable/default on existing transactions).
 
 ---
 
-### v3.17.0 — Savings Goals
+### v3.18.0 — Savings Rate Dashboard
+**Priority: MEDIUM**
+**New file: `js/savings.js`**
+
+Real usage showed savings of 25k (Jan), 45k (Feb), 0k (Mar) — but the app provides no visibility into savings rate trends or projections. This release adds a dedicated savings view.
+
+**No new IDB store needed.** Savings are derived from:
+1. Transactions with `type === 'transfer'` where `toAccount` matches a known savings account
+2. Transactions with `category === 'Savings/Investments'` (legacy support for existing data)
+
+**Dashboard widgets:**
+- **This month saved:** amount transferred to savings accounts
+- **Savings rate:** `savings / income * 100` for the month
+- **3-month trend:** savings rate per month (bar chart using existing chart.js infrastructure)
+- **Annual projection:** "At this rate, you'll save X by Dec 2026"
+- **Running total:** cumulative savings logged since app start
+
+**Settings:** User designates which account names count as "savings accounts" (e.g. "SCB Savings", "Savings Jar"). Stored in `appSettings` (added in v3.16).
+
+**Files:**
+- `js/savings.js` (new) — rate calculation, projection, trend data
+- `js/ui.js` — add savings dashboard section to Summary tab
+- `index.html` — savings dashboard HTML in Summary tab
+- `css/styles.css` — savings rate card, projection widget
+- `css/dark-mode.css` — dark mode support
+- `sw.js` — add `js/savings.js` to `CACHE_URLS`, bump cache version
+
+---
+
+### v3.19.0 — Savings Goals
 **Priority: MEDIUM**
 **New file: `js/goals.js`**
 
 Track progress toward savings targets (vacation fund, emergency fund, etc.).
 
-**New IDB store: `savingsGoals` (DB_VERSION → 6)**
+**New IDB store: `savingsGoals` (DB_VERSION → 7)**
 ```javascript
 {
   id: number,
@@ -418,17 +326,18 @@ Track progress toward savings targets (vacation fund, emergency fund, etc.).
   targetAmount: number,
   currentAmount: number,
   deadline: 'YYYY-MM-DD',
+  linkedAccount: string | null,  // account name from v3.15 Transfer accounts
   createdAt: ISO8601
 }
 // Index: deadline
 ```
 
-**UI:** Goals section in Summary tab. Circular progress indicators. Manual contribution button. Milestone celebrations at 25/50/75/100%.
+**UI:** Goals section in Summary tab. Circular progress indicators. Manual contribution button (logs a Transfer). Milestone celebrations at 25/50/75/100%.
 
 **Files:**
 - `js/goals.js` (new) — CRUD, progress calculation, milestone detection
-- `js/db.js` — add `savingsGoals` store
-- `js/state.js` — bump `DB_VERSION` to 6
+- `js/db.js` — add `savingsGoals` store, bump to DB_VERSION 7
+- `js/state.js` — bump `DB_VERSION` to 7
 - `js/app.js` — import goals.js
 - `index.html` — goals section
 - `css/styles.css` — circular progress, goal cards
@@ -436,13 +345,13 @@ Track progress toward savings targets (vacation fund, emergency fund, etc.).
 
 ---
 
-### v3.18.0 — Receipt Photos
+### v3.20.0 — Receipt Photos
 **Priority: LOW**
 **New file: `js/receipts.js`**
 
 Attach photo receipts to transactions. Conservative storage: 500KB max per image with Canvas-based compression.
 
-**New IDB store: `receipts` (DB_VERSION → 7)**
+**New IDB store: `receipts` (DB_VERSION → 8)**
 ```javascript
 {
   id: number,
@@ -474,14 +383,12 @@ Attach photo receipts to transactions. Conservative storage: 500KB max per image
 
 | Version | Feature | DB Version | Priority |
 |---------|---------|-----------|---------|
-| v3.11.0 | Recurring Transactions | 2 | HIGH (overdue) |
-| v3.12.0 | Reports: Trend + Weekly Charts | 2 | HIGH |
-| v3.13.0 | Budget Limits + Rollover | 3 | HIGH |
-| v3.14.0 | Tags & Search | 4 | MEDIUM-HIGH |
-| v3.15.0 | Optional Fields System | 5 | MEDIUM |
-| v3.16.0 | Split Transactions | 5 | MEDIUM |
-| v3.17.0 | Savings Goals | 6 | MEDIUM |
-| v3.18.0 | Receipt Photos | 7 | LOW |
+| v3.15.0 | Transfer Transaction Type | 5 | HIGH |
+| v3.16.0 | Optional Fields + Smart Suggestions + Envelopes | 6 | MEDIUM |
+| v3.17.0 | Split Transactions + One-Time Flag | 6 | MEDIUM |
+| v3.18.0 | Savings Rate Dashboard | 6 | MEDIUM |
+| v3.19.0 | Savings Goals | 7 | MEDIUM |
+| v3.20.0 | Receipt Photos | 8 | LOW |
 
 ---
 
@@ -489,13 +396,27 @@ Attach photo receipts to transactions. Conservative storage: 500KB max per image
 
 | DB Version | App Version | Change |
 |-----------|------------|--------|
-| 1 | v3.10.x | transactions store (current) |
+| 1 | v3.10.x | transactions store |
 | 2 | v3.11.0 | + recurringTemplates store |
 | 3 | v3.13.0 | + budgets store |
 | 4 | v3.14.0 | + tags index on transactions |
-| 5 | v3.15.0 | + appSettings store; optional fields on transactions (nullable) |
-| 6 | v3.17.0 | + savingsGoals store |
-| 7 | v3.18.0 | + receipts store |
+| 5 | v3.15.0 | + transfer type; fromAccount, toAccount, transferNote fields on transactions (nullable) |
+| 6 | v3.16.0 | + appSettings store; optional fields on transactions (all nullable) |
+| 7 | v3.19.0 | + savingsGoals store |
+| 8 | v3.20.0 | + receipts store |
+
+---
+
+## Category Cleanup (Recommended, No Version Needed)
+
+Real usage revealed the built-in category list has structural problems. These can be cleaned up in `js/state.js` at any point — no DB change needed, just updating the default list and removing/merging retired names.
+
+| Current (inconsistent) | Recommended fix |
+|---|---|
+| `Misc/Buffer`, `Other Expense`, `Shopping` used interchangeably | Consolidate to `Other`; use tags for sub-classification |
+| `Utilities/Bills` used for toys, travel, and actual bills | Split into `Utilities` and `Bills` |
+| `Savings/Investments` as an expense category | Remove — use Transfer type instead |
+| `Debt/Loans` for both outgoing loans and CC payments | Keep for loan repayments; CC payments → Transfer |
 
 ---
 
