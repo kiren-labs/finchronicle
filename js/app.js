@@ -76,6 +76,12 @@ import {
   deleteBudget,
   renderBudgetModal,
 } from "./budget.js";
+import {
+  toggleTransferFields,
+  bindAccountAutocomplete,
+  getTransferFormData,
+  clearTransferFields,
+} from "./transfer.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -688,9 +694,10 @@ function bindFormSubmit() {
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="btn-spinner"></span> Saving...';
 
+      const type = document.getElementById("type").value;
       const transaction = {
         id: state.editingId || Date.now(),
-        type: document.getElementById("type").value,
+        type: type,
         amount: amount,
         category: document.getElementById("category").value,
         date: document.getElementById("date").value,
@@ -700,6 +707,14 @@ function bindFormSubmit() {
           ? state.transactions.find((t) => t.id === state.editingId)?.createdAt
           : new Date().toISOString(),
       };
+
+      // Add transfer-specific fields
+      if (type === "transfer") {
+        const transferData = getTransferFormData();
+        transaction.fromAccount = transferData.fromAccount;
+        transaction.toAccount = transferData.toAccount;
+        transaction.transferNote = transferData.transferNote;
+      }
 
       const validation = validateTransaction(transaction);
 
