@@ -427,6 +427,9 @@
 
             <!-- Add Transaction Tab -->
             <div id="addTab" class="tab-content active" role="tabpanel" aria-labelledby="add-tab">
+                <!-- Quick Entry Bar (v3.17.0) -->
+                <div id="quickEntryBar" class="quick-entry-bar" hidden></div>
+
                 <div class="card" id="main-content">
                     <h2 id="formTitle" style="font-size: 20px; margin-bottom: 16px;">Add Transaction</h2>
                     <form id="transactionForm" aria-label="Add transaction form">
@@ -577,6 +580,11 @@
                         <input type="hidden" id="editId" value="">
 
                         <button type="submit" class="primary" id="submitBtn">Save Transaction</button>
+                        <div class="form-actions-row">
+                            <button type="button" id="saveAsTemplateBtn" class="save-template-btn" aria-label="Save as quick entry template">
+                                <i class="ri-bookmark-line"></i> Save as Template
+                            </button>
+                        </div>
                         <button type="button" class="primary" id="cancelEditBtn"
                             style="background: #6e6e73; margin-top: 12px; display: none;" aria-label="Cancel editing">Cancel</button>
                     </form>
@@ -722,6 +730,17 @@
                         </div>
                         <p class="optional-fields-desc">Enable additional fields on the transaction form. Disabling a field hides it but never deletes existing data.</p>
                         <div id="optionalFieldToggles" class="optional-field-toggles"></div>
+                    </div>
+                </div>
+
+                <!-- Quick Entry Templates (v3.17.0) -->
+                <div id="quickTemplatesContainer">
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3>Quick Entry Templates</h3>
+                            <span class="template-count" id="templateCount"></span>
+                        </div>
+                        <div id="quickTemplatesList"></div>
                     </div>
                 </div>
 

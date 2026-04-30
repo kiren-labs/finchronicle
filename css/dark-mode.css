@@ -580,3 +580,32 @@ body.dark-mode .tx-meta-item {
   background: var(--color-border);
   color: var(--color-text-muted);
 }
+
+/* Quick Entry (v3.17.0) */
+body.dark-mode .quick-pill {
+  background: var(--color-card-bg);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .quick-pill:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg);
+}
+
+body.dark-mode .save-template-btn:hover {
+  background: var(--color-bg);
+}
+
+body.dark-mode .template-item {
+  border-color: var(--color-border);
+}
+
+body.dark-mode .template-action-btn:hover {
+  background: var(--color-border);
+}
+
+body.dark-mode .template-edit-input {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-color: var(--color-primary);
+}

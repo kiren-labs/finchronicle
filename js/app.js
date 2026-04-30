@@ -96,6 +96,17 @@ import {
   dismissCategorySuggestion,
   rebuildSmartKeywords,
 } from "./optional-fields.js";
+import {
+  initQuickEntry,
+  renderQuickBar,
+  prefillFromTemplate,
+  cloneLast,
+  saveAsTemplate,
+  renderTemplateManager,
+  deleteTemplate,
+  moveTemplate,
+  editTemplateLabel,
+} from "./quick-entry.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -337,6 +348,9 @@ function bindStaticEvents() {
 
   // ---- Optional fields (v3.16.0) ----
   bindOptionalFieldsEvents();
+
+  // ---- Quick Entry (v3.17.0) ----
+  bindQuickEntryEvents();
 }
 
 function bindSettingsButtons() {
@@ -717,6 +731,86 @@ function bindOptionalFieldsEvents() {
 }
 
 // ============================================================================
+// Quick Entry Events (v3.17.0)
+// ============================================================================
+
+function bindQuickEntryEvents() {
+  // Quick bar pill clicks
+  const bar = document.getElementById("quickEntryBar");
+  if (bar) {
+    bar.addEventListener("click", (e) => {
+      const pill = e.target.closest("[data-template-id]");
+      if (pill) {
+        prefillFromTemplate(Number(pill.dataset.templateId));
+        return;
+      }
+      if (e.target.closest("#cloneLastBtn")) {
+        cloneLast();
+      }
+    });
+  }
+
+  // "Save as Template" button
+  const saveTemplateBtn = document.getElementById("saveAsTemplateBtn");
+  if (saveTemplateBtn) {
+    saveTemplateBtn.addEventListener("click", saveAsTemplate);
+  }
+
+  // Custom event: quick-entry-type → update category options + transfer fields
+  document.addEventListener("quick-entry-type", (e) => {
+    updateCategoryOptions(e.detail);
+    selectType(e.detail);
+  });
+
+  // Custom event: quick-entry-tags → re-render form tag chips
+  document.addEventListener("quick-entry-tags", () => {
+    renderFormTagChips();
+  });
+
+  // Template manager delegated events (Settings)
+  const templatesList = document.getElementById("quickTemplatesList");
+  if (templatesList) {
+    templatesList.addEventListener("click", (e) => {
+      const deleteBtn = e.target.closest("[data-delete]");
+      if (deleteBtn) {
+        deleteTemplate(Number(deleteBtn.dataset.delete));
+        return;
+      }
+      const moveBtn = e.target.closest("[data-move]");
+      if (moveBtn) {
+        moveTemplate(Number(moveBtn.dataset.id), moveBtn.dataset.move);
+        return;
+      }
+      // Double-click to edit label
+      const label = e.target.closest(".template-item-label");
+      if (label) {
+        const item = label.closest(".template-item");
+        if (!item) return;
+        const id = Number(item.dataset.templateId);
+        const currentLabel = label.textContent;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = currentLabel;
+        input.maxLength = 30;
+        input.className = "template-edit-input";
+        label.replaceWith(input);
+        input.focus();
+        input.select();
+        const commit = () => {
+          const newVal = input.value.trim() || currentLabel;
+          editTemplateLabel(id, newVal);
+        };
+        input.addEventListener("blur", commit);
+        input.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") input.blur();
+          if (ev.key === "Escape") { input.value = currentLabel; input.blur(); }
+        });
+      }
+    });
+  }
+}
+
+// ============================================================================
 // Form Submission Handler
 // ============================================================================
 
@@ -844,6 +938,7 @@ function bindFormSubmit() {
           formCard.classList.remove("success-pulse");
 
           updateUI();
+          renderQuickBar();
         }, 800);
       } catch (err) {
         console.error("Save failed:", err);
@@ -1004,6 +1099,7 @@ async function init() {
     await initBudgets();
     await checkRecurringTransactions();
     await initOptionalFields();
+    await initQuickEntry();
     initTagColors();
 
     // Set up UI defaults
@@ -1029,6 +1125,7 @@ async function init() {
     renderBudgetList();
     renderBudgetAlerts();
     renderTagPicker();
+    renderTemplateManager();
 
     // Post-render setup
     checkAppVersion();

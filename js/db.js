@@ -10,6 +10,7 @@ import {
   RECURRING_STORE,
   BUDGETS_STORE,
   APP_SETTINGS_STORE,
+  QUICK_TEMPLATES_STORE,
   DEFAULT_APP_SETTINGS,
 } from "./state.js";
 
@@ -81,6 +82,14 @@ export function initDB() {
       if (oldVersion < 6) {
         if (!database.objectStoreNames.contains(APP_SETTINGS_STORE)) {
           database.createObjectStore(APP_SETTINGS_STORE, { keyPath: "id" });
+        }
+      }
+
+      // v7: Quick templates store for Quick Entry (v3.17.0)
+      if (oldVersion < 7) {
+        if (!database.objectStoreNames.contains(QUICK_TEMPLATES_STORE)) {
+          const qtStore = database.createObjectStore(QUICK_TEMPLATES_STORE, { keyPath: "id" });
+          qtStore.createIndex("sortOrder", "sortOrder", { unique: false });
         }
       }
     };
@@ -390,5 +399,72 @@ export function saveAppSettings(settings) {
     const request = store.put(settings);
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
+  });
+}
+
+// ---- Quick Templates (v3.17.0) ----
+
+export function loadQuickTemplates() {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      resolve([]);
+      return;
+    }
+    if (!state.db.objectStoreNames.contains(QUICK_TEMPLATES_STORE)) {
+      resolve([]);
+      return;
+    }
+    const tx = state.db.transaction([QUICK_TEMPLATES_STORE], "readonly");
+    const store = tx.objectStore(QUICK_TEMPLATES_STORE);
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const templates = request.result || [];
+      templates.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      resolve(templates);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function saveQuickTemplate(template) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([QUICK_TEMPLATES_STORE], "readwrite");
+    const store = tx.objectStore(QUICK_TEMPLATES_STORE);
+    const request = store.put(template);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function deleteQuickTemplate(id) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([QUICK_TEMPLATES_STORE], "readwrite");
+    const store = tx.objectStore(QUICK_TEMPLATES_STORE);
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function bulkSaveQuickTemplates(templates) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([QUICK_TEMPLATES_STORE], "readwrite");
+    const store = tx.objectStore(QUICK_TEMPLATES_STORE);
+    store.clear();
+    templates.forEach((t) => store.put(t));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
   });
 }
