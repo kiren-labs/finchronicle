@@ -243,56 +243,48 @@ interface Transaction {
 ```javascript
 {
   // Settings (persistent)
-  "currency": "INR",                      // String: Currency code
-  "darkMode": "enabled",                  // String: "enabled" | "disabled"
-  "app_version": "3.9.1",                // String: For update detection
-  "idb_migrated": "true",                // String: Migration flag
+  "currency": "INR",                       // String: Currency code
+  "darkMode": "enabled",                   // String: "enabled" | "disabled"
+  "app_version": "3.21.0",                // String: For update detection
+  "idb_migrated": "true",                 // String: Migration flag
 
   // UI State (persistent)
-  "summaryCollapsed": "false",            // String: Summary expand/collapse
-  "installPromptHidden": "true",          // String: iOS install prompt
+  "summaryCollapsed": "false",             // String: Summary expand/collapse
+  "installPromptHidden": "true",           // String: iOS install prompt
 
-  // Backup Tracking (v3.9.0+)
+  // Backup Tracking
   "last_backup_timestamp": "1707398400000", // String: Milliseconds since epoch
 
-  // Future: Language preference
-  "language": "en"                        // String: Language code
+  // Smart Alerts (v3.21.0)
+  "smartAlerts": "{\"history\":[],\"dismissed\":[]}" // JSON string
 }
 ```
 
-### 🧠 In-Memory State (Global Variables)
+### 🧠 In-Memory State
+
+All mutable state lives in the `state` object exported from `js/state.js`:
 
 ```javascript
-// ===== Data State =====
-let db = null;                      // IndexedDB connection
-let transactions = [];              // Array of all transactions (sorted)
-
-// ===== UI State =====
-let currentTab = 'add';             // 'add' | 'list' | 'groups' | 'settings'
-let currentGrouping = 'month';      // 'month' | 'category'
-
-// ===== Filter State =====
-let selectedMonth = 'all';          // 'all' | 'YYYY-MM'
-let selectedCategory = 'all';       // 'all' | category name
-let selectedType = 'all';           // 'all' | 'income' | 'expense'
-let insightsMonth = 'current';      // 'current' | 'YYYY-MM'
-
-// ===== Edit/Delete State =====
-let editingId = null;               // null | transaction ID
-let deleteId = null;                // null | transaction ID
-
-// ===== Pagination State =====
-let currentPage = 1;                // Number: Current page (1-indexed)
-const itemsPerPage = 20;            // Const: Fixed page size
-
-// ===== PWA State =====
-let updateAvailable = false;        // Boolean: SW update pending
-let lastBackupTimestamp = null;     // null | Number: Last backup time
-
-// ===== Immutable Configuration =====
-const categories = { /* ... */ };   // Income/expense category lists
-const currencies = { /* ... */ };   // Currency definitions
+// js/state.js — single source of truth
+export const state = {
+  db: null,                        // IndexedDB connection
+  transactions: [],                // All transactions (sorted by date desc)
+  currentTab: 'add',               // Active tab
+  selectedMonth: 'all',            // Month filter
+  selectedCategory: 'all',         // Category filter
+  selectedType: 'all',             // Type filter
+  editingId: null,                 // Transaction being edited
+  deleteId: null,                  // Transaction pending delete
+  currentPage: 1,                  // Pagination
+  recurringTemplates: [],          // Recurring templates
+  budgets: [],                     // Budget limits
+  accounts: [],                    // Account definitions
+  savingsGoals: [],                // Savings goals
+  // ... additional UI state
+};
 ```
+
+**DOM references** are cached via `getDOM()` (lazy-initialized on first call, never re-queried).
 
 ### 📊 Data Flow Diagram
 
@@ -346,12 +338,15 @@ User Input
 
 ### 🎛️ State Management Pattern
 
-**Pattern:** Centralized State with Manual Propagation
+**Pattern:** Centralized State Object with Manual Propagation
 
-Unlike reactive frameworks (React, Vue), FinChronicle uses:
-- Global mutable state variables
-- Manual synchronization between storage and UI
-- Master update function (updateUI) for consistency
+All mutable state is in the `state` object in `js/state.js`. The canonical update cycle:
+
+```
+user action → validateTransaction() → saveTransactionToDB() → mutate state.transactions → updateUI()
+```
+
+`updateUI()` in `ui.js` is the master refresh function — it calls `updateSummary()`, `updateTransactionsList()`, `updateMonthFilters()`, `updateCategoryFilter()`, and `updateGroupedView()` in sequence. Always call it after any state change.
 
 ### State Update Flow
 
@@ -494,58 +489,54 @@ App
 │  ├─ This Month Card
 │  ├─ Total Entries Card
 │  ├─ Income Card
-│  └─ Expenses Card
+│  ├─ Expenses Card
+│  ├─ Budget Alerts
+│  └─ Smart Spending Alerts (v3.21)
 │
-├─ Tab Navigation (Desktop)
-│  ├─ Add Tab Button
-│  ├─ List Tab Button
-│  ├─ Groups Tab Button
-│  └─ Settings Tab Button
+├─ Tab Navigation (Desktop: tabs, Mobile: bottom nav)
+│  ├─ Add | List | Reports | Settings
 │
 ├─ Tab Content (One Active)
 │  │
 │  ├─ Add Tab
-│  │  ├─ Type Toggle (Income/Expense)
+│  │  ├─ Type Toggle (Income/Expense/Transfer)
 │  │  ├─ Amount Input
 │  │  ├─ Category Dropdown
 │  │  ├─ Date Picker
-│  │  ├─ Notes Textarea
+│  │  ├─ Notes Textarea + Tags
+│  │  ├─ Optional Fields (payment method, expense type)
+│  │  ├─ Transfer Fields (from/to account)
+│  │  ├─ Quick Entry Templates (v3.17)
 │  │  └─ Submit Button
 │  │
 │  ├─ List Tab
-│  │  ├─ Filter Controls
-│  │  │  ├─ Month Filter (buttons)
-│  │  │  ├─ Category Filter (dropdown)
-│  │  │  └─ Type Filter (dropdown)
+│  │  ├─ Search Bar (full-text + tags)
+│  │  ├─ Filter Controls (month, category, type)
 │  │  ├─ Transaction List (paginated)
-│  │  │  └─ Transaction Item (repeating)
-│  │  │     ├─ Icon
-│  │  │     ├─ Details (category, date, notes)
-│  │  │     ├─ Amount
-│  │  │     └─ Actions (Edit, Delete buttons)
 │  │  └─ Pagination Controls
 │  │
-│  ├─ Groups Tab
-│  │  ├─ Monthly Insights (v3.8.0)
-│  │  │  ├─ Month Selector Dropdown
-│  │  │  ├─ Insight Cards (Income, Expense, Savings, Count)
-│  │  │  └─ Top Spending Categories
-│  │  ├─ Separator
-│  │  ├─ Grouping Toggle (Month/Category)
-│  │  └─ Grouped View
-│  │     ├─ By Month → Month cards with totals
-│  │     └─ By Category → Category cards with totals
+│  ├─ Reports Tab (Groups)
+│  │  ├─ Monthly Insights
+│  │  ├─ Category Pie Chart (donut)
+│  │  ├─ Grouped View (by month / by category)
+│  │  ├─ Accounts & Net Worth Dashboard (v3.18)
+│  │  ├─ Savings Rate Dashboard (v3.19)
+│  │  ├─ Savings Goals (v3.20)
+│  │  └─ Annual Report (v3.21)
 │  │
 │  └─ Settings Tab
 │     ├─ Action Buttons (Export, Import, Currency, Dark Mode)
-│     ├─ Backup Status Card (v3.9.0)
-│     └─ FAQ Section (v3.9.0)
+│     ├─ Recurring Templates Manager
+│     ├─ Budget Manager
+│     ├─ Alert History (v3.21)
+│     ├─ Backup Status Card
+│     └─ FAQ Section (lazy-loaded)
 │
-└─ Bottom Navigation (Mobile)
-   ├─ Add NavItem
-   ├─ List NavItem
-   ├─ Groups NavItem
-   └─ Settings NavItem
+└─ Modals
+   ├─ Delete Confirmation
+   ├─ Currency Selector
+   ├─ Recurring Template Editor
+   └─ Budget Editor
 ```
 
 ### Dynamic Rendering Pattern
@@ -643,25 +634,44 @@ function switchTab(tab) {
 
 ### 🔧 Service Worker Strategy
 
-**File:** `sw.js` (147 lines)
+**File:** `sw.js`
 **Cache Strategy:** Cache-First (Offline-First)
 
 ```javascript
-// Version: 3.9.1
-const CACHE_NAME = 'finchronicle-v3.9.1';
+const CACHE_NAME = 'finchronicle-v3.21.0';
 
 // Files to cache for offline use
 const CACHE_URLS = [
     './',
     './index.html',
-    './app.js',
+    './manifest.json',
     './css/tokens.css',
     './css/styles.css',
+    './css/chart.css',
     './css/dark-mode.css',
-    './icons/icon-192.png',
-    './icons/icon-512.png',
-    './icons/maskable-icon-512.png',
-    'https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css'  // Icons
+    './js/app.js',
+    './js/state.js',
+    './js/db.js',
+    './js/ui.js',
+    './js/validation.js',
+    './js/utils.js',
+    './js/currency.js',
+    './js/settings.js',
+    './js/chart.js',
+    './js/recurring.js',
+    './js/budget.js',
+    './js/search.js',
+    './js/transfer.js',
+    './js/optional-fields.js',
+    './js/quick-entry.js',
+    './js/accounts.js',
+    './js/savings.js',
+    './js/goals.js',
+    './js/alerts.js',
+    './js/annual-report.js',
+    // faq.js and import-export.js are lazy-loaded
+    './icons/...',
+    'https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css'
 ];
 ```
 
