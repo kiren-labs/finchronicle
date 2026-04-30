@@ -3,18 +3,29 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "3.17.0";
+export const APP_VERSION = "3.18.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
 export const DB_NAME = "FinChronicleDB";
-export const DB_VERSION = 7;
+export const DB_VERSION = 8;
 export const STORE_NAME = "transactions";
 export const RECURRING_STORE = "recurringTemplates";
 export const BUDGETS_STORE = "budgets";
 export const APP_SETTINGS_STORE = "appSettings";
 export const QUICK_TEMPLATES_STORE = "quickTemplates";
+export const ACCOUNTS_STORE = "accounts";
 export const MAX_QUICK_TEMPLATES = 20;
+
+// Account types
+export const ACCOUNT_TYPES = [
+  "checking",
+  "savings",
+  "credit-card",
+  "cash",
+  "investment",
+  "other",
+];
 
 // Pagination
 export const ITEMS_PER_PAGE = 20;
@@ -45,6 +56,7 @@ export const state = {
   savedAccounts: ["Cash", "Savings", "Credit Card", "Bank Account"],
   appSettings: null,
   quickTemplates: [],
+  accounts: [],
 };
 
 // Default optional fields configuration

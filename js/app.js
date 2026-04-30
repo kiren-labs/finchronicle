@@ -107,6 +107,16 @@ import {
   moveTemplate,
   editTemplateLabel,
 } from "./quick-entry.js";
+import {
+  initAccounts,
+  renderNetWorthDashboard,
+  renderAccountManager,
+  showAddAccountForm,
+  showEditAccountForm,
+  closeAccountForm,
+  handleAccountFormSubmit,
+  removeAccount,
+} from "./accounts.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -351,6 +361,9 @@ function bindStaticEvents() {
 
   // ---- Quick Entry (v3.17.0) ----
   bindQuickEntryEvents();
+
+  // ---- Accounts (v3.18.0) ----
+  bindAccountEvents();
 }
 
 function bindSettingsButtons() {
@@ -1100,6 +1113,7 @@ async function init() {
     await checkRecurringTransactions();
     await initOptionalFields();
     await initQuickEntry();
+    await initAccounts();
     initTagColors();
 
     // Set up UI defaults
@@ -1126,6 +1140,8 @@ async function init() {
     renderBudgetAlerts();
     renderTagPicker();
     renderTemplateManager();
+    renderAccountManager();
+    renderNetWorthDashboard();
 
     // Post-render setup
     checkAppVersion();
