@@ -2943,7 +2943,7 @@ button.primary.loading .btn-spinner {
     font-size: var(--font-xs);
     font-weight: 600;
     padding: var(--space-2xs) var(--space-sm);
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-pill);
     background: var(--color-success-bg);
     color: var(--color-success);
     text-transform: uppercase;
@@ -3934,7 +3934,7 @@ button.primary.loading .btn-spinner {
   background: none;
   border: none;
   color: var(--color-primary);
-  font-size: 14px;
+  font-size: var(--font-md);
   font-weight: 500;
   cursor: pointer;
   font-family: var(--font-family-base);
@@ -3971,7 +3971,7 @@ button.primary.loading .btn-spinner {
   background: var(--color-info-bg);
   border: 1px solid var(--color-info-border);
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-info-text);
 }
 
@@ -3982,12 +3982,12 @@ button.primary.loading .btn-spinner {
 
 .suggestion-accept {
   margin-left: auto;
-  padding: 2px 10px;
+  padding: var(--space-2xs) var(--space-md);
   background: var(--color-primary);
   color: #fff;
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: 12px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   font-weight: 500;
   cursor: pointer;
   font-family: var(--font-family-base);
@@ -4029,7 +4029,7 @@ button.primary.loading .btn-spinner {
 }
 
 .optional-fields-desc {
-  font-size: 13px;
+  font-size: var(--font-sm);
   color: var(--color-text-muted);
   margin-bottom: var(--space-md);
   line-height: 1.4;
@@ -4057,7 +4057,7 @@ button.primary.loading .btn-spinner {
 }
 
 .field-toggle-label {
-  font-size: 14px;
+  font-size: var(--font-md);
   font-weight: 500;
   color: var(--color-text);
 }
@@ -4147,21 +4147,21 @@ button.primary.loading .btn-spinner {
 .quick-pill {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-full, 20px);
-  background: var(--color-card-bg, #fff);
-  font-size: 13px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-size: var(--font-sm);
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
   flex-shrink: 0;
 }
 
 .quick-pill:hover {
   border-color: var(--color-primary);
-  background: var(--color-primary-bg, #f0f4ff);
+  background: var(--color-primary-bg);
 }
 
 .quick-pill:active {
@@ -4169,7 +4169,7 @@ button.primary.loading .btn-spinner {
 }
 
 .quick-pill-icon {
-  font-size: 14px;
+  font-size: var(--font-md);
   font-weight: 600;
 }
 
@@ -4192,7 +4192,7 @@ button.primary.loading .btn-spinner {
 }
 
 .quick-pill-clone i {
-  font-size: 14px;
+  font-size: var(--font-md);
 }
 
 /* Save as Template button */
@@ -4205,24 +4205,24 @@ button.primary.loading .btn-spinner {
 .save-template-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
   border: none;
   background: none;
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
   cursor: pointer;
   border-radius: var(--radius-md);
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 }
 
 .save-template-btn:hover {
   color: var(--color-primary);
-  background: var(--color-primary-bg, #f0f4ff);
+  background: var(--color-primary-bg);
 }
 
 .save-template-btn i {
-  font-size: 15px;
+  font-size: var(--icon-sm);
 }
 
 /* Template Manager (Settings) */
@@ -4235,7 +4235,7 @@ button.primary.loading .btn-spinner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
+  padding: var(--space-md) 0;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -4246,7 +4246,7 @@ button.primary.loading .btn-spinner {
 .template-item-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-md);
   flex: 1;
   min-width: 0;
 }
@@ -4276,7 +4276,7 @@ button.primary.loading .btn-spinner {
 
 .template-item-label {
   font-weight: 500;
-  font-size: 14px;
+  font-size: var(--font-md);
   color: var(--color-text);
   cursor: pointer;
   overflow: hidden;
@@ -4325,11 +4325,11 @@ button.primary.loading .btn-spinner {
 }
 
 .template-edit-input {
-  font-size: 14px;
+  font-size: var(--font-md);
   font-weight: 500;
-  padding: 2px 6px;
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-sm);
+  padding: var(--space-2xs) var(--space-sm);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-md);
   outline: none;
   width: 120px;
 }
@@ -4337,8 +4337,8 @@ button.primary.loading .btn-spinner {
 .empty-state {
   text-align: center;
   color: var(--color-text-muted);
-  padding: 20px 0;
-  font-size: 13px;
+  padding: var(--space-xl) 0;
+  font-size: var(--font-sm);
 }
 
 /* ============================================================================
@@ -4352,9 +4352,9 @@ button.primary.loading .btn-spinner {
 .net-worth-card h3 {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   margin-bottom: var(--space-sm);
-  font-size: 15px;
+  font-size: var(--font-lg);
 }
 
 .net-worth-summary {
@@ -4400,7 +4400,7 @@ button.primary.loading .btn-spinner {
 
 .net-worth-item {
   text-align: center;
-  padding: 8px;
+  padding: var(--space-sm);
   border-radius: var(--radius-md);
   background: var(--color-bg);
 }
@@ -4416,7 +4416,7 @@ button.primary.loading .btn-spinner {
 
 .nw-item-value {
   display: block;
-  font-size: 15px;
+  font-size: var(--font-lg);
   font-weight: 600;
 }
 
@@ -4442,7 +4442,7 @@ button.primary.loading .btn-spinner {
 }
 
 .account-balance-name {
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--color-text);
 }
@@ -4454,7 +4454,7 @@ button.primary.loading .btn-spinner {
 }
 
 .account-balance-amount {
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 
@@ -4486,7 +4486,7 @@ button.primary.loading .btn-spinner {
 .account-item-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-md);
   flex: 1;
   min-width: 0;
 }
@@ -4512,7 +4512,7 @@ button.primary.loading .btn-spinner {
 }
 
 .account-item-name {
-  font-size: 14px;
+  font-size: var(--font-md);
   font-weight: 500;
   color: var(--color-text);
   overflow: hidden;
@@ -4543,12 +4543,12 @@ button.primary.loading .btn-spinner {
 .account-item-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-md);
   flex-shrink: 0;
 }
 
 .account-item-balance {
-  font-size: 14px;
+  font-size: var(--font-md);
   font-weight: 600;
 }
 
@@ -4591,9 +4591,9 @@ button.primary.loading .btn-spinner {
 .savings-card h3 {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-sm);
   margin-bottom: var(--space-sm);
-  font-size: 15px;
+  font-size: var(--font-lg);
 }
 
 .savings-widgets {
@@ -4613,13 +4613,13 @@ button.primary.loading .btn-spinner {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 8px;
+  padding: var(--space-sm);
   border-radius: var(--radius-md);
   background: var(--color-bg);
 }
 
 .savings-widget.highlight {
-  background: var(--color-primary-bg, rgba(0, 122, 255, 0.06));
+  background: var(--color-primary-bg);
 }
 
 .savings-widget-label {
@@ -4656,7 +4656,7 @@ button.primary.loading .btn-spinner {
 
 /* 3-Month Trend Bar Chart */
 .savings-trend {
-  padding: 8px;
+  padding: var(--space-sm);
   border-radius: var(--radius-md);
   background: var(--color-bg);
 }
@@ -4745,8 +4745,8 @@ button.primary.loading .btn-spinner {
 .goals-header h3 {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 15px;
+  gap: var(--space-sm);
+  font-size: var(--font-lg);
   margin: 0;
 }
 
@@ -4760,7 +4760,7 @@ button.primary.loading .btn-spinner {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  padding: 10px;
+  padding: var(--space-md);
   border-radius: var(--radius-md);
   background: var(--color-bg);
 }
@@ -4918,7 +4918,7 @@ button.primary.loading .btn-spinner {
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-xs);
-  font-size: 13px;
+  font-size: var(--font-sm);
   animation: alertSlideIn 0.3s ease;
 }
 
@@ -4928,15 +4928,15 @@ button.primary.loading .btn-spinner {
 }
 
 .smart-alert-warning {
-  background: var(--color-warning-bg, #fff8e1);
-  border: 1px solid var(--color-warning-border, #ffcc02);
-  color: var(--color-warning-text, #7a5900);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-warning-text);
 }
 
 .smart-alert-danger {
-  background: var(--color-danger-bg, #fdecea);
-  border: 1px solid var(--color-danger-border, #ff3b30);
-  color: var(--color-danger-text, #9a1c14);
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
 }
 
 .smart-alert-text {
@@ -4972,11 +4972,11 @@ button.primary.loading .btn-spinner {
 }
 
 .alert-history-warning {
-  border-left-color: var(--color-warning-border, #ffcc02);
+  border-left-color: var(--color-warning-border);
 }
 
 .alert-history-danger {
-  border-left-color: var(--color-danger-border, #ff3b30);
+  border-left-color: var(--color-danger-border);
 }
 
 .alert-history-info {
@@ -5022,7 +5022,7 @@ button.primary.loading .btn-spinner {
 .annual-report-content {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: var(--space-md);
+  padding: var(--space-xl);
 }
 
 .annual-year-selector {
@@ -5123,7 +5123,7 @@ button.primary.loading .btn-spinner {
   text-align: center;
   color: var(--color-text-muted);
   padding: var(--space-lg) 0;
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 
 @media (min-width: 480px) {
