@@ -214,13 +214,13 @@ export function showGoalForm(goalId = null) {
     delete saveBtn.dataset.editId;
   }
 
-  modal.classList.add("active");
+  modal.classList.add("show");
   nameInput.focus();
 }
 
 export function closeGoalForm() {
   const modal = document.getElementById("goalFormModal");
-  if (modal) modal.classList.remove("active");
+  if (modal) modal.classList.remove("show");
 }
 
 export async function handleGoalFormSubmit() {
@@ -277,14 +277,14 @@ export function showContributionForm(goalId) {
   remaining.textContent = `Remaining: ${formatCurrency(left)}`;
   input.value = "";
   input.max = left;
-  modal.classList.add("active");
+  modal.classList.add("show");
   modal.dataset.goalId = goalId;
   input.focus();
 }
 
 export function closeContributionForm() {
   const modal = document.getElementById("contributionModal");
-  if (modal) modal.classList.remove("active");
+  if (modal) modal.classList.remove("show");
 }
 
 export async function handleContributionSubmit() {
