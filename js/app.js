@@ -82,6 +82,20 @@ import {
   getTransferFormData,
   clearTransferFields,
 } from "./transfer.js";
+import {
+  initOptionalFields,
+  renderOptionalFieldsForm,
+  getOptionalFieldValues,
+  setOptionalFieldValues,
+  clearOptionalFields,
+  bindFieldAutocomplete,
+  renderFieldToggles,
+  handleFieldToggle,
+  handleNoteInput,
+  acceptCategorySuggestion,
+  dismissCategorySuggestion,
+  rebuildSmartKeywords,
+} from "./optional-fields.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -320,6 +334,9 @@ function bindStaticEvents() {
   // ---- Tag chip input in form (v3.14.0) ----
   bindTagInputEvents();
   initRecurringTagEvents();
+
+  // ---- Optional fields (v3.16.0) ----
+  bindOptionalFieldsEvents();
 }
 
 function bindSettingsButtons() {
@@ -660,6 +677,46 @@ function bindTagInputEvents() {
 }
 
 // ============================================================================
+// Optional Fields Events (v3.16.0)
+// ============================================================================
+
+function bindOptionalFieldsEvents() {
+  // Collapsible "Additional Details" toggle
+  const toggle = document.getElementById("optionalFieldsToggle");
+  const container = document.getElementById("optionalFieldsContainer");
+  if (toggle && container) {
+    toggle.addEventListener("click", () => {
+      const expanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!expanded));
+      container.hidden = expanded;
+      toggle.querySelector(".optional-fields-chevron").classList.toggle("expanded", !expanded);
+    });
+  }
+
+  // Notes input → smart category suggestion
+  const notesInput = document.getElementById("notes");
+  if (notesInput) {
+    notesInput.addEventListener("input", () => {
+      handleNoteInput(notesInput.value);
+    });
+  }
+
+  // Category suggestion accept/dismiss
+  const suggestionBanner = document.getElementById("categorySuggestion");
+  if (suggestionBanner) {
+    suggestionBanner.querySelector(".suggestion-accept").addEventListener("click", acceptCategorySuggestion);
+    suggestionBanner.querySelector(".suggestion-dismiss").addEventListener("click", dismissCategorySuggestion);
+  }
+
+  // Field toggle switches in Settings
+  document.getElementById("optionalFieldToggles").addEventListener("change", (e) => {
+    const checkbox = e.target.closest("[data-field-toggle]");
+    if (!checkbox) return;
+    handleFieldToggle(checkbox.dataset.fieldToggle, checkbox.checked);
+  });
+}
+
+// ============================================================================
 // Form Submission Handler
 // ============================================================================
 
@@ -718,6 +775,10 @@ function bindFormSubmit() {
         transaction.transferNote = transferData.transferNote;
       }
 
+      // Add optional fields (v3.16.0)
+      const optionalValues = getOptionalFieldValues();
+      Object.assign(transaction, optionalValues);
+
       const validation = validateTransaction(transaction);
 
       if (!validation.valid) {
@@ -770,6 +831,8 @@ function bindFormSubmit() {
           state.formTags = [];
           renderFormTagChips();
           clearTransferFields();
+          clearOptionalFields();
+          dismissCategorySuggestion();
           selectType("expense");
           document.getElementById("formTitle").textContent = "Add Transaction";
           document.getElementById("cancelEditBtn").style.display = "none";
@@ -940,6 +1003,7 @@ async function init() {
     await loadRecurringIntoState();
     await initBudgets();
     await checkRecurringTransactions();
+    await initOptionalFields();
     initTagColors();
 
     // Set up UI defaults
@@ -954,6 +1018,11 @@ async function init() {
     // Bind account autocomplete for transfer fields
     bindAccountAutocomplete("fromAccount", "fromAccountSuggestions");
     bindAccountAutocomplete("toAccount", "toAccountSuggestions");
+
+    // Bind autocomplete for optional fields (v3.16.0)
+    bindFieldAutocomplete("merchant", "merchantSuggestions", "merchant");
+    bindFieldAutocomplete("attachedTo", "attachedToSuggestions", "attachedTo");
+    renderFieldToggles();
 
     // First render
     updateUI();

@@ -3,15 +3,16 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "3.15.0";
+export const APP_VERSION = "3.16.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
 export const DB_NAME = "FinChronicleDB";
-export const DB_VERSION = 5;
+export const DB_VERSION = 6;
 export const STORE_NAME = "transactions";
 export const RECURRING_STORE = "recurringTemplates";
 export const BUDGETS_STORE = "budgets";
+export const APP_SETTINGS_STORE = "appSettings";
 
 // Pagination
 export const ITEMS_PER_PAGE = 20;
@@ -40,7 +41,37 @@ export const state = {
   searchTags: [],
   formTags: [],
   savedAccounts: ["Cash", "Savings", "Credit Card", "Bank Account"],
+  appSettings: null,
 };
+
+// Default optional fields configuration
+export const DEFAULT_APP_SETTINGS = {
+  id: "config",
+  enabledFields: {
+    tags: true,
+    paymentMethod: false,
+    merchant: false,
+    expenseType: false,
+    attachedTo: false,
+    referenceId: false,
+    location: false,
+  },
+  smartCategoryKeywords: {},
+  lastUpdated: null,
+};
+
+// Payment method options
+export const PAYMENT_METHODS = [
+  "cash",
+  "credit-card",
+  "debit-card",
+  "bank-transfer",
+  "wallet",
+  "other",
+];
+
+// Expense type options
+export const EXPENSE_TYPES = ["personal", "business", "reimbursable"];
 
 // Category definitions
 export const categories = {

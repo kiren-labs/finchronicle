@@ -78,6 +78,13 @@ export function filterTransactions(transactions) {
       if (t.category.toLowerCase().includes(query)) return true;
       if (t.notes && t.notes.toLowerCase().includes(query)) return true;
       if ((t.tags || []).some((tag) => tag.toLowerCase().includes(query))) return true;
+      // Optional fields (v3.16.0)
+      if (t.merchant && t.merchant.toLowerCase().includes(query)) return true;
+      if (t.attachedTo && t.attachedTo.toLowerCase().includes(query)) return true;
+      if (t.location && t.location.toLowerCase().includes(query)) return true;
+      if (t.referenceId && t.referenceId.toLowerCase().includes(query)) return true;
+      if (t.paymentMethod && t.paymentMethod.toLowerCase().includes(query)) return true;
+      if (t.expenseType && t.expenseType.toLowerCase().includes(query)) return true;
       return false;
     });
   }

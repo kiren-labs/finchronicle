@@ -9,6 +9,8 @@ import {
   STORE_NAME,
   RECURRING_STORE,
   BUDGETS_STORE,
+  APP_SETTINGS_STORE,
+  DEFAULT_APP_SETTINGS,
 } from "./state.js";
 
 // Initialize IndexedDB
@@ -73,6 +75,13 @@ export function initDB() {
       // No index needed — transfers filtered in-memory via type field
       if (oldVersion < 5) {
         // No structural changes needed — existing type index handles 'transfer'
+      }
+
+      // v6: App settings store for optional fields configuration
+      if (oldVersion < 6) {
+        if (!database.objectStoreNames.contains(APP_SETTINGS_STORE)) {
+          database.createObjectStore(APP_SETTINGS_STORE, { keyPath: "id" });
+        }
       }
     };
   });
@@ -343,4 +352,43 @@ export async function migrateFromLocalStorage() {
   }
 
   localStorage.setItem("idb_migrated", "true");
+}
+
+// ---- App Settings (v3.16.0) ----
+
+export function loadAppSettings() {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      resolve(null);
+      return;
+    }
+    if (!state.db.objectStoreNames.contains(APP_SETTINGS_STORE)) {
+      resolve(null);
+      return;
+    }
+    const tx = state.db.transaction([APP_SETTINGS_STORE], "readonly");
+    const store = tx.objectStore(APP_SETTINGS_STORE);
+    const request = store.get("config");
+    request.onsuccess = () => {
+      const result = request.result || null;
+      resolve(result);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function saveAppSettings(settings) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    settings.id = "config";
+    settings.lastUpdated = new Date().toISOString();
+    const tx = state.db.transaction([APP_SETTINGS_STORE], "readwrite");
+    const store = tx.objectStore(APP_SETTINGS_STORE);
+    const request = store.put(settings);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
 }

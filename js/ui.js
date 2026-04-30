@@ -9,6 +9,7 @@ import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
 import { renderBudgetAlerts, renderBudgetList, deleteBudget } from "./budget.js";
+import { setOptionalFieldValues, clearOptionalFields } from "./optional-fields.js";
 import {
   renderCategoryPieChart,
   buildCategoryData,
@@ -220,11 +221,21 @@ export function updateTransactionsList() {
                 </div>`;
     }
 
+    // Build optional field metadata line (v3.16.0)
+    const metaParts = [];
+    const ef = state.appSettings ? state.appSettings.enabledFields : {};
+    if (ef.paymentMethod && t.paymentMethod) metaParts.push(`<span class="tx-meta-item"><i class="ri-bank-card-line"></i> ${sanitizeHTML(t.paymentMethod)}</span>`);
+    if (ef.merchant && t.merchant) metaParts.push(`<span class="tx-meta-item"><i class="ri-store-2-line"></i> ${sanitizeHTML(t.merchant)}</span>`);
+    if (ef.attachedTo && t.attachedTo) metaParts.push(`<span class="tx-meta-item"><i class="ri-user-line"></i> ${sanitizeHTML(t.attachedTo)}</span>`);
+    if (ef.location && t.location) metaParts.push(`<span class="tx-meta-item"><i class="ri-map-pin-line"></i> ${sanitizeHTML(t.location)}</span>`);
+    const metaHtml = metaParts.length > 0 ? `<div class="tx-meta">${metaParts.join("")}</div>` : "";
+
     item.innerHTML = `
             ${iconHtml}
             <div class="transaction-details">
                 ${categoryHtml}
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
+                ${metaHtml}
                 <div class="transaction-date">${formatDate(t.date)}</div>
                 ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
             </div>
@@ -697,6 +708,9 @@ export function editTransaction(id) {
     document.getElementById("toAccount").value = transaction.toAccount || "";
   }
 
+  // Populate optional fields (v3.16.0)
+  setOptionalFieldValues(transaction);
+
   document.getElementById("formTitle").textContent = "Edit Transaction";
   document.getElementById("submitBtn").textContent = "Update Transaction";
   document.getElementById("cancelEditBtn").style.display = "block";
@@ -717,6 +731,9 @@ export function cancelEdit() {
   const toInput = document.getElementById("toAccount");
   if (fromInput) fromInput.value = "";
   if (toInput) toInput.value = "";
+
+  // Clear optional fields (v3.16.0)
+  clearOptionalFields();
 
   selectType("expense");
 

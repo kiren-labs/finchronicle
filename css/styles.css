@@ -842,34 +842,98 @@ button.primary.loading .btn-spinner {
     gap: var(--space-2xs);
 }
 
+/* ==========================================================================
+   Type Toggle — elastic active tab (Idea 1)
+   Inactive: icon only (small, faint-tinted). Active: expands with label + bold.
+   ========================================================================== */
+
 .type-option {
     flex: 1;
-    padding: var(--space-lg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: var(--space-sm) var(--space-xs);
     border: none;
     border-radius: var(--radius-md);
     background: transparent;
-    font-size: var(--font-lg);
-    font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition:
+        flex var(--transition-fast),
+        background var(--transition-fast),
+        color var(--transition-fast),
+        box-shadow var(--transition-fast);
     color: var(--color-text-muted);
     min-height: 48px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
+/* Icon sizing */
+.type-option i {
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: font-size var(--transition-fast);
+}
+
+/* Label: always visible — tiny when inactive, normal when active */
+.type-option .type-label {
+    display: inline-block;
+    font-size: 8px;
+    opacity: 0.6;
+    transition: font-size var(--transition-fast), opacity var(--transition-fast), font-weight var(--transition-fast);
+}
+
+/* ---- Active state ---- */
 .type-option.active {
+    flex: 2.5;
     background: var(--color-toggle-active-bg);
     color: var(--color-text);
     box-shadow: var(--shadow-sm);
 }
 
-.type-option.active .ri-arrow-up-circle-line {
-    color: var(--color-success-strong);
+.type-option.active i {
+    font-size: 18px;
 }
 
-.type-option.active .ri-arrow-down-circle-line {
+.type-option.active .type-label {
+    font-size: var(--font-md);
+    opacity: 1;
+    font-weight: 700;
+}
+
+/* ---- Icon colors: faint when inactive, full when active ---- */
+.type-option[data-type="expense"] i,
+.type-option[data-rtype="expense"] i {
     color: var(--color-danger-strong);
+    opacity: 0.35;
+}
+.type-option[data-type="income"] i,
+.type-option[data-rtype="income"] i {
+    color: var(--color-success-strong);
+    opacity: 0.35;
+}
+.type-option[data-type="transfer"] i {
+    color: var(--color-transfer, #6366f1);
+    opacity: 0.35;
 }
 
+.type-option.active[data-type="expense"] i,
+.type-option.active[data-rtype="expense"] i {
+    color: var(--color-danger-strong);
+    opacity: 1;
+}
+.type-option.active[data-type="income"] i,
+.type-option.active[data-rtype="income"] i {
+    color: var(--color-success-strong);
+    opacity: 1;
+}
+.type-option.active[data-type="transfer"] i {
+    color: var(--color-transfer, #6366f1);
+    opacity: 1;
+}
+
+.type-option.active[data-type="income"] i,
 .type-option:active {
     transform: scale(0.98);
 }
@@ -3735,12 +3799,7 @@ button.primary.loading .btn-spinner {
    Transfer Transaction Type (v3.15.0)
    ============================================================================ */
 
-/* Transfer type toggle button */
-.type-option[data-type="transfer"].active {
-  background: var(--color-transfer, #6366f1);
-  color: #fff;
-  border-color: var(--color-transfer, #6366f1);
-}
+/* Transfer type toggle button — uses shared active style, color lives in the icon */
 
 /* Transfer fields container */
 .transfer-fields {
@@ -3853,4 +3912,211 @@ button.primary.loading .btn-spinner {
 .transfer-arrow-icon {
   color: var(--text-secondary, #6b7280);
   font-size: 12px;
+}
+
+/* ============================================================================
+   Optional Fields (v3.16.0)
+   ============================================================================ */
+
+/* Collapsible section toggle */
+.optional-fields-section {
+  margin-top: var(--space-sm);
+}
+
+.optional-fields-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-md) 0;
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-family-base);
+}
+
+.optional-fields-toggle:hover {
+  opacity: 0.8;
+}
+
+.optional-fields-chevron {
+  margin-left: auto;
+  transition: transform var(--transition-fast);
+}
+
+.optional-fields-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+.optional-fields-container {
+  padding-top: var(--space-sm);
+}
+
+.optional-fields-container .form-group[hidden] {
+  display: none;
+}
+
+/* Category suggestion banner */
+.category-suggestion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+  background: var(--color-info-bg);
+  border: 1px solid var(--color-info-border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--color-info-text);
+}
+
+.category-suggestion i {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.suggestion-accept {
+  margin-left: auto;
+  padding: 2px 10px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-family-base);
+}
+
+.suggestion-accept:hover {
+  background: var(--color-primary-hover);
+}
+
+.suggestion-dismiss {
+  background: none;
+  border: none;
+  color: var(--color-info-text);
+  cursor: pointer;
+  padding: 2px;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.suggestion-dismiss:hover {
+  opacity: 0.7;
+}
+
+/* Settings: Optional fields toggle list */
+.optional-fields-settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: var(--space-md);
+}
+
+.optional-settings-chevron {
+  transition: transform var(--transition-fast);
+  font-size: 20px;
+  color: var(--color-text-muted);
+}
+
+.optional-fields-desc {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+  line-height: 1.4;
+}
+
+.optional-field-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.field-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.field-toggle-row:hover {
+  background: var(--color-border);
+}
+
+.field-toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.field-toggle-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.field-toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--color-disabled-bg);
+  border-radius: var(--radius-pill);
+  transition: background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.field-toggle-switch::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform var(--transition-fast);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.field-toggle-checkbox:checked + .field-toggle-switch {
+  background: var(--color-primary);
+}
+
+.field-toggle-checkbox:checked + .field-toggle-switch::after {
+  transform: translateX(20px);
+}
+
+/* Transaction list: optional field metadata */
+.tx-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: 2px;
+}
+
+.tx-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.tx-meta-item i {
+  font-size: 11px;
 }
