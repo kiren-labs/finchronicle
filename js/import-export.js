@@ -32,6 +32,8 @@ export function exportToCSV() {
     "Category",
     `Amount (${currencyCode})`,
     "Notes",
+    "From Account",
+    "To Account",
   ];
   const rows = state.transactions.map((t) => [
     t.date,
@@ -39,6 +41,8 @@ export function exportToCSV() {
     t.category,
     t.amount,
     t.notes || "",
+    t.fromAccount || "",
+    t.toAccount || "",
   ]);
 
   let csv = headers.join(",") + "\n";
@@ -107,6 +111,8 @@ export function createBackup() {
     "Notes",
     "ID",
     "CreatedAt",
+    "From Account",
+    "To Account",
   ];
   const rows = state.transactions.map((t) => [
     t.date,
@@ -116,6 +122,8 @@ export function createBackup() {
     t.notes || "",
     t.id,
     t.createdAt,
+    t.fromAccount || "",
+    t.toAccount || "",
   ]);
 
   let csv = metadata + "\n";

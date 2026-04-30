@@ -3820,7 +3820,12 @@ button.primary.loading .btn-spinner {
 
 /* Transaction list: transfer item styling */
 .transaction-item.transfer {
-  border-left: 3px solid var(--color-transfer, #6366f1);
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.03) 0%, transparent 100%);
+}
+
+.transaction-item.transfer::before {
+  background: var(--gradient-transfer);
+  box-shadow: 0 0 var(--space-sm) rgba(99, 102, 241, 0.3);
 }
 
 .transaction-icon.transfer {
