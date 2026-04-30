@@ -9,7 +9,7 @@ import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
 import { renderBudgetAlerts, renderBudgetList, deleteBudget } from "./budget.js";
-import { setOptionalFieldValues } from "./optional-fields.js";
+import { setOptionalFieldValues, clearOptionalFields } from "./optional-fields.js";
 import {
   renderCategoryPieChart,
   buildCategoryData,
@@ -730,6 +730,9 @@ export function cancelEdit() {
   const toInput = document.getElementById("toAccount");
   if (fromInput) fromInput.value = "";
   if (toInput) toInput.value = "";
+
+  // Clear optional fields (v3.16.0)
+  clearOptionalFields();
 
   selectType("expense");
 
