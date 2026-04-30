@@ -84,6 +84,7 @@ export function filterTransactions(transactions) {
       if (t.location && t.location.toLowerCase().includes(query)) return true;
       if (t.referenceId && t.referenceId.toLowerCase().includes(query)) return true;
       if (t.paymentMethod && t.paymentMethod.toLowerCase().includes(query)) return true;
+      if (t.expenseType && t.expenseType.toLowerCase().includes(query)) return true;
       return false;
     });
   }

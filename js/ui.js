@@ -223,10 +223,11 @@ export function updateTransactionsList() {
 
     // Build optional field metadata line (v3.16.0)
     const metaParts = [];
-    if (t.paymentMethod) metaParts.push(`<span class="tx-meta-item"><i class="ri-bank-card-line"></i> ${sanitizeHTML(t.paymentMethod)}</span>`);
-    if (t.merchant) metaParts.push(`<span class="tx-meta-item"><i class="ri-store-2-line"></i> ${sanitizeHTML(t.merchant)}</span>`);
-    if (t.attachedTo) metaParts.push(`<span class="tx-meta-item"><i class="ri-user-line"></i> ${sanitizeHTML(t.attachedTo)}</span>`);
-    if (t.location) metaParts.push(`<span class="tx-meta-item"><i class="ri-map-pin-line"></i> ${sanitizeHTML(t.location)}</span>`);
+    const ef = state.appSettings ? state.appSettings.enabledFields : {};
+    if (ef.paymentMethod && t.paymentMethod) metaParts.push(`<span class="tx-meta-item"><i class="ri-bank-card-line"></i> ${sanitizeHTML(t.paymentMethod)}</span>`);
+    if (ef.merchant && t.merchant) metaParts.push(`<span class="tx-meta-item"><i class="ri-store-2-line"></i> ${sanitizeHTML(t.merchant)}</span>`);
+    if (ef.attachedTo && t.attachedTo) metaParts.push(`<span class="tx-meta-item"><i class="ri-user-line"></i> ${sanitizeHTML(t.attachedTo)}</span>`);
+    if (ef.location && t.location) metaParts.push(`<span class="tx-meta-item"><i class="ri-map-pin-line"></i> ${sanitizeHTML(t.location)}</span>`);
     const metaHtml = metaParts.length > 0 ? `<div class="tx-meta">${metaParts.join("")}</div>` : "";
 
     item.innerHTML = `

@@ -2,7 +2,7 @@
 // Import / Export / Backup / Restore
 // ============================================================================
 
-import { APP_VERSION, state } from "./state.js";
+import { APP_VERSION, state, PAYMENT_METHODS, EXPENSE_TYPES } from "./state.js";
 import {
   sanitizeHTML,
   showMessage,
@@ -301,7 +301,7 @@ export async function importFromCSV(text) {
     // Add optional fields if present (v3.16.0)
     if (paymentMethodIndex !== -1) {
       const val = (row[paymentMethodIndex] || "").trim();
-      if (val) txn.paymentMethod = sanitizeHTML(val);
+      if (val && PAYMENT_METHODS.includes(val)) txn.paymentMethod = sanitizeHTML(val);
     }
     if (merchantIndex !== -1) {
       const val = (row[merchantIndex] || "").trim();
@@ -309,7 +309,7 @@ export async function importFromCSV(text) {
     }
     if (expenseTypeIndex !== -1) {
       const val = (row[expenseTypeIndex] || "").trim();
-      if (val) txn.expenseType = sanitizeHTML(val);
+      if (val && EXPENSE_TYPES.includes(val)) txn.expenseType = sanitizeHTML(val);
     }
     if (attachedToIndex !== -1) {
       const val = (row[attachedToIndex] || "").trim();
@@ -494,7 +494,7 @@ export function parseBackupCSV(text) {
     // Restore optional fields (v3.16.0)
     if (paymentMethodIdx !== -1) {
       const val = (row[paymentMethodIdx] || "").trim();
-      if (val) transaction.paymentMethod = sanitizeHTML(val);
+      if (val && PAYMENT_METHODS.includes(val)) transaction.paymentMethod = sanitizeHTML(val);
     }
     if (merchantIdx !== -1) {
       const val = (row[merchantIdx] || "").trim();
@@ -502,7 +502,7 @@ export function parseBackupCSV(text) {
     }
     if (expenseTypeIdx !== -1) {
       const val = (row[expenseTypeIdx] || "").trim();
-      if (val) transaction.expenseType = sanitizeHTML(val);
+      if (val && EXPENSE_TYPES.includes(val)) transaction.expenseType = sanitizeHTML(val);
     }
     if (attachedToIdx !== -1) {
       const val = (row[attachedToIdx] || "").trim();

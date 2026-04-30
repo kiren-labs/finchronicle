@@ -98,6 +98,12 @@ export async function checkRecurringTransactions() {
       recurringId: template.id,
     };
 
+    // Copy optional fields from template (v3.16.0)
+    const optionalKeys = ["paymentMethod", "merchant", "expenseType", "attachedTo", "referenceId", "location"];
+    for (const key of optionalKeys) {
+      if (template[key]) transaction[key] = template[key];
+    }
+
     const validation = validateTransaction(transaction);
     if (!validation.valid) {
       console.warn(
