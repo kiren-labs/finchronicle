@@ -16,6 +16,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.21.0] - 2026-05-01
+
+### Added
+- **Smart Spending Alerts** — Proactive, context-aware notifications based on rolling 90-day averages
+  - Weekly Spike: detects when category spending exceeds 40% above weekly average
+  - Unusual Amount: flags single transactions exceeding 3x category median
+  - Velocity Warning: projects if monthly budget will be exceeded at current pace
+  - Category Drift: alerts when category spending doubles vs last month
+  - Dismissible alert banners on the Summary tab
+  - Alert history in Settings (last 30 alerts)
+- **Annual Report** — Year-in-review section in the Reports tab
+  - 12-month income vs expense bar chart
+  - Year selector for multi-year data
+  - Annual summary cards (total income, expenses, net, savings rate)
+  - Category breakdown with horizontal bar visualization
+  - Year-over-year comparison
+  - Top 5 largest expenses
+  - Export annual data as CSV
+
+### Technical
+- New modules: `js/alerts.js`, `js/annual-report.js`
+- Alert state persisted in localStorage (no new IndexedDB store needed)
+- Alert checks triggered on every transaction save and on app init
+
+---
+
 ## [3.20.0] - 2026-05-01
 
 ### Added

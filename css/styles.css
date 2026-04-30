@@ -4906,3 +4906,354 @@ button.primary.loading .btn-spinner {
 }
 
 .summary-section.collapsed .goals-card { display: none; }
+
+/* ============================================================================
+   Smart Spending Alerts (v3.21.0)
+   ============================================================================ */
+
+.smart-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xs);
+  font-size: 13px;
+  animation: alertSlideIn 0.3s ease;
+}
+
+@keyframes alertSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.smart-alert-warning {
+  background: var(--color-warning-bg, #fff8e1);
+  border: 1px solid var(--color-warning-border, #ffcc02);
+  color: var(--color-warning-text, #7a5900);
+}
+
+.smart-alert-danger {
+  background: var(--color-danger-bg, #fdecea);
+  border: 1px solid var(--color-danger-border, #ff3b30);
+  color: var(--color-danger-text, #9a1c14);
+}
+
+.smart-alert-text {
+  flex: 1;
+  line-height: 1.3;
+}
+
+.smart-alert-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.smart-alert-dismiss:hover {
+  opacity: 1;
+}
+
+/* Alert History (Settings) */
+.alert-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-xs);
+  font-size: 12px;
+  border-left: 3px solid var(--color-border);
+}
+
+.alert-history-warning {
+  border-left-color: var(--color-warning-border, #ffcc02);
+}
+
+.alert-history-danger {
+  border-left-color: var(--color-danger-border, #ff3b30);
+}
+
+.alert-history-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-history-type {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  background: var(--color-bg);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.alert-history-msg {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.alert-history-date {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+  margin-left: var(--space-sm);
+}
+
+/* ============================================================================
+   Annual Report (v3.21.0)
+   ============================================================================ */
+
+.annual-report-section {
+  margin-top: var(--space-lg);
+}
+
+.annual-report-content {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+}
+
+.annual-year-selector {
+  display: flex;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.annual-summary-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.annual-stat {
+  text-align: center;
+  padding: var(--space-sm);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+
+.annual-stat-label {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 2px;
+}
+
+.annual-stat-value {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.annual-stat-value.positive { color: var(--color-income); }
+.annual-stat-value.negative { color: var(--color-expense); }
+
+/* Annual Bar Chart */
+.annual-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 140px;
+  margin-bottom: var(--space-sm);
+  padding-bottom: 20px;
+  position: relative;
+}
+
+.annual-bar-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.annual-bar-cols {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  flex: 1;
+  width: 100%;
+}
+
+.annual-bar {
+  flex: 1;
+  min-height: 2px;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.3s ease;
+}
+
+.annual-bar-income { background: var(--color-income); }
+.annual-bar-expense { background: var(--color-expense); }
+
+.annual-bar-label {
+  font-size: 9px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+.annual-bar-legend {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-income { background: var(--color-income); }
+.legend-expense { background: var(--color-expense); }
+
+/* Annual Category List */
+.annual-section {
+  margin-top: var(--space-lg);
+}
+
+.annual-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.annual-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.annual-cat-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 12px;
+}
+
+.annual-cat-name {
+  width: 90px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.annual-cat-bar-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--color-bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.annual-cat-bar {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.annual-cat-amount {
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: right;
+}
+
+.annual-cat-amount small {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+/* Annual YoY */
+.annual-yoy {
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+
+.annual-yoy h4 {
+  font-size: 12px;
+  margin-bottom: var(--space-xs);
+  color: var(--color-text-muted);
+}
+
+.yoy-item {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: var(--space-md);
+}
+
+.yoy-item.positive { color: var(--color-income); }
+.yoy-item.negative { color: var(--color-expense); }
+
+/* Annual Top Expenses */
+.annual-top-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.annual-top-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 12px;
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.annual-top-item:last-child { border-bottom: none; }
+
+.annual-top-cat {
+  flex: 1;
+  font-weight: 500;
+}
+
+.annual-top-amount {
+  font-weight: 600;
+  color: var(--color-expense);
+}
+
+.annual-top-date {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.annual-empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--space-lg) 0;
+  font-size: 13px;
+}
+
+@media (min-width: 480px) {
+  .annual-summary-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
