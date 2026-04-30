@@ -261,6 +261,9 @@ export async function importFromCSV(text) {
   const attachedToIndex = findHeaderIndex(headers, /^attached to$/i);
   const referenceIdIndex = findHeaderIndex(headers, /^reference id$/i);
   const locationIndex = findHeaderIndex(headers, /^location$/i);
+  const txCurrencyIndex = findHeaderIndex(headers, /^transaction currency$/i);
+  const exchangeRateIndex = findHeaderIndex(headers, /^exchange rate$/i);
+  const homeAmountIndex = findHeaderIndex(headers, /^home amount$/i);
 
   if (dateIndex === -1 || categoryIndex === -1 || amountIndex === -1) {
     throw new Error("Missing required headers");
@@ -334,6 +337,19 @@ export async function importFromCSV(text) {
     if (locationIndex !== -1) {
       const val = (row[locationIndex] || "").trim();
       if (val) txn.location = sanitizeHTML(val);
+    }
+    // Multi-currency fields (v3.24.0)
+    if (txCurrencyIndex !== -1) {
+      const val = (row[txCurrencyIndex] || "").trim();
+      if (val) txn.transactionCurrency = val;
+    }
+    if (exchangeRateIndex !== -1) {
+      const val = parseFloat((row[exchangeRateIndex] || "").trim());
+      if (!isNaN(val) && val > 0) txn.exchangeRate = val;
+    }
+    if (homeAmountIndex !== -1) {
+      const val = parseFloat((row[homeAmountIndex] || "").trim());
+      if (!isNaN(val) && val > 0) txn.homeAmount = val;
     }
 
     newTransactions.push(txn);
