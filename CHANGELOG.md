@@ -11,6 +11,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 - Split Transactions
+- Account reconciliation
+- Account-linked expenses/income
+
+---
+
+## [3.18.0] - 2026-04-30
+
+### Added
+- **Accounts & Net Worth** — First-class account entities with derived balances and a net worth dashboard
+  - Account CRUD: create, edit, deactivate accounts (checking, savings, credit-card, cash, investment, other)
+  - Derived balance calculation from opening balance + transfers/income/expenses
+  - Net Worth dashboard in Summary section: total assets, liabilities, and net worth
+  - Per-account balance list in the net worth card
+  - Account Manager in Settings with type icons, balance display, savings badge
+  - "Counts as Savings" toggle per account (for future savings rate calculations)
+  - Accounts referenced in transfers are deactivated instead of deleted (preserves history)
+  - New IndexedDB `accounts` store (DB_VERSION 8) with name (unique) and type indexes
 
 ---
 
