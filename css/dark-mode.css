@@ -647,3 +647,16 @@ body.dark-mode .savings-widget.highlight {
 body.dark-mode .savings-trend {
   background: var(--color-surface);
 }
+
+/* Savings Goals (v3.20.0) */
+body.dark-mode .goal-card {
+  background: var(--color-surface);
+}
+
+body.dark-mode .goal-ring-bg {
+  stroke: var(--color-border);
+}
+
+body.dark-mode .goal-actions button:hover {
+  background: var(--color-border);
+}
