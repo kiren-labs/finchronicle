@@ -690,3 +690,33 @@ body.dark-mode .annual-stat {
 body.dark-mode .annual-yoy {
   background: var(--color-bg);
 }
+
+/* Auto-Backup & Data Safety (v3.22.0) */
+body.dark-mode .auto-backup-card {
+  background: var(--color-surface);
+}
+
+body.dark-mode .storage-health-card {
+  background: var(--color-surface);
+}
+
+body.dark-mode .toggle-switch {
+  background: var(--color-bg);
+}
+
+body.dark-mode .toggle-knob {
+  background: var(--color-text-secondary);
+}
+
+body.dark-mode .toggle-switch.active .toggle-knob {
+  background: #fff;
+}
+
+body.dark-mode .auto-backup-actions button {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .auto-backup-actions button:hover {
+  background: var(--color-surface);
+}
