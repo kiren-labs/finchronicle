@@ -117,6 +117,7 @@ import {
   handleAccountFormSubmit,
   removeAccount,
 } from "./accounts.js";
+import { renderSavingsDashboard } from "./savings.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
