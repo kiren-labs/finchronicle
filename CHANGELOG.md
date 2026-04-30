@@ -10,7 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Quick Entry + Split Transactions
+- Split Transactions
+
+---
+
+## [3.17.0] - 2026-05-01
+
+### Added
+- **Quick Entry Templates** — Save frequently used transactions as one-tap templates for faster data entry
+  - Quick bar above the form with pill-shaped template buttons showing type, label, and amount
+  - "Clone Last" button to pre-fill the form with the most recent transaction
+  - "Save as Template" button below the submit button to create templates from current form values
+  - Template Manager in Settings: reorder (up/down), inline rename, and delete templates
+  - Up to 20 templates supported; templates stored in IndexedDB (`quickTemplates` store, DB_VERSION 7)
+  - Pre-fill mode: templates populate the form without auto-submitting, allowing review before save
 
 ---
 
