@@ -23,8 +23,8 @@
 | v3.19.0 | Savings Rate Dashboard | ✅ DONE | All 5 widgets |
 | v3.20.0 | Savings Goals | ✅ DONE | Full feature with milestones |
 | v3.21.0 | Annual Report & Smart Alerts | ✅ DONE | Trimmed — no redundant charts |
-| v3.22.0 | Auto-Backup & Data Safety | NOT STARTED | |
-| v3.23.0 | Receipt Photos | NOT STARTED | |
+| v3.22.0 | Auto-Backup & Data Safety | ✅ DONE | |
+| v3.23.0 | Receipt Photos | SKIPPED | |
 | v3.24.0 | Multi-Currency Transactions | NOT STARTED | |
 | v3.25.0 | Push Notifications | NOT STARTED | |
 | v3.26.0 | Family Expense Settlement | NOT STARTED | |
