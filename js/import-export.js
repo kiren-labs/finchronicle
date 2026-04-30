@@ -201,6 +201,8 @@ export async function importFromCSV(text) {
   const notesIndex =
     findHeaderIndex(headers, /^notes$/i) ??
     findHeaderIndex(headers, /^description$/i);
+  const fromAccountIndex = findHeaderIndex(headers, /^from account$/i);
+  const toAccountIndex = findHeaderIndex(headers, /^to account$/i);
 
   if (dateIndex === -1 || categoryIndex === -1 || amountIndex === -1) {
     throw new Error("Missing required headers");
@@ -227,10 +229,10 @@ export async function importFromCSV(text) {
       typeIndex !== -1
         ? (row[typeIndex] || "").trim().toLowerCase()
         : "expense";
-    const type = rawType === "income" ? "income" : "expense";
+    const type = rawType === "income" ? "income" : rawType === "transfer" ? "transfer" : "expense";
     const baseCategory = (row[categoryIndex] || "").trim();
     const rawNotes = notesIndex !== -1 ? (row[notesIndex] || "").trim() : "";
-    const category = normalizeImportedCategory(baseCategory, rawNotes, type);
+    const category = type === "transfer" ? "Transfer" : normalizeImportedCategory(baseCategory, rawNotes, type);
 
     const txn = {
       id: startId + i,
@@ -241,6 +243,13 @@ export async function importFromCSV(text) {
       notes: sanitizeHTML(rawNotes),
       createdAt: nowIso,
     };
+
+    // Add transfer fields if present
+    if (type === "transfer") {
+      txn.fromAccount = fromAccountIndex !== -1 ? sanitizeHTML((row[fromAccountIndex] || "").trim()) : null;
+      txn.toAccount = toAccountIndex !== -1 ? sanitizeHTML((row[toAccountIndex] || "").trim()) : null;
+      txn.transferNote = null;
+    }
 
     newTransactions.push(txn);
     state.transactions.unshift(txn);
@@ -339,6 +348,8 @@ export function parseBackupCSV(text) {
   const notesIndex = headers.findIndex((h) => h === "notes");
   const idIndex = headers.findIndex((h) => h === "id");
   const createdAtIndex = headers.findIndex((h) => h === "createdat");
+  const fromAccountIndex = headers.findIndex((h) => h === "from account");
+  const toAccountIndex = headers.findIndex((h) => h === "to account");
 
   const parsedTransactions = [];
   const dataRows = rows.slice(1);
@@ -376,7 +387,12 @@ export function parseBackupCSV(text) {
           : new Date().toISOString(),
     };
 
-    if (transaction.type !== "income" && transaction.type !== "expense") {
+    if (transaction.type === "transfer") {
+      transaction.category = "Transfer";
+      transaction.fromAccount = fromAccountIndex !== -1 ? sanitizeHTML((row[fromAccountIndex] || "").trim()) : null;
+      transaction.toAccount = toAccountIndex !== -1 ? sanitizeHTML((row[toAccountIndex] || "").trim()) : null;
+      transaction.transferNote = null;
+    } else if (transaction.type !== "income" && transaction.type !== "expense") {
       transaction.type = "expense";
     }
 
