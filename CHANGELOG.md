@@ -16,6 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.19.0] - 2026-05-01
+
+### Added
+- **Savings Rate Dashboard** — new card in the Summary tab showing:
+  - This Month Saved (amount + income context)
+  - Savings Rate with color-coded percentage (green ≥20%, yellow ≥10%, red <10%)
+  - 3-Month Trend bar chart showing savings rate over time
+  - Annual Projection based on 3-month average
+  - Cumulative Total (all-time savings)
+- Savings detection from transfers to savings-flagged accounts and legacy "Savings/Investments" category
+- Transfers between savings accounts are excluded from savings count
+- Dashboard auto-hides when no savings accounts or legacy savings data exist
+- Dark mode support for all savings widgets
+
+---
+
 ## [3.18.0] - 2026-04-30
 
 ### Added

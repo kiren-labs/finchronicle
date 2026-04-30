@@ -117,6 +117,7 @@ import {
   handleAccountFormSubmit,
   removeAccount,
 } from "./accounts.js";
+import { renderSavingsDashboard } from "./savings.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -871,6 +872,7 @@ function bindAccountEvents() {
           await removeAccount(id);
           renderAccountManager();
           renderNetWorthDashboard();
+          renderSavingsDashboard();
         }
       }
     });
@@ -1007,6 +1009,7 @@ function bindFormSubmit() {
           updateUI();
           renderQuickBar();
           renderNetWorthDashboard();
+          renderSavingsDashboard();
         }, 800);
       } catch (err) {
         console.error("Save failed:", err);
@@ -1197,8 +1200,7 @@ async function init() {
     renderTemplateManager();
     renderAccountManager();
     renderNetWorthDashboard();
-
-    // Post-render setup
+    renderSavingsDashboard();
     checkAppVersion();
     loadDarkMode();
     loadSummaryState();
