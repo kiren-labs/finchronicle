@@ -9,7 +9,7 @@ import { sanitizeHTML } from "./utils.js";
 const DEFAULT_ACCOUNTS = ["Cash", "Savings", "Credit Card", "Bank Account"];
 
 /**
- * Get all unique account names from past transfer transactions + defaults.
+ * Get all unique account names from accounts store + past transfers + defaults.
  * Used for autocomplete suggestions.
  */
 export function getAccountSuggestions() {
@@ -21,8 +21,13 @@ export function getAccountSuggestions() {
     }
   });
 
-  // Merge defaults + history, deduplicate
-  const all = new Set([...DEFAULT_ACCOUNTS, ...state.savedAccounts, ...fromHistory]);
+  // Include names from the accounts store (v3.18.0)
+  const fromStore = (state.accounts || [])
+    .filter((a) => a.isActive !== false)
+    .map((a) => a.name);
+
+  // Merge defaults + store + history, deduplicate
+  const all = new Set([...DEFAULT_ACCOUNTS, ...state.savedAccounts, ...fromStore, ...fromHistory]);
   return [...all].sort();
 }
 

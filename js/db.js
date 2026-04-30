@@ -11,6 +11,7 @@ import {
   BUDGETS_STORE,
   APP_SETTINGS_STORE,
   QUICK_TEMPLATES_STORE,
+  ACCOUNTS_STORE,
   DEFAULT_APP_SETTINGS,
 } from "./state.js";
 
@@ -90,6 +91,16 @@ export function initDB() {
         if (!database.objectStoreNames.contains(QUICK_TEMPLATES_STORE)) {
           const qtStore = database.createObjectStore(QUICK_TEMPLATES_STORE, { keyPath: "id" });
           qtStore.createIndex("sortOrder", "sortOrder", { unique: false });
+        }
+      }
+
+      // v8: Accounts store for Accounts & Net Worth (v3.18.0)
+      if (oldVersion < 8) {
+        if (!database.objectStoreNames.contains(ACCOUNTS_STORE)) {
+          const accStore = database.createObjectStore(ACCOUNTS_STORE, { keyPath: "id" });
+          accStore.createIndex("name", "name", { unique: true });
+          accStore.createIndex("type", "type", { unique: false });
+          accStore.createIndex("sortOrder", "sortOrder", { unique: false });
         }
       }
     };
@@ -466,5 +477,54 @@ export function bulkSaveQuickTemplates(templates) {
     templates.forEach((t) => store.put(t));
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ---- Accounts CRUD (v3.18.0) ----
+
+export function loadAccounts() {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([ACCOUNTS_STORE], "readonly");
+    const store = tx.objectStore(ACCOUNTS_STORE);
+    const request = store.getAll();
+    request.onsuccess = () => {
+      state.accounts = (request.result || []).sort(
+        (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0),
+      );
+      resolve(state.accounts);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function saveAccount(account) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([ACCOUNTS_STORE], "readwrite");
+    const store = tx.objectStore(ACCOUNTS_STORE);
+    const request = store.put(account);
+    request.onsuccess = () => resolve(account);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function deleteAccount(id) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+    const tx = state.db.transaction([ACCOUNTS_STORE], "readwrite");
+    const store = tx.objectStore(ACCOUNTS_STORE);
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
   });
 }
