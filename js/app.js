@@ -135,6 +135,7 @@ import {
   performCsvBackup,
   performEncryptedBackup,
   importEncryptedBackup,
+  renderAutoBackupSettings,
   renderStorageHealth,
 } from "./auto-backup.js";
 import {
@@ -1052,6 +1053,90 @@ function bindAnnualReportEvents() {
       exportAnnualCSV(exportBtn.dataset.annualExport);
     }
   });
+}
+
+function bindAutoBackupEvents() {
+  // Use event delegation on the auto-backup container
+  const container = document.getElementById("autoBackupContainer");
+  if (!container) return;
+
+  container.addEventListener("click", (e) => {
+    // Toggle auto-backup on/off
+    const toggle = e.target.closest("#autoBackupToggle");
+    if (toggle) {
+      const settings = getBackupSettings();
+      settings.autoBackupEnabled = !settings.autoBackupEnabled;
+      saveBackupSettings(settings);
+      container.innerHTML = renderAutoBackupSettings();
+      return;
+    }
+
+    // Manual backup now
+    const manualBtn = e.target.closest("#manualBackupBtn");
+    if (manualBtn) {
+      const settings = getBackupSettings();
+      if (settings.backupFormat === "json") {
+        performJsonBackup(false);
+      } else {
+        performCsvBackup(false);
+      }
+      return;
+    }
+
+    // Encrypted backup
+    const encBtn = e.target.closest("#encryptedBackupBtn");
+    if (encBtn) {
+      const passphrase = prompt(
+        "Enter a passphrase (min 6 characters) to encrypt your backup:",
+      );
+      if (passphrase) {
+        performEncryptedBackup(passphrase);
+      }
+      return;
+    }
+
+    // Import encrypted
+    const impBtn = e.target.closest("#importEncryptedBtn");
+    if (impBtn) {
+      document.getElementById("encryptedRestoreFile").click();
+      return;
+    }
+  });
+
+  container.addEventListener("change", (e) => {
+    // Frequency select
+    if (e.target.id === "backupFrequency") {
+      const settings = getBackupSettings();
+      settings.backupFrequency = e.target.value;
+      saveBackupSettings(settings);
+    }
+    // Format select
+    if (e.target.id === "backupFormat") {
+      const settings = getBackupSettings();
+      settings.backupFormat = e.target.value;
+      saveBackupSettings(settings);
+    }
+  });
+
+  // Encrypted file input handler
+  document
+    .getElementById("encryptedRestoreFile")
+    .addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const passphrase = prompt(
+        "Enter the passphrase used to encrypt this backup:",
+      );
+      if (!passphrase) return;
+
+      const data = await importEncryptedBackup(file, passphrase);
+      if (data) {
+        // Hand off to import-export module's restore flow
+        const mod = await getImportExportModule();
+        mod.processRestoredData(data);
+      }
+      e.target.value = "";
+    });
 }
 
 // ============================================================================
