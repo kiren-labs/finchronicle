@@ -446,11 +446,13 @@ function groupByMonth() {
   state.transactions.forEach((t) => {
     const month = t.date.slice(0, 7);
     if (!grouped[month]) {
-      grouped[month] = { income: 0, expense: 0, count: 0 };
+      grouped[month] = { income: 0, expense: 0, transfer: 0, count: 0 };
     }
     grouped[month].count++;
     if (t.type === "income") {
       grouped[month].income += t.amount;
+    } else if (t.type === "transfer") {
+      grouped[month].transfer += t.amount;
     } else {
       grouped[month].expense += t.amount;
     }
@@ -508,7 +510,7 @@ function groupByCategory() {
   return cats
     .map((category) => {
       const data = grouped[category];
-      const colorClass = data.type === "income" ? "positive" : "negative";
+      const colorClass = data.type === "transfer" ? "transfer" : data.type === "income" ? "positive" : "negative";
 
       return `
             <div class="card">
@@ -709,6 +711,12 @@ export function cancelEdit() {
   document.getElementById("date").valueAsDate = new Date();
   state.formTags = [];
   renderFormTagChips();
+
+  // Clear transfer fields
+  const fromInput = document.getElementById("fromAccount");
+  const toInput = document.getElementById("toAccount");
+  if (fromInput) fromInput.value = "";
+  if (toInput) toInput.value = "";
 
   selectType("expense");
 
