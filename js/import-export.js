@@ -35,6 +35,12 @@ export function exportToCSV() {
     "From Account",
     "To Account",
     "UpdatedAt",
+    "Payment Method",
+    "Merchant",
+    "Expense Type",
+    "Attached To",
+    "Reference ID",
+    "Location",
   ];
   const rows = state.transactions.map((t) => [
     t.date,
@@ -45,6 +51,12 @@ export function exportToCSV() {
     t.fromAccount || "",
     t.toAccount || "",
     t.updatedAt || "",
+    t.paymentMethod || "",
+    t.merchant || "",
+    t.expenseType || "",
+    t.attachedTo || "",
+    t.referenceId || "",
+    t.location || "",
   ]);
 
   let csv = headers.join(",") + "\n";
@@ -126,6 +138,12 @@ export async function createBackup() {
     "To Account",
     "Deleted",
     "DeletedAt",
+    "Payment Method",
+    "Merchant",
+    "Expense Type",
+    "Attached To",
+    "Reference ID",
+    "Location",
   ];
   const rows = allRecords.map((t) => [
     t.date,
@@ -140,6 +158,12 @@ export async function createBackup() {
     t.toAccount || "",
     t.deleted ? "yes" : "",
     t.deletedAt || "",
+    t.paymentMethod || "",
+    t.merchant || "",
+    t.expenseType || "",
+    t.attachedTo || "",
+    t.referenceId || "",
+    t.location || "",
   ]);
 
   let csv = metadata + "\n";
@@ -219,6 +243,12 @@ export async function importFromCSV(text) {
     findHeaderIndex(headers, /^description$/i);
   const fromAccountIndex = findHeaderIndex(headers, /^from account$/i);
   const toAccountIndex = findHeaderIndex(headers, /^to account$/i);
+  const paymentMethodIndex = findHeaderIndex(headers, /^payment method$/i);
+  const merchantIndex = findHeaderIndex(headers, /^merchant$/i);
+  const expenseTypeIndex = findHeaderIndex(headers, /^expense type$/i);
+  const attachedToIndex = findHeaderIndex(headers, /^attached to$/i);
+  const referenceIdIndex = findHeaderIndex(headers, /^reference id$/i);
+  const locationIndex = findHeaderIndex(headers, /^location$/i);
 
   if (dateIndex === -1 || categoryIndex === -1 || amountIndex === -1) {
     throw new Error("Missing required headers");
@@ -266,6 +296,32 @@ export async function importFromCSV(text) {
       txn.fromAccount = fromAccountIndex !== -1 ? sanitizeHTML((row[fromAccountIndex] || "").trim()) : null;
       txn.toAccount = toAccountIndex !== -1 ? sanitizeHTML((row[toAccountIndex] || "").trim()) : null;
       txn.transferNote = null;
+    }
+
+    // Add optional fields if present (v3.16.0)
+    if (paymentMethodIndex !== -1) {
+      const val = (row[paymentMethodIndex] || "").trim();
+      if (val) txn.paymentMethod = sanitizeHTML(val);
+    }
+    if (merchantIndex !== -1) {
+      const val = (row[merchantIndex] || "").trim();
+      if (val) txn.merchant = sanitizeHTML(val);
+    }
+    if (expenseTypeIndex !== -1) {
+      const val = (row[expenseTypeIndex] || "").trim();
+      if (val) txn.expenseType = sanitizeHTML(val);
+    }
+    if (attachedToIndex !== -1) {
+      const val = (row[attachedToIndex] || "").trim();
+      if (val) txn.attachedTo = sanitizeHTML(val);
+    }
+    if (referenceIdIndex !== -1) {
+      const val = (row[referenceIdIndex] || "").trim();
+      if (val) txn.referenceId = sanitizeHTML(val);
+    }
+    if (locationIndex !== -1) {
+      const val = (row[locationIndex] || "").trim();
+      if (val) txn.location = sanitizeHTML(val);
     }
 
     newTransactions.push(txn);
@@ -370,6 +426,12 @@ export function parseBackupCSV(text) {
   const updatedAtIndex = headers.findIndex((h) => h === "updatedat");
   const deletedIndex = headers.findIndex((h) => h === "deleted");
   const deletedAtIndex = headers.findIndex((h) => h === "deletedat");
+  const paymentMethodIdx = headers.findIndex((h) => h === "payment method");
+  const merchantIdx = headers.findIndex((h) => h === "merchant");
+  const expenseTypeIdx = headers.findIndex((h) => h === "expense type");
+  const attachedToIdx = headers.findIndex((h) => h === "attached to");
+  const referenceIdIdx = headers.findIndex((h) => h === "reference id");
+  const locationIdx = headers.findIndex((h) => h === "location");
 
   const parsedTransactions = [];
   const dataRows = rows.slice(1);
@@ -427,6 +489,32 @@ export function parseBackupCSV(text) {
       transaction.transferNote = null;
     } else if (transaction.type !== "income" && transaction.type !== "expense") {
       transaction.type = "expense";
+    }
+
+    // Restore optional fields (v3.16.0)
+    if (paymentMethodIdx !== -1) {
+      const val = (row[paymentMethodIdx] || "").trim();
+      if (val) transaction.paymentMethod = sanitizeHTML(val);
+    }
+    if (merchantIdx !== -1) {
+      const val = (row[merchantIdx] || "").trim();
+      if (val) transaction.merchant = sanitizeHTML(val);
+    }
+    if (expenseTypeIdx !== -1) {
+      const val = (row[expenseTypeIdx] || "").trim();
+      if (val) transaction.expenseType = sanitizeHTML(val);
+    }
+    if (attachedToIdx !== -1) {
+      const val = (row[attachedToIdx] || "").trim();
+      if (val) transaction.attachedTo = sanitizeHTML(val);
+    }
+    if (referenceIdIdx !== -1) {
+      const val = (row[referenceIdIdx] || "").trim();
+      if (val) transaction.referenceId = sanitizeHTML(val);
+    }
+    if (locationIdx !== -1) {
+      const val = (row[locationIdx] || "").trim();
+      if (val) transaction.location = sanitizeHTML(val);
     }
 
     parsedTransactions.push(transaction);
