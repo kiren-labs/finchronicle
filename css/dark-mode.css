@@ -700,15 +700,7 @@ body.dark-mode .storage-health-card {
   background: var(--color-surface);
 }
 
-body.dark-mode .toggle-switch {
-  background: var(--color-bg);
-}
-
 body.dark-mode .toggle-knob {
-  background: var(--color-text-secondary);
-}
-
-body.dark-mode .toggle-switch.active .toggle-knob {
   background: #fff;
 }
 
@@ -719,4 +711,10 @@ body.dark-mode .auto-backup-actions button {
 
 body.dark-mode .auto-backup-actions button:hover {
   background: var(--color-surface);
+}
+
+body.dark-mode .auto-backup-row select {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+  color: var(--color-text);
 }

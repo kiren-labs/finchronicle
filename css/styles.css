@@ -5137,10 +5137,10 @@ button.primary.loading .btn-spinner {
    ============================================================ */
 
 .auto-backup-card {
-  background: var(--card-bg);
+  background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-xl);
   box-shadow: var(--shadow-sm);
 }
 
@@ -5148,144 +5148,171 @@ button.primary.loading .btn-spinner {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  margin-bottom: var(--space-md);
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--text-primary);
+  margin-bottom: var(--space-lg);
 }
 
 .auto-backup-header i {
-  font-size: 18px;
-  color: var(--accent);
+  font-size: var(--font-2xl);
+  color: var(--color-primary);
+}
+
+.auto-backup-header h3 {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  margin: 0;
 }
 
 .auto-backup-toggle-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-sm) 0;
-  border-bottom: 1px solid var(--border-light);
-  margin-bottom: var(--space-md);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-lg);
 }
 
 .auto-backup-toggle-row label {
-  font-size: 14px;
-  color: var(--text-primary);
+  font-size: var(--font-md);
+  color: var(--color-text);
+  font-weight: 500;
 }
 
 .toggle-switch {
-  width: 44px;
-  height: 24px;
-  border-radius: 12px;
-  background: var(--border-color);
+  width: 48px;
+  height: 26px;
+  border-radius: var(--radius-pill);
+  background: var(--color-disabled-bg);
   position: relative;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--transition-fast);
+  border: none;
+  padding: 0;
 }
 
 .toggle-switch.active {
-  background: var(--accent);
+  background: var(--color-primary);
 }
 
 .toggle-knob {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-surface);
   position: absolute;
   top: 2px;
   left: 2px;
-  transition: transform 0.2s;
+  transition: transform var(--transition-fast);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .toggle-switch.active .toggle-knob {
-  transform: translateX(20px);
+  transform: translateX(22px);
 }
 
 .auto-backup-options {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);
+}
+
+.auto-backup-options.disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .auto-backup-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-xs) 0;
+  padding: var(--space-sm) 0;
 }
 
 .auto-backup-row label {
-  font-size: 13px;
-  color: var(--text-secondary);
+  font-size: var(--font-md);
+  color: var(--color-text-muted);
 }
 
 .auto-backup-row select {
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-color);
-  background: var(--input-bg);
-  color: var(--text-primary);
-  font-size: 13px;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-md);
+  font-family: inherit;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.auto-backup-row select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .auto-backup-info {
-  margin-top: var(--space-md);
-  padding: var(--space-sm) var(--space-md);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  color: var(--text-secondary);
+  margin-top: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
   display: flex;
   align-items: center;
   gap: var(--space-sm);
 }
 
 .auto-backup-info i {
-  color: var(--accent);
+  color: var(--color-primary);
+  font-size: var(--icon-md);
 }
 
 .auto-backup-actions {
   display: flex;
   gap: var(--space-sm);
-  margin-top: var(--space-md);
+  margin-top: var(--space-lg);
   flex-wrap: wrap;
 }
 
 .auto-backup-actions button {
   flex: 1;
-  min-width: 120px;
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  background: var(--card-bg);
-  color: var(--text-primary);
-  font-size: 13px;
+  min-width: 130px;
+  padding: var(--space-sm) var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-sm);
+  font-family: inherit;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .auto-backup-actions button:hover {
-  background: var(--bg-secondary);
-  border-color: var(--accent);
+  background: var(--color-bg);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-primary-sm);
+}
+
+.auto-backup-actions button:active {
+  transform: scale(0.97);
 }
 
 .auto-backup-actions button i {
-  font-size: 15px;
+  font-size: var(--icon-sm);
+  color: var(--color-primary);
 }
 
 /* Storage Health Widget */
 
 .storage-health-card {
-  background: var(--card-bg);
+  background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-xl);
   box-shadow: var(--shadow-sm);
 }
 
@@ -5293,51 +5320,110 @@ button.primary.loading .btn-spinner {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  margin: 0 0 var(--space-md);
-  font-size: 14px;
+  margin: 0 0 var(--space-lg);
+  font-size: var(--font-md);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text);
 }
 
 .storage-health-card h4 i {
-  color: var(--accent);
+  font-size: var(--icon-md);
+  color: var(--color-primary);
 }
 
 .storage-meter {
   height: 8px;
-  border-radius: 4px;
-  background: var(--bg-secondary);
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
   overflow: hidden;
   margin-bottom: var(--space-sm);
 }
 
 .storage-meter-fill {
   height: 100%;
-  border-radius: 4px;
-  transition: width 0.3s;
+  border-radius: var(--radius-pill);
+  transition: width var(--transition-med);
 }
 
 .storage-meter-fill.storage-good {
-  background: var(--success);
+  background: var(--color-success);
 }
 
 .storage-meter-fill.storage-warning {
-  background: var(--warning);
+  background: var(--color-warning-border);
 }
 
 .storage-meter-fill.storage-danger {
-  background: var(--danger);
+  background: var(--color-danger);
 }
 
 .storage-stats {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
 }
 
 .storage-details {
   margin-top: var(--space-sm);
-  font-size: 12px;
-  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+}
+
+.storage-health-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.storage-health-header i {
+  font-size: var(--icon-md);
+  color: var(--color-primary);
+}
+
+.storage-health-header h4 {
+  font-size: var(--font-md);
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.storage-health-info {
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.storage-health-info i {
+  font-size: var(--icon-sm);
+}
+
+.storage-warning-text {
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  border-left: 3px solid var(--color-warning-border);
+}
+
+.storage-unsupported {
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .auto-backup-actions {
+    flex-direction: column;
+  }
+
+  .auto-backup-actions button {
+    min-width: unset;
+    width: 100%;
+  }
 }
