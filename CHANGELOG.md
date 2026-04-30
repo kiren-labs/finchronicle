@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- v3.22.0: Auto-Backup & Data Safety (scheduled local exports, storage health monitoring, encrypted export)
 - v3.23.0: Receipt Photos (Canvas compression, IndexedDB blob storage)
 - v3.24.0: Multi-Currency Transactions (per-transaction currency + manual exchange rate)
 - v3.25.0: Push Notifications (recurring due dates, budget warnings, inactivity nudge)
@@ -20,6 +19,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Split Transactions — rarely needed in practice; approximable with tags
 - Account reconciliation — adds complexity for minimal gain on a personal app
 - Account-linked expenses/income — `account` optional field from v3.16 covers the basic case
+
+---
+
+## [3.22.0] - 2026-05-15
+
+### Added
+- **Auto-Backup & Data Safety** — Scheduled local exports with storage health monitoring
+  - Configurable auto-backup: daily, weekly, or monthly intervals (JSON or CSV format)
+  - Storage Health dashboard: IndexedDB usage, transaction count, estimated remaining capacity
+  - Encrypted backup/restore: AES-GCM-256 encryption via Web Crypto API (PBKDF2 key derivation)
+  - Backup verification: integrity check with transaction count and date range validation
+  - Last backup timestamp tracking in Settings tab
+
+### Fixed
+- **CSS Design Token Audit** — Comprehensive fix across v3.13–v3.22 components
+  - Replaced all non-existent CSS custom property references with correct design tokens
+  - Standardised form inputs to stacked vertical layout pattern with correct sizing
+  - Fixed hardcoded pixel values to use token variables throughout
+  - Added missing tokens: `--color-danger-bg`, `--color-danger-border`, `--color-danger-text`, `--color-primary-bg`
+  - Fixed dark mode overrides to use correct token names
 
 ---
 

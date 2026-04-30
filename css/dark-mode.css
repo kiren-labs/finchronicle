@@ -29,7 +29,12 @@ body.dark-mode {
     --color-success-strong: #30E85D;
     --color-danger: #FF453A;
     --color-danger-strong: #FF6B6B;
+    --color-danger-bg: #3a1a18;
+    --color-danger-border: #FF453A;
+    --color-danger-text: #FF6B6B;
     --color-warning-text: #FCD34D;
+
+    --color-primary-bg: #1a2a3a;
 
     /* Brand wordmark — brighter for dark backgrounds */
     --color-fin: #5B8DEF;
@@ -277,7 +282,7 @@ body.dark-mode .budget-card:hover {
 }
 
 body.dark-mode .budget-title h3 {
-    color: var(--color-text-primary);
+    color: var(--color-text);
 }
 
 body.dark-mode .budget-status {
@@ -296,8 +301,8 @@ body.dark-mode .budget-status.budget-exceeded {
 }
 
 body.dark-mode .icon-btn {
-    background: var(--color-bg-secondary);
-    color: var(--color-text-secondary);
+    background: var(--color-bg);
+    color: var(--color-text-muted);
 }
 
 body.dark-mode .icon-btn:hover {
@@ -306,7 +311,7 @@ body.dark-mode .icon-btn:hover {
 }
 
 body.dark-mode .progress-bar {
-    background: var(--color-bg-secondary);
+    background: var(--color-bg);
 }
 
 body.dark-mode .progress-fill {
@@ -322,7 +327,7 @@ body.dark-mode .budget-card.budget-exceeded .progress-fill {
 }
 
 body.dark-mode .progress-text {
-    color: var(--color-text-secondary);
+    color: var(--color-text-muted);
 }
 
 body.dark-mode .budget-details {
@@ -334,7 +339,7 @@ body.dark-mode .detail-label {
 }
 
 body.dark-mode .detail-value {
-    color: var(--color-text-primary);
+    color: var(--color-text);
 }
 
 body.dark-mode .budget-alert {
@@ -356,17 +361,17 @@ body.dark-mode .budget-alert.alert-danger i {
 }
 
 body.dark-mode .alert-content {
-    color: var(--color-text-primary);
+    color: var(--color-text);
 }
 
 body.dark-mode .form-group label {
-    color: var(--color-text-primary);
+    color: var(--color-text);
 }
 
 body.dark-mode .form-group input,
 body.dark-mode .form-group select {
-    background: var(--color-bg-secondary);
-    color: var(--color-text-primary);
+    background: var(--color-bg);
+    color: var(--color-text);
     border-color: var(--color-border);
 }
 
@@ -583,7 +588,7 @@ body.dark-mode .tx-meta-item {
 
 /* Quick Entry (v3.17.0) */
 body.dark-mode .quick-pill {
-  background: var(--color-card-bg);
+  background: var(--color-surface);
   border-color: var(--color-border);
 }
 
@@ -689,4 +694,32 @@ body.dark-mode .annual-stat {
 
 body.dark-mode .annual-yoy {
   background: var(--color-bg);
+}
+
+/* Auto-Backup & Data Safety (v3.22.0) */
+body.dark-mode .auto-backup-card {
+  background: var(--color-surface);
+}
+
+body.dark-mode .storage-health-card {
+  background: var(--color-surface);
+}
+
+body.dark-mode .toggle-knob {
+  background: #fff;
+}
+
+body.dark-mode .auto-backup-row select {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+body.dark-mode .auto-backup-actions button {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .auto-backup-actions button:hover {
+  background: var(--color-surface);
 }
