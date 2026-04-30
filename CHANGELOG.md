@@ -10,7 +10,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Optional Fields System
+- Quick Entry + Split Transactions
+
+---
+
+## [3.16.0] - 2026-04-30
+
+### Added
+- **Optional Fields System** — User-controlled optional transaction fields for power users; basic users see a clean form
+  - Six optional fields: Payment Method, Merchant/Payee, Expense Type, Person (Attached To), Reference/Receipt ID, Location
+  - Toggle each field on/off in Settings → Optional Fields; disabling hides the field but never deletes existing data
+  - Collapsible "Additional Details" section in the transaction form keeps the UI clean
+  - Autocomplete suggestions for Merchant and Person fields based on transaction history
+  - Auto-detect: on first load, fields are auto-enabled if existing transactions already have data in them
+  - Optional field metadata shown as compact chips in the transaction list view
+  - Full import/export/backup/restore support for all optional fields
+  - Full dark mode support for all new UI elements
+
+- **Smart Category Suggestions** — AI-lite category prediction from transaction notes
+  - Builds keyword → category frequency map from the last 90 days of transactions
+  - When typing notes, shows a dismissible suggestion banner: "Suggested: Household" with one-click accept
+  - Suggestions are passive — never auto-fills, only suggests when confidence ≥ 60%
+  - Keywords automatically rebuild from transaction history
+
+### Technical
+- `js/optional-fields.js` — New module: `initOptionalFields()`, `suggestCategory()`, `renderOptionalFieldsForm()`, `getOptionalFieldValues()`, `setOptionalFieldValues()`, `clearOptionalFields()`, `bindFieldAutocomplete()`, `renderFieldToggles()`, `handleFieldToggle()`, `handleNoteInput()`, `acceptCategorySuggestion()`, `dismissCategorySuggestion()`, `rebuildSmartKeywords()`
+- `js/db.js` — DB_VERSION 5→6: new `appSettings` store; `loadAppSettings()`, `saveAppSettings()` functions
+- `js/state.js` — `APP_VERSION` → `3.16.0`, `DB_VERSION` → 6; `APP_SETTINGS_STORE` constant; `DEFAULT_APP_SETTINGS`, `PAYMENT_METHODS`, `EXPENSE_TYPES` exports; `appSettings` added to state
+- `js/validation.js` — Optional field validation: payment method enum, expense type enum, max length + sanitization for merchant/attachedTo/referenceId/location
+- `js/ui.js` — `editTransaction()` populates optional fields; transaction list renders optional field metadata chips
+- `js/import-export.js` — Export/backup include optional field columns; import/restore parse and restore optional fields
+- `js/app.js` — Imports optional-fields module; `bindOptionalFieldsEvents()` for collapsible toggle, notes → suggestion, field toggles; form submit merges optional values; init calls `initOptionalFields()`, binds autocomplete, renders field toggles
+- `index.html` — Collapsible "Additional Details" section with 6 optional fields in form; category suggestion banner; Optional Fields settings card with toggle switches
+- `css/styles.css` — Optional field toggle, collapsible section, suggestion banner, field toggle switches, `.tx-meta` metadata chips
+- `css/dark-mode.css` — Dark mode overrides for optional fields, suggestion banner, toggles, metadata chips
+- `sw.js` — `js/optional-fields.js` added to `CACHE_URLS`; cache version bumped to `finchronicle-v3.16.0`
+- `manifest.json` — Version bumped to `3.16.0`
 
 ---
 

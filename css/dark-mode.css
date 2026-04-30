@@ -551,3 +551,35 @@ body.dark-mode .type-option[data-type="transfer"].active {
   background: #6366f1;
   border-color: #6366f1;
 }
+
+/* Optional Fields (v3.16.0) */
+body.dark-mode .category-suggestion {
+  background: rgba(23, 162, 184, 0.15);
+  border-color: rgba(23, 162, 184, 0.3);
+  color: #b2ebf2;
+}
+
+body.dark-mode .suggestion-dismiss {
+  color: #b2ebf2;
+}
+
+body.dark-mode .field-toggle-row {
+  background: var(--color-bg);
+}
+
+body.dark-mode .field-toggle-row:hover {
+  background: var(--color-border);
+}
+
+body.dark-mode .field-toggle-switch {
+  background: var(--color-border);
+}
+
+body.dark-mode .optional-fields-toggle {
+  color: var(--color-primary-strong);
+}
+
+body.dark-mode .tx-meta-item {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+}
