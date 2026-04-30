@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-3.13.0-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-3.21.0-blue.svg)](VERSION.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -34,25 +34,34 @@
 - ✅ **Dark Mode** - Easy on the eyes at night
 
 ### 💰 Financial Tracking
-- ✅ **Income & Expenses** - Track both transaction types
+- ✅ **Income, Expenses & Transfers** - Track all transaction types
 - ✅ **Categories** - Organize by customizable categories
-- ✅ **Multi-Currency** - Support for 20 major currencies
-- ✅ **Monthly Reports** - View income/expense summaries
-- ✅ **Category Insights** - See spending by category
-- ✅ **Export to CSV** - Backup and analyze your data
+- ✅ **Multi-Currency** - Support for 20+ major currencies
+- ✅ **Monthly Budgets** - Set limits with over-budget alerts
+- ✅ **Recurring Transactions** - Templates for regular payments
+- ✅ **Tags & Search** - Full-text search and tag-based filtering
+- ✅ **Accounts & Net Worth** - Track multiple accounts
+- ✅ **Savings Rate Dashboard** - Monitor saving habits
+- ✅ **Savings Goals** - Progress tracking with milestones
+- ✅ **Smart Spending Alerts** - AI-like pattern detection (v3.21.0)
+- ✅ **Annual Report** - Year scorecard with YoY comparison (v3.21.0)
+- ✅ **Export to CSV** - Backup, restore, and annual exports
 
 ### 🎨 User Experience
-- ✅ **Smart Type Toggle** - Mobile-friendly income/expense selection
-- ✅ **Dynamic Categories** - Categories filter based on type
+- ✅ **Quick Entry Templates** - Save & reuse common transactions
+- ✅ **Optional Fields** - Payment method, merchant, expense type
+- ✅ **Smart Category Suggestions** - Auto-suggest from notes
+- ✅ **Transfer Autocomplete** - From/to account suggestions
 - ✅ **Edit & Delete** - Manage transactions easily
-- ✅ **Month Filtering** - View specific time periods
+- ✅ **Month & Category Filtering** - View specific time periods
 - ✅ **Auto-Updates** - Get notified of new versions
 - ✅ **Modern Icons** - Professional Remix Icon font
 
 ### 🛠️ Technical Features
-- ✅ **Service Worker** - Offline caching
-- ✅ **IndexedDB** - Robust transaction data storage
-- ✅ **localStorage** - Settings persistence
+- ✅ **ES Modules** - 23 focused modules, no build step required
+- ✅ **Zero Dependencies** - No npm, no frameworks
+- ✅ **Service Worker** - Cache-first offline strategy
+- ✅ **IndexedDB** - 7 object stores for robust data
 - ✅ **Responsive Design** - Works on all screen sizes
 - ✅ **WCAG AA Compliant** - Fully accessible
 - ✅ **Version Management** - Semantic versioning with auto-update
@@ -107,39 +116,57 @@ open http://localhost:8000
 ```
 finchronicle/
 ├── index.html          # Main HTML structure
-├── app.js             # Application logic (~2650 lines)
-├── sw.js              # Service Worker for offline support
-├── manifest.json      # PWA manifest
+├── sw.js               # Service Worker (cache-first)
+├── manifest.json       # PWA manifest
+├── js/
+│   ├── app.js          # Entry point — init, event bindings, SW registration
+│   ├── state.js        # Single source of truth: state object, constants
+│   ├── db.js           # All IndexedDB operations
+│   ├── ui.js           # DOM rendering and UI state
+│   ├── validation.js   # Transaction validation
+│   ├── utils.js        # formatCurrency, formatDate, showMessage, sanitizeHTML
+│   ├── currency.js     # Currency selector modal
+│   ├── settings.js     # Dark mode, version checks, backup timestamp
+│   ├── chart.js        # CSS conic-gradient donut chart
+│   ├── recurring.js    # Recurring transaction templates
+│   ├── budget.js       # Budget limits & alerts
+│   ├── search.js       # Tags & full-text search
+│   ├── transfer.js     # Transfer transactions, account autocomplete
+│   ├── optional-fields.js  # Payment method, merchant, smart suggestions
+│   ├── quick-entry.js  # Quick entry templates
+│   ├── accounts.js     # Account CRUD & net worth dashboard
+│   ├── savings.js      # Savings rate dashboard
+│   ├── goals.js        # Savings goals with progress tracking
+│   ├── alerts.js       # Smart spending alerts (v3.21.0)
+│   ├── annual-report.js # Year scorecard & CSV export (v3.21.0)
+│   ├── faq.js          # Lazy-loaded FAQ
+│   └── import-export.js # Lazy-loaded CSV import/export
 ├── css/
-│   ├── tokens.css     # Design tokens
-│   ├── styles.css     # Main styles
-│   └── dark-mode.css  # Dark theme
-├── icons/             # PWA icons
-├── robots.txt         # SEO configuration
-├── README.md          # This file
-├── CONTRIBUTING.md    # Contribution guidelines
-├── LICENSE            # MIT License
-├── VERSION.md         # Version history and guide
-└── CHANGELOG.md       # Detailed changelog
+│   ├── tokens.css      # Design tokens (CSS custom properties)
+│   ├── styles.css      # Component styles
+│   ├── chart.css       # Chart-specific styles
+│   └── dark-mode.css   # Dark theme overrides
+├── icons/              # PWA icons
+├── scripts/            # Build & release scripts
+├── docs/               # Feature roadmap & architecture docs
+├── CHANGELOG.md        # Detailed changelog
+└── README.md           # This file
 ```
 
 ### Making Changes
 
-1. **Edit files**:
-   - `app.js` for application logic and features
-   - `index.html` for HTML structure
-   - `css/styles.css` for styling
+1. **Edit files** — logic lives in `js/` modules, UI structure in `index.html`, styling in `css/`
 2. **Update version** in three places:
    ```javascript
-   // app.js (line 2)
-   const APP_VERSION = '3.10.3';
+   // js/state.js
+   export const APP_VERSION = '3.21.0';
 
-   // sw.js (line 4)
-   const CACHE_NAME = 'finchronicle-v3.10.3';
+   // sw.js
+   const CACHE_NAME = 'finchronicle-v3.21.0';
    ```
    ```json
    // manifest.json
-   "version": "3.10.3"
+   "version": "3.21.0"
    ```
 3. **Test locally**:
    ```bash
@@ -154,10 +181,10 @@ finchronicle/
 
 Click the currency button in the toolbar and select from 20+ currencies!
 
-Or modify the default in [app.js](app.js):
+Or modify the default in [js/currency.js](js/currency.js):
 ```javascript
-// In app.js, search for getCurrency() function:
-function getCurrency() {
+// In js/currency.js, getCurrency() function:
+export function getCurrency() {
     const saved = localStorage.getItem('currency');
     return saved && currencies[saved] ? saved : 'INR'; // Change to your default
 }
@@ -166,8 +193,8 @@ function getCurrency() {
 #### Add Categories
 
 ```javascript
-// In app.js, search for categories object:
-const categories = {
+// In js/state.js, categories object:
+export const categories = {
     income: [
         'Salary',
         'Business',
@@ -232,21 +259,23 @@ const categories = {
 
 ## 🛣️ Roadmap
 
-### Recently Completed (v3.x)
-- ✅ Import from CSV / Backup & Restore
-- ✅ Budget Health Tracking
-- ✅ Month-over-month trends
-- ✅ Advanced filtering
-- ✅ Transaction validation layer
-- ✅ Enhanced export with metadata
+### Completed (v3.11–3.21)
+- ✅ Recurring transactions (v3.11)
+- ✅ Budget limits & alerts (v3.13)
+- ✅ Tags & full-text search (v3.14)
+- ✅ Transfer transactions (v3.15)
+- ✅ Optional fields system (v3.16)
+- ✅ Quick Entry templates (v3.17)
+- ✅ Accounts & Net Worth (v3.18)
+- ✅ Savings Rate Dashboard (v3.19)
+- ✅ Savings Goals (v3.20)
+- ✅ Smart Spending Alerts & Annual Report (v3.21)
 
-### Upcoming Features
-- [ ] Recurring transactions
-- [ ] Search functionality
-- [ ] Custom categories
-- [ ] Charts and graphs
-- [ ] Tag system
-- [ ] Custom date ranges
+### Upcoming
+- [ ] Auto-Backup & Data Safety (v3.22)
+- [ ] Receipt Photos (v3.23)
+- [ ] Multi-Currency Transactions (v3.24)
+- [ ] Push Notifications (v3.25)
 
 See [FEATURE-ROADMAP.md](docs/FEATURE-ROADMAP.md) for detailed roadmap.
 
@@ -356,13 +385,12 @@ If this project helped you, please consider:
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Latest Release: v3.10.3**
-- 🔒 Transaction validation layer (amounts, dates, categories)
-- 💾 Enhanced backup system with metadata
-- 📊 Month-over-month trend indicators
-- 🎯 Budget health tracking
-- ⚡ Performance optimizations
-- 🐛 Various bug fixes
+**Latest Release: v3.21.0**
+- 🔔 Smart Spending Alerts (weekly spike, unusual amount, velocity, category drift)
+- 📊 Annual Report year scorecard (YoY comparison, top expenses, CSV export)
+- 🎯 Savings Goals with circular progress & milestones (v3.20.0)
+- 💰 Savings Rate Dashboard (v3.19.0)
+- 🏦 Accounts & Net Worth tracking (v3.18.0)
 
 ---
 

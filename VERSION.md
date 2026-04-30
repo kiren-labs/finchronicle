@@ -1,10 +1,11 @@
 # Version Management Guide
 
-## Current Version: 3.4.0
+## Current Version: 3.21.0
+**Last Updated:** 2026-05-01
 
 ## How Versioning Works
 
-Finance Tracker uses **Semantic Versioning** (SemVer): `MAJOR.MINOR.PATCH`
+FinChronicle uses **Semantic Versioning** (SemVer): `MAJOR.MINOR.PATCH`
 
 - **MAJOR** (X.0.0): Breaking changes, major redesign
 - **MINOR** (0.X.0): New features, no breaking changes
@@ -26,8 +27,8 @@ The app version is always visible in the header next to the app name. This helps
 ### How It Works
 
 ```javascript
-// In index.html, update this constant when releasing:
-const APP_VERSION = '3.0.0';
+// In js/state.js:
+export const APP_VERSION = '3.21.0';
 ```
 
 When users load the app:
@@ -38,43 +39,35 @@ When users load the app:
 
 ## Release Process
 
-### Step 1: Update Version Number
-
-Edit `/offline-tracker/index.html`:
+### Step 1: Update Version Number in Three Places
 
 ```javascript
-// Change this line (around line 1046):
-const APP_VERSION = '3.1.0';  // ← Update here
+// js/state.js
+export const APP_VERSION = '3.21.0';
+
+// sw.js
+const CACHE_NAME = 'finchronicle-v3.21.0';
 ```
 
-### Step 2: Update Service Worker Cache
-
-Edit `/offline-tracker/sw.js`:
-
-```javascript
-// Change this line (line 2):
-const CACHE_NAME = 'finchronicle-v4';  // ← Increment version
+```json
+// manifest.json
+"version": "3.21.0"
 ```
+
+### Step 2: Update Service Worker Cache URLs
+
+If new JS modules were added, add them to `CACHE_URLS` array in `sw.js`.
 
 ### Step 3: Document Changes
 
-Add entry to **Changelog** section below.
+Add entry to `CHANGELOG.md`.
 
 ### Step 4: Commit and Deploy
 
 ```bash
-cd /Users/kiren.paul/Projects/kiren-labs/personal-finance
-
-# Stage changes
-git add offline-tracker/
-
-# Commit with version number
-git commit -m "Release v3.1.0: [Brief description]"
-
-# Push to GitHub Pages
+git add -A
+git commit -m "Release v3.21.0: [Brief description]"
 git push origin main
-
-# Wait 1-2 minutes for GitHub Pages to deploy
 ```
 
 ### Step 5: Verify Deployment
@@ -91,57 +84,25 @@ Mobile users will be notified automatically:
 3. Update notification appears
 4. Tap "Update Now" to reload
 
-## Changelog
+## Recent Release History
 
-### v3.0.0 (2025-01-14) 🎉
+| Version | Date | Highlights |
+|---------|------|-----------|
+| v3.21.0 | 2026-05-01 | Smart Spending Alerts (4 types), Annual Report with YoY comparison |
+| v3.20.0 | 2026-05-01 | Savings Goals with circular progress, milestones, deadlines |
+| v3.19.0 | 2026-05-01 | Savings Rate Dashboard — this-month, 3-month trend, annual projection |
+| v3.18.0 | 2026-04-30 | Accounts & Net Worth — first-class accounts, derived balances, net worth dashboard |
+| v3.17.0 | 2026-05-01 | Quick Entry Templates — one-tap pre-fill, Clone Last, template manager |
+| v3.16.0 | 2026-04-30 | Optional Fields System — 6 optional fields, smart category suggestions |
+| v3.15.0 | 2026-04-30 | Transfer Transaction Type — eliminates double-counting, audit trail, soft delete |
+| v3.14.0 | — | Tags & full-text search |
+| v3.13.0 | 2026-03-26 | Budget Limits & Alerts per category |
+| v3.12.0 | 2026-03-24 | Complete Reports suite (bar chart, weekly, heatmap, range selector) |
+| v3.11.0 | 2026-03-24 | Recurring Transactions |
+| v3.10.5 | 2026-03-20 | Category Pie Chart, WCAG AA fixes |
+| v3.10.4 | 2026-03-09 | ES Module refactoring (21 modules) |
 
-**Major Features:**
-- ✨ Multi-currency support (20 currencies)
-- 🎛️ Toggle button for Income/Expense selection
-- 📊 Dynamic category filtering based on type
-- 🔢 Version display in header
-- 🔔 Automatic update notifications
-- 🔄 Service worker update detection
-
-**Improvements:**
-- Better mobile UX with toggle buttons
-- Currency selector modal with beautiful UI
-- Dark mode support for all new features
-- Persistent currency selection
-
-**Technical:**
-- Semantic versioning implementation
-- Version check on app load
-- localStorage version tracking
-- Service worker cache v3
-
----
-
-### v2.0.0 (Previous Release)
-
-**Features:**
-- ✏️ Edit transactions
-- 🗑️ Delete transactions with confirmation
-- 🔍 Filter by category
-- 📥 Export to CSV
-- 🌙 Dark mode
-- ♿ WCAG AA accessibility compliance
-
-**Bug Fixes:**
-- Fixed color contrast issues
-- Fixed form label associations
-- Fixed service worker registration
-
----
-
-### v1.0.0 (Initial Release)
-
-**Features:**
-- 💰 Add income/expense transactions
-- 📊 Monthly summary view
-- 📱 PWA installable on mobile
-- 💾 Offline-first with localStorage
-- 🎨 Beautiful iOS-style design
+See [CHANGELOG.md](CHANGELOG.md) for full details on every release.
 
 ---
 
@@ -175,16 +136,17 @@ Example: v3.0.1 - Fix currency display bug
 
 Before releasing a new version:
 
-- [ ] Update `APP_VERSION` in index.html
-- [ ] Update `CACHE_NAME` in sw.js
+- [ ] Update `APP_VERSION` in `js/state.js`
+- [ ] Update `CACHE_NAME` in `sw.js`
+- [ ] Update `version` in `manifest.json`
+- [ ] Add new JS files to `CACHE_URLS` in `sw.js` (if any)
 - [ ] Test on desktop browser
 - [ ] Test on mobile browser
 - [ ] Test dark mode
-- [ ] Test all new features
-- [ ] Verify version displays correctly
-- [ ] Update this VERSION.md changelog
-- [ ] Commit with version tag
-- [ ] Deploy to GitHub Pages
+- [ ] Test offline mode (DevTools → Network → Offline)
+- [ ] Verify IndexedDB persistence (reload and verify data)
+- [ ] Update `CHANGELOG.md`
+- [ ] Commit and push
 - [ ] Verify deployed version
 - [ ] Test update notification on existing install
 
@@ -232,5 +194,5 @@ If users report wrong version:
 ---
 
 **Current Status**: Production Ready ✅
-**Next Release**: v3.1.0 (Planned features TBD)
-**Last Updated**: 2025-01-14
+**Next Release**: v3.22.0 — Auto-Backup & Data Safety
+**Last Updated**: 2026-05-01

@@ -660,3 +660,33 @@ body.dark-mode .goal-ring-bg {
 body.dark-mode .goal-actions button:hover {
   background: var(--color-border);
 }
+
+/* Smart Alerts (v3.21.0) */
+body.dark-mode .smart-alert-warning {
+  background: rgba(255, 204, 2, 0.1);
+  border-color: rgba(255, 204, 2, 0.3);
+  color: #ffd60a;
+}
+
+body.dark-mode .smart-alert-danger {
+  background: rgba(255, 59, 48, 0.1);
+  border-color: rgba(255, 59, 48, 0.3);
+  color: #ff6961;
+}
+
+body.dark-mode .alert-history-type {
+  background: var(--color-surface);
+}
+
+/* Annual Report (v3.21.0) */
+body.dark-mode .annual-report-content {
+  background: var(--color-surface);
+}
+
+body.dark-mode .annual-stat {
+  background: var(--color-bg);
+}
+
+body.dark-mode .annual-yoy {
+  background: var(--color-bg);
+}

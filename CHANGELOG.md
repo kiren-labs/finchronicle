@@ -10,9 +10,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Split Transactions
-- Account reconciliation
-- Account-linked expenses/income
+- v3.22.0: Auto-Backup & Data Safety (scheduled local exports, storage health monitoring, encrypted export)
+- v3.23.0: Receipt Photos (Canvas compression, IndexedDB blob storage)
+- v3.24.0: Multi-Currency Transactions (per-transaction currency + manual exchange rate)
+- v3.25.0: Push Notifications (recurring due dates, budget warnings, inactivity nudge)
+- v3.26.0: Family Expense Settlement (per-person balance from `attachedTo` tags)
+
+### Deferred (not blocked, low priority)
+- Split Transactions — rarely needed in practice; approximable with tags
+- Account reconciliation — adds complexity for minimal gain on a personal app
+- Account-linked expenses/income — `account` optional field from v3.16 covers the basic case
+
+---
+
+## [3.21.0] - 2026-05-01
+
+### Added
+- **Smart Spending Alerts** — Proactive, context-aware notifications based on rolling 90-day averages
+  - Weekly Spike: detects when category spending exceeds 40% above weekly average
+  - Unusual Amount: flags single transactions exceeding 3x category median
+  - Velocity Warning: projects if monthly budget will be exceeded at current pace
+  - Category Drift: alerts when category spending doubles vs last month
+  - Dismissible alert banners on the Summary tab
+  - Alert history in Settings (last 30 alerts)
+- **Annual Report** — Compact year scorecard in the Reports tab (no duplication of existing charts)
+  - Year selector for multi-year data
+  - Annual summary cards (total income, expenses, net, savings rate)
+  - Year-over-year comparison ("Income +12% vs last year")
+  - Top 5 largest single expenses (outlier detection)
+  - Export full year as CSV (tax-season-friendly)
+
+### Technical
+- New modules: `js/alerts.js`, `js/annual-report.js`
+- Alert state persisted in localStorage (no new IndexedDB store needed)
+- Alert checks triggered on every transaction save and on app init
 
 ---
 
