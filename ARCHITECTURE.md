@@ -746,7 +746,7 @@ Result: App fully functional offline! 🎉
 ### Update Detection & Notification
 
 ```javascript
-// In app.js (lines 2357-2413)
+// In js/app.js — Service Worker registration
 
 // Register service worker
 navigator.serviceWorker.register('sw.js')
@@ -1031,57 +1031,46 @@ function loadDarkMode() {
 
 ## 8. Code Organization Patterns
 
-### 📦 Function Organization
+### 📦 Module Architecture
 
-**app.js Structure (2495 lines):**
+The codebase is split into 21 ES modules under `js/`. Each module has a single responsibility:
 
 ```javascript
-// Lines 1-90: Configuration & Setup
-const APP_VERSION = '3.9.1';
-const DB_NAME = 'FinChronicleDB';
-let transactions = [];
-const categories = { ... };
+// js/state.js — configuration & shared state
+export const APP_VERSION = '3.21.0';
+export const DB_NAME = 'FinChronicleDB';
+export const DB_VERSION = 9;
+export const state = { transactions: [], ... };
+export const categories = { income: [...], expense: [...] };
+export const currencies = { INR: {...}, USD: {...}, ... };
+export function getDOM() { ... }  // lazy-cached DOM refs
 
-// Lines 90-280: IndexedDB Operations
-async function initDB() { ... }
-async function loadDataFromDB() { ... }
-async function saveTransactionToDB() { ... }
+// js/db.js — all IndexedDB operations
+export async function initDB() { ... }
+export async function loadDataFromDB() { ... }
+export async function saveTransactionToDB(tx) { ... }
+export async function deleteTransactionFromDB(id) { ... }
 
-// Lines 280-360: Utility Functions
-function formatCurrency() { ... }
-function formatDate() { ... }
-function getCurrency() { ... }
+// js/ui.js — all DOM rendering
+export function updateUI() { ... }           // master refresh
+export function updateSummary() { ... }
+export function updateTransactionsList() { ... }
 
-// Lines 360-550: Event Handlers
-document.getElementById('form').addEventListener('submit', ...);
-function editTransaction(id) { ... }
-function deleteTransaction(id) { ... }
+// js/validation.js — input validation
+export function validateTransaction(data) { ... }
+// Returns { valid: boolean, errors: string[], sanitized: object }
 
-// Lines 550-850: UI Update Functions
-function updateUI() { ... }
-function updateSummary() { ... }
-function updateTransactionsList() { ... }
-
-// Lines 850-920: Navigation & Tab Management
-function switchTab(tab) { ... }
-function toggleSummaryCollapse() { ... }
-
-// Lines 920-1220: Backup & FAQ (v3.9.0)
-function renderBackupStatus() { ... }
-function renderFAQ() { ... }
-
-// Lines 1230-1410: Insights (v3.8.0)
-function getMonthInsights() { ... }
-function renderMonthlyInsights() { ... }
-
-// Lines 1538-1930: Import/Export
-function exportToCSV() { ... }
-function importFromCSV() { ... }
-function parseCSV() { ... }
-
-// Lines 2340-2430: Initialization
-window.addEventListener('load', async () => { ... });
+// js/app.js — entry point
+import { state, getDOM } from './state.js';
+import { initDB, loadDataFromDB } from './db.js';
+// ... imports from all modules
+async function init() { ... }
+function bindStaticEvents() { ... }
 ```
+
+**Lazy-loaded modules** (imported dynamically to keep initial load fast):
+- `faq.js` — loaded on first Settings tab visit
+- `import-export.js` — loaded on first CSV import/export call
 
 ### Naming Conventions
 
@@ -1192,8 +1181,7 @@ function showMessage(text) {
 
 **Trade-offs:**
 - ⚠️ No automatic reactivity (manual updateUI() calls)
-- ⚠️ Larger app.js file (2495 lines in one file)
-- ⚠️ No component encapsulation (shared global scope)
+- ⚠️ No component encapsulation (shared state object)
 - ⚠️ Manual state synchronization required
 
 **When to reconsider:**
@@ -1300,30 +1288,24 @@ self.addEventListener('fetch', (event) => {
 });
 ```
 
-#### Decision 5: Single File JavaScript (app.js)
+#### Decision 5: ES Modules (Modular Architecture)
 
-**Why One File:**
-- ✅ Simple deployment (no bundling)
-- ✅ Easy to understand (no module maze)
-- ✅ No import/export complexity
-- ✅ Works directly in browser
-- ✅ Easier to debug (one source map)
+**Why ES Modules (since v3.11):**
+- ✅ Each module has a single responsibility
+- ✅ Clear dependency graph (import/export)
+- ✅ No global scope pollution
+- ✅ Easy to navigate and maintain
+- ✅ Native browser support (no bundler needed)
+- ✅ Lazy loading for non-critical modules
 
 **Trade-offs:**
-- ⚠️ Large file (2495 lines)
-- ⚠️ No code splitting
-- ⚠️ All code loads upfront
+- ⚠️ More files to manage (21 modules)
+- ⚠️ Must be served over HTTP (not file://)
+- ⚠️ All modules must be listed in SW CACHE_URLS
 
-**Acceptable because:**
-- Total size is still small (~100KB)
-- Service worker caches it
-- Only loads once per session
-- Users don't notice
-
-**When to split:**
-- If app.js exceeds 5000 lines
-- If adding i18n (separate translation files)
-- If adding charts library (separate module)
+**Previous approach (v1–v3.10):**
+- Single monolithic `app.js` (~2500 lines)
+- Refactored to modules starting in v3.11
 
 ---
 
@@ -1348,7 +1330,7 @@ self.addEventListener('fetch', (event) => {
     │
     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ 2. VALIDATION (app.js:368-405)                             │
+│ 2. VALIDATION (js/validation.js)                           │
 │    ├─ Trim amount input                                    │
 │    ├─ Parse: parseFloat("1500") → 1500                     │
 │    ├─ Check: isNaN(amount) → false ✅                       │
@@ -1442,7 +1424,7 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ DEVELOPER: Pushes v3.9.1 to GitHub (sw.js hash changes)   │
+│ DEVELOPER: Pushes v3.21.0 to GitHub (sw.js hash changes)   │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
@@ -1455,7 +1437,7 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 ┌─────────────────────────────────────────────────────────────┐
 │ SW: INSTALL Event                                          │
 │    ├─ Download new sw.js                                   │
-│    ├─ Open cache: 'finchronicle-v3.9.1'                   │
+│    ├─ Open cache: 'finchronicle-v3.21.0'                   │
 │    ├─ Cache all assets: addAll(CACHE_URLS)                │
 │    └─ SW state: INSTALLED (waiting)                        │
 └─────────────────────────────────────────────────────────────┘
@@ -1490,8 +1472,8 @@ RESULT: ✅ Transaction saved, UI updated, user notified
     ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ SW: ACTIVATE Event                                         │
-│    ├─ Get all caches: ['v3.9.0', 'v3.9.1']                │
-│    ├─ Delete old: caches.delete('finchronicle-v3.9.0')    │
+│    ├─ Get all caches: ['v3.20.0', 'v3.21.0']                │
+│    ├─ Delete old: caches.delete('finchronicle-v3.20.0')    │
 │    ├─ Claim clients: self.clients.claim()                  │
 │    └─ Post message: { type: 'SW_UPDATED', version }       │
 └─────────────────────────────────────────────────────────────┘
