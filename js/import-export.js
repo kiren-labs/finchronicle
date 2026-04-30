@@ -460,6 +460,9 @@ export function parseBackupCSV(text) {
   const attachedToIdx = headers.findIndex((h) => h === "attached to");
   const referenceIdIdx = headers.findIndex((h) => h === "reference id");
   const locationIdx = headers.findIndex((h) => h === "location");
+  const txCurrencyIdx = headers.findIndex((h) => h === "transaction currency");
+  const exchangeRateIdx = headers.findIndex((h) => h === "exchange rate");
+  const homeAmountIdx = headers.findIndex((h) => h === "home amount");
 
   const parsedTransactions = [];
   const dataRows = rows.slice(1);
@@ -543,6 +546,19 @@ export function parseBackupCSV(text) {
     if (locationIdx !== -1) {
       const val = (row[locationIdx] || "").trim();
       if (val) transaction.location = sanitizeHTML(val);
+    }
+    // Multi-currency fields (v3.24.0)
+    if (txCurrencyIdx !== -1) {
+      const val = (row[txCurrencyIdx] || "").trim();
+      if (val) transaction.transactionCurrency = val;
+    }
+    if (exchangeRateIdx !== -1) {
+      const val = parseFloat((row[exchangeRateIdx] || "").trim());
+      if (!isNaN(val) && val > 0) transaction.exchangeRate = val;
+    }
+    if (homeAmountIdx !== -1) {
+      const val = parseFloat((row[homeAmountIdx] || "").trim());
+      if (!isNaN(val) && val > 0) transaction.homeAmount = val;
     }
 
     parsedTransactions.push(transaction);
