@@ -334,7 +334,7 @@ function bindSettingsButtons() {
     },
     "Create Backup": async () => {
       const mod = await getImportExportModule();
-      mod.createBackup();
+      await mod.createBackup();
     },
     "Restore from Backup": async () => {
       const mod = await getImportExportModule();
@@ -695,6 +695,7 @@ function bindFormSubmit() {
       submitBtn.innerHTML = '<span class="btn-spinner"></span> Saving...';
 
       const type = document.getElementById("type").value;
+      const now = new Date().toISOString();
       const transaction = {
         id: state.editingId || Date.now(),
         type: type,
@@ -705,7 +706,8 @@ function bindFormSubmit() {
         tags: [...state.formTags],
         createdAt: state.editingId
           ? state.transactions.find((t) => t.id === state.editingId)?.createdAt
-          : new Date().toISOString(),
+          : now,
+        updatedAt: now,
       };
 
       // Add transfer-specific fields

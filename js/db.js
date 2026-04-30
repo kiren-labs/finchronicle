@@ -91,13 +91,40 @@ export function loadDataFromDB() {
     const request = store.getAll();
 
     request.onsuccess = () => {
-      state.transactions = request.result || [];
+      const all = request.result || [];
+      // Filter out soft-deleted records (kept in DB for audit trail)
+      state.transactions = all.filter((t) => !t.deleted);
       // Cache timestamps for fast numeric sorting
       state.transactions.forEach((t) => {
         t.dateTs = new Date(t.date).getTime();
       });
       state.transactions.sort((a, b) => b.dateTs - a.dateTs);
       resolve(state.transactions);
+    };
+
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Load ALL transactions including soft-deleted (for audit backup)
+export function loadAllTransactionsFromDB() {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+
+    const transaction = state.db.transaction([STORE_NAME], "readonly");
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      const all = request.result || [];
+      all.forEach((t) => {
+        t.dateTs = new Date(t.date).getTime();
+      });
+      all.sort((a, b) => b.dateTs - a.dateTs);
+      resolve(all);
     };
 
     request.onerror = () => reject(request.error);
@@ -121,7 +148,7 @@ export function saveTransactionToDB(transaction) {
   });
 }
 
-// Delete transaction from IndexedDB
+// Soft-delete transaction (preserves record for audit trail)
 export function deleteTransactionFromDB(id) {
   return new Promise((resolve, reject) => {
     if (!state.db) {
@@ -131,10 +158,22 @@ export function deleteTransactionFromDB(id) {
 
     const tx = state.db.transaction([STORE_NAME], "readwrite");
     const store = tx.objectStore(STORE_NAME);
-    const request = store.delete(id);
+    const getRequest = store.get(id);
 
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
+    getRequest.onsuccess = () => {
+      const record = getRequest.result;
+      if (!record) {
+        resolve();
+        return;
+      }
+      record.deleted = true;
+      record.deletedAt = new Date().toISOString();
+      const putRequest = store.put(record);
+      putRequest.onsuccess = () => resolve();
+      putRequest.onerror = () => reject(putRequest.error);
+    };
+
+    getRequest.onerror = () => reject(getRequest.error);
   });
 }
 
