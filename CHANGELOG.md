@@ -10,15 +10,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- v3.23.0: Receipt Photos (Canvas compression, IndexedDB blob storage)
-- v3.24.0: Multi-Currency Transactions (per-transaction currency + manual exchange rate)
 - v3.25.0: Push Notifications (recurring due dates, budget warnings, inactivity nudge)
-- v3.26.0: Family Expense Settlement (per-person balance from `attachedTo` tags)
 
 ### Deferred (not blocked, low priority)
 - Split Transactions — rarely needed in practice; approximable with tags
 - Account reconciliation — adds complexity for minimal gain on a personal app
 - Account-linked expenses/income — `account` optional field from v3.16 covers the basic case
+
+---
+
+## [3.26.0] - 2026-05-15
+
+### Added
+- **Multi-Currency Transactions (v3.24.0)** — Per-transaction foreign currency support
+  - Toggle "Transaction Currency" in optional fields to enter amounts in any supported currency
+  - Manual exchange rate input with automatic home-amount conversion
+  - Exchange rate history saved locally for quick reuse
+  - Dual-amount display in transaction list (foreign + home currency)
+  - Full CSV/backup export and import/restore support for multi-currency fields
+
+- **Family Expense Settlement (v3.26.0)** — Per-person balance from `attachedTo` tags
+  - Settlement dashboard showing who owes whom based on `attachedTo` field usage
+  - Per-person breakdown: amount spent on them, amount they contributed, net balance
+  - Monthly period navigation to review settlement by month
+  - One-click copy of settlement summary to clipboard
+  - Auto-hidden when no `attachedTo` data exists
 
 ---
 
