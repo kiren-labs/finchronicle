@@ -1,6 +1,7 @@
 # Version Management Guide
 
 ## Current Version: 3.21.0
+**Last Updated:** 2026-05-01
 
 ## How Versioning Works
 
@@ -83,57 +84,25 @@ Mobile users will be notified automatically:
 3. Update notification appears
 4. Tap "Update Now" to reload
 
-## Changelog
+## Recent Release History
 
-### v3.0.0 (2025-01-14) 🎉
+| Version | Date | Highlights |
+|---------|------|-----------|
+| v3.21.0 | 2026-05-01 | Smart Spending Alerts (4 types), Annual Report with YoY comparison |
+| v3.20.0 | 2026-05-01 | Savings Goals with circular progress, milestones, deadlines |
+| v3.19.0 | 2026-05-01 | Savings Rate Dashboard — this-month, 3-month trend, annual projection |
+| v3.18.0 | 2026-04-30 | Accounts & Net Worth — first-class accounts, derived balances, net worth dashboard |
+| v3.17.0 | 2026-05-01 | Quick Entry Templates — one-tap pre-fill, Clone Last, template manager |
+| v3.16.0 | 2026-04-30 | Optional Fields System — 6 optional fields, smart category suggestions |
+| v3.15.0 | 2026-04-30 | Transfer Transaction Type — eliminates double-counting, audit trail, soft delete |
+| v3.14.0 | — | Tags & full-text search |
+| v3.13.0 | 2026-03-26 | Budget Limits & Alerts per category |
+| v3.12.0 | 2026-03-24 | Complete Reports suite (bar chart, weekly, heatmap, range selector) |
+| v3.11.0 | 2026-03-24 | Recurring Transactions |
+| v3.10.5 | 2026-03-20 | Category Pie Chart, WCAG AA fixes |
+| v3.10.4 | 2026-03-09 | ES Module refactoring (21 modules) |
 
-**Major Features:**
-- ✨ Multi-currency support (20 currencies)
-- 🎛️ Toggle button for Income/Expense selection
-- 📊 Dynamic category filtering based on type
-- 🔢 Version display in header
-- 🔔 Automatic update notifications
-- 🔄 Service worker update detection
-
-**Improvements:**
-- Better mobile UX with toggle buttons
-- Currency selector modal with beautiful UI
-- Dark mode support for all new features
-- Persistent currency selection
-
-**Technical:**
-- Semantic versioning implementation
-- Version check on app load
-- localStorage version tracking
-- Service worker cache v3
-
----
-
-### v2.0.0 (Previous Release)
-
-**Features:**
-- ✏️ Edit transactions
-- 🗑️ Delete transactions with confirmation
-- 🔍 Filter by category
-- 📥 Export to CSV
-- 🌙 Dark mode
-- ♿ WCAG AA accessibility compliance
-
-**Bug Fixes:**
-- Fixed color contrast issues
-- Fixed form label associations
-- Fixed service worker registration
-
----
-
-### v1.0.0 (Initial Release)
-
-**Features:**
-- 💰 Add income/expense transactions
-- 📊 Monthly summary view
-- 📱 PWA installable on mobile
-- 💾 Offline-first with localStorage
-- 🎨 Beautiful iOS-style design
+See [CHANGELOG.md](CHANGELOG.md) for full details on every release.
 
 ---
 
@@ -225,5 +194,5 @@ If users report wrong version:
 ---
 
 **Current Status**: Production Ready ✅
-**Next Release**: v3.1.0 (Planned features TBD)
-**Last Updated**: 2025-01-14
+**Next Release**: v3.22.0 — Auto-Backup & Data Safety
+**Last Updated**: 2026-05-01

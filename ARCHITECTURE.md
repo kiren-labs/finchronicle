@@ -1,7 +1,7 @@
 # FinChronicle - Complete Architecture Guide
 
 **Version:** 3.21.0
-**Last Updated:** 2026-04-01
+**Last Updated:** 2026-05-01
 **For:** Developers who want to understand or contribute to the codebase
 
 ---
@@ -1033,7 +1033,7 @@ function loadDarkMode() {
 
 ### 📦 Module Architecture
 
-The codebase is split into 21 ES modules under `js/`. Each module has a single responsibility:
+The codebase is split into 23 ES modules under `js/`. Each module has a single responsibility:
 
 ```javascript
 // js/state.js — configuration & shared state
@@ -1539,10 +1539,9 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 - Users must manually export/import
 - Dependent on user discipline
 
-⚠️ **Large Single File**
-- app.js is 2495 lines
-- All code loads upfront
-- Not code-split
+⚠️ **Manual State Management**
+- Must call updateUI() after every state change — no automatic reactivity
+- Risk of UI drift if a state mutation is made without a subsequent updateUI() call
 
 ⚠️ **Limited Scalability**
 - Works well up to ~10K transactions
@@ -1559,7 +1558,7 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 1. Read `README.md` - Overview and setup
 2. Read `CHANGELOG.md` - Feature evolution
 3. Open `index.html` - See UI structure
-4. Open `app.js` - Read initialization (line 2340)
+4. Open `js/app.js` - Read `init()` and `bindStaticEvents()` (entry point)
 5. Follow one user action end-to-end (e.g., add transaction)
 
 **Key Functions to Understand:**

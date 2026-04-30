@@ -58,7 +58,7 @@
 - ✅ **Modern Icons** - Professional Remix Icon font
 
 ### 🛠️ Technical Features
-- ✅ **ES Modules** - 21 focused modules, no build step required
+- ✅ **ES Modules** - 23 focused modules, no build step required
 - ✅ **Zero Dependencies** - No npm, no frameworks
 - ✅ **Service Worker** - Cache-first offline strategy
 - ✅ **IndexedDB** - 7 object stores for robust data

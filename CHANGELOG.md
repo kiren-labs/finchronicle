@@ -10,9 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Split Transactions
-- Account reconciliation
-- Account-linked expenses/income
+- v3.22.0: Auto-Backup & Data Safety (scheduled local exports, storage health monitoring, encrypted export)
+- v3.23.0: Receipt Photos (Canvas compression, IndexedDB blob storage)
+- v3.24.0: Multi-Currency Transactions (per-transaction currency + manual exchange rate)
+- v3.25.0: Push Notifications (recurring due dates, budget warnings, inactivity nudge)
+- v3.26.0: Family Expense Settlement (per-person balance from `attachedTo` tags)
+
+### Deferred (not blocked, low priority)
+- Split Transactions — rarely needed in practice; approximable with tags
+- Account reconciliation — adds complexity for minimal gain on a personal app
+- Account-linked expenses/income — `account` optional field from v3.16 covers the basic case
 
 ---
 
