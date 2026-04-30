@@ -507,6 +507,74 @@
                             <div class="tag-suggestions" id="tagSuggestions" hidden></div>
                         </div>
 
+                        <!-- Optional Fields (v3.16.0) -->
+                        <div id="optionalFieldsSection" class="optional-fields-section" hidden>
+                            <button type="button" class="optional-fields-toggle" id="optionalFieldsToggle"
+                                aria-expanded="false" aria-controls="optionalFieldsContainer">
+                                <i class="ri-add-circle-line"></i> Additional Details
+                                <i class="ri-arrow-down-s-line optional-fields-chevron"></i>
+                            </button>
+                            <div id="optionalFieldsContainer" class="optional-fields-container" hidden>
+                                <div class="form-group" data-optional-field="paymentMethod" hidden>
+                                    <label for="paymentMethod">Payment Method</label>
+                                    <select id="paymentMethod">
+                                        <option value="">Select method</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="credit-card">Credit Card</option>
+                                        <option value="debit-card">Debit Card</option>
+                                        <option value="bank-transfer">Bank Transfer</option>
+                                        <option value="wallet">Wallet</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" data-optional-field="merchant" hidden>
+                                    <label for="merchant">Merchant / Payee</label>
+                                    <div class="account-input-wrapper">
+                                        <i class="ri-store-2-line account-input-icon"></i>
+                                        <input type="text" id="merchant" placeholder="e.g. Starbucks"
+                                            autocomplete="off" maxlength="100" aria-label="Merchant name">
+                                        <div class="account-suggestions" id="merchantSuggestions" hidden></div>
+                                    </div>
+                                </div>
+                                <div class="form-group" data-optional-field="expenseType" hidden>
+                                    <label for="expenseType">Expense Type</label>
+                                    <select id="expenseType">
+                                        <option value="">Select type</option>
+                                        <option value="personal">Personal</option>
+                                        <option value="business">Business</option>
+                                        <option value="reimbursable">Reimbursable</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" data-optional-field="attachedTo" hidden>
+                                    <label for="attachedTo">Person</label>
+                                    <div class="account-input-wrapper">
+                                        <i class="ri-user-line account-input-icon"></i>
+                                        <input type="text" id="attachedTo" placeholder="e.g. Kevin"
+                                            autocomplete="off" maxlength="50" aria-label="Person name">
+                                        <div class="account-suggestions" id="attachedToSuggestions" hidden></div>
+                                    </div>
+                                </div>
+                                <div class="form-group" data-optional-field="referenceId" hidden>
+                                    <label for="referenceId">Reference / Receipt ID</label>
+                                    <input type="text" id="referenceId" placeholder="e.g. INV-2026-001"
+                                        maxlength="100" aria-label="Reference ID">
+                                </div>
+                                <div class="form-group" data-optional-field="location" hidden>
+                                    <label for="locationField">Location</label>
+                                    <input type="text" id="locationField" placeholder="e.g. Bangkok"
+                                        maxlength="100" aria-label="Location">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Category suggestion (v3.16.0) -->
+                        <div id="categorySuggestion" class="category-suggestion" hidden>
+                            <i class="ri-lightbulb-line"></i>
+                            <span>Suggested: <strong class="suggestion-category"></strong></span>
+                            <button type="button" class="suggestion-accept" aria-label="Accept suggestion">Use</button>
+                            <button type="button" class="suggestion-dismiss" aria-label="Dismiss suggestion"><i class="ri-close-line"></i></button>
+                        </div>
+
                         <input type="hidden" id="editId" value="">
 
                         <button type="submit" class="primary" id="submitBtn">Save Transaction</button>
@@ -642,6 +710,19 @@
                             <i class="ri-feedback-line"></i>
                             <span>Send Feedback</span>
                         </button>
+                    </div>
+                </div>
+
+                <!-- Optional Fields (v3.16.0) -->
+                <div id="optionalFieldsSettingsContainer">
+                    <div class="card">
+                        <div class="optional-fields-settings-header" data-toggle-optional-settings
+                            aria-expanded="false" role="button" tabindex="0">
+                            <h3>Optional Fields</h3>
+                            <i class="ri-arrow-down-s-line optional-settings-chevron"></i>
+                        </div>
+                        <p class="optional-fields-desc">Enable additional fields on the transaction form. Disabling a field hides it but never deletes existing data.</p>
+                        <div id="optionalFieldToggles" class="optional-field-toggles"></div>
                     </div>
                 </div>
 

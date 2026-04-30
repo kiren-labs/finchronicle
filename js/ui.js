@@ -9,6 +9,7 @@ import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
 import { renderBudgetAlerts, renderBudgetList, deleteBudget } from "./budget.js";
+import { setOptionalFieldValues } from "./optional-fields.js";
 import {
   renderCategoryPieChart,
   buildCategoryData,
@@ -696,6 +697,9 @@ export function editTransaction(id) {
     document.getElementById("fromAccount").value = transaction.fromAccount || "";
     document.getElementById("toAccount").value = transaction.toAccount || "";
   }
+
+  // Populate optional fields (v3.16.0)
+  setOptionalFieldValues(transaction);
 
   document.getElementById("formTitle").textContent = "Edit Transaction";
   document.getElementById("submitBtn").textContent = "Update Transaction";
