@@ -178,6 +178,12 @@ export function renderOptionalFieldsForm() {
     const fieldName = el.dataset.optionalField;
     el.hidden = !enabled[fieldName];
   });
+
+  // Hide Tags management section in Settings when tags are disabled
+  const tagMgmt = document.getElementById("tagManagementContainer");
+  if (tagMgmt) {
+    tagMgmt.hidden = !enabled.tags;
+  }
 }
 
 /**
