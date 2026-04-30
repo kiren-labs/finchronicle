@@ -41,6 +41,9 @@ export function exportToCSV() {
     "Attached To",
     "Reference ID",
     "Location",
+    "Transaction Currency",
+    "Exchange Rate",
+    "Home Amount",
   ];
   const rows = state.transactions.map((t) => [
     t.date,
@@ -57,6 +60,9 @@ export function exportToCSV() {
     t.attachedTo || "",
     t.referenceId || "",
     t.location || "",
+    t.transactionCurrency || "",
+    t.exchangeRate || "",
+    t.homeAmount || "",
   ]);
 
   let csv = headers.join(",") + "\n";
@@ -144,6 +150,9 @@ export async function createBackup() {
     "Attached To",
     "Reference ID",
     "Location",
+    "Transaction Currency",
+    "Exchange Rate",
+    "Home Amount",
   ];
   const rows = allRecords.map((t) => [
     t.date,
@@ -164,6 +173,9 @@ export async function createBackup() {
     t.attachedTo || "",
     t.referenceId || "",
     t.location || "",
+    t.transactionCurrency || "",
+    t.exchangeRate || "",
+    t.homeAmount || "",
   ]);
 
   let csv = metadata + "\n";
@@ -249,6 +261,9 @@ export async function importFromCSV(text) {
   const attachedToIndex = findHeaderIndex(headers, /^attached to$/i);
   const referenceIdIndex = findHeaderIndex(headers, /^reference id$/i);
   const locationIndex = findHeaderIndex(headers, /^location$/i);
+  const txCurrencyIndex = findHeaderIndex(headers, /^transaction currency$/i);
+  const exchangeRateIndex = findHeaderIndex(headers, /^exchange rate$/i);
+  const homeAmountIndex = findHeaderIndex(headers, /^home amount$/i);
 
   if (dateIndex === -1 || categoryIndex === -1 || amountIndex === -1) {
     throw new Error("Missing required headers");
@@ -322,6 +337,19 @@ export async function importFromCSV(text) {
     if (locationIndex !== -1) {
       const val = (row[locationIndex] || "").trim();
       if (val) txn.location = sanitizeHTML(val);
+    }
+    // Multi-currency fields (v3.24.0)
+    if (txCurrencyIndex !== -1) {
+      const val = (row[txCurrencyIndex] || "").trim();
+      if (val) txn.transactionCurrency = val;
+    }
+    if (exchangeRateIndex !== -1) {
+      const val = parseFloat((row[exchangeRateIndex] || "").trim());
+      if (!isNaN(val) && val > 0) txn.exchangeRate = val;
+    }
+    if (homeAmountIndex !== -1) {
+      const val = parseFloat((row[homeAmountIndex] || "").trim());
+      if (!isNaN(val) && val > 0) txn.homeAmount = val;
     }
 
     newTransactions.push(txn);
@@ -432,6 +460,9 @@ export function parseBackupCSV(text) {
   const attachedToIdx = headers.findIndex((h) => h === "attached to");
   const referenceIdIdx = headers.findIndex((h) => h === "reference id");
   const locationIdx = headers.findIndex((h) => h === "location");
+  const txCurrencyIdx = headers.findIndex((h) => h === "transaction currency");
+  const exchangeRateIdx = headers.findIndex((h) => h === "exchange rate");
+  const homeAmountIdx = headers.findIndex((h) => h === "home amount");
 
   const parsedTransactions = [];
   const dataRows = rows.slice(1);
@@ -515,6 +546,19 @@ export function parseBackupCSV(text) {
     if (locationIdx !== -1) {
       const val = (row[locationIdx] || "").trim();
       if (val) transaction.location = sanitizeHTML(val);
+    }
+    // Multi-currency fields (v3.24.0)
+    if (txCurrencyIdx !== -1) {
+      const val = (row[txCurrencyIdx] || "").trim();
+      if (val) transaction.transactionCurrency = val;
+    }
+    if (exchangeRateIdx !== -1) {
+      const val = parseFloat((row[exchangeRateIdx] || "").trim());
+      if (!isNaN(val) && val > 0) transaction.exchangeRate = val;
+    }
+    if (homeAmountIdx !== -1) {
+      const val = parseFloat((row[homeAmountIdx] || "").trim());
+      if (!isNaN(val) && val > 0) transaction.homeAmount = val;
     }
 
     parsedTransactions.push(transaction);

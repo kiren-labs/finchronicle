@@ -418,6 +418,11 @@
                     </div>
                     <div id="goalsDashboard"></div>
                 </div>
+                <!-- Family Settlement (v3.26.0) -->
+                <div class="card settlement-card" id="settlementSection" hidden>
+                    <h3><i class="ri-group-line"></i> Family Settlement</h3>
+                    <div id="settlementDashboard"></div>
+                </div>
             </div>
             <!-- Goal Form Modal (v3.20.0) -->
             <div id="goalFormModal" class="modal">
@@ -633,6 +638,9 @@
                                     <label for="locationField">Location</label>
                                     <input type="text" id="locationField" placeholder="e.g. Bangkok"
                                         maxlength="100" aria-label="Location">
+                                </div>
+                                <div class="form-group" data-optional-field="transactionCurrency" hidden>
+                                    <!-- Multi-currency fields rendered by js/multi-currency.js -->
                                 </div>
                             </div>
                         </div>
