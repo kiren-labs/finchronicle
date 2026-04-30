@@ -645,3 +645,21 @@ export async function confirmRestore() {
     }
   }
 }
+
+// ---- Process Restored Data from Encrypted Backup (v3.22.0) ----
+
+export function processRestoredData(data) {
+  // Convert JSON backup format to the internal restore format
+  const backupData = {
+    valid: true,
+    metadata: {
+      "Backup Date": data.exportDate || new Date().toISOString(),
+      "App Version": data.version || "unknown",
+      Currency: data.currency || "INR",
+    },
+    transactions: data.transactions || [],
+  };
+
+  state.pendingRestoreData = backupData;
+  showRestorePreview(backupData);
+}

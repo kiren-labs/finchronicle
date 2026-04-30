@@ -5131,3 +5131,213 @@ button.primary.loading .btn-spinner {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* ============================================================
+   Auto-Backup & Data Safety (v3.22.0)
+   ============================================================ */
+
+.auto-backup-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.auto-backup-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.auto-backup-header i {
+  font-size: 18px;
+  color: var(--accent);
+}
+
+.auto-backup-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: var(--space-md);
+}
+
+.auto-backup-toggle-row label {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.toggle-switch {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--border-color);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toggle-switch.active {
+  background: var(--accent);
+}
+
+.toggle-knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-switch.active .toggle-knob {
+  transform: translateX(20px);
+}
+
+.auto-backup-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.auto-backup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+}
+
+.auto-backup-row label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.auto-backup-row select {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.auto-backup-info {
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.auto-backup-info i {
+  color: var(--accent);
+}
+
+.auto-backup-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.auto-backup-actions button {
+  flex: 1;
+  min-width: 120px;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.auto-backup-actions button:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent);
+}
+
+.auto-backup-actions button i {
+  font-size: 15px;
+}
+
+/* Storage Health Widget */
+
+.storage-health-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.storage-health-card h4 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-md);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.storage-health-card h4 i {
+  color: var(--accent);
+}
+
+.storage-meter {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg-secondary);
+  overflow: hidden;
+  margin-bottom: var(--space-sm);
+}
+
+.storage-meter-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.storage-meter-fill.storage-good {
+  background: var(--success);
+}
+
+.storage-meter-fill.storage-warning {
+  background: var(--warning);
+}
+
+.storage-meter-fill.storage-danger {
+  background: var(--danger);
+}
+
+.storage-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.storage-details {
+  margin-top: var(--space-sm);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
