@@ -609,3 +609,28 @@ body.dark-mode .template-edit-input {
   color: var(--color-text);
   border-color: var(--color-primary);
 }
+
+/* Accounts & Net Worth (v3.18.0) */
+body.dark-mode .net-worth-main {
+  border-color: var(--color-border);
+}
+
+body.dark-mode .net-worth-item {
+  background: var(--color-bg);
+}
+
+body.dark-mode .account-balances-list {
+  border-color: var(--color-border);
+}
+
+body.dark-mode .account-balance-row {
+  border-color: var(--color-border);
+}
+
+body.dark-mode .account-item {
+  border-color: var(--color-border);
+}
+
+body.dark-mode .account-item-icon {
+  background: var(--color-border);
+}
