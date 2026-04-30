@@ -1157,6 +1157,51 @@ function bindAutoBackupEvents() {
 }
 
 // ============================================================================
+// Multi-Currency Events (v3.24.0)
+// ============================================================================
+
+function bindMultiCurrencyEvents() {
+  // The multi-currency fields are rendered inside the optional fields container.
+  // renderMultiCurrencyFields() handles its own event binding.
+  // We just need to re-render when optional field toggles change.
+  document.getElementById("optionalFieldToggles").addEventListener("change", (e) => {
+    const checkbox = e.target.closest("[data-field-toggle]");
+    if (checkbox && checkbox.dataset.fieldToggle === "transactionCurrency") {
+      setTimeout(() => renderMultiCurrencyFields(), 50);
+    }
+  });
+}
+
+// ============================================================================
+// Settlement Events (v3.26.0)
+// ============================================================================
+
+function bindSettlementEvents() {
+  const container = document.getElementById("settlementDashboard");
+  if (!container) return;
+
+  container.addEventListener("click", async (e) => {
+    // Period navigation
+    const periodBtn = e.target.closest("[data-settlement-period]");
+    if (periodBtn) {
+      navigateSettlementPeriod(periodBtn.dataset.settlementPeriod);
+      return;
+    }
+
+    // Copy summary
+    const exportBtn = e.target.closest("[data-settlement-export]");
+    if (exportBtn) {
+      const ok = await copySettlementSummary();
+      if (ok) {
+        const { showMessage: msg } = await import("./utils.js");
+        msg("Summary copied to clipboard!");
+      }
+      return;
+    }
+  });
+}
+
+// ============================================================================
 // Form Submission Handler
 // ============================================================================
 
@@ -1219,6 +1264,10 @@ function bindFormSubmit() {
       const optionalValues = getOptionalFieldValues();
       Object.assign(transaction, optionalValues);
 
+      // Add multi-currency fields (v3.24.0)
+      const multiCurrencyValues = getMultiCurrencyFormData();
+      Object.assign(transaction, multiCurrencyValues);
+
       const validation = validateTransaction(transaction);
 
       if (!validation.valid) {
@@ -1272,6 +1321,7 @@ function bindFormSubmit() {
           renderFormTagChips();
           clearTransferFields();
           clearOptionalFields();
+          clearMultiCurrencyFields();
           dismissCategorySuggestion();
           selectType("expense");
           document.getElementById("formTitle").textContent = "Add Transaction";
@@ -1289,6 +1339,7 @@ function bindFormSubmit() {
           renderSavingsDashboard();
           renderAlertBanners(runAlertChecks(sanitizedTransaction));
           renderAnnualReport();
+          renderSettlementDashboard();
         }, 800);
       } catch (err) {
         console.error("Save failed:", err);
@@ -1486,6 +1537,8 @@ async function init() {
     renderAnnualReport();
     renderAlertBanners(runAlertChecks());
     renderAlertHistory();
+    renderMultiCurrencyFields();
+    renderSettlementDashboard();
     await initAutoBackup();
     checkAppVersion();
     loadDarkMode();

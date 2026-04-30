@@ -10,7 +10,7 @@ import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
 import { renderBudgetAlerts, renderBudgetList, deleteBudget } from "./budget.js";
 import { setOptionalFieldValues, clearOptionalFields } from "./optional-fields.js";
-import { formatMultiCurrency } from "./multi-currency.js";
+import { formatMultiCurrency, setMultiCurrencyFormData } from "./multi-currency.js";
 import {
   renderCategoryPieChart,
   buildCategoryData,
@@ -713,6 +713,9 @@ export function editTransaction(id) {
 
   // Populate optional fields (v3.16.0)
   setOptionalFieldValues(transaction);
+
+  // Populate multi-currency fields (v3.24.0)
+  setMultiCurrencyFormData(transaction);
 
   document.getElementById("formTitle").textContent = "Edit Transaction";
   document.getElementById("submitBtn").textContent = "Update Transaction";
