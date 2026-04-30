@@ -3,12 +3,12 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "3.14.0";
+export const APP_VERSION = "3.15.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
 export const DB_NAME = "FinChronicleDB";
-export const DB_VERSION = 4;
+export const DB_VERSION = 5;
 export const STORE_NAME = "transactions";
 export const RECURRING_STORE = "recurringTemplates";
 export const BUDGETS_STORE = "budgets";
@@ -39,6 +39,7 @@ export const state = {
   searchQuery: "",
   searchTags: [],
   formTags: [],
+  savedAccounts: ["Cash", "Savings", "Credit Card", "Bank Account"],
 };
 
 // Category definitions
@@ -53,6 +54,7 @@ export const categories = {
     "Bonus",
     "Other Income",
   ],
+  transfer: ["Transfer"],
   expense: [
     "Food",
     "Groceries",

@@ -18,6 +18,8 @@
     --color-danger-strong: #C41E1A;
     --color-danger-deep: #c5221f;
 
+    --color-transfer: #6366f1;
+
     --color-text: #1d1d1f;
     --color-text-muted: #6e6e73;
     --color-text-subtle: #6e6e73;
@@ -67,6 +69,7 @@
     --gradient-update: linear-gradient(135deg, #34c759 0%, #30b34d 100%);
     --gradient-income: linear-gradient(180deg, #34c759 0%, #28a745 100%);
     --gradient-expense: linear-gradient(180deg, #ff3b30 0%, #d93025 100%);
+    --gradient-transfer: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
 
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);

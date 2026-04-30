@@ -240,6 +240,7 @@ export function buildIncomeExpenseData(transactions, range) {
   // Aggregate by month
   const byMonth = {};
   transactions.forEach((t) => {
+    if (t.type === "transfer") return; // exclude transfers from income/expense chart
     const m = t.date.slice(0, 7);
     if (!byMonth[m]) byMonth[m] = { income: 0, expense: 0 };
     if (t.type === "income") byMonth[m].income += t.amount;

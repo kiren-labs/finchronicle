@@ -14,7 +14,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [3.14.0] - 2026-03-26
+## [3.15.0] - 2026-04-30
+
+### Added
+- **Transfer Transaction Type** — Third transaction type for money moving between accounts (credit card payments, savings deposits, debt repayments) without inflating expense/income totals
+  - Transfer option in the type selector with swap icon
+  - From Account / To Account fields with autocomplete from past entries and saved accounts
+  - Category automatically set to "Transfer" and disabled for transfer transactions
+  - Transfers excluded from all expense/income summaries, budget calculations, and category charts
+  - Transfer rows visually distinct in the transaction list with neutral indigo color and swap icon
+  - Account suggestions merge default accounts, saved accounts, and transaction history
+  - Full dark mode support for all transfer UI elements
+
+- **Audit Trail Improvements** — Data quality enhancements for reliable record-keeping
+  - `updatedAt` timestamp on every transaction save/edit
+  - Soft delete: deleted transactions are marked `deleted: true` with `deletedAt` timestamp instead of being removed
+  - Soft-deleted records automatically filtered from all views, charts, and calculations
+  - Backup exports include all records (including soft-deleted) with `Deleted` and `DeletedAt` columns for complete audit trail
+  - Restore from backup preserves soft-delete state
+
+### Technical
+- `js/transfer.js` — New module: `getAccountSuggestions()`, `toggleTransferFields()`, `bindAccountAutocomplete()`, `getTransferFormData()`, `setTransferFormData()`, `clearTransferFields()`
+- `js/db.js` — DB_VERSION 4→5 (schema-only upgrade); `deleteTransactionFromDB()` changed to soft delete; new `loadAllTransactionsFromDB()` for audit backup; `loadDataFromDB()` filters `deleted: true` records
+- `js/state.js` — `APP_VERSION` → `3.15.0`, `DB_VERSION` → 5; `transfer: ["Transfer"]` added to categories; `savedAccounts` added to state
+- `js/validation.js` — `transfer` added as valid type; auto-sets `category = "Transfer"`; requires both `fromAccount` and `toAccount`; prevents same source/destination
+- `js/ui.js` — `updateSummary()` excludes transfers; transfer row rendering with swap icon and "from → to" label; `selectType()` toggles transfer fields; `updateCategoryOptions()` disables category for transfers; `groupByMonth()` tracks transfers separately; `groupByCategory()` handles transfer color
+- `js/chart.js` — `buildIncomeExpenseData()` skips transfers in bar chart aggregation
+- `js/import-export.js` — Export/backup include `From Account`, `To Account`, `UpdatedAt` columns; backup includes `Deleted`, `DeletedAt` columns and exports all records; import/restore handle transfer type and audit fields; `createBackup()` now async
+- `js/app.js` — Imports transfer module; form submit builds transfer fields and `updatedAt`; binds account autocomplete; `createBackup()` awaited
+- `index.html` — Transfer type button, `#transferFields` container with `fromAccount`/`toAccount` inputs and autocomplete dropdowns, category group wrapper
+- `css/tokens.css` — `--color-transfer` and `--gradient-transfer` custom properties
+- `css/styles.css` — Transfer toggle, `.transfer-fields`, `.account-input-wrapper`, `.account-suggestions`, `.disabled-field`, transfer transaction row styles with `::before` gradient bar
+- `css/dark-mode.css` — Dark overrides for transfer fields, account suggestions, transfer icons, transfer type toggle
+- `sw.js` — `js/transfer.js` added to `CACHE_URLS`; cache version bumped to `finchronicle-v3.15.0`
 
 ### Added
 - **Tags & Search** — Organise and find transactions fast with free-form tags and a real-time search bar

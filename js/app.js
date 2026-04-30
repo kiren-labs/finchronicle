@@ -76,6 +76,12 @@ import {
   deleteBudget,
   renderBudgetModal,
 } from "./budget.js";
+import {
+  toggleTransferFields,
+  bindAccountAutocomplete,
+  getTransferFormData,
+  clearTransferFields,
+} from "./transfer.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -328,7 +334,7 @@ function bindSettingsButtons() {
     },
     "Create Backup": async () => {
       const mod = await getImportExportModule();
-      mod.createBackup();
+      await mod.createBackup();
     },
     "Restore from Backup": async () => {
       const mod = await getImportExportModule();
@@ -688,9 +694,11 @@ function bindFormSubmit() {
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="btn-spinner"></span> Saving...';
 
+      const type = document.getElementById("type").value;
+      const now = new Date().toISOString();
       const transaction = {
         id: state.editingId || Date.now(),
-        type: document.getElementById("type").value,
+        type: type,
         amount: amount,
         category: document.getElementById("category").value,
         date: document.getElementById("date").value,
@@ -698,8 +706,17 @@ function bindFormSubmit() {
         tags: [...state.formTags],
         createdAt: state.editingId
           ? state.transactions.find((t) => t.id === state.editingId)?.createdAt
-          : new Date().toISOString(),
+          : now,
+        updatedAt: now,
       };
+
+      // Add transfer-specific fields
+      if (type === "transfer") {
+        const transferData = getTransferFormData();
+        transaction.fromAccount = transferData.fromAccount;
+        transaction.toAccount = transferData.toAccount;
+        transaction.transferNote = transferData.transferNote;
+      }
 
       const validation = validateTransaction(transaction);
 
@@ -752,6 +769,8 @@ function bindFormSubmit() {
           state.editingId = null;
           state.formTags = [];
           renderFormTagChips();
+          clearTransferFields();
+          selectType("expense");
           document.getElementById("formTitle").textContent = "Add Transaction";
           document.getElementById("cancelEditBtn").style.display = "none";
 
@@ -931,6 +950,10 @@ async function init() {
     bindStaticEvents();
     bindDelegatedEvents();
     bindFormSubmit();
+
+    // Bind account autocomplete for transfer fields
+    bindAccountAutocomplete("fromAccount", "fromAccountSuggestions");
+    bindAccountAutocomplete("toAccount", "toAccountSuggestions");
 
     // First render
     updateUI();

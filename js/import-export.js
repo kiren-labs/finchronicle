@@ -13,7 +13,7 @@ import {
   formatDate,
 } from "./utils.js";
 import { getCurrency, formatCurrency } from "./currency.js";
-import { loadDataFromDB, bulkSaveTransactionsToDB } from "./db.js";
+import { loadDataFromDB, bulkSaveTransactionsToDB, loadAllTransactionsFromDB } from "./db.js";
 import { updateBackupTimestamp } from "./settings.js";
 import { updateUI } from "./ui.js";
 
@@ -32,6 +32,9 @@ export function exportToCSV() {
     "Category",
     `Amount (${currencyCode})`,
     "Notes",
+    "From Account",
+    "To Account",
+    "UpdatedAt",
   ];
   const rows = state.transactions.map((t) => [
     t.date,
@@ -39,6 +42,9 @@ export function exportToCSV() {
     t.category,
     t.amount,
     t.notes || "",
+    t.fromAccount || "",
+    t.toAccount || "",
+    t.updatedAt || "",
   ]);
 
   let csv = headers.join(",") + "\n";
@@ -90,7 +96,7 @@ function generateBackupMetadata() {
 
 // ---- Create Full Backup ----
 
-export function createBackup() {
+export async function createBackup() {
   if (state.transactions.length === 0) {
     showMessage("No transactions to backup!");
     return;
@@ -98,6 +104,14 @@ export function createBackup() {
 
   const currencyCode = getCurrency();
   const metadata = generateBackupMetadata();
+
+  // Load ALL records including soft-deleted for complete audit backup
+  let allRecords;
+  try {
+    allRecords = await loadAllTransactionsFromDB();
+  } catch {
+    allRecords = state.transactions;
+  }
 
   const headers = [
     "Date",
@@ -107,8 +121,13 @@ export function createBackup() {
     "Notes",
     "ID",
     "CreatedAt",
+    "UpdatedAt",
+    "From Account",
+    "To Account",
+    "Deleted",
+    "DeletedAt",
   ];
-  const rows = state.transactions.map((t) => [
+  const rows = allRecords.map((t) => [
     t.date,
     t.type,
     t.category,
@@ -116,6 +135,11 @@ export function createBackup() {
     t.notes || "",
     t.id,
     t.createdAt,
+    t.updatedAt || "",
+    t.fromAccount || "",
+    t.toAccount || "",
+    t.deleted ? "yes" : "",
+    t.deletedAt || "",
   ]);
 
   let csv = metadata + "\n";
@@ -193,6 +217,8 @@ export async function importFromCSV(text) {
   const notesIndex =
     findHeaderIndex(headers, /^notes$/i) ??
     findHeaderIndex(headers, /^description$/i);
+  const fromAccountIndex = findHeaderIndex(headers, /^from account$/i);
+  const toAccountIndex = findHeaderIndex(headers, /^to account$/i);
 
   if (dateIndex === -1 || categoryIndex === -1 || amountIndex === -1) {
     throw new Error("Missing required headers");
@@ -219,10 +245,10 @@ export async function importFromCSV(text) {
       typeIndex !== -1
         ? (row[typeIndex] || "").trim().toLowerCase()
         : "expense";
-    const type = rawType === "income" ? "income" : "expense";
+    const type = rawType === "income" ? "income" : rawType === "transfer" ? "transfer" : "expense";
     const baseCategory = (row[categoryIndex] || "").trim();
     const rawNotes = notesIndex !== -1 ? (row[notesIndex] || "").trim() : "";
-    const category = normalizeImportedCategory(baseCategory, rawNotes, type);
+    const category = type === "transfer" ? "Transfer" : normalizeImportedCategory(baseCategory, rawNotes, type);
 
     const txn = {
       id: startId + i,
@@ -232,7 +258,15 @@ export async function importFromCSV(text) {
       date: normalizedDateVal,
       notes: sanitizeHTML(rawNotes),
       createdAt: nowIso,
+      updatedAt: nowIso,
     };
+
+    // Add transfer fields if present
+    if (type === "transfer") {
+      txn.fromAccount = fromAccountIndex !== -1 ? sanitizeHTML((row[fromAccountIndex] || "").trim()) : null;
+      txn.toAccount = toAccountIndex !== -1 ? sanitizeHTML((row[toAccountIndex] || "").trim()) : null;
+      txn.transferNote = null;
+    }
 
     newTransactions.push(txn);
     state.transactions.unshift(txn);
@@ -331,6 +365,11 @@ export function parseBackupCSV(text) {
   const notesIndex = headers.findIndex((h) => h === "notes");
   const idIndex = headers.findIndex((h) => h === "id");
   const createdAtIndex = headers.findIndex((h) => h === "createdat");
+  const fromAccountIndex = headers.findIndex((h) => h === "from account");
+  const toAccountIndex = headers.findIndex((h) => h === "to account");
+  const updatedAtIndex = headers.findIndex((h) => h === "updatedat");
+  const deletedIndex = headers.findIndex((h) => h === "deleted");
+  const deletedAtIndex = headers.findIndex((h) => h === "deletedat");
 
   const parsedTransactions = [];
   const dataRows = rows.slice(1);
@@ -366,9 +405,27 @@ export function parseBackupCSV(text) {
         createdAtIndex !== -1 && row[createdAtIndex]
           ? row[createdAtIndex].trim()
           : new Date().toISOString(),
+      updatedAt:
+        updatedAtIndex !== -1 && row[updatedAtIndex]
+          ? row[updatedAtIndex].trim()
+          : null,
     };
 
-    if (transaction.type !== "income" && transaction.type !== "expense") {
+    // Restore soft-delete state from backup
+    if (deletedIndex !== -1 && (row[deletedIndex] || "").trim().toLowerCase() === "yes") {
+      transaction.deleted = true;
+      transaction.deletedAt =
+        deletedAtIndex !== -1 && row[deletedAtIndex]
+          ? row[deletedAtIndex].trim()
+          : new Date().toISOString();
+    }
+
+    if (transaction.type === "transfer") {
+      transaction.category = "Transfer";
+      transaction.fromAccount = fromAccountIndex !== -1 ? sanitizeHTML((row[fromAccountIndex] || "").trim()) : null;
+      transaction.toAccount = toAccountIndex !== -1 ? sanitizeHTML((row[toAccountIndex] || "").trim()) : null;
+      transaction.transferNote = null;
+    } else if (transaction.type !== "income" && transaction.type !== "expense") {
       transaction.type = "expense";
     }
 

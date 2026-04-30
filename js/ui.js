@@ -66,7 +66,7 @@ export function updateSummary() {
 
   const { income, expense, count } = state.transactions.reduce(
     (acc, t) => {
-      if (t.date.startsWith(currentMonth)) {
+      if (t.date.startsWith(currentMonth) && t.type !== "transfer") {
         acc.count++;
         if (t.type === "income") acc.income += t.amount;
         else acc.expense += t.amount;
@@ -190,21 +190,40 @@ export function updateTransactionsList() {
 
   paginatedTransactions.forEach((t) => {
     const isIncome = t.type === "income";
-    const amountClass = isIncome ? "positive" : "negative";
-    const sign = isIncome ? "+" : "-";
+    const isTransfer = t.type === "transfer";
+    const amountClass = isTransfer ? "transfer" : isIncome ? "positive" : "negative";
+    const sign = isTransfer ? "" : isIncome ? "+" : "-";
 
     const item = document.createElement("div");
     item.className = `transaction-item ${t.type}`;
 
-    item.innerHTML = `
-            <div class="transaction-icon ${t.type}">
-                <i class="ri-arrow-${isIncome ? "up" : "down"}-circle-fill"></i>
-            </div>
-            <div class="transaction-details">
-                <div class="transaction-category">
+    // Build icon based on type
+    let iconHtml;
+    if (isTransfer) {
+      iconHtml = `<div class="transaction-icon transfer"><i class="ri-swap-line"></i></div>`;
+    } else {
+      iconHtml = `<div class="transaction-icon ${t.type}"><i class="ri-arrow-${isIncome ? "up" : "down"}-circle-fill"></i></div>`;
+    }
+
+    // Build category/account display
+    let categoryHtml;
+    if (isTransfer) {
+      categoryHtml = `<div class="transaction-category transfer-label">
+                    <span class="transfer-from">${sanitizeHTML(t.fromAccount || "—")}</span>
+                    <i class="ri-arrow-right-line transfer-arrow-icon"></i>
+                    <span class="transfer-to">${sanitizeHTML(t.toAccount || "—")}</span>
+                </div>`;
+    } else {
+      categoryHtml = `<div class="transaction-category">
                     ${sanitizeHTML(t.category)}
                     ${t.recurringId ? '<span class="recurring-badge" title="Auto-generated recurring transaction"><i class="ri-repeat-line"></i></span>' : ""}
-                </div>
+                </div>`;
+    }
+
+    item.innerHTML = `
+            ${iconHtml}
+            <div class="transaction-details">
+                ${categoryHtml}
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
                 <div class="transaction-date">${formatDate(t.date)}</div>
                 ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
@@ -427,11 +446,13 @@ function groupByMonth() {
   state.transactions.forEach((t) => {
     const month = t.date.slice(0, 7);
     if (!grouped[month]) {
-      grouped[month] = { income: 0, expense: 0, count: 0 };
+      grouped[month] = { income: 0, expense: 0, transfer: 0, count: 0 };
     }
     grouped[month].count++;
     if (t.type === "income") {
       grouped[month].income += t.amount;
+    } else if (t.type === "transfer") {
+      grouped[month].transfer += t.amount;
     } else {
       grouped[month].expense += t.amount;
     }
@@ -489,7 +510,7 @@ function groupByCategory() {
   return cats
     .map((category) => {
       const data = grouped[category];
-      const colorClass = data.type === "income" ? "positive" : "negative";
+      const colorClass = data.type === "transfer" ? "transfer" : data.type === "income" ? "positive" : "negative";
 
       return `
             <div class="card">
@@ -670,6 +691,12 @@ export function editTransaction(id) {
   updateCategoryOptions(transaction.type);
   document.getElementById("category").value = transaction.category;
 
+  // Populate transfer fields if editing a transfer
+  if (transaction.type === "transfer") {
+    document.getElementById("fromAccount").value = transaction.fromAccount || "";
+    document.getElementById("toAccount").value = transaction.toAccount || "";
+  }
+
   document.getElementById("formTitle").textContent = "Edit Transaction";
   document.getElementById("submitBtn").textContent = "Update Transaction";
   document.getElementById("cancelEditBtn").style.display = "block";
@@ -684,6 +711,12 @@ export function cancelEdit() {
   document.getElementById("date").valueAsDate = new Date();
   state.formTags = [];
   renderFormTagChips();
+
+  // Clear transfer fields
+  const fromInput = document.getElementById("fromAccount");
+  const toInput = document.getElementById("toAccount");
+  if (fromInput) fromInput.value = "";
+  if (toInput) toInput.value = "";
 
   selectType("expense");
 
@@ -750,6 +783,12 @@ export function selectType(type) {
     btn.setAttribute("aria-checked", isActive);
   });
 
+  // Show/hide transfer fields
+  const transferFields = document.getElementById("transferFields");
+  if (transferFields) {
+    transferFields.hidden = type !== "transfer";
+  }
+
   updateCategoryOptions(type);
 }
 
@@ -760,6 +799,16 @@ export function updateCategoryOptions(type) {
   categorySelect.innerHTML = cats
     .map((cat) => `<option value="${cat}">${cat}</option>`)
     .join("");
+
+  // For transfers, auto-select "Transfer" and disable
+  if (type === "transfer") {
+    categorySelect.value = "Transfer";
+    categorySelect.disabled = true;
+    document.getElementById("categoryGroup").classList.add("disabled-field");
+  } else {
+    categorySelect.disabled = false;
+    document.getElementById("categoryGroup").classList.remove("disabled-field");
+  }
 
   if (state.editingId) {
     const currentCategory = categorySelect.dataset.editValue;

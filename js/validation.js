@@ -10,7 +10,7 @@ export function validateTransaction(transaction) {
   const errors = [];
 
   // 1. Type validation
-  if (!["income", "expense"].includes(transaction.type)) {
+  if (!["income", "expense", "transfer"].includes(transaction.type)) {
     errors.push({ field: "type", message: "Invalid transaction type" });
   }
 
@@ -26,13 +26,37 @@ export function validateTransaction(transaction) {
   }
 
   // 3. Category validation
-  const validCategories =
-    transaction.type === "income" ? categories.income : categories.expense;
-  if (!validCategories.includes(transaction.category)) {
-    errors.push({
-      field: "category",
-      message: "Invalid category for transaction type",
-    });
+  if (transaction.type === "transfer") {
+    // Transfers always have category "Transfer" — auto-set it
+    transaction.category = "Transfer";
+  } else {
+    const validCategories =
+      transaction.type === "income" ? categories.income : categories.expense;
+    if (!validCategories.includes(transaction.category)) {
+      errors.push({
+        field: "category",
+        message: "Invalid category for transaction type",
+      });
+    }
+  }
+
+  // 3b. Transfer account validation (require both)
+  if (transaction.type === "transfer") {
+    const from = (transaction.fromAccount || "").trim();
+    const to = (transaction.toAccount || "").trim();
+    if (!from) {
+      errors.push({ field: "fromAccount", message: "Source account is required for transfers" });
+    }
+    if (!to) {
+      errors.push({ field: "toAccount", message: "Destination account is required for transfers" });
+    }
+    if (from && to && from.toLowerCase() === to.toLowerCase()) {
+      errors.push({ field: "toAccount", message: "Source and destination cannot be the same" });
+    }
+    // Sanitize account names
+    transaction.fromAccount = sanitizeHTML(from);
+    transaction.toAccount = sanitizeHTML(to);
+    transaction.transferNote = sanitizeHTML((transaction.transferNote || "").trim());
   }
 
   // 4. Date validation
