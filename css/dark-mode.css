@@ -634,3 +634,16 @@ body.dark-mode .account-item {
 body.dark-mode .account-item-icon {
   background: var(--color-border);
 }
+
+/* Savings Rate Dashboard (v3.19.0) */
+body.dark-mode .savings-widget {
+  background: var(--color-surface);
+}
+
+body.dark-mode .savings-widget.highlight {
+  background: rgba(10, 132, 255, 0.1);
+}
+
+body.dark-mode .savings-trend {
+  background: var(--color-surface);
+}

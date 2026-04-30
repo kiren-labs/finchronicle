@@ -872,6 +872,7 @@ function bindAccountEvents() {
           await removeAccount(id);
           renderAccountManager();
           renderNetWorthDashboard();
+          renderSavingsDashboard();
         }
       }
     });
@@ -1008,7 +1009,7 @@ function bindFormSubmit() {
           updateUI();
           renderQuickBar();
           renderNetWorthDashboard();
-        }, 800);
+          renderSavingsDashboard(); }, 800);
       } catch (err) {
         console.error("Save failed:", err);
         submitBtn.classList.remove("loading");
@@ -1198,8 +1199,7 @@ async function init() {
     renderTemplateManager();
     renderAccountManager();
     renderNetWorthDashboard();
-
-    // Post-render setup
+    renderSavingsDashboard();
     checkAppVersion();
     loadDarkMode();
     loadSummaryState();
