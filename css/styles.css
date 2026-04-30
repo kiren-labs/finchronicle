@@ -2936,7 +2936,7 @@ button.primary.loading .btn-spinner {
     font-size: var(--font-lg);
     font-weight: 600;
     margin: 0;
-    color: var(--color-text-primary);
+    color: var(--color-text);
 }
 
 .budget-status {
@@ -2973,8 +2973,8 @@ button.primary.loading .btn-spinner {
     height: 32px;
     border: none;
     border-radius: var(--radius-md);
-    background: var(--color-bg-secondary);
-    color: var(--color-text-secondary);
+    background: var(--color-bg);
+    color: var(--color-text-muted);
     cursor: pointer;
     transition: all var(--transition-fast);
 }
@@ -3040,7 +3040,7 @@ button.primary.loading .btn-spinner {
     justify-content: space-between;
     font-size: var(--font-sm);
     font-weight: 500;
-    color: var(--color-text-secondary);
+    color: var(--color-text-muted);
 }
 
 .budget-details {
@@ -3068,7 +3068,7 @@ button.primary.loading .btn-spinner {
 .detail-value {
     font-size: var(--font-md);
     font-weight: 600;
-    color: var(--color-text-primary);
+    color: var(--color-text);
 }
 
 .budget-list {
@@ -3110,7 +3110,7 @@ button.primary.loading .btn-spinner {
     flex: 1;
     font-size: var(--font-md);
     font-weight: 500;
-    color: var(--color-text-primary);
+    color: var(--color-text);
     line-height: 1.5;
 }
 
@@ -3137,7 +3137,7 @@ button.primary.loading .btn-spinner {
 .form-group label {
     font-size: var(--font-md);
     font-weight: 500;
-    color: var(--color-text-primary);
+    color: var(--color-text);
 }
 
 .form-group input,
@@ -3146,8 +3146,8 @@ button.primary.loading .btn-spinner {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: var(--font-md);
-    background: var(--color-bg-primary);
-    color: var(--color-text-primary);
+    background: var(--color-surface);
+    color: var(--color-text);
     transition: all var(--transition-fast);
 }
 
@@ -3155,7 +3155,7 @@ button.primary.loading .btn-spinner {
 .form-group select:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px var(--color-primary-bg-light);
+    box-shadow: 0 0 0 3px var(--color-primary-bg);
 }
 
 .form-group small {
@@ -3805,15 +3805,15 @@ button.primary.loading .btn-spinner {
 
 /* Transfer fields container */
 .transfer-fields {
-  background: var(--bg-secondary, #f8f9fa);
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: var(--radius-md, 12px);
-  padding: 16px;
-  margin-bottom: 16px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
 }
 
 .transfer-fields .form-group {
-  margin-bottom: 12px;
+  margin-bottom: var(--space-md);
 }
 
 .transfer-fields .form-group:last-child {
@@ -3822,9 +3822,9 @@ button.primary.loading .btn-spinner {
 
 .transfer-arrow {
   text-align: center;
-  color: var(--text-secondary, #6b7280);
+  color: var(--color-text-muted);
   font-size: 18px;
-  margin: 4px 0;
+  margin: var(--space-2xs) 0;
 }
 
 /* Account input wrapper */
@@ -3834,11 +3834,11 @@ button.primary.loading .btn-spinner {
 
 .account-input-icon {
   position: absolute;
-  left: 12px;
+  left: var(--space-md);
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text-secondary, #6b7280);
-  font-size: 16px;
+  color: var(--color-text-muted);
+  font-size: var(--icon-sm);
   pointer-events: none;
 }
 
@@ -3852,25 +3852,25 @@ button.primary.loading .btn-spinner {
   top: 100%;
   left: 0;
   right: 0;
-  background: var(--bg-primary, #fff);
-  border: 1px solid var(--border-color, #e5e7eb);
-  border-radius: var(--radius-sm, 8px);
-  box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.1));
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
   z-index: 100;
   max-height: 160px;
   overflow-y: auto;
-  margin-top: 4px;
+  margin-top: var(--space-2xs);
 }
 
 .account-suggestion {
-  padding: 10px 12px;
+  padding: var(--space-md);
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.15s;
+  font-size: var(--font-md);
+  transition: background var(--transition-fast);
 }
 
 .account-suggestion:hover {
-  background: var(--bg-secondary, #f3f4f6);
+  background: var(--color-bg);
 }
 
 /* Disabled category field for transfers */
@@ -3902,8 +3902,8 @@ button.primary.loading .btn-spinner {
 .transfer-label {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 14px;
+  gap: var(--space-xs);
+  font-size: var(--font-md);
 }
 
 .transfer-from,
@@ -3912,8 +3912,8 @@ button.primary.loading .btn-spinner {
 }
 
 .transfer-arrow-icon {
-  color: var(--text-secondary, #6b7280);
-  font-size: 12px;
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
 }
 
 /* ============================================================================
