@@ -48,6 +48,7 @@ export const state = {
 export const DEFAULT_APP_SETTINGS = {
   id: "config",
   enabledFields: {
+    tags: true,
     paymentMethod: false,
     merchant: false,
     expenseType: false,

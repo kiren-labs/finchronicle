@@ -3896,6 +3896,10 @@ button.primary.loading .btn-spinner {
   padding-top: var(--space-sm);
 }
 
+.optional-fields-container .form-group[hidden] {
+  display: none;
+}
+
 /* Category suggestion banner */
 .category-suggestion {
   display: flex;

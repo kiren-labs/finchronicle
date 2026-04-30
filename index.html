@@ -496,17 +496,6 @@
                             <input type="text" id="notes" placeholder="Add a note...">
                         </div>
 
-                        <div class="form-group">
-                            <label>Tags (Optional)</label>
-                            <div id="tagPickerRow" class="tag-picker-row" hidden></div>
-                            <div class="tag-input-wrapper" id="tagInputWrapper">
-                                <div class="tag-chips" id="formTagChips"></div>
-                                <input type="text" id="tagInput" class="tag-input"
-                                    placeholder="Add tag…" autocomplete="off" aria-label="Add tags">
-                            </div>
-                            <div class="tag-suggestions" id="tagSuggestions" hidden></div>
-                        </div>
-
                         <!-- Optional Fields (v3.16.0) -->
                         <div id="optionalFieldsSection" class="optional-fields-section" hidden>
                             <button type="button" class="optional-fields-toggle" id="optionalFieldsToggle"
@@ -515,6 +504,16 @@
                                 <i class="ri-arrow-down-s-line optional-fields-chevron"></i>
                             </button>
                             <div id="optionalFieldsContainer" class="optional-fields-container" hidden>
+                                <div class="form-group" data-optional-field="tags" hidden>
+                                    <label>Tags</label>
+                                    <div id="tagPickerRow" class="tag-picker-row" hidden></div>
+                                    <div class="tag-input-wrapper" id="tagInputWrapper">
+                                        <div class="tag-chips" id="formTagChips"></div>
+                                        <input type="text" id="tagInput" class="tag-input"
+                                            placeholder="Add tag…" autocomplete="off" aria-label="Add tags">
+                                    </div>
+                                    <div class="tag-suggestions" id="tagSuggestions" hidden></div>
+                                </div>
                                 <div class="form-group" data-optional-field="paymentMethod" hidden>
                                     <label for="paymentMethod">Payment Method</label>
                                     <select id="paymentMethod">

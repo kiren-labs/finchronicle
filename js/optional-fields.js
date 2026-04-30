@@ -15,6 +15,7 @@ import { sanitizeHTML } from "./utils.js";
  */
 export async function initOptionalFields() {
   let settings = await loadAppSettings();
+  const isFirstRun = !settings;
 
   if (!settings) {
     settings = JSON.parse(JSON.stringify(DEFAULT_APP_SETTINGS));
@@ -27,15 +28,20 @@ export async function initOptionalFields() {
     }
   }
 
-  // Auto-detect: if any transaction already has data in a field, enable it
-  const fieldKeys = Object.keys(settings.enabledFields);
-  for (const key of fieldKeys) {
-    if (!settings.enabledFields[key]) {
-      const hasData = state.transactions.some(
-        (t) => t[key] !== undefined && t[key] !== null && t[key] !== ""
-      );
-      if (hasData) {
-        settings.enabledFields[key] = true;
+  // Auto-detect only on first run — never override user choices after that
+  if (isFirstRun) {
+    const fieldKeys = Object.keys(settings.enabledFields);
+    for (const key of fieldKeys) {
+      if (!settings.enabledFields[key]) {
+        const hasData = state.transactions.some((t) => {
+          const val = t[key];
+          if (val === undefined || val === null || val === "") return false;
+          if (Array.isArray(val)) return val.length > 0;
+          return true;
+        });
+        if (hasData) {
+          settings.enabledFields[key] = true;
+        }
       }
     }
   }
@@ -318,6 +324,7 @@ export function bindFieldAutocomplete(inputId, suggestionsId, fieldName) {
 // ============================================================================
 
 const FIELD_LABELS = {
+  tags: "Tags",
   paymentMethod: "Payment Method",
   merchant: "Merchant / Payee",
   expenseType: "Expense Type",

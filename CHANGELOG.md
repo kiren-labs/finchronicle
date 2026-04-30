@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Autocomplete suggestions for Merchant and Person fields based on transaction history
   - Auto-detect: on first load, fields are auto-enabled if existing transactions already have data in them
   - Optional field metadata shown as compact chips in the transaction list view
+  - Tags field is now part of the optional fields system — disable it in Settings for an even cleaner form
   - Full import/export/backup/restore support for all optional fields
   - Full dark mode support for all new UI elements
 
