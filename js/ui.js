@@ -221,11 +221,20 @@ export function updateTransactionsList() {
                 </div>`;
     }
 
+    // Build optional field metadata line (v3.16.0)
+    const metaParts = [];
+    if (t.paymentMethod) metaParts.push(`<span class="tx-meta-item"><i class="ri-bank-card-line"></i> ${sanitizeHTML(t.paymentMethod)}</span>`);
+    if (t.merchant) metaParts.push(`<span class="tx-meta-item"><i class="ri-store-2-line"></i> ${sanitizeHTML(t.merchant)}</span>`);
+    if (t.attachedTo) metaParts.push(`<span class="tx-meta-item"><i class="ri-user-line"></i> ${sanitizeHTML(t.attachedTo)}</span>`);
+    if (t.location) metaParts.push(`<span class="tx-meta-item"><i class="ri-map-pin-line"></i> ${sanitizeHTML(t.location)}</span>`);
+    const metaHtml = metaParts.length > 0 ? `<div class="tx-meta">${metaParts.join("")}</div>` : "";
+
     item.innerHTML = `
             ${iconHtml}
             <div class="transaction-details">
                 ${categoryHtml}
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
+                ${metaHtml}
                 <div class="transaction-date">${formatDate(t.date)}</div>
                 ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
             </div>

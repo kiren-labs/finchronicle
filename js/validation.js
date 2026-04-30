@@ -2,7 +2,7 @@
 // Transaction Validation Layer (v3.10.2)
 // ============================================================================
 
-import { categories } from "./state.js";
+import { categories, PAYMENT_METHODS, EXPENSE_TYPES } from "./state.js";
 import { sanitizeHTML } from "./utils.js";
 
 // Validate transaction before saving
@@ -105,6 +105,43 @@ export function validateTransaction(transaction) {
     errors.push({ field: "tags", message: "Maximum 15 tags allowed" });
   }
   transaction.tags = sanitizedTags.slice(0, 15);
+
+  // 7. Optional fields validation (v3.16.0) — all nullable, validate only if present
+  if (transaction.paymentMethod && !PAYMENT_METHODS.includes(transaction.paymentMethod)) {
+    errors.push({ field: "paymentMethod", message: "Invalid payment method" });
+  }
+
+  if (transaction.expenseType && !EXPENSE_TYPES.includes(transaction.expenseType)) {
+    errors.push({ field: "expenseType", message: "Invalid expense type" });
+  }
+
+  if (transaction.merchant) {
+    if (transaction.merchant.length > 100) {
+      errors.push({ field: "merchant", message: "Merchant name too long (max 100)" });
+    }
+    transaction.merchant = sanitizeHTML(transaction.merchant);
+  }
+
+  if (transaction.attachedTo) {
+    if (transaction.attachedTo.length > 50) {
+      errors.push({ field: "attachedTo", message: "Person name too long (max 50)" });
+    }
+    transaction.attachedTo = sanitizeHTML(transaction.attachedTo);
+  }
+
+  if (transaction.referenceId) {
+    if (transaction.referenceId.length > 100) {
+      errors.push({ field: "referenceId", message: "Reference ID too long (max 100)" });
+    }
+    transaction.referenceId = sanitizeHTML(transaction.referenceId);
+  }
+
+  if (transaction.location) {
+    if (transaction.location.length > 100) {
+      errors.push({ field: "location", message: "Location too long (max 100)" });
+    }
+    transaction.location = sanitizeHTML(transaction.location);
+  }
 
   return {
     valid: errors.length === 0,
