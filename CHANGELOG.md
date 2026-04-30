@@ -26,14 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Category Drift: alerts when category spending doubles vs last month
   - Dismissible alert banners on the Summary tab
   - Alert history in Settings (last 30 alerts)
-- **Annual Report** — Year-in-review section in the Reports tab
-  - 12-month income vs expense bar chart
+- **Annual Report** — Compact year scorecard in the Reports tab (no duplication of existing charts)
   - Year selector for multi-year data
   - Annual summary cards (total income, expenses, net, savings rate)
-  - Category breakdown with horizontal bar visualization
-  - Year-over-year comparison
-  - Top 5 largest expenses
-  - Export annual data as CSV
+  - Year-over-year comparison ("Income +12% vs last year")
+  - Top 5 largest single expenses (outlier detection)
+  - Export full year as CSV (tax-season-friendly)
 
 ### Technical
 - New modules: `js/alerts.js`, `js/annual-report.js`

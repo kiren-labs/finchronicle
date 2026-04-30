@@ -22,7 +22,7 @@
 | v3.18.0 | Accounts & Net Worth | ✅ DONE | Core only — see skipped items |
 | v3.19.0 | Savings Rate Dashboard | ✅ DONE | All 5 widgets |
 | v3.20.0 | Savings Goals | ✅ DONE | Full feature with milestones |
-| v3.21.0 | Annual Report & Smart Alerts | NOT STARTED | |
+| v3.21.0 | Annual Report & Smart Alerts | ✅ DONE | Trimmed — no redundant charts |
 | v3.22.0 | Auto-Backup & Data Safety | NOT STARTED | |
 | v3.23.0 | Receipt Photos | NOT STARTED | |
 | v3.24.0 | Multi-Currency Transactions | NOT STARTED | |
@@ -149,6 +149,8 @@ These do not warrant their own version but should be done as part of the specifi
 | `js/accounts.js` | Account CRUD, net worth dashboard | v3.18.0 |
 | `js/savings.js` | Savings rate calculation & dashboard | v3.19.0 |
 | `js/goals.js` | Savings goals with progress tracking | v3.20.0 |
+| `js/alerts.js` | Smart spending alerts (4 types, rolling averages) | v3.21.0 |
+| `js/annual-report.js` | Year scorecard, YoY comparison, CSV export | v3.21.0 |
 | `js/faq.js` | Lazy-loaded | v3.10 |
 | `js/import-export.js` | Lazy-loaded | v3.10 |
 
@@ -467,49 +469,44 @@ Track progress toward savings targets (vacation fund, emergency fund, etc.).
 
 ---
 
-### v3.21.0 — Annual Report & Smart Spending Alerts
+### v3.21.0 — Annual Report & Smart Spending Alerts ✅ DONE
 **Priority: MEDIUM**
-**New file: `js/alerts.js`, `js/annual-report.js`**
+**New files: `js/alerts.js`, `js/annual-report.js`**
 
-Two complementary features: a year-end financial summary and proactive spending intelligence beyond static budget limits.
+Two complementary features: a compact year-end scorecard and proactive spending intelligence beyond static budget limits.
 
-**Annual Report:**
-- 12-month income vs expense bar chart (uses existing chart infrastructure)
-- Annual category breakdown pie chart — "Where did the money go this year?"
-- Year-over-year comparison: "You spent 15% less on Transport vs last year"
-- Savings rate for the year
-- Top 5 largest expenses
-- Export annual report as CSV (tax-season-friendly category export)
-- Accessible from Summary tab with a "Year in Review" card when viewing December or via Settings
+**Annual Report (trimmed — avoids duplicating existing Reports/Groups charts):**
+- Year selector pills for multi-year data
+- 4 summary stat cards: Total Income, Total Expenses, Net, Savings Rate
+- Year-over-year comparison: "↑ Income +12%, ↓ Expenses −8%"
+- Top 5 largest single expenses (outlier detection)
+- Export full year as CSV (tax-season-friendly)
+- ~~12-month bar chart~~ (removed — already in Reports → 1Y view)
+- ~~Category breakdown~~ (removed — already in Reports pie chart + Groups tab)
 
 **Smart Spending Alerts:**
-Proactive, context-aware notifications based on rolling averages — not just binary over/under limits.
+Proactive, context-aware notifications based on rolling 90-day averages — not just binary over/under limits.
 
-```javascript
-// Alert types
-const ALERT_TYPES = {
-  WEEKLY_SPIKE: 'weekly_spike',       // "You spent 40% more on Food this week vs your 3-month weekly average"
-  UNUSUAL_AMOUNT: 'unusual_amount',   // "₹25,000 in Transport — 8x your average, is this right?"
-  VELOCITY_WARNING: 'velocity',       // "At this pace, you'll exceed monthly budget by the 20th"
-  CATEGORY_DRIFT: 'category_drift'    // "Utilities/Bills spending doubled this month"
-};
-```
+4 alert types:
+- **Weekly Spike** — category spending 40%+ above rolling weekly average
+- **Unusual Amount** — single transaction ≥3x category median
+- **Velocity Warning** — pace-based projection exceeds monthly budget
+- **Category Drift** — category spending doubled vs last month
 
 **Alert logic (all local computation, no network):**
-- Calculate rolling 90-day weekly averages per category
-- On each transaction save, compare this week's total to the rolling average
-- Velocity: `(spending_so_far / days_elapsed) * days_in_month > budget_limit`
-- Unusual amount: single transaction > 3x category's median transaction amount
-- Alerts shown as dismissible banners at the top of the Summary tab
-- Alert history in Settings (last 30 alerts kept)
+- Rolling 90-day weekly averages per category
+- Alert checks triggered on every transaction save + on app init
+- Deduplicated: one alert per type+category per day
+- Dismissible banners on Summary tab (max 5 shown)
+- Alert history in Settings (last 30 kept)
+- State persisted in localStorage (no new IndexedDB store)
 
-**Files:**
+**Files modified:**
 - `js/alerts.js` (new) — alert detection engine, rolling average calculation, alert history
-- `js/annual-report.js` (new) — yearly aggregation, YoY comparison, report generation
-- `js/ui.js` — alert banner rendering, annual report section
-- `js/app.js` — import both modules, trigger alert checks on transaction save
-- `index.html` — alert banner container, annual report view, alert history in Settings
-- `css/styles.css` — alert banners (info/warning/danger), annual report charts
+- `js/annual-report.js` (new) — yearly aggregation, YoY comparison, CSV export
+- `js/app.js` — imports, init, event bindings, trigger on save
+- `index.html` — alert banner container, annual report in Reports tab, alert history in Settings
+- `css/styles.css` — alert banners (warning/danger), annual report layout
 - `css/dark-mode.css` — dark mode support
 - `sw.js` — add new files to `CACHE_URLS`, bump cache version
 
@@ -741,7 +738,7 @@ The `attachedTo` field (from v3.16 Optional Fields) tags who a transaction is fo
 | v3.18.0 | Accounts & Net Worth (core) | 8 | HIGH | ✅ Done (Apr 2026) |
 | v3.19.0 | Savings Rate Dashboard | 8 | MEDIUM | ✅ Done (May 2026) |
 | v3.20.0 | Savings Goals | 9 | MEDIUM | ✅ Done (May 2026) |
-| v3.21.0 | Annual Report & Smart Spending Alerts | 9 | MEDIUM | Next up |
+| v3.21.0 | Annual Report & Smart Spending Alerts | 9 | MEDIUM | ✅ Done (May 2026) |
 | v3.22.0 | Auto-Backup & Data Safety | 9 | HIGH (Critical) | Planned |
 | v3.23.0 | Receipt Photos | 10 | LOW | Planned |
 | v3.24.0 | Multi-Currency Transactions | 10 | LOW | Planned |

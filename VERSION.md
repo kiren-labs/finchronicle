@@ -1,10 +1,10 @@
 # Version Management Guide
 
-## Current Version: 3.4.0
+## Current Version: 3.21.0
 
 ## How Versioning Works
 
-Finance Tracker uses **Semantic Versioning** (SemVer): `MAJOR.MINOR.PATCH`
+FinChronicle uses **Semantic Versioning** (SemVer): `MAJOR.MINOR.PATCH`
 
 - **MAJOR** (X.0.0): Breaking changes, major redesign
 - **MINOR** (0.X.0): New features, no breaking changes
@@ -26,8 +26,8 @@ The app version is always visible in the header next to the app name. This helps
 ### How It Works
 
 ```javascript
-// In index.html, update this constant when releasing:
-const APP_VERSION = '3.0.0';
+// In js/state.js:
+export const APP_VERSION = '3.21.0';
 ```
 
 When users load the app:
@@ -38,43 +38,35 @@ When users load the app:
 
 ## Release Process
 
-### Step 1: Update Version Number
-
-Edit `/offline-tracker/index.html`:
+### Step 1: Update Version Number in Three Places
 
 ```javascript
-// Change this line (around line 1046):
-const APP_VERSION = '3.1.0';  // ← Update here
+// js/state.js
+export const APP_VERSION = '3.21.0';
+
+// sw.js
+const CACHE_NAME = 'finchronicle-v3.21.0';
 ```
 
-### Step 2: Update Service Worker Cache
-
-Edit `/offline-tracker/sw.js`:
-
-```javascript
-// Change this line (line 2):
-const CACHE_NAME = 'finchronicle-v4';  // ← Increment version
+```json
+// manifest.json
+"version": "3.21.0"
 ```
+
+### Step 2: Update Service Worker Cache URLs
+
+If new JS modules were added, add them to `CACHE_URLS` array in `sw.js`.
 
 ### Step 3: Document Changes
 
-Add entry to **Changelog** section below.
+Add entry to `CHANGELOG.md`.
 
 ### Step 4: Commit and Deploy
 
 ```bash
-cd /Users/kiren.paul/Projects/kiren-labs/personal-finance
-
-# Stage changes
-git add offline-tracker/
-
-# Commit with version number
-git commit -m "Release v3.1.0: [Brief description]"
-
-# Push to GitHub Pages
+git add -A
+git commit -m "Release v3.21.0: [Brief description]"
 git push origin main
-
-# Wait 1-2 minutes for GitHub Pages to deploy
 ```
 
 ### Step 5: Verify Deployment
@@ -175,16 +167,17 @@ Example: v3.0.1 - Fix currency display bug
 
 Before releasing a new version:
 
-- [ ] Update `APP_VERSION` in index.html
-- [ ] Update `CACHE_NAME` in sw.js
+- [ ] Update `APP_VERSION` in `js/state.js`
+- [ ] Update `CACHE_NAME` in `sw.js`
+- [ ] Update `version` in `manifest.json`
+- [ ] Add new JS files to `CACHE_URLS` in `sw.js` (if any)
 - [ ] Test on desktop browser
 - [ ] Test on mobile browser
 - [ ] Test dark mode
-- [ ] Test all new features
-- [ ] Verify version displays correctly
-- [ ] Update this VERSION.md changelog
-- [ ] Commit with version tag
-- [ ] Deploy to GitHub Pages
+- [ ] Test offline mode (DevTools → Network → Offline)
+- [ ] Verify IndexedDB persistence (reload and verify data)
+- [ ] Update `CHANGELOG.md`
+- [ ] Commit and push
 - [ ] Verify deployed version
 - [ ] Test update notification on existing install
 

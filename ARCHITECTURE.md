@@ -1,7 +1,7 @@
 # FinChronicle - Complete Architecture Guide
 
-**Version:** 3.9.1
-**Last Updated:** 2026-02-08
+**Version:** 3.21.0
+**Last Updated:** 2026-04-01
 **For:** Developers who want to understand or contribute to the codebase
 
 ---
