@@ -232,13 +232,9 @@ export function renderNetWorthDashboard() {
     .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
     .forEach((a) => {
       const balClass = a.balance >= 0 ? "positive" : "negative";
-      const typeLabel = a.type.replace("-", " ");
       html += `
       <div class="account-balance-row">
-        <div class="account-balance-info">
-          <span class="account-balance-name">${sanitizeHTML(a.name)}</span>
-          <span class="account-balance-type">${typeLabel}</span>
-        </div>
+        <span class="account-balance-name">${sanitizeHTML(a.name)}</span>
         <span class="account-balance-amount ${balClass}">${formatCurrency(a.balance)}</span>
       </div>`;
     });
