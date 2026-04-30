@@ -35,19 +35,6 @@ function getMonthlyTotals(year) {
   return { income, expense };
 }
 
-function getCategoryBreakdown(year) {
-  const txns = getTransactionsForYear(year).filter((t) => t.type === "expense");
-  const totals = {};
-  for (const t of txns) {
-    const cat = t.category || "Other";
-    totals[cat] = (totals[cat] || 0) + t.amount;
-  }
-  // Sort descending
-  return Object.entries(totals)
-    .sort((a, b) => b[1] - a[1])
-    .map(([category, amount]) => ({ category, amount }));
-}
-
 function getTopExpenses(year, count = 5) {
   return getTransactionsForYear(year)
     .filter((t) => t.type === "expense")
@@ -94,60 +81,6 @@ function getYoYComparison(currentYear) {
   };
 }
 
-// ---- Chart Rendering (CSS-based bars) ----
-
-function renderIncomeExpenseBarChart(income, expense) {
-  const maxVal = Math.max(...income, ...expense, 1);
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-  return `
-    <div class="annual-bar-chart">
-      ${months
-        .map((m, i) => {
-          const incH = Math.round((income[i] / maxVal) * 100);
-          const expH = Math.round((expense[i] / maxVal) * 100);
-          return `
-          <div class="annual-bar-group">
-            <div class="annual-bar-cols">
-              <div class="annual-bar annual-bar-income" style="height: ${incH}%" title="${m} Income: ${formatCurrency(income[i])}"></div>
-              <div class="annual-bar annual-bar-expense" style="height: ${expH}%" title="${m} Expenses: ${formatCurrency(expense[i])}"></div>
-            </div>
-            <span class="annual-bar-label">${m}</span>
-          </div>`;
-        })
-        .join("")}
-    </div>
-    <div class="annual-bar-legend">
-      <span class="legend-item"><span class="legend-dot legend-income"></span> Income</span>
-      <span class="legend-item"><span class="legend-dot legend-expense"></span> Expense</span>
-    </div>
-  `;
-}
-
-function renderCategoryList(categories) {
-  const total = categories.reduce((s, c) => s + c.amount, 0);
-  if (total === 0) return `<p class="annual-empty">No expenses recorded.</p>`;
-
-  return `
-    <div class="annual-category-list">
-      ${categories
-        .slice(0, 8)
-        .map((c) => {
-          const pct = Math.round((c.amount / total) * 100);
-          return `
-          <div class="annual-cat-row">
-            <span class="annual-cat-name">${c.category}</span>
-            <div class="annual-cat-bar-wrap">
-              <div class="annual-cat-bar" style="width: ${pct}%"></div>
-            </div>
-            <span class="annual-cat-amount">${formatCurrency(c.amount)} <small>(${pct}%)</small></span>
-          </div>`;
-        })
-        .join("")}
-    </div>
-  `;
-}
-
 // ---- Public: Render Annual Report ----
 
 export function renderAnnualReport(year = null) {
@@ -160,7 +93,7 @@ export function renderAnnualReport(year = null) {
     return;
   }
 
-  const selectedYear = year || years[0]; // default to most recent year
+  const selectedYear = year || years[0];
 
   // Year selector
   const yearSelector = `
@@ -180,7 +113,6 @@ export function renderAnnualReport(year = null) {
   const totalExpense = expense.reduce((s, v) => s + v, 0);
   const net = totalIncome - totalExpense;
   const savingsRate = getAnnualSavingsRate(selectedYear);
-  const categories = getCategoryBreakdown(selectedYear);
   const topExpenses = getTopExpenses(selectedYear);
   const yoy = getYoYComparison(selectedYear);
 
@@ -197,7 +129,7 @@ export function renderAnnualReport(year = null) {
       </div>
       <div class="annual-stat">
         <span class="annual-stat-label">Net</span>
-        <span class="annual-stat-value ${net >= 0 ? "positive" : "negative"}">${formatCurrency(Math.abs(net))}</span>
+        <span class="annual-stat-value ${net >= 0 ? "positive" : "negative"}">${net >= 0 ? "" : "-"}${formatCurrency(Math.abs(net))}</span>
       </div>
       <div class="annual-stat">
         <span class="annual-stat-label">Savings Rate</span>
@@ -225,7 +157,7 @@ export function renderAnnualReport(year = null) {
   if (topExpenses.length > 0) {
     topSection = `
       <div class="annual-section">
-        <h4>Top 5 Expenses</h4>
+        <h4>Top 5 Largest Expenses</h4>
         <div class="annual-top-list">
           ${topExpenses
             .map(
@@ -243,16 +175,21 @@ export function renderAnnualReport(year = null) {
     `;
   }
 
+  // Export button
+  const exportBtn = `
+    <div class="annual-section" style="text-align: center; padding-top: var(--space-sm);">
+      <button class="btn primary-btn" data-annual-export="${selectedYear}" style="font-size: 12px; padding: 8px 16px;">
+        <i class="ri-download-2-line"></i> Export ${selectedYear} as CSV
+      </button>
+    </div>
+  `;
+
   container.innerHTML = `
     ${yearSelector}
     ${summaryCards}
-    ${renderIncomeExpenseBarChart(income, expense)}
-    <div class="annual-section">
-      <h4>Where did the money go?</h4>
-      ${renderCategoryList(categories)}
-    </div>
     ${yoySection}
     ${topSection}
+    ${exportBtn}
   `;
 }
 
