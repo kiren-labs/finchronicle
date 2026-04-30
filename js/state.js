@@ -3,7 +3,7 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "3.22.0";
+export const APP_VERSION = "3.26.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
@@ -72,6 +72,7 @@ export const DEFAULT_APP_SETTINGS = {
     attachedTo: false,
     referenceId: false,
     location: false,
+    transactionCurrency: false,
   },
   smartCategoryKeywords: {},
   lastUpdated: null,

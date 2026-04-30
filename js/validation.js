@@ -2,7 +2,7 @@
 // Transaction Validation Layer (v3.10.2)
 // ============================================================================
 
-import { categories, PAYMENT_METHODS, EXPENSE_TYPES } from "./state.js";
+import { categories, PAYMENT_METHODS, EXPENSE_TYPES, currencies } from "./state.js";
 import { sanitizeHTML } from "./utils.js";
 
 // Validate transaction before saving
