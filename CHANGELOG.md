@@ -16,6 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.20.0] - 2026-05-01
+
+### Added
+- **Savings Goals** — track progress toward savings targets with:
+  - Create/edit/delete goals with name, target amount, optional deadline, and optional linked account
+  - Circular progress ring indicators with color coding (red <50%, yellow 50-75%, green ≥75%)
+  - Manual contribution button to update goal progress
+  - Milestone celebrations at 25%, 50%, 75%, and 100% with toast messages
+  - Overdue/deadline warnings for time-bound goals
+  - Goals auto-sorted: incomplete first (by progress), completed at bottom
+- New IndexedDB store: `savingsGoals` (DB_VERSION 9)
+- Goals section in Summary tab (auto-hides when no goals exist)
+- Dark mode support for goal cards and progress rings
+
+---
+
 ## [3.19.0] - 2026-05-01
 
 ### Added
