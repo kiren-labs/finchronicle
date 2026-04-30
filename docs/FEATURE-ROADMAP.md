@@ -1,7 +1,7 @@
 # FinChronicle Feature Roadmap (Revised March 2026)
 
-> Last updated: 2026-03-30
-> Previous plan: 2026-03-24
+> Last updated: 2026-04-30
+> Previous plan: 2026-03-30
 
 ---
 
@@ -16,7 +16,7 @@
 | v3.12.0 | Complete Reports (trends, weekly) | DONE |
 | v3.13.0 | Budget Limits & Alerts | DONE |
 | v3.14.0 | Tags & Search | DONE |
-| v3.15.0 | Transfer Transaction Type | NOT STARTED |
+| v3.15.0 | Transfer Transaction Type + Audit Trail | DONE |
 | v3.16.0 | Optional Fields System | NOT STARTED |
 | v3.17.0 | Split Transactions | NOT STARTED |
 | v3.18.0 | Savings Rate Dashboard | NOT STARTED |
@@ -77,26 +77,34 @@ These do not warrant their own version but should be done as part of the specifi
 | `js/utils.js` | `formatCurrency`, `formatDate`, `showMessage`, `sanitizeHTML` |
 | `js/settings.js` | Dark mode, SW update flow |
 | `js/currency.js` | Currency selector |
-| `js/chart.js` | Category pie chart (added v3.10.5) |
+| `js/recurring.js` | Recurring transactions (added v3.11.0) |
+| `js/budget.js` | Budget limits & alerts (added v3.13.0) |
+| `js/search.js` | Tags & search (added v3.14.0) |
+| `js/transfer.js` | Transfer type & account autocomplete (added v3.15.0) |
 | `js/faq.js` | Lazy-loaded |
 | `js/import-export.js` | Lazy-loaded |
 
-**Transaction schema (current, DB_VERSION: 4):**
+**Transaction schema (current, DB_VERSION: 5):**
 ```javascript
 {
   id: number,              // Date.now()
-  type: 'expense' | 'income',
+  type: 'expense' | 'income' | 'transfer',
   amount: number,
   category: string,
   date: 'YYYY-MM-DD',
   notes: string,
   tags: string[],          // added v3.14.0
-  createdAt: ISO8601
+  createdAt: ISO8601,
+  updatedAt: ISO8601,      // added v3.15.0
+  fromAccount: string | null,   // transfer only, added v3.15.0
+  toAccount: string | null,     // transfer only, added v3.15.0
+  deleted: boolean,        // soft delete flag, added v3.15.0
+  deletedAt: ISO8601 | null     // soft delete timestamp, added v3.15.0
 }
 ```
 
 **IndexedDB:**
-- DB: `FinChronicleDB`, DB_VERSION: 4
+- DB: `FinChronicleDB`, DB_VERSION: 5
 - Store: `transactions`
 - Indexes: `date`, `type`, `category`, `dateType` (composite), `tags` (multiEntry)
 
@@ -106,63 +114,29 @@ These do not warrant their own version but should be done as part of the specifi
 
 ---
 
-### v3.15.0 — Transfer Transaction Type
-**Priority: HIGH**
-**New file: `js/transfer.js`**
+### v3.15.0 — Transfer Transaction Type + Audit Trail ✅ DONE
+**Released: 2026-04-30**
 
-The highest-impact data integrity fix based on real usage. Adds a third transaction type — `transfer` — for money that moves between accounts without being income or expense. This eliminates double-counting of credit card payments, savings deposits, and debt repayments.
+Adds a third transaction type — `transfer` — for money moving between accounts without being income or expense. Eliminates double-counting of credit card payments, savings deposits, and debt repayments. Also adds `updatedAt` timestamps and soft delete for audit-quality data integrity.
 
-**Why this is blocking:** Until this exists, every monthly CC bill payment (9,648 in March) inflates expense totals. Savings contributions (25,000 in Jan) appear as expenses. The budget and reports views are untrustworthy for heavy users.
+**Implemented:**
+- Transfer type selector with From Account / To Account autocomplete
+- Transfers excluded from expense/income totals, budgets, and charts
+- `updatedAt` timestamp on every save/edit
+- Soft delete with `deleted`/`deletedAt` flags (records kept in DB for audit)
+- Backup exports include all records (including soft-deleted) for complete audit trail
+- Full import/export support for transfer and audit fields
 
-**Schema change (DB_VERSION → 5):**
-```javascript
-{
-  // Existing fields unchanged. type gains a new allowed value:
-  type: 'expense' | 'income' | 'transfer',
-
-  // New fields, nullable, only used when type === 'transfer':
-  fromAccount: string | null,   // e.g. "Kasikorn Savings", "Cash"
-  toAccount: string | null,     // e.g. "SCB Credit Card", "Savings Jar"
-  transferNote: string | null   // optional context
-}
-```
-
-**Core rules:**
-- `transfer` transactions are **excluded from all expense/income totals**, budget calculations, and category charts
-- `amount` still stored (for account-level balance tracking later)
-- `category` field is set to `'Transfer'` automatically and is not user-editable for transfers
-- Existing `income` / `expense` transactions are unaffected
-
-**Validation additions (`js/validation.js`):**
-```javascript
-if (tx.type === 'transfer') {
-  if (!tx.fromAccount && !tx.toAccount) {
-    errors.push('Transfer must have at least a source or destination account');
-  }
-  // amount must still be positive
-}
-```
-
-**UI changes:**
-- Transaction form: type selector gains a `Transfer` option
-- When Transfer selected: category field replaced by fromAccount / toAccount inputs with autocomplete from past entries
-- Transaction list: transfer rows visually distinct (e.g. left border in a neutral color, swap icon)
-- Summary tab: transfers shown as a separate collapsed section, not counted in totals
-- Reports: filter toggles to include/exclude transfers
-
-**Migration note:** No existing data needs migration. New fields are nullable on existing rows.
-
-**Files:**
-- `js/transfer.js` (new) — transfer-specific validation, account autocomplete, UI helpers
-- `js/validation.js` — add transfer branch
-- `js/db.js` — bump DB_VERSION to 5 in `onupgradeneeded` (no new store needed, schema change only)
-- `js/state.js` — bump `DB_VERSION` to 5; add `'Transfer'` to categories list as non-editable
-- `js/ui.js` — exclude transfers from summary totals; add transfer row style
-- `js/app.js` — import transfer.js
-- `index.html` — transfer type option, fromAccount/toAccount inputs
-- `css/styles.css` — transfer row style, account input
-- `css/dark-mode.css` — dark mode for transfer elements
-- `sw.js` — add `js/transfer.js` to `CACHE_URLS`, bump `CACHE_NAME`
+**Files added/modified:**
+- `js/transfer.js` (new) — account autocomplete, transfer field UI helpers
+- `js/db.js` — DB_VERSION 5, soft delete, `loadAllTransactionsFromDB()`
+- `js/validation.js` — transfer validation branch
+- `js/state.js` — transfer categories, saved accounts
+- `js/ui.js` — transfer row rendering, summary exclusion
+- `js/chart.js` — skip transfers in aggregation
+- `js/import-export.js` — transfer + audit columns in export/backup/restore
+- `js/app.js` — transfer imports, form wiring, updatedAt
+- `index.html`, `css/tokens.css`, `css/styles.css`, `css/dark-mode.css`, `sw.js`
 
 ---
 
