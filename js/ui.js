@@ -66,7 +66,7 @@ export function updateSummary() {
 
   const { income, expense, count } = state.transactions.reduce(
     (acc, t) => {
-      if (t.date.startsWith(currentMonth)) {
+      if (t.date.startsWith(currentMonth) && t.type !== "transfer") {
         acc.count++;
         if (t.type === "income") acc.income += t.amount;
         else acc.expense += t.amount;
@@ -190,21 +190,40 @@ export function updateTransactionsList() {
 
   paginatedTransactions.forEach((t) => {
     const isIncome = t.type === "income";
-    const amountClass = isIncome ? "positive" : "negative";
-    const sign = isIncome ? "+" : "-";
+    const isTransfer = t.type === "transfer";
+    const amountClass = isTransfer ? "transfer" : isIncome ? "positive" : "negative";
+    const sign = isTransfer ? "" : isIncome ? "+" : "-";
 
     const item = document.createElement("div");
     item.className = `transaction-item ${t.type}`;
 
-    item.innerHTML = `
-            <div class="transaction-icon ${t.type}">
-                <i class="ri-arrow-${isIncome ? "up" : "down"}-circle-fill"></i>
-            </div>
-            <div class="transaction-details">
-                <div class="transaction-category">
+    // Build icon based on type
+    let iconHtml;
+    if (isTransfer) {
+      iconHtml = `<div class="transaction-icon transfer"><i class="ri-swap-line"></i></div>`;
+    } else {
+      iconHtml = `<div class="transaction-icon ${t.type}"><i class="ri-arrow-${isIncome ? "up" : "down"}-circle-fill"></i></div>`;
+    }
+
+    // Build category/account display
+    let categoryHtml;
+    if (isTransfer) {
+      categoryHtml = `<div class="transaction-category transfer-label">
+                    <span class="transfer-from">${sanitizeHTML(t.fromAccount || "—")}</span>
+                    <i class="ri-arrow-right-line transfer-arrow-icon"></i>
+                    <span class="transfer-to">${sanitizeHTML(t.toAccount || "—")}</span>
+                </div>`;
+    } else {
+      categoryHtml = `<div class="transaction-category">
                     ${sanitizeHTML(t.category)}
                     ${t.recurringId ? '<span class="recurring-badge" title="Auto-generated recurring transaction"><i class="ri-repeat-line"></i></span>' : ""}
-                </div>
+                </div>`;
+    }
+
+    item.innerHTML = `
+            ${iconHtml}
+            <div class="transaction-details">
+                ${categoryHtml}
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
                 <div class="transaction-date">${formatDate(t.date)}</div>
                 ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
@@ -670,6 +689,12 @@ export function editTransaction(id) {
   updateCategoryOptions(transaction.type);
   document.getElementById("category").value = transaction.category;
 
+  // Populate transfer fields if editing a transfer
+  if (transaction.type === "transfer") {
+    document.getElementById("fromAccount").value = transaction.fromAccount || "";
+    document.getElementById("toAccount").value = transaction.toAccount || "";
+  }
+
   document.getElementById("formTitle").textContent = "Edit Transaction";
   document.getElementById("submitBtn").textContent = "Update Transaction";
   document.getElementById("cancelEditBtn").style.display = "block";
@@ -750,6 +775,12 @@ export function selectType(type) {
     btn.setAttribute("aria-checked", isActive);
   });
 
+  // Show/hide transfer fields
+  const transferFields = document.getElementById("transferFields");
+  if (transferFields) {
+    transferFields.hidden = type !== "transfer";
+  }
+
   updateCategoryOptions(type);
 }
 
@@ -760,6 +791,16 @@ export function updateCategoryOptions(type) {
   categorySelect.innerHTML = cats
     .map((cat) => `<option value="${cat}">${cat}</option>`)
     .join("");
+
+  // For transfers, auto-select "Transfer" and disable
+  if (type === "transfer") {
+    categorySelect.value = "Transfer";
+    categorySelect.disabled = true;
+    document.getElementById("categoryGroup").classList.add("disabled-field");
+  } else {
+    categorySelect.disabled = false;
+    document.getElementById("categoryGroup").classList.remove("disabled-field");
+  }
 
   if (state.editingId) {
     const currentCategory = categorySelect.dataset.editValue;
