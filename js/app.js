@@ -404,6 +404,9 @@ function bindStaticEvents() {
 
   // ---- Annual Report (v3.21.0) ----
   bindAnnualReportEvents();
+
+  // ---- Auto-Backup (v3.22.0) ----
+  bindAutoBackupEvents();
 }
 
 function bindSettingsButtons() {
