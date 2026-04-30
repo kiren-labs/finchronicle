@@ -938,6 +938,7 @@ function bindFormSubmit() {
           formCard.classList.remove("success-pulse");
 
           updateUI();
+          renderQuickBar();
         }, 800);
       } catch (err) {
         console.error("Save failed:", err);
