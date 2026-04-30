@@ -41,6 +41,9 @@ export function exportToCSV() {
     "Attached To",
     "Reference ID",
     "Location",
+    "Transaction Currency",
+    "Exchange Rate",
+    "Home Amount",
   ];
   const rows = state.transactions.map((t) => [
     t.date,
@@ -57,6 +60,9 @@ export function exportToCSV() {
     t.attachedTo || "",
     t.referenceId || "",
     t.location || "",
+    t.transactionCurrency || "",
+    t.exchangeRate || "",
+    t.homeAmount || "",
   ]);
 
   let csv = headers.join(",") + "\n";
@@ -144,6 +150,9 @@ export async function createBackup() {
     "Attached To",
     "Reference ID",
     "Location",
+    "Transaction Currency",
+    "Exchange Rate",
+    "Home Amount",
   ];
   const rows = allRecords.map((t) => [
     t.date,
@@ -164,6 +173,9 @@ export async function createBackup() {
     t.attachedTo || "",
     t.referenceId || "",
     t.location || "",
+    t.transactionCurrency || "",
+    t.exchangeRate || "",
+    t.homeAmount || "",
   ]);
 
   let csv = metadata + "\n";
