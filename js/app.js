@@ -119,6 +119,15 @@ import {
 } from "./accounts.js";
 import { renderSavingsDashboard } from "./savings.js";
 import {
+  initAlerts,
+  runAlertChecks,
+  renderAlertBanners,
+  dismissAlert,
+  renderAlertHistory,
+  clearAlertHistory,
+} from "./alerts.js";
+import { renderAnnualReport, exportAnnualCSV } from "./annual-report.js";
+import {
   initGoals,
   renderGoalsDashboard,
   showGoalForm,
@@ -379,6 +388,12 @@ function bindStaticEvents() {
 
   // ---- Goals (v3.20.0) ----
   bindGoalEvents();
+
+  // ---- Smart Alerts (v3.21.0) ----
+  bindAlertEvents();
+
+  // ---- Annual Report (v3.21.0) ----
+  bindAnnualReportEvents();
 }
 
 function bindSettingsButtons() {
@@ -972,6 +987,61 @@ function bindGoalEvents() {
 }
 
 // ============================================================================
+// Alert Events (v3.21.0)
+// ============================================================================
+
+function bindAlertEvents() {
+  // Dismiss alert banners
+  const alertsContainer = document.getElementById("smartAlerts");
+  if (alertsContainer) {
+    alertsContainer.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-dismiss]");
+      if (!btn) return;
+      const alertId = btn.dataset.dismiss;
+      dismissAlert(alertId);
+      const banner = btn.closest(".smart-alert");
+      if (banner) banner.remove();
+      // Hide container if empty
+      if (!alertsContainer.querySelector(".smart-alert")) {
+        alertsContainer.hidden = true;
+      }
+    });
+  }
+
+  // Clear alert history button
+  const clearBtn = document.getElementById("clearAlertsBtn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      clearAlertHistory();
+      renderAlertHistory();
+    });
+  }
+}
+
+// ============================================================================
+// Annual Report Events (v3.21.0)
+// ============================================================================
+
+function bindAnnualReportEvents() {
+  const container = document.getElementById("annualReportContent");
+  if (!container) return;
+
+  container.addEventListener("click", (e) => {
+    // Year selector pills
+    const yearBtn = e.target.closest("[data-annual-year]");
+    if (yearBtn) {
+      renderAnnualReport(yearBtn.dataset.annualYear);
+      return;
+    }
+    // Export CSV button
+    const exportBtn = e.target.closest("[data-annual-export]");
+    if (exportBtn) {
+      exportAnnualCSV(exportBtn.dataset.annualExport);
+    }
+  });
+}
+
+// ============================================================================
 // Form Submission Handler
 // ============================================================================
 
@@ -1102,6 +1172,8 @@ function bindFormSubmit() {
           renderQuickBar();
           renderNetWorthDashboard();
           renderSavingsDashboard();
+          renderAlertBanners(runAlertChecks(sanitizedTransaction));
+          renderAnnualReport();
         }, 800);
       } catch (err) {
         console.error("Save failed:", err);
@@ -1265,6 +1337,7 @@ async function init() {
     await initQuickEntry();
     await initAccounts();
     await initGoals();
+    initAlerts();
     initTagColors();
 
     // Set up UI defaults
@@ -1295,6 +1368,9 @@ async function init() {
     renderNetWorthDashboard();
     renderSavingsDashboard();
     renderGoalsDashboard();
+    renderAnnualReport();
+    renderAlertBanners(runAlertChecks());
+    renderAlertHistory();
     checkAppVersion();
     loadDarkMode();
     loadSummaryState();
