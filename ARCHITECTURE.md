@@ -115,209 +115,75 @@ User Action (e.g., "Add Transaction")
 
 ```
 finchronicle/
-├── index.html              (440 lines) - UI Structure
-├── app.js                  (2495 lines) - Application Logic
-├── sw.js                   (147 lines) - Service Worker
-├── manifest.json           (69 lines) - PWA Configuration
+├── index.html              - UI Structure (tabs, forms, modals)
+├── sw.js                   - Service Worker (cache-first offline)
+├── manifest.json           - PWA Configuration
+├── js/
+│   ├── app.js              - Entry point: init, event bindings, SW registration
+│   ├── state.js            - Single source of truth: state object, APP_VERSION, categories, currencies, getDOM()
+│   ├── db.js               - All IndexedDB operations (CRUD, bulk, migrations)
+│   ├── ui.js               - DOM rendering: updateUI, updateSummary, updateTransactionsList, etc.
+│   ├── validation.js       - validateTransaction() — returns { valid, errors, sanitized }
+│   ├── utils.js            - formatCurrency, formatDate, showMessage, sanitizeHTML
+│   ├── currency.js         - Currency selector modal and getCurrency()
+│   ├── settings.js         - Dark mode, version checks, backup timestamp, SW update flow
+│   ├── chart.js            - CSS conic-gradient donut chart renderer
+│   ├── recurring.js        - Recurring transaction templates and due-date processing
+│   ├── budget.js           - Budget limits per category and over-budget alerts
+│   ├── search.js           - Tags & full-text search across transactions
+│   ├── transfer.js         - Transfer transaction type, from/to account fields, autocomplete
+│   ├── optional-fields.js  - Payment method, expense type, smart category suggestions
+│   ├── quick-entry.js      - Quick Entry Templates — save/reuse common patterns
+│   ├── accounts.js         - Account CRUD & Net Worth dashboard
+│   ├── savings.js          - Savings Rate Dashboard
+│   ├── goals.js            - Savings Goals with circular progress tracking
+│   ├── alerts.js           - Smart Spending Alerts (4 detection algorithms)
+│   ├── annual-report.js    - Year scorecard, YoY comparison, CSV export
+│   ├── faq.js              - Lazy-loaded on first Settings tab visit
+│   └── import-export.js    - Lazy-loaded on first CSV import/export call
 ├── css/
-│   ├── tokens.css          (150 lines) - Design Tokens
-│   ├── styles.css          (2330 lines) - Component Styles
-│   └── dark-mode.css       (366 lines) - Dark Theme
+│   ├── tokens.css          - Design Tokens (CSS custom properties)
+│   ├── styles.css          - Component Styles
+│   ├── chart.css           - Chart-specific styles
+│   └── dark-mode.css       - Dark Theme (token overrides for .dark-mode)
 ├── icons/                  - PWA Icons & Logo
-│   ├── icon.svg
-│   ├── icon-192.png
-│   ├── icon-512.png
-│   └── maskable-icon-512.png
+├── scripts/                - Build & release scripts
+├── docs/                   - Feature roadmap & architecture docs
 ├── CHANGELOG.md            - Version history
-├── README.md               - User documentation
+└── README.md               - User documentation
 ```
 
-### index.html - UI Structure (440 lines)
+### Module Architecture (ES Modules)
 
-**Responsibilities:**
-- HTML5 semantic structure
-- Tab-based navigation markup
-- Forms for data entry
-- Modals for dialogs
-- Accessibility attributes (ARIA)
+The app uses native ES modules (`type="module"` in `<script>`). `js/app.js` is the single entry point — it imports from all other modules and orchestrates initialization.
 
-**Key Sections:**
-```html
-<body>
-  <!-- Header -->
-  <header>
-    <h1>Logo + Title</h1>
-    <div>Status indicators</div>
-  </header>
-
-  <!-- Main Container -->
-  <div class="container">
-    <!-- Desktop Tab Navigation -->
-    <div class="tabs-container">
-      <button id="add-tab" class="tab active">Add</button>
-      <button id="list-tab" class="tab">List</button>
-      <!-- ... -->
-    </div>
-
-    <!-- Tab Content Sections -->
-    <main>
-      <!-- Add Tab -->
-      <div id="addTab" class="tab-content active">
-        <form id="transactionForm">...</form>
-      </div>
-
-      <!-- List Tab -->
-      <div id="listTab" class="tab-content">
-        <div id="transactionsList">...</div>
-      </div>
-
-      <!-- Groups Tab -->
-      <div id="groupsTab" class="tab-content">
-        <div id="groupedContent">...</div>
-      </div>
-
-      <!-- Settings Tab -->
-      <div id="settingsTab" class="tab-content">
-        <div>Export/Import buttons</div>
-        <div id="backupStatusContainer"></div>
-        <div id="faqContainer"></div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Bottom Navigation (Mobile) -->
-  <nav class="bottom-nav">
-    <button id="add-nav" class="nav-item">Add</button>
-    <!-- ... -->
-  </nav>
-
-  <!-- Modals -->
-  <div id="deleteModal" class="modal">...</div>
-  <div id="currencyModal" class="modal">...</div>
-  <!-- ... -->
-
-  <!-- Load JavaScript last -->
-  <script src="app.js"></script>
-</body>
+**Module dependency flow:**
+```
+app.js (entry point)
+├── state.js        ← imported by almost all modules
+├── db.js           ← imports state.js
+├── ui.js           ← imports state.js, utils.js, chart.js
+├── validation.js   ← imports state.js
+├── utils.js        ← imports state.js
+├── currency.js     ← imports state.js
+├── settings.js     ← imports state.js, utils.js
+├── chart.js        ← imports state.js, utils.js
+├── recurring.js    ← imports state.js, db.js, utils.js
+├── budget.js       ← imports state.js, db.js, utils.js
+├── search.js       ← imports state.js, utils.js
+├── transfer.js     ← imports state.js, utils.js
+├── optional-fields.js ← imports state.js, db.js
+├── quick-entry.js  ← imports state.js, db.js, utils.js
+├── accounts.js     ← imports state.js, db.js, utils.js
+├── savings.js      ← imports state.js, utils.js
+├── goals.js        ← imports state.js, db.js, utils.js
+├── alerts.js       ← imports state.js, utils.js
+├── annual-report.js ← imports state.js, utils.js
+├── faq.js          (dynamic import)
+└── import-export.js (dynamic import)
 ```
 
-**Why inline event handlers:**
-- Simple: onclick="functionName(id)"
-- Easy to trace: Clear connection between UI and handler
-- No need for complex event delegation
-- Works well for app of this size
-
----
-
-### app.js - Application Logic (2495 lines)
-
-**Code Organization (Top to Bottom):**
-
-```javascript
-// ========== 1. Configuration (Lines 1-60) ==========
-const APP_VERSION = '3.9.1';
-const DB_NAME = 'FinChronicleDB';
-const categories = { income: [...], expense: [...] };
-const currencies = { INR: {...}, USD: {...}, ... };
-
-// ========== 2. Global State (Lines 12-22) ==========
-let transactions = [];        // In-memory transaction cache
-let currentTab = 'add';      // Active tab
-let selectedMonth = 'all';    // Filter state
-let editingId = null;         // Edit mode
-// ... 10 more state variables
-
-// ========== 3. IndexedDB Operations (Lines 90-280) ==========
-async function initDB() { ... }
-async function loadDataFromDB() { ... }
-async function saveTransactionToDB(tx) { ... }
-async function deleteTransactionFromDB(id) { ... }
-async function bulkSaveTransactionsToDB(txs) { ... }
-
-// ========== 4. Utility Functions (Lines 100-250) ==========
-function formatCurrency(amount) { ... }
-function formatNumber(num) { ... }
-function formatDate(dateStr) { ... }
-function getCurrency() { ... }
-
-// ========== 5. Event Handlers (Lines 360-460) ==========
-document.getElementById('transactionForm').addEventListener('submit', ...);
-document.getElementById('type').addEventListener('change', ...);
-// ... inline handlers via onclick=""
-
-// ========== 6. UI Update Functions (Lines 461-850) ==========
-function updateUI() { ... }             // Master function
-function updateSummary() { ... }
-function updateTransactionsList() { ... }
-function updateGroupedView() { ... }
-
-// ========== 7. Navigation & Interaction (Lines 812-920) ==========
-function switchTab(tab) { ... }
-function toggleDarkMode() { ... }
-function onSummaryTileClick(tileType) { ... }
-
-// ========== 8. Trend Calculations (Lines 852-910) ==========
-function getPreviousMonth(month) { ... }
-function getMonthTotals(month) { ... }
-function calculateMoMDelta(current, prev) { ... }
-
-// ========== 9. Backup & FAQ (Lines 930-1220) ==========
-function loadBackupTimestamp() { ... }
-function renderBackupStatus() { ... }
-function renderFAQ() { ... }
-
-// ========== 10. Insights (Lines 1230-1410) ==========
-function getMonthInsights(month) { ... }
-function getTopSpendingCategories(month) { ... }
-function renderMonthlyInsights() { ... }
-
-// ========== 11. CSV Import/Export (Lines 1538-1930) ==========
-function exportToCSV() { ... }
-function importFromCSV(text) { ... }
-function parseCSV(text) { ... }
-function normalizeDate(dateStr) { ... }
-
-// ========== 12. Version Management (Lines 1950-2100) ==========
-function checkAppVersion() { ... }
-function showUpdatePrompt() { ... }
-
-// ========== 13. Date/Time Formatters (Lines 2215-2250) ==========
-function formatDate(dateStr) { ... }  // Uses toLocaleDateString()
-function formatMonth(monthStr) { ... } // Uses toLocaleDateString()
-
-// ========== 14. Initialization (Lines 2340-2430) ==========
-window.addEventListener('load', async function () {
-    await initDB();
-    await migrateFromLocalStorage();
-    await loadDataFromDB();
-    updateUI();
-    checkAppVersion();
-    loadDarkMode();
-    loadSummaryState();
-    updateCurrencyDisplay();
-    loadBackupTimestamp();
-    checkInstallPrompt();
-});
-
-// ========== 15. Service Worker Registration (Lines 2357-2413) ==========
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-    // Handle updates, messages, controller changes
-}
-```
-
-**Key Functions by Purpose:**
-
-| Category | Functions | Line Range |
-|----------|-----------|------------|
-| IndexedDB | initDB, loadDataFromDB, saveTransactionToDB, deleteTransactionFromDB | 90-280 |
-| UI Updates | updateUI, updateSummary, updateTransactionsList, updateGroupedView | 461-850 |
-| Formatters | formatCurrency, formatNumber, formatDate, formatMonth | 100-250, 2215-2250 |
-| Filters | filterByMonth, selectCategory, selectType | 580-650 |
-| Navigation | switchTab, onSummaryTileClick, quickAddTransaction | 812-920 |
-| Import/Export | exportToCSV, importFromCSV, parseCSV, normalizeDate | 1538-1930 |
-| Trends | getMonthTotals, calculateMoMDelta, getMonthInsights | 852-1410 |
-| Backup | loadBackupTimestamp, renderBackupStatus, updateBackupTimestamp | 930-1065 |
+**No inline event handlers** — all DOM events are bound in `bindStaticEvents()` inside `app.js`.
 
 ---
 
@@ -326,45 +192,35 @@ if ('serviceWorker' in navigator) {
 ### 🗄️ IndexedDB Structure
 
 **Database:** `FinChronicleDB`
-**Version:** 1
-**Object Store:** `transactions`
+**Version:** 9
 
-```javascript
-// Schema Definition
-const dbRequest = indexedDB.open('FinChronicleDB', 1);
+**Object Stores:**
 
-dbRequest.onupgradeneeded = function(event) {
-    const db = event.target.result;
-
-    // Create object store with 'id' as key path
-    const objectStore = db.createObjectStore('transactions', {
-        keyPath: 'id'  // Unique identifier (timestamp)
-    });
-
-    // Index 1: Date (for month filtering)
-    objectStore.createIndex('date', 'date', { unique: false });
-
-    // Index 2: Type (for income/expense filtering)
-    objectStore.createIndex('type', 'type', { unique: false });
-
-    // Index 3: Category (for category grouping)
-    objectStore.createIndex('category', 'category', { unique: false });
-
-    // Index 4: Composite (optimized queries)
-    objectStore.createIndex('date_type', ['date', 'type'], { unique: false });
-};
-```
+| Store | Key Path | Indexes | Purpose |
+|-------|----------|---------|---------|
+| `transactions` | `id` | `date`, `type`, `category`, `dateType` (composite), `tags` (multiEntry) | All transaction data |
+| `recurringTemplates` | `id` | `nextDueDate`, `enabled` | Recurring transaction templates |
+| `budgets` | `id` | `category` | Per-category budget limits |
+| `appSettings` | `key` | — | Optional fields configuration |
+| `quickTemplates` | `id` | — | Quick entry templates |
+| `accounts` | `id` | — | Account definitions for net worth |
+| `savingsGoals` | `id` | — | Savings goals with progress |
 
 **Transaction Document:**
 ```typescript
 interface Transaction {
-  id: number;              // Date.now() timestamp (must be unique)
-  type: 'income' | 'expense';  // Transaction type
-  amount: number;          // Decimal, 2 decimal places max
-  category: string;        // From predefined categories list
-  date: string;            // YYYY-MM-DD format
-  notes: string;           // Optional description
-  createdAt: string;       // ISO 8601 timestamp for tracking
+  id: number;                       // Date.now() timestamp (unique)
+  type: 'income' | 'expense' | 'transfer';
+  amount: number;                   // Decimal, 2 decimal places max
+  category: string;                 // From predefined categories list
+  date: string;                     // YYYY-MM-DD format
+  notes: string;                    // Optional description (sanitized)
+  tags: string[];                   // Optional tags array
+  createdAt: string;                // ISO 8601 timestamp
+  fromAccount?: string;             // Transfer: source account
+  toAccount?: string;               // Transfer: destination account
+  paymentMethod?: string;           // Optional field
+  expenseType?: string;             // Optional field
 }
 ```
 
