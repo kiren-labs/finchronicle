@@ -793,8 +793,11 @@
                                 <input type="number" id="accountBalanceInput" placeholder="0.00" step="0.01">
                             </div>
                             <div class="form-group toggle-row">
-                                <label for="accountSavingsToggle">Counts as Savings</label>
-                                <input type="checkbox" id="accountSavingsToggle" class="field-toggle-switch">
+                                <label>Counts as Savings</label>
+                                <label class="field-toggle">
+                                    <input type="checkbox" id="accountSavingsToggle" class="field-toggle-checkbox" hidden>
+                                    <span class="field-toggle-switch"></span>
+                                </label>
                             </div>
                             <button type="button" id="accountFormSaveBtn" class="btn primary-btn" style="width: 100%; margin-top: 12px;">Save Account</button>
                         </div>
