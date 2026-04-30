@@ -143,6 +143,18 @@ export function validateTransaction(transaction) {
     transaction.location = sanitizeHTML(transaction.location);
   }
 
+  // 8. Multi-currency validation (v3.24.0)
+  if (transaction.transactionCurrency) {
+    if (!currencies[transaction.transactionCurrency]) {
+      errors.push({ field: "transactionCurrency", message: "Invalid transaction currency" });
+    }
+    if (transaction.exchangeRate !== null && transaction.exchangeRate !== undefined) {
+      if (isNaN(transaction.exchangeRate) || transaction.exchangeRate <= 0) {
+        errors.push({ field: "exchangeRate", message: "Exchange rate must be a positive number" });
+      }
+    }
+  }
+
   return {
     valid: errors.length === 0,
     errors: errors,

@@ -10,6 +10,7 @@ import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
 import { renderBudgetAlerts, renderBudgetList, deleteBudget } from "./budget.js";
 import { setOptionalFieldValues, clearOptionalFields } from "./optional-fields.js";
+import { formatMultiCurrency } from "./multi-currency.js";
 import {
   renderCategoryPieChart,
   buildCategoryData,
@@ -69,8 +70,9 @@ export function updateSummary() {
     (acc, t) => {
       if (t.date.startsWith(currentMonth) && t.type !== "transfer") {
         acc.count++;
-        if (t.type === "income") acc.income += t.amount;
-        else acc.expense += t.amount;
+        const amt = t.homeAmount || t.amount;
+        if (t.type === "income") acc.income += amt;
+        else acc.expense += amt;
       }
       return acc;
     },
@@ -240,7 +242,8 @@ export function updateTransactionsList() {
                 ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
             </div>
             <div class="transaction-amount ${amountClass}">
-                ${sign}${formatCurrency(t.amount)}
+                ${sign}${formatCurrency(t.homeAmount || t.amount)}
+                ${t.transactionCurrency && t.homeAmount ? `<div class="tx-foreign-amount">${(() => { const mc = formatMultiCurrency(t); return mc ? mc.foreign : ""; })()}</div>` : ""}
             </div>
             <div class="transaction-actions">
                 <button class="action-btn edit-btn" data-action="edit" data-id="${t.id}" aria-label="Edit transaction"><i class="ri-edit-line"></i></button>

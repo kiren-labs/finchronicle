@@ -139,6 +139,17 @@ import {
   renderStorageHealth,
 } from "./auto-backup.js";
 import {
+  renderMultiCurrencyFields,
+  getMultiCurrencyFormData,
+  setMultiCurrencyFormData,
+  clearMultiCurrencyFields,
+} from "./multi-currency.js";
+import {
+  renderSettlementDashboard,
+  navigateSettlementPeriod,
+  copySettlementSummary,
+} from "./settlement.js";
+import {
   initGoals,
   renderGoalsDashboard,
   showGoalForm,
@@ -408,6 +419,12 @@ function bindStaticEvents() {
 
   // ---- Auto-Backup (v3.22.0) ----
   bindAutoBackupEvents();
+
+  // ---- Multi-Currency (v3.24.0) ----
+  bindMultiCurrencyEvents();
+
+  // ---- Settlement (v3.26.0) ----
+  bindSettlementEvents();
 }
 
 function bindSettingsButtons() {
