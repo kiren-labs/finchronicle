@@ -32,18 +32,26 @@ export function calculateSettlement(startDate, endDate) {
   });
 
   // Aggregate per person
-  const personMap = {}; // { name: { spentOn: number, contributed: number } }
+  const personMap = {}; // { name: { spentOn, contributed, outstanding, settled } }
 
   relevant.forEach((t) => {
     const person = t.attachedTo.trim();
     if (!person) return;
 
     if (!personMap[person]) {
-      personMap[person] = { spentOn: 0, contributed: 0 };
+      personMap[person] = { spentOn: 0, contributed: 0, outstanding: 0, settled: 0 };
     }
 
     if (t.type === "expense") {
-      personMap[person].spentOn += t.homeAmount || t.amount;
+      const amt = t.homeAmount || t.amount;
+      personMap[person].spentOn += amt;
+      if (t.expenseType === "reimbursable") {
+        if (t.settled) {
+          personMap[person].settled += amt;
+        } else {
+          personMap[person].outstanding += amt;
+        }
+      }
     } else if (t.type === "income") {
       personMap[person].contributed += t.homeAmount || t.amount;
     }
@@ -55,6 +63,8 @@ export function calculateSettlement(startDate, endDate) {
     spentOn: Math.round(data.spentOn * 100) / 100,
     contributed: Math.round(data.contributed * 100) / 100,
     balance: Math.round((data.contributed - data.spentOn) * 100) / 100,
+    outstanding: Math.round(data.outstanding * 100) / 100,
+    settled: Math.round(data.settled * 100) / 100,
   }));
 
   // Sort by balance ascending (most owed first)
@@ -152,6 +162,21 @@ function renderPersonCard(person) {
     ? "surplus"
     : "owes";
 
+  const hasReimbursable = person.outstanding > 0 || person.settled > 0;
+  const reimbursementHtml = hasReimbursable ? `
+    <div class="settlement-reimbursement">
+      ${person.outstanding > 0 ? `
+      <div class="settlement-detail settlement-outstanding">
+        <span class="settlement-detail-label"><i class="ri-time-line"></i> Outstanding</span>
+        <span class="settlement-detail-value outstanding">${formatCurrency(person.outstanding)}</span>
+      </div>` : ""}
+      ${person.settled > 0 ? `
+      <div class="settlement-detail settlement-settled">
+        <span class="settlement-detail-label"><i class="ri-check-line"></i> Settled</span>
+        <span class="settlement-detail-value settled">${formatCurrency(person.settled)}</span>
+      </div>` : ""}
+    </div>` : "";
+
   return `
     <div class="settlement-person-card">
       <div class="settlement-person-header">
@@ -174,6 +199,7 @@ function renderPersonCard(person) {
           <span class="settlement-detail-value positive">${formatCurrency(person.contributed)}</span>
         </div>
       </div>
+      ${reimbursementHtml}
     </div>
   `;
 }
@@ -258,7 +284,10 @@ export function getSettlementSummaryText(startDate, endDate) {
     const balanceStr = p.balance >= 0
       ? `+${formatCurrency(p.balance)}`
       : `-${formatCurrency(Math.abs(p.balance))}`;
-    text += `${p.name}: spent ${formatCurrency(p.spentOn)}, contributed ${formatCurrency(p.contributed)} → ${balanceStr} (${status})\n`;
+    text += `${p.name}: spent ${formatCurrency(p.spentOn)}, contributed ${formatCurrency(p.contributed)} → ${balanceStr} (${status})`;
+    if (p.outstanding > 0) text += ` | outstanding: ${formatCurrency(p.outstanding)}`;
+    if (p.settled > 0) text += ` | settled: ${formatCurrency(p.settled)}`;
+    text += "\n";
   });
 
   return text;

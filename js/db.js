@@ -13,8 +13,10 @@ import {
   QUICK_TEMPLATES_STORE,
   ACCOUNTS_STORE,
   GOALS_STORE,
+  NET_WORTH_SNAPSHOTS_STORE,
   DEFAULT_APP_SETTINGS,
 } from "./state.js";
+import { showMessage } from "./utils.js";
 
 // Initialize IndexedDB
 export function initDB() {
@@ -110,6 +112,14 @@ export function initDB() {
         if (!database.objectStoreNames.contains(GOALS_STORE)) {
           const goalsStore = database.createObjectStore(GOALS_STORE, { keyPath: "id" });
           goalsStore.createIndex("deadline", "deadline", { unique: false });
+        }
+      }
+
+      // v10: Net Worth Snapshots store (v3.28.0)
+      if (oldVersion < 10) {
+        if (!database.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
+          const snapshotsStore = database.createObjectStore(NET_WORTH_SNAPSHOTS_STORE, { keyPath: "id", autoIncrement: true });
+          snapshotsStore.createIndex("snapshotDate", "snapshotDate", { unique: true });
         }
       }
     };
@@ -208,6 +218,37 @@ export function deleteTransactionFromDB(id) {
       record.deletedAt = new Date().toISOString();
       const putRequest = store.put(record);
       putRequest.onsuccess = () => resolve();
+      putRequest.onerror = () => reject(putRequest.error);
+    };
+
+    getRequest.onerror = () => reject(getRequest.error);
+  });
+}
+
+// Mark a reimbursable transaction as settled (v3.27.0)
+export function markTransactionSettled(id, settledBy = null) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) {
+      reject(new Error("Database not initialized"));
+      return;
+    }
+
+    const tx = state.db.transaction([STORE_NAME], "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    const getRequest = store.get(id);
+
+    getRequest.onsuccess = () => {
+      const record = getRequest.result;
+      if (!record) {
+        resolve();
+        return;
+      }
+      record.settled = true;
+      record.settledAt = new Date().toISOString();
+      record.settledBy = settledBy || null;
+      record.updatedAt = new Date().toISOString();
+      const putRequest = store.put(record);
+      putRequest.onsuccess = () => resolve(record);
       putRequest.onerror = () => reject(putRequest.error);
     };
 
@@ -376,6 +417,7 @@ export async function migrateFromLocalStorage() {
       localStorage.removeItem("transactions");
     } catch (err) {
       console.error("Migration failed:", err);
+      showMessage("Data migration failed. Your existing transactions may not have loaded.");
       return;
     }
   }
@@ -583,6 +625,52 @@ export function deleteGoal(id) {
     const store = tx.objectStore(GOALS_STORE);
     const request = store.delete(id);
     request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// ---- Net Worth Snapshots (v3.28.0) ----
+
+export function saveNetWorthSnapshot(snapshot) {
+  return new Promise((resolve, reject) => {
+    if (!state.db || !state.db.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
+      resolve(null);
+      return;
+    }
+    const tx = state.db.transaction([NET_WORTH_SNAPSHOTS_STORE], "readwrite");
+    const store = tx.objectStore(NET_WORTH_SNAPSHOTS_STORE);
+    const request = store.put(snapshot);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function loadNetWorthSnapshots() {
+  return new Promise((resolve, reject) => {
+    if (!state.db || !state.db.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
+      resolve([]);
+      return;
+    }
+    const tx = state.db.transaction([NET_WORTH_SNAPSHOTS_STORE], "readonly");
+    const store = tx.objectStore(NET_WORTH_SNAPSHOTS_STORE);
+    const index = store.index("snapshotDate");
+    const request = index.getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function getNetWorthSnapshotByDate(snapshotDate) {
+  return new Promise((resolve, reject) => {
+    if (!state.db || !state.db.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
+      resolve(null);
+      return;
+    }
+    const tx = state.db.transaction([NET_WORTH_SNAPSHOTS_STORE], "readonly");
+    const store = tx.objectStore(NET_WORTH_SNAPSHOTS_STORE);
+    const index = store.index("snapshotDate");
+    const request = index.get(snapshotDate);
+    request.onsuccess = () => resolve(request.result || null);
     request.onerror = () => reject(request.error);
   });
 }

@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { state, ACCOUNT_TYPES } from "./state.js";
-import { loadAccounts, saveAccount, deleteAccount } from "./db.js";
+import { loadAccounts, saveAccount, deleteAccount, saveNetWorthSnapshot, loadNetWorthSnapshots, getNetWorthSnapshotByDate } from "./db.js";
 import { formatCurrency } from "./currency.js";
 import { sanitizeHTML, showMessage } from "./utils.js";
 
@@ -12,9 +12,13 @@ import { sanitizeHTML, showMessage } from "./utils.js";
 export async function initAccounts() {
   try {
     await loadAccounts();
+    if (state.accounts.length > 0) {
+      await captureMonthlySnapshot();
+    }
   } catch (err) {
     console.error("Failed to load accounts:", err);
     state.accounts = [];
+    showMessage("Failed to load accounts. Some data may be unavailable.");
   }
 }
 
@@ -241,6 +245,113 @@ export function renderNetWorthDashboard() {
 
   html += `</div>`;
   container.innerHTML = html;
+
+  // Render net worth trend chart below dashboard (v3.28.0)
+  renderNetWorthTrend();
+}
+
+// ---- Net Worth Trend: Snapshot Capture (v3.28.0) ----
+
+export async function captureMonthlySnapshot() {
+  try {
+    const now = new Date();
+    const snapshotDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+    const existing = await getNetWorthSnapshotByDate(snapshotDate);
+    if (existing) return; // already captured this month
+
+    const { assets, liabilities, netWorth } = getNetWorth();
+    await saveNetWorthSnapshot({
+      snapshotDate,
+      assets: Math.round(assets * 100) / 100,
+      liabilities: Math.round(liabilities * 100) / 100,
+      netWorth: Math.round(netWorth * 100) / 100,
+      capturedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("Failed to capture net worth snapshot:", err);
+  }
+}
+
+// ---- Net Worth Trend: Chart Rendering (v3.28.0) ----
+
+async function renderNetWorthTrend() {
+  const container = document.getElementById("netWorthTrendContainer");
+  const chartEl = document.getElementById("netWorthTrend");
+  if (!container || !chartEl) return;
+
+  let snapshots;
+  try {
+    snapshots = await loadNetWorthSnapshots();
+  } catch {
+    return;
+  }
+
+  // Keep last 12 months only, sorted ascending
+  snapshots = snapshots
+    .sort((a, b) => a.snapshotDate.localeCompare(b.snapshotDate))
+    .slice(-12);
+
+  if (snapshots.length < 2) {
+    container.hidden = false;
+    chartEl.innerHTML = `<p class="nw-trend-placeholder">Track your net worth over time — check back next month for your first trend point.</p>`;
+    return;
+  }
+
+  container.hidden = false;
+
+  const values = snapshots.map((s) => s.netWorth);
+  const minVal = Math.min(...values);
+  const maxVal = Math.max(...values);
+  const range = maxVal - minVal || 1;
+
+  const W = 300;
+  const H = 120;
+  const PAD_X = 10;
+  const PAD_Y = 14;
+  const chartW = W - PAD_X * 2;
+  const chartH = H - PAD_Y * 2;
+
+  const points = snapshots.map((s, i) => {
+    const x = PAD_X + (i / (snapshots.length - 1)) * chartW;
+    const y = PAD_Y + chartH - ((s.netWorth - minVal) / range) * chartH;
+    return { x, y, snapshot: s };
+  });
+
+  const polylinePoints = points.map((p) => `${p.x},${p.y}`).join(" ");
+
+  const dotSVG = points.map((p, i) => {
+    const isLast = i === points.length - 1;
+    return `<circle cx="${p.x}" cy="${p.y}" r="${isLast ? 4 : 3}" class="nw-trend-dot${isLast ? " nw-trend-dot-last" : ""}" data-value="${p.snapshot.netWorth}" data-date="${p.snapshot.snapshotDate}" />`;
+  }).join("");
+
+  const labelFirst = formatMonthLabel(snapshots[0].snapshotDate);
+  const labelLast = formatMonthLabel(snapshots[snapshots.length - 1].snapshotDate);
+  const latestNetWorth = snapshots[snapshots.length - 1].netWorth;
+  const prevNetWorth = snapshots[snapshots.length - 2].netWorth;
+  const trendDiff = latestNetWorth - prevNetWorth;
+  const trendClass = trendDiff >= 0 ? "positive" : "negative";
+  const trendSign = trendDiff >= 0 ? "+" : "";
+
+  chartEl.innerHTML = `
+    <div class="nw-trend-header">
+      <span class="nw-trend-current ${trendClass}">${formatCurrency(latestNetWorth)}</span>
+      <span class="nw-trend-change ${trendClass}">${trendSign}${formatCurrency(trendDiff)} vs last month</span>
+    </div>
+    <svg class="nw-trend-svg" viewBox="0 0 ${W} ${H}" aria-label="Net worth trend chart">
+      <polyline class="nw-trend-line" points="${polylinePoints}" />
+      ${dotSVG}
+    </svg>
+    <div class="nw-trend-labels">
+      <span>${labelFirst}</span>
+      <span>${snapshots.length} months</span>
+      <span>${labelLast}</span>
+    </div>
+  `;
+}
+
+function formatMonthLabel(snapshotDate) {
+  const d = new Date(snapshotDate + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
 
 // ---- Render: Account Manager (Settings) ----

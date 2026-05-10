@@ -4466,6 +4466,96 @@ button.primary.loading .btn-spinner {
   color: var(--color-expense);
 }
 
+/* Net Worth Trend Chart (v3.28.0) */
+#netWorthTrendContainer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.nw-trend-title {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin: 0 0 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nw-trend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.nw-trend-current {
+  font-size: var(--font-lg);
+  font-weight: 700;
+}
+
+.nw-trend-current.positive { color: var(--color-income); }
+.nw-trend-current.negative { color: var(--color-expense); }
+
+.nw-trend-change {
+  font-size: var(--font-xs);
+  font-weight: 500;
+}
+
+.nw-trend-change.positive { color: var(--color-income); }
+.nw-trend-change.negative { color: var(--color-expense); }
+
+.nw-trend-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+.nw-trend-line {
+  fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: nw-draw-line 0.8s ease-out forwards;
+}
+
+@keyframes nw-draw-line {
+  to { stroke-dashoffset: 0; }
+}
+
+.nw-trend-dot {
+  fill: var(--color-primary);
+  opacity: 0.6;
+}
+
+.nw-trend-dot-last {
+  fill: var(--color-primary);
+  opacity: 1;
+  stroke: var(--color-surface);
+  stroke-width: 1.5;
+}
+
+.nw-trend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+.nw-trend-placeholder {
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 8px 0 4px;
+  margin: 0;
+}
+
 /* Account Manager (Settings) */
 .account-item {
   display: flex;
@@ -5613,4 +5703,56 @@ button.primary.loading .btn-spinner {
   color: var(--color-text-muted);
   padding: 16px 0;
   font-size: var(--font-sm);
+}
+
+/* Reimbursement breakdown in settlement card (v3.27.0) */
+.settlement-reimbursement {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--color-border);
+}
+
+.settlement-detail-value.outstanding {
+  color: var(--color-expense);
+}
+
+.settlement-detail-value.settled {
+  color: var(--color-income);
+}
+
+/* Transaction list: reimbursement controls (v3.27.0) */
+.settled-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--color-income);
+  background: var(--color-income-bg, #e8f5e9);
+  padding: 1px 7px;
+  border-radius: var(--radius-sm);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.mark-settled-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--color-primary);
+  background: transparent;
+  border: 1px solid var(--color-primary);
+  padding: 1px 7px;
+  border-radius: var(--radius-sm);
+  margin-top: 2px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mark-settled-btn:hover {
+  background: var(--color-primary);
+  color: #fff;
 }

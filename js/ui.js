@@ -232,12 +232,23 @@ export function updateTransactionsList() {
     if (ef.location && t.location) metaParts.push(`<span class="tx-meta-item"><i class="ri-map-pin-line"></i> ${sanitizeHTML(t.location)}</span>`);
     const metaHtml = metaParts.length > 0 ? `<div class="tx-meta">${metaParts.join("")}</div>` : "";
 
+    // Reimbursement status (v3.27.0)
+    let reimbursementHtml = "";
+    if (t.expenseType === "reimbursable") {
+      if (t.settled) {
+        reimbursementHtml = `<span class="settled-badge"><i class="ri-check-line"></i> Settled</span>`;
+      } else {
+        reimbursementHtml = `<button class="mark-settled-btn" data-action="mark-settled" data-id="${t.id}" aria-label="Mark as settled"><i class="ri-check-double-line"></i> Mark settled</button>`;
+      }
+    }
+
     item.innerHTML = `
             ${iconHtml}
             <div class="transaction-details">
                 ${categoryHtml}
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
                 ${metaHtml}
+                ${reimbursementHtml}
                 <div class="transaction-date">${formatDate(t.date)}</div>
                 ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
             </div>

@@ -741,3 +741,24 @@ body.dark-mode .settlement-export-btn {
   border-color: var(--color-border);
   color: var(--color-text);
 }
+
+/* Net Worth Trend (v3.28.0) */
+body.dark-mode .nw-trend-dot-last {
+  stroke: var(--color-bg);
+}
+
+/* Reimbursement (v3.27.0) */
+body.dark-mode .settled-badge {
+  background: rgba(76, 175, 80, 0.15);
+}
+
+body.dark-mode .mark-settled-btn {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+body.dark-mode .mark-settled-btn:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+
