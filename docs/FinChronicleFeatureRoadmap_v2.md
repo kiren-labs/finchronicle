@@ -1,7 +1,7 @@
 # FinChronicle Feature Roadmap
 
-> Last updated: 2026-05-05
-> Current version: v3.28.0
+> Last updated: 2026-05-10
+> Current version: v3.28.0 (v3.28.1 patch planned)
 
 ---
 
@@ -29,6 +29,7 @@ All features from the previous roadmap have shipped. The app is now a full perso
 | v3.26.1 | Technical fixes (exchange rate validation, error toasts, CLAUDE.md update) | May 2026 |
 | v3.27.0 | Reimbursement Workflow (mark-as-settled flow + settlement dashboard breakdown) | May 2026 |
 | v3.28.0 | Net Worth Trend (monthly snapshot store + SVG line chart) | May 2026 |
+| v3.28.1 | Dashboard & UI/UX fixes (savings rate bug, alert overload, period sync, negative value styling) | May 2026 |
 
 ---
 
@@ -70,6 +71,123 @@ These were considered and consciously ruled out. Revisiting requires a concrete 
 | One-Time Expense Flag | Tags (`#one-time`, `#annual`) cover this without a schema change. |
 | Contribution-Creates-Transfer in Goals | Auto-created transfers add transactions the user didn't explicitly enter. Confusing in the list. Manual update is cleaner. |
 | Account-Linked Expenses | The `account` optional field from v3.16 covers the basic case. Full balance-from-expenses accounting adds complexity for minimal benefit. |
+
+---
+
+## v3.28.1 — Dashboard & UI/UX Fix Patch
+
+**Priority: HIGH (data trust + daily-use friction)**
+**No new modules, no DB changes**
+
+This patch resolves bugs and UX anomalies identified from a live-usage screen review. All are purely JS/CSS fixes — no schema change, no new IndexedDB store.
+
+---
+
+### Bug 1 — Savings Rate shows 0.0% when income is ฿0 but savings amount is non-zero
+**File:** `js/savings.js`
+
+The savings rate calculation divides saved amount by income. When income is ฿0 in the current month the engine outputs 0.0% — but a non-zero saved amount is also shown, which is contradictory and breaks user trust.
+
+**Fix:** When `totalIncome === 0` for the period:
+- Display `"N/A"` for savings rate (not 0.0%)
+- Replace the `"Below target"` sub-label with `"No income recorded this month"`
+- Do not show a percentage arrow or color indicator
+- Keep the saved-amount figure as-is (it reflects transfers to savings accounts)
+
+---
+
+### Bug 2 — Annual Projection shows positive when monthly average is negative
+**File:** `js/savings.js`
+
+"Annual Projection: ฿270,000 / -฿22,500/mo avg" is mathematically impossible. The projection is calculated from `monthlyAvg × 12` but uses an absolute value somewhere in the pipeline.
+
+**Fix:**
+- If `monthlyAvg < 0`, replace the projection card with: `"On track for deficit: ฿X"` in red
+- Remove the sub-label `-฿22,500/mo avg` when the projection card already signals a deficit (redundant)
+- Use `--color-danger` token for negative projection values
+
+---
+
+### Bug 3 — Period selector ("All Time") desyncs from KPI card title ("This Month")
+**File:** `js/ui.js` → `updateSummary()`
+
+The period dropdown value and the card header label read from different state keys. When the user selects "All Time" the card still hardcodes "This Month".
+
+**Fix:**
+- `updateSummary()` must read the active period from `state.currentFilter` and set the card label dynamically:
+  - "All Time" → card title: "All Time Total"
+  - "This Month" → card title: "This Month"
+  - "YYYY-MM" month filter → card title: "Month — MMM YYYY"
+  - Custom range → card title: "Range — [start] → [end]"
+
+---
+
+### Bug 4 — Income ฿0 displays a percentage change arrow (+0.0%)
+**File:** `js/ui.js` → income summary card render
+
+When both current and previous period income are ฿0, showing "+0.0%" with an arrow implies a comparison was made. It looks broken.
+
+**Fix:** If both `currentIncome === 0` and `previousIncome === 0`, replace the change indicator with an em dash (`—`) and no arrow icon. Only show the arrow when at least one period has non-zero income.
+
+---
+
+### UX 1 — Alert banner overload (5 stacked banners)
+**File:** `js/alerts.js`, `css/styles.css`
+
+Five full-width alert banners stack on the dashboard making it feel broken and causing alert fatigue.
+
+**Fix:**
+- Collapse alerts into a single summary chip when count > 2: e.g. `"⚠ 3 spending alerts"` with a chevron toggle
+- Expanded state shows all banners (toggled by click, state stored in `localStorage` key `alertsExpanded`)
+- Add "Dismiss all" button when expanded
+- Order: yellow advisory alerts first, red danger alerts second (currently reversed)
+
+---
+
+### UX 2 — Negative net/savings figures use default text color
+**Files:** `css/styles.css`, `css/dark-mode.css`
+
+Net loss (`-฿89,472`), negative savings rate (`-16%`), and negative net worth changes all render in the same muted grey as neutral figures. Critical financial signals must visually stand out.
+
+**Fix:**
+- Any value rendered via `.summary-amount`, `.kpi-value`, or `.net-value` that is negative → add class `is-negative` → apply `color: var(--color-danger)`
+- The JS render functions in `ui.js` / `savings.js` / `annual-report.js` must toggle this class based on the sign of the value
+- Do NOT hardcode `color: red` — always use the token
+
+---
+
+### UX 3 — Savings trend chart shows "0%" on empty bars instead of "No data"
+**File:** `js/savings.js` → 3-month trend renderer
+
+Bars for months with no transactions show `0%` label, indistinguishable from months that were genuinely 0% savings rate.
+
+**Fix:** When a month bucket has `transactionCount === 0`, render the bar height at 0 but replace the label with `"—"` in muted color. Tooltip on hover: `"No transactions recorded"`.
+
+---
+
+### UX 4 — "Clone Last" button is orphaned from its context
+**File:** `index.html`, `css/styles.css`
+
+The "Clone Last" button floats below the Savings section with no visual connection to the Add Transaction form.
+
+**Fix:** Move the button into the Add Transaction card header (right side), next to the form title. Add a `title="Copy last transaction"` tooltip. Visually group it using the existing `.form-header-actions` pattern.
+
+---
+
+### Files to Modify
+
+| File | Change |
+|------|--------|
+| `js/savings.js` | Fix savings rate ÷0, fix negative projection label |
+| `js/ui.js` | Sync period label to filter, fix income ฿0 arrow, add `is-negative` class logic |
+| `js/alerts.js` | Collapse to summary chip when > 2 alerts, Dismiss all, fix ordering |
+| `js/annual-report.js` | Apply `is-negative` to Net and Savings Rate in year scorecard |
+| `index.html` | Move Clone Last button into Add Transaction card header |
+| `css/styles.css` | `.is-negative` rule, alert collapse chip styles, Clone Last repositioned styles |
+| `css/dark-mode.css` | `.is-negative` dark mode override if needed |
+| `js/state.js` | Bump `APP_VERSION` → `3.28.1` |
+| `sw.js` | Bump `CACHE_NAME` → `finchronicle-v3.28.1` |
+| `manifest.json` | Bump `version` → `3.28.1` |
 
 ---
 
@@ -238,6 +356,7 @@ Previously deferred. Still low priority but the only significant data-capture ga
 
 | Version | Feature | DB Version | Priority | Status |
 |---------|---------|-----------|---------|--------|
+| v3.28.1 | Dashboard & UI/UX fixes (savings rate bug, alert overload, period sync, negative value styling) | 10 | HIGH | Planned |
 | v3.29.0 | Local Notifications | 10 | HIGH | Planned |
 | v3.30.0 | Bulk Transaction Operations | 10 | MEDIUM | Planned |
 | v3.31.0 | Category Management (rename, merge, cleanup) | 10 | MEDIUM | Planned |
