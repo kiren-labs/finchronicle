@@ -124,6 +124,7 @@ import {
   runAlertChecks,
   renderAlertBanners,
   dismissAlert,
+  dismissAllAlerts,
   renderAlertHistory,
   clearAlertHistory,
 } from "./alerts.js";
@@ -1037,6 +1038,25 @@ function bindAlertEvents() {
       // Hide container if empty
       if (!alertsContainer.querySelector(".smart-alert")) {
         alertsContainer.hidden = true;
+      }
+    });
+  }
+
+  // Alert summary chip toggle (collapse/expand when > 2 alerts)
+  if (alertsContainer) {
+    alertsContainer.addEventListener("click", (e) => {
+      if (e.target.closest("#alertSummaryToggle")) {
+        const expanded = localStorage.getItem("alertsExpanded") === "true";
+        localStorage.setItem("alertsExpanded", expanded ? "false" : "true");
+        renderAlertBanners(runAlertChecks());
+        return;
+      }
+      if (e.target.closest("#alertDismissAll")) {
+        const alerts = runAlertChecks();
+        dismissAllAlerts(alerts);
+        localStorage.removeItem("alertsExpanded");
+        renderAlertBanners([]);
+        return;
       }
     });
   }

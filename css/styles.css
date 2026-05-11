@@ -5049,6 +5049,56 @@ button.primary.loading .btn-spinner {
   opacity: 1;
 }
 
+/* Alert summary chip (collapses > 2 alerts) */
+.alert-summary-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xs);
+  font-size: var(--font-sm);
+  font-weight: 500;
+}
+.alert-summary-chip.danger {
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+}
+.alert-summary-chip.warning {
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-warning-text);
+}
+.alert-summary-chip > span { flex: 1; }
+.alert-summary-toggle,
+.alert-dismiss-all {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.alert-summary-toggle:hover,
+.alert-dismiss-all:hover { opacity: 1; }
+.alert-dismiss-all { text-decoration: underline; }
+
+/* Negative value indicator (v3.28.1) */
+.is-negative {
+  color: var(--color-danger) !important;
+}
+
+/* Savings trend no-data label */
+.savings-trend-nodata {
+  color: var(--color-text-muted);
+  font-style: normal;
+}
+
 /* Alert History (Settings) */
 .alert-history-item {
   display: flex;

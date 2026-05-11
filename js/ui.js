@@ -54,6 +54,7 @@ export function updateUI() {
 
 export function updateSummary() {
   const currentMonth = new Date().toISOString().slice(0, 7);
+  const activeMonth = state.selectedMonth === "all" ? currentMonth : state.selectedMonth;
 
   // Update section title: selected month or "All Time"
   const monthLabel = document.getElementById("summaryMonthLabel");
@@ -66,9 +67,21 @@ export function updateSummary() {
     }
   }
 
+  // Sync the "This Month" card label with the active period
+  const thisMonthLabel = document.getElementById("thisMonthLabel");
+  if (thisMonthLabel) {
+    if (state.selectedMonth === "all") {
+      thisMonthLabel.textContent = "This Month";
+    } else {
+      const [y, m] = state.selectedMonth.split("-");
+      const label = new Date(y, parseInt(m) - 1).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+      thisMonthLabel.textContent = label;
+    }
+  }
+
   const { income, expense, count } = state.transactions.reduce(
     (acc, t) => {
-      if (t.date.startsWith(currentMonth) && t.type !== "transfer") {
+      if (t.date.startsWith(activeMonth) && t.type !== "transfer") {
         acc.count++;
         const amt = t.homeAmount || t.amount;
         if (t.type === "income") acc.income += amt;
@@ -81,7 +94,7 @@ export function updateSummary() {
 
   const net = income - expense;
 
-  const previousMonth = getPreviousMonth(currentMonth);
+  const previousMonth = getPreviousMonth(activeMonth);
   const prevTotals = getMonthTotals(previousMonth);
 
   const netDelta = calculateMoMDelta(net, prevTotals.net);
@@ -105,13 +118,13 @@ export function updateSummary() {
     $.monthNetTrend.textContent = "";
   }
 
-  // Update Income trend
-  if (incomeDelta && incomeDelta.pct !== null) {
+  // Update Income trend — suppress arrow when both current and previous are ฿0
+  if (incomeDelta && incomeDelta.pct !== null && !(income === 0 && prevTotals.income === 0)) {
     const sign = incomeDelta.abs >= 0 ? "+" : "";
     $.monthIncomeTrend.innerHTML = `<i class="ri-arrow-${incomeDelta.direction === "up" ? "up" : incomeDelta.direction === "down" ? "down" : "right"}-line"></i> ${sign}${Math.abs(incomeDelta.pct).toFixed(1)}% vs last month`;
     $.monthIncomeTrend.className = `summary-trend ${incomeDelta.direction === "up" ? "positive" : incomeDelta.direction === "down" ? "negative" : "neutral"}`;
   } else {
-    $.monthIncomeTrend.textContent = "";
+    $.monthIncomeTrend.textContent = income === 0 && prevTotals.income === 0 ? "—" : "";
   }
 
   // Update Expenses meta

@@ -100,7 +100,8 @@ export function buildSavingsTrend() {
     const savings = getMonthlySavings(m);
     const rate = income > 0 ? Math.min((savings / income) * 100, 100) : 0;
     const label = new Date(m + "-15").toLocaleDateString("en", { month: "short" });
-    return { month: m, label, income, savings, rate };
+    const transactionCount = state.transactions.filter((t) => !t.deleted && t.date && t.date.startsWith(m)).length;
+    return { month: m, label, income, savings, rate, transactionCount };
   });
 }
 
@@ -194,8 +195,8 @@ export function renderSavingsDashboard() {
         </div>
         <div class="savings-widget highlight">
           <span class="savings-widget-label">Savings Rate</span>
-          <span class="savings-widget-value ${rateClass}">${rate.toFixed(1)}%</span>
-          <span class="savings-widget-sub">${rate >= 20 ? "On track" : rate >= 10 ? "Could improve" : "Below target"}</span>
+          <span class="savings-widget-value ${monthIncome === 0 ? "" : rateClass}">${monthIncome === 0 ? "N/A" : rate.toFixed(1) + "%"}</span>
+          <span class="savings-widget-sub">${monthIncome === 0 ? "No income recorded" : rate >= 20 ? "On track" : rate >= 10 ? "Could improve" : "Below target"}</span>
         </div>
       </div>`;
 
@@ -211,7 +212,7 @@ export function renderSavingsDashboard() {
     html += `
       <div class="savings-trend-col">
         <div class="savings-trend-bar-wrap">
-          <span class="savings-trend-pct">${t.rate.toFixed(0)}%</span>
+          <span class="savings-trend-pct${t.transactionCount === 0 ? " savings-trend-nodata" : ""}">${t.transactionCount === 0 ? "—" : t.rate.toFixed(0) + "%"}</span>
           <div class="savings-trend-bar ${barClass}" style="height: ${height}%"></div>
         </div>
         <span class="savings-trend-label">${t.label}</span>
@@ -225,8 +226,8 @@ export function renderSavingsDashboard() {
       <div class="savings-widget-row">
         <div class="savings-widget">
           <span class="savings-widget-label">Annual Projection</span>
-          <span class="savings-widget-value">${formatCurrency(projection.projectedAnnual)}</span>
-          <span class="savings-widget-sub">~${formatCurrency(projection.avgMonthlySavings)}/mo avg</span>
+          <span class="savings-widget-value${projection.avgMonthlySavings < 0 ? " is-negative" : ""}">${formatCurrency(Math.abs(projection.projectedAnnual))}</span>
+          <span class="savings-widget-sub">${projection.avgMonthlySavings < 0 ? "Deficit trend" : "~" + formatCurrency(projection.avgMonthlySavings) + "/mo avg"}</span>
         </div>
         <div class="savings-widget">
           <span class="savings-widget-label">Total Saved</span>
