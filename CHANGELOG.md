@@ -9,14 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned
-- (Nothing pending — all roadmap features complete)
+### Planned — v3.28.1 (Dashboard & UI/UX Fix Patch)
+- Fix savings rate showing `0.0%` when income is ฿0 but saved amount is non-zero → show `"N/A"` instead
+- Fix annual projection showing positive when monthly average is negative → replace with deficit label in red
+- Fix period selector ("All Time") desyncing from KPI card title ("This Month") → sync card title to `state.currentFilter`
+- Fix income ฿0 displaying `+0.0%` change arrow when both periods are zero → show em dash instead
+- Collapse 3+ alert banners into a single summary chip with chevron toggle and "Dismiss all"
+- Fix alert ordering: yellow advisory first, red danger second
+- Apply `is-negative` class (using `--color-danger` token) to negative values in `.summary-amount`, `.kpi-value`, `.net-value`
+- Fix savings trend chart showing `0%` on empty months → show `"—"` for months with no transactions
+- Move "Clone Last" button into the Add Transaction card header (`.form-header-actions`)
 
-### Deferred (not blocked, low priority)
-- Push Notifications — recurring due dates, budget warnings
-- Split Transactions — rarely needed in practice; approximable with tags
+### Permanently Deferred — Will Not Build
+- Split Transactions — approximable with tags; low frequency in real usage
 - Account reconciliation — adds complexity for minimal gain on a personal app
 - Account-linked expenses/income — `account` optional field from v3.16 covers the basic case
+- Receipt Photos, Budget Envelopes, Recurring Auto-Match — see roadmap for full rationale
 
 ---
 

@@ -1,7 +1,7 @@
 # Version Management Guide
 
-## Current Version: 3.21.0
-**Last Updated:** 2026-05-01
+## Current Version: 3.28.0
+**Last Updated:** 2026-05-12
 
 ## How Versioning Works
 
@@ -28,7 +28,7 @@ The app version is always visible in the header next to the app name. This helps
 
 ```javascript
 // In js/state.js:
-export const APP_VERSION = '3.21.0';
+export const APP_VERSION = '3.28.0';
 ```
 
 When users load the app:
@@ -43,15 +43,15 @@ When users load the app:
 
 ```javascript
 // js/state.js
-export const APP_VERSION = '3.21.0';
+export const APP_VERSION = '3.28.0';
 
 // sw.js
-const CACHE_NAME = 'finchronicle-v3.21.0';
+const CACHE_NAME = 'finchronicle-v3.28.0';
 ```
 
 ```json
 // manifest.json
-"version": "3.21.0"
+"version": "3.28.0"
 ```
 
 ### Step 2: Update Service Worker Cache URLs
@@ -66,7 +66,7 @@ Add entry to `CHANGELOG.md`.
 
 ```bash
 git add -A
-git commit -m "Release v3.21.0: [Brief description]"
+git commit -m "Release v3.28.0: [Brief description]"
 git push origin main
 ```
 
@@ -88,6 +88,12 @@ Mobile users will be notified automatically:
 
 | Version | Date | Highlights |
 |---------|------|-----------|
+| v3.28.0 | 2026-05-05 | Net Worth Trend — monthly snapshot store (DB_VERSION 10), SVG line chart |
+| v3.27.0 | 2026-05-05 | Reimbursement Workflow — mark-as-settled, settlement dashboard breakdown |
+| v3.26.1 | 2026-05-05 | Exchange rate validation fix, error toasts, CLAUDE.md update |
+| v3.26.0 | 2026-05-05 | Family Expense Settlement — per-person balance from `attachedTo` tags |
+| v3.24.0 | 2026-05-05 | Multi-Currency Transactions — per-transaction FX + exchange rate history |
+| v3.22.0 | 2026-05-05 | Auto-Backup — AES-GCM-256 encryption, storage health dashboard |
 | v3.21.0 | 2026-05-01 | Smart Spending Alerts (4 types), Annual Report with YoY comparison |
 | v3.20.0 | 2026-05-01 | Savings Goals with circular progress, milestones, deadlines |
 | v3.19.0 | 2026-05-01 | Savings Rate Dashboard — this-month, 3-month trend, annual projection |
@@ -194,5 +200,6 @@ If users report wrong version:
 ---
 
 **Current Status**: Production Ready ✅
-**Next Release**: v3.22.0 — Auto-Backup & Data Safety
-**Last Updated**: 2026-05-01
+**Next Release**: v3.28.1 — Dashboard & UI/UX fixes (savings rate, alert overload, period sync, negative value styling)
+**Roadmap**: v3.29–v3.40 — Budget vs Actual, Financial Health Ratios, Cash Flow Forecast, Subscription Tracker, Duplicate Detection, Loan/EMI Tracker, Bank Statement Importer, Notifications, Bulk Ops, Category Management, Tax Export, Receipt Photos
+**Last Updated**: 2026-05-13

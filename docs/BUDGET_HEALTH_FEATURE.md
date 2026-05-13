@@ -1,5 +1,7 @@
 # Budget Health Card Feature - Implementation Summary
 
+> **Archived** — Feature shipped in v3.10.0 (Feb 2026). This document is kept for historical reference only. The budget health logic was later subsumed by Smart Spending Alerts (v3.21.0) and the Budget vs Actual Report (planned v3.29.0).
+
 **Date**: 2026-02-16
 **Version**: 3.10.0
 **Feature**: Budget Health Card (Back-ported from Flutter app)

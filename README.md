@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-3.21.0-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-3.28.0-blue.svg)](VERSION.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -43,8 +43,13 @@
 - ✅ **Accounts & Net Worth** - Track multiple accounts
 - ✅ **Savings Rate Dashboard** - Monitor saving habits
 - ✅ **Savings Goals** - Progress tracking with milestones
-- ✅ **Smart Spending Alerts** - AI-like pattern detection (v3.21.0)
-- ✅ **Annual Report** - Year scorecard with YoY comparison (v3.21.0)
+- ✅ **Smart Spending Alerts** - Pattern detection with rolling 90-day averages (v3.21.0)
+- ✅ **Annual Report** - Year scorecard with YoY comparison & CSV export (v3.21.0)
+- ✅ **Auto-Backup** - Scheduled encrypted backups (AES-GCM-256) + storage health (v3.22.0)
+- ✅ **Multi-Currency** - Per-transaction foreign currency + exchange rate entry (v3.24.0)
+- ✅ **Family Settlement** - Per-person balance from `attachedTo` tags (v3.26.0)
+- ✅ **Reimbursement Workflow** - Mark-as-settled flow + settlement dashboard breakdown (v3.27.0)
+- ✅ **Net Worth Trend** - Monthly snapshot store + SVG line chart (v3.28.0)
 - ✅ **Export to CSV** - Backup, restore, and annual exports
 
 ### 🎨 User Experience
@@ -58,10 +63,10 @@
 - ✅ **Modern Icons** - Professional Remix Icon font
 
 ### 🛠️ Technical Features
-- ✅ **ES Modules** - 23 focused modules, no build step required
+- ✅ **ES Modules** - 25 focused modules, no build step required
 - ✅ **Zero Dependencies** - No npm, no frameworks
 - ✅ **Service Worker** - Cache-first offline strategy
-- ✅ **IndexedDB** - 7 object stores for robust data
+- ✅ **IndexedDB** - 8 object stores for robust data (DB_VERSION 10)
 - ✅ **Responsive Design** - Works on all screen sizes
 - ✅ **WCAG AA Compliant** - Fully accessible
 - ✅ **Version Management** - Semantic versioning with auto-update
@@ -139,6 +144,9 @@ finchronicle/
 │   ├── goals.js        # Savings goals with progress tracking
 │   ├── alerts.js       # Smart spending alerts (v3.21.0)
 │   ├── annual-report.js # Year scorecard & CSV export (v3.21.0)
+│   ├── auto-backup.js  # Scheduled encrypted backups + storage health (v3.22.0)
+│   ├── multi-currency.js # Per-transaction FX + exchange rate history (v3.24.0)
+│   ├── settlement.js   # Family expense settlement (v3.26.0)
 │   ├── faq.js          # Lazy-loaded FAQ
 │   └── import-export.js # Lazy-loaded CSV import/export
 ├── css/
@@ -159,14 +167,14 @@ finchronicle/
 2. **Update version** in three places:
    ```javascript
    // js/state.js
-   export const APP_VERSION = '3.21.0';
+   export const APP_VERSION = '3.28.0';
 
    // sw.js
-   const CACHE_NAME = 'finchronicle-v3.21.0';
+   const CACHE_NAME = 'finchronicle-v3.28.0';
    ```
    ```json
    // manifest.json
-   "version": "3.21.0"
+   "version": "3.28.0"
    ```
 3. **Test locally**:
    ```bash
@@ -259,25 +267,40 @@ export const categories = {
 
 ## 🛣️ Roadmap
 
-### Completed (v3.11–3.21)
+### Completed (v3.11–3.28)
 - ✅ Recurring transactions (v3.11)
 - ✅ Budget limits & alerts (v3.13)
 - ✅ Tags & full-text search (v3.14)
-- ✅ Transfer transactions (v3.15)
+- ✅ Transfer transactions + audit trail (v3.15)
 - ✅ Optional fields system (v3.16)
 - ✅ Quick Entry templates (v3.17)
 - ✅ Accounts & Net Worth (v3.18)
 - ✅ Savings Rate Dashboard (v3.19)
 - ✅ Savings Goals (v3.20)
 - ✅ Smart Spending Alerts & Annual Report (v3.21)
+- ✅ Auto-Backup with AES-GCM-256 encryption (v3.22)
+- ✅ Multi-Currency Transactions (v3.24)
+- ✅ Family Expense Settlement (v3.26)
+- ✅ Reimbursement Workflow (v3.27)
+- ✅ Net Worth Trend chart (v3.28)
 
 ### Upcoming
-- [ ] Auto-Backup & Data Safety (v3.22)
-- [ ] Receipt Photos (v3.23)
-- [ ] Multi-Currency Transactions (v3.24)
-- [ ] Push Notifications (v3.25)
 
-See [FEATURE-ROADMAP.md](docs/FEATURE-ROADMAP.md) for detailed roadmap.
+- [ ] Dashboard & UI/UX fixes — savings rate, alert overload, period sync (v3.28.1)
+- [ ] Budget vs Actual Report — consolidated table with variance per category (v3.29)
+- [ ] Financial Health Ratios — emergency fund, debt-to-income, housing cost KPIs (v3.30)
+- [ ] Cash Flow Forecast — 30/60/90-day projection from recurring templates (v3.31)
+- [ ] Subscription Tracker — total monthly/yearly subscription cost view (v3.32)
+- [ ] Duplicate Transaction Detection (v3.33)
+- [ ] Loan / EMI Tracker — amortization schedule, payoff calculator (v3.34)
+- [ ] Bank Statement CSV Importer — generic column mapper (v3.35)
+- [ ] Local Notifications — recurring reminders, budget warnings (v3.36)
+- [ ] Bulk Transaction Operations — recategorize, tag, delete (v3.37)
+- [ ] Category Management — rename, merge, cleanup suggestions (v3.38)
+- [ ] Business & Tax Export with tax year configuration (v3.39)
+- [ ] Receipt Photos (v3.40)
+
+See [FinChronicleFeatureRoadmap_v2.md](docs/FinChronicleFeatureRoadmap_v2.md) for detailed roadmap.
 
 ---
 
@@ -385,12 +408,12 @@ If this project helped you, please consider:
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Latest Release: v3.21.0**
-- 🔔 Smart Spending Alerts (weekly spike, unusual amount, velocity, category drift)
-- 📊 Annual Report year scorecard (YoY comparison, top expenses, CSV export)
-- 🎯 Savings Goals with circular progress & milestones (v3.20.0)
-- 💰 Savings Rate Dashboard (v3.19.0)
-- 🏦 Accounts & Net Worth tracking (v3.18.0)
+**Latest Release: v3.28.0**
+- 📈 Net Worth Trend — monthly snapshot store (DB_VERSION 10) + SVG line chart
+- ✅ Reimbursement Workflow — mark-as-settled flow + settlement dashboard breakdown (v3.27.0)
+- 🌍 Multi-Currency Transactions — per-transaction FX + exchange rate history (v3.24.0)
+- 🔐 Auto-Backup — AES-GCM-256 encryption + storage health dashboard (v3.22.0)
+- 👨‍👩‍👧 Family Expense Settlement — per-person balance from `attachedTo` tags (v3.26.0)
 
 ---
 

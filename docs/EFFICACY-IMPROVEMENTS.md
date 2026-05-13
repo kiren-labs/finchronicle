@@ -1,14 +1,17 @@
 # FinChronicle Efficacy Improvements — Draft
 
 > Date: 2026-05-01  
-> Status: Draft / Proposal  
-> Scope: Post-v3.26 improvements focused on speed, reliability, and daily UX
+> Last reviewed: 2026-05-13  
+> Status: Partially actioned — see item-level status notes  
+> Scope: Post-v3.28 improvements focused on speed, reliability, and daily UX
 
 ---
 
 ## Context
 
-With 16 feature modules shipped (v3.10–v3.26), the app covers budgeting, savings, goals, alerts, multi-currency, settlement, and auto-backup. The next phase should focus on **efficacy** — making existing features faster, safer, and less friction-prone — rather than adding more surface area.
+With 25 feature modules shipped (v3.10–v3.28), the app covers budgeting, savings, goals, alerts, multi-currency, settlement, reimbursement, auto-backup, and net worth trend. The next phase should focus on **efficacy** — making existing features faster, safer, and less friction-prone — rather than adding more surface area.
+
+**Roadmap status (as of 2026-05-13):** Batch Operations is now v3.37.0 in the main roadmap. Keyboard Shortcuts, Undo Delete, Lazy Loading, Virtual Scrolling, and the remaining items below are not yet scheduled — they are candidates for efficacy sprints between roadmap releases.
 
 ---
 
@@ -81,7 +84,7 @@ Implementation: Single `keydown` listener in `app.js` with a shortcut map.
 - Store in `localStorage` (small settings data, consistent with existing pattern)
 - Pre-fill on next form open; user can override
 
-### 2.3 Batch Operations
+### 2.3 Batch Operations *(→ scheduled as v3.37.0 in main roadmap)*
 
 - Multi-select mode in transaction list (long-press or checkbox toggle)
 - Actions: bulk delete, bulk re-categorize, bulk tag
