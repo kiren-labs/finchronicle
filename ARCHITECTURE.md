@@ -1,7 +1,7 @@
 # FinChronicle - Complete Architecture Guide
 
-**Version:** 3.21.0
-**Last Updated:** 2026-05-01
+**Version:** 3.28.0
+**Last Updated:** 2026-05-13
 **For:** Developers who want to understand or contribute to the codebase
 
 ---
@@ -139,6 +139,9 @@ finchronicle/
 │   ├── goals.js            - Savings Goals with circular progress tracking
 │   ├── alerts.js           - Smart Spending Alerts (4 detection algorithms)
 │   ├── annual-report.js    - Year scorecard, YoY comparison, CSV export
+│   ├── auto-backup.js      - Scheduled encrypted backups (AES-GCM-256) + storage health
+│   ├── multi-currency.js   - Per-transaction foreign currency + exchange rate history
+│   ├── settlement.js       - Family expense settlement (per-person balance from attachedTo tags)
 │   ├── faq.js              - Lazy-loaded on first Settings tab visit
 │   └── import-export.js    - Lazy-loaded on first CSV import/export call
 ├── css/
@@ -192,7 +195,7 @@ app.js (entry point)
 ### 🗄️ IndexedDB Structure
 
 **Database:** `FinChronicleDB`
-**Version:** 9
+**Version:** 10
 
 **Object Stores:**
 
@@ -205,35 +208,66 @@ app.js (entry point)
 | `quickTemplates` | `id` | — | Quick entry templates |
 | `accounts` | `id` | — | Account definitions for net worth |
 | `savingsGoals` | `id` | — | Savings goals with progress |
+| `netWorthSnapshots` | `id` | `snapshotDate` (unique) | Monthly net worth snapshots for trend chart |
 
-**Transaction Document:**
+**Transaction Document (complete schema as of v3.28.0):**
 ```typescript
 interface Transaction {
-  id: number;                       // Date.now() timestamp (unique)
+  // Core
+  id: number;                         // Date.now() timestamp (unique)
   type: 'income' | 'expense' | 'transfer';
-  amount: number;                   // Decimal, 2 decimal places max
-  category: string;                 // From predefined categories list
-  date: string;                     // YYYY-MM-DD format
-  notes: string;                    // Optional description (sanitized)
-  tags: string[];                   // Optional tags array
-  createdAt: string;                // ISO 8601 timestamp
-  fromAccount?: string;             // Transfer: source account
-  toAccount?: string;               // Transfer: destination account
-  paymentMethod?: string;           // Optional field
-  expenseType?: string;             // Optional field
+  amount: number;                     // In home currency; 2 decimal places max
+  category: string;                   // From predefined categories list
+  date: string;                       // YYYY-MM-DD format
+  notes: string;                      // Optional description (sanitized)
+  tags: string[];                     // Optional tags array
+  createdAt: string;                  // ISO 8601 timestamp
+  updatedAt: string;                  // ISO 8601 timestamp (set on every save)
+
+  // Audit trail (v3.15)
+  deleted?: boolean;                  // Soft-delete flag
+  deletedAt?: string;                 // ISO 8601 timestamp of soft-delete
+
+  // Transfer fields (v3.15)
+  fromAccount?: string;               // Transfer: source account name
+  toAccount?: string;                 // Transfer: destination account name
+  transferNote?: string;              // Transfer: optional memo
+
+  // Optional fields (v3.16)
+  paymentMethod?: string;             // 'cash'|'credit-card'|'debit-card'|'bank-transfer'|'wallet'|'other'
+  merchant?: string;                  // Free text with autocomplete
+  expenseType?: string;               // 'personal'|'business'|'reimbursable'
+  attachedTo?: string;                // Person tag: 'Kevin', 'Beth', etc.
+  referenceId?: string;               // UPI ID, receipt number
+  location?: string;                  // City/area, free text
+
+  // Multi-currency (v3.24)
+  transactionCurrency?: string;       // ISO 4217 code e.g. 'USD', 'THB'
+  exchangeRate?: number;              // Rate to home currency at time of entry
+  homeAmount?: number;                // amount × exchangeRate
+
+  // Reimbursement (v3.27)
+  settled?: boolean;
+  settledAt?: string;                 // ISO 8601 timestamp
+  settledBy?: string;                 // Free text (who settled)
+
+  // Recurring link
+  recurringId?: number;               // ID of source recurringTemplate
 }
 ```
 
-**Example:**
+**Minimal example:**
 ```javascript
 {
   id: 1707398400000,
   type: 'expense',
   amount: 1234.56,
   category: 'Food',
-  date: '2024-02-08',
+  date: '2026-02-08',
   notes: 'Lunch at restaurant',
-  createdAt: '2024-02-08T12:00:00.000Z'
+  tags: [],
+  createdAt: '2026-02-08T12:00:00.000Z',
+  updatedAt: '2026-02-08T12:00:00.000Z'
 }
 ```
 
@@ -256,7 +290,15 @@ interface Transaction {
   "last_backup_timestamp": "1707398400000", // String: Milliseconds since epoch
 
   // Smart Alerts (v3.21.0)
-  "smartAlerts": "{\"history\":[],\"dismissed\":[]}" // JSON string
+  "smartAlerts": "{\"history\":[],\"dismissed\":[]}",  // JSON string
+
+  // Auto-Backup (v3.22.0)
+  "autoBackupEnabled": "true",
+  "backupFrequency": "weekly",
+  "lastAutoBackup": "1707398400000",
+
+  // UI state
+  "alertsExpanded": "false"           // Alert banner collapse state
 }
 ```
 
@@ -270,6 +312,7 @@ export const state = {
   db: null,                        // IndexedDB connection
   transactions: [],                // All transactions (sorted by date desc)
   currentTab: 'add',               // Active tab
+  currentFilter: 'all',            // Active period filter ('all', 'YYYY-MM', custom range)
   selectedMonth: 'all',            // Month filter
   selectedCategory: 'all',         // Category filter
   selectedType: 'all',             // Type filter
@@ -278,8 +321,9 @@ export const state = {
   currentPage: 1,                  // Pagination
   recurringTemplates: [],          // Recurring templates
   budgets: [],                     // Budget limits
-  accounts: [],                    // Account definitions
-  savingsGoals: [],                // Savings goals
+  accounts: [],                    // Account definitions (v3.18)
+  savingsGoals: [],                // Savings goals (v3.20)
+  netWorthSnapshots: [],           // Monthly snapshots for trend chart (v3.28)
   // ... additional UI state
 };
 ```
@@ -520,16 +564,20 @@ App
 │  │  ├─ Category Pie Chart (donut)
 │  │  ├─ Grouped View (by month / by category)
 │  │  ├─ Accounts & Net Worth Dashboard (v3.18)
+│  │  ├─ Net Worth Trend SVG chart (v3.28)
 │  │  ├─ Savings Rate Dashboard (v3.19)
 │  │  ├─ Savings Goals (v3.20)
-│  │  └─ Annual Report (v3.21)
+│  │  ├─ Annual Report + Tax Export (v3.21 / v3.32 planned)
+│  │  └─ Family Settlement Dashboard (v3.26)
 │  │
 │  └─ Settings Tab
 │     ├─ Action Buttons (Export, Import, Currency, Dark Mode)
 │     ├─ Recurring Templates Manager
 │     ├─ Budget Manager
+│     ├─ Optional Fields Config (v3.16)
+│     ├─ Quick Entry Templates (v3.17)
 │     ├─ Alert History (v3.21)
-│     ├─ Backup Status Card
+│     ├─ Backup Status Card + Storage Health (v3.22)
 │     └─ FAQ Section (lazy-loaded)
 │
 └─ Modals
