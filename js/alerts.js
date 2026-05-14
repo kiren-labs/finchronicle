@@ -354,6 +354,14 @@ export function getAlertHistory() {
   return alertHistory;
 }
 
+// ---- Public: Dismiss all active alerts ----
+
+export function dismissAllAlerts(alerts) {
+  if (!Array.isArray(alerts)) return;
+  alerts.forEach((alert) => dismissedAlerts.add(alert.id));
+  persistAlerts();
+}
+
 // ---- Public: Clear all alerts ----
 
 export function clearAlertHistory() {
@@ -374,21 +382,46 @@ export function renderAlertBanners(alerts) {
     return;
   }
 
+  // Sort: warning (advisory) first, danger second
+  const sorted = [...alerts].sort((a, b) => {
+    if (a.severity === b.severity) return 0;
+    return a.severity === "warning" ? -1 : 1;
+  });
+
   container.hidden = false;
-  container.innerHTML = alerts
-    .slice(0, 5) // show max 5 banners
-    .map(
-      (alert) => `
-    <div class="smart-alert smart-alert-${alert.severity}" data-alert-id="${alert.id}">
-      <i class="${alert.severity === "danger" ? "ri-alarm-warning-fill" : "ri-error-warning-line"}"></i>
-      <span class="smart-alert-text">${alert.message}</span>
-      <button class="smart-alert-dismiss" data-dismiss="${alert.id}" aria-label="Dismiss">
-        <i class="ri-close-line"></i>
+
+  if (sorted.length <= 2) {
+    container.innerHTML = sorted.map((a) => renderAlertBanner(a)).join("");
+    return;
+  }
+
+  // Collapse to summary chip when > 2 alerts
+  const expanded = localStorage.getItem("alertsExpanded") === "true";
+  const dangerCount = sorted.filter((a) => a.severity === "danger").length;
+  const chipClass = dangerCount > 0 ? "alert-summary-chip danger" : "alert-summary-chip warning";
+  const icon = dangerCount > 0 ? "ri-alarm-warning-fill" : "ri-error-warning-line";
+  const bannerList = expanded ? sorted.map((a) => renderAlertBanner(a)).join("") : "";
+
+  container.innerHTML = `
+    <div class="${chipClass}" id="alertSummaryChip">
+      <i class="${icon}"></i>
+      <span>${sorted.length} spending alert${sorted.length > 1 ? "s" : ""}</span>
+      <button class="alert-summary-toggle" id="alertSummaryToggle" aria-expanded="${expanded}" aria-label="${expanded ? "Collapse" : "Expand"} alerts">
+        <i class="ri-arrow-${expanded ? "up" : "down"}-s-line"></i>
       </button>
+      ${expanded ? `<button class="alert-dismiss-all" id="alertDismissAll" aria-label="Dismiss all alerts">Dismiss all</button>` : ""}
     </div>
-  `
-    )
-    .join("");
+    <div id="alertBannerList">${bannerList}</div>`;
+}
+
+function renderAlertBanner(alert) {
+  return `<div class="smart-alert smart-alert-${alert.severity}" data-alert-id="${alert.id}">
+    <i class="${alert.severity === "danger" ? "ri-alarm-warning-fill" : "ri-error-warning-line"}"></i>
+    <span class="smart-alert-text">${alert.message}</span>
+    <button class="smart-alert-dismiss" data-dismiss="${alert.id}" aria-label="Dismiss">
+      <i class="ri-close-line"></i>
+    </button>
+  </div>`;
 }
 
 // ---- Public: Render alert history (Settings) ----

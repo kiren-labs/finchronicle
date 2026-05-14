@@ -9,6 +9,7 @@ import {
   migrateFromLocalStorage,
   loadDataFromDB,
   saveTransactionToDB,
+  markTransactionSettled,
 } from "./db.js";
 import {
   setCurrency,
@@ -123,6 +124,7 @@ import {
   runAlertChecks,
   renderAlertBanners,
   dismissAlert,
+  dismissAllAlerts,
   renderAlertHistory,
   clearAlertHistory,
 } from "./alerts.js";
@@ -471,6 +473,7 @@ function bindDelegatedEvents() {
       const id = Number(btn.dataset.id);
       if (btn.dataset.action === "edit") editTransaction(id);
       if (btn.dataset.action === "delete") deleteTransaction(id);
+      if (btn.dataset.action === "mark-settled") handleMarkSettled(id);
       return;
     }
     const tagEl = e.target.closest("[data-tag]");
@@ -1039,6 +1042,25 @@ function bindAlertEvents() {
     });
   }
 
+  // Alert summary chip toggle (collapse/expand when > 2 alerts)
+  if (alertsContainer) {
+    alertsContainer.addEventListener("click", (e) => {
+      if (e.target.closest("#alertSummaryToggle")) {
+        const expanded = localStorage.getItem("alertsExpanded") === "true";
+        localStorage.setItem("alertsExpanded", expanded ? "false" : "true");
+        renderAlertBanners(runAlertChecks());
+        return;
+      }
+      if (e.target.closest("#alertDismissAll")) {
+        const alerts = runAlertChecks();
+        dismissAllAlerts(alerts);
+        localStorage.removeItem("alertsExpanded");
+        renderAlertBanners([]);
+        return;
+      }
+    });
+  }
+
   // Clear alert history button
   const clearBtn = document.getElementById("clearAlertsBtn");
   if (clearBtn) {
@@ -1349,6 +1371,27 @@ function bindFormSubmit() {
         showMessage("Failed to save transaction");
       }
     });
+}
+
+// ============================================================================
+// Reimbursement Settlement (v3.27.0)
+// ============================================================================
+
+async function handleMarkSettled(id) {
+  try {
+    const updated = await markTransactionSettled(id);
+    if (updated) {
+      const idx = state.transactions.findIndex((t) => t.id === id);
+      if (idx !== -1) {
+        state.transactions[idx] = updated;
+      }
+      updateUI();
+      showMessage("Marked as settled");
+    }
+  } catch (err) {
+    console.error("Failed to mark transaction as settled:", err);
+    showMessage("Failed to mark as settled. Please try again.");
+  }
 }
 
 // ============================================================================

@@ -1,8 +1,10 @@
 # Architecture Improvement Recommendations
 
-**Current Version:** 3.10.3  
-**Date:** March 7, 2026  
-**Status:** Proposed Improvements
+**Current Version:** 3.28.0  
+**Date:** March 7, 2026 (last reviewed: May 2026)
+**Status:** Historical Proposals — see implementation status notes below
+
+> **Status as of v3.28.0:** This document was written at v3.10.3 when the app was a single file. The ES Module refactoring (v3.10.4), strict state object pattern (`js/state.js`), and `updateUI()` master refresh cycle were shipped instead of the Reactive State / Component patterns described here. The Virtual List, Command Pattern, and Service Layer proposals remain valid future improvements. The Repository Pattern is moot — IndexedDB is local-only, no network sync exists by design.
 
 ---
 

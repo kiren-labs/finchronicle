@@ -1,6 +1,9 @@
 # FinChronicle Feature Roadmap (Revised May 2026)
 
-> Last updated: 2026-05-01
+> **SUPERSEDED** — This file is kept for historical reference only.
+> The current roadmap is [`FinChronicleFeatureRoadmap_v2.md`](FinChronicleFeatureRoadmap_v2.md) (updated 2026-05-10, reflects v3.28.0 and the v3.29–v3.33 plan).
+
+> Last updated: 2026-05-01 (archived)
 > Previous plan: 2026-04-30
 
 ---

@@ -352,7 +352,7 @@
                         <i class="ri-calendar-check-line"></i>
                     </div>
                     <div class="card-content">
-                        <div class="summary-label">This Month</div>
+                        <div class="summary-label" id="thisMonthLabel">This Month</div>
                         <div class="summary-value" id="monthNet">0</div>
                         <div class="summary-trend" id="monthNetTrend"></div>
                     </div>
@@ -404,6 +404,11 @@
                 <div class="card net-worth-card" id="netWorthSection" hidden>
                     <h3><i class="ri-wallet-3-line"></i> Net Worth</h3>
                     <div id="netWorthDashboard"></div>
+                    <!-- Net Worth Trend Chart (v3.28.0) -->
+                    <div id="netWorthTrendContainer" hidden>
+                        <h4 class="nw-trend-title"><i class="ri-line-chart-line"></i> Trend</h4>
+                        <div id="netWorthTrend"></div>
+                    </div>
                 </div>
                 <!-- Savings Rate Dashboard (v3.19.0) -->
                 <div class="card savings-card" id="savingsSection" hidden>

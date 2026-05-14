@@ -2,7 +2,7 @@
 // Transaction Validation Layer (v3.10.2)
 // ============================================================================
 
-import { categories, PAYMENT_METHODS, EXPENSE_TYPES, currencies } from "./state.js";
+import { categories, PAYMENT_METHODS, EXPENSE_TYPES, currencies, state } from "./state.js";
 import { sanitizeHTML } from "./utils.js";
 
 // Validate transaction before saving
@@ -148,7 +148,12 @@ export function validateTransaction(transaction) {
     if (!currencies[transaction.transactionCurrency]) {
       errors.push({ field: "transactionCurrency", message: "Invalid transaction currency" });
     }
-    if (transaction.exchangeRate !== null && transaction.exchangeRate !== undefined) {
+    const homeCurrency = state.currency || localStorage.getItem("currency") || "USD";
+    if (transaction.transactionCurrency !== homeCurrency) {
+      if (!transaction.exchangeRate || isNaN(transaction.exchangeRate) || transaction.exchangeRate <= 0) {
+        errors.push({ field: "exchangeRate", message: "Exchange rate is required for foreign currency transactions" });
+      }
+    } else if (transaction.exchangeRate !== null && transaction.exchangeRate !== undefined) {
       if (isNaN(transaction.exchangeRate) || transaction.exchangeRate <= 0) {
         errors.push({ field: "exchangeRate", message: "Exchange rate must be a positive number" });
       }
