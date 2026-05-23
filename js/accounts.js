@@ -188,7 +188,7 @@ export async function removeAccount(id) {
 
   try {
     await deleteAccount(id);
-    state.accounts = state.accounts.filter((a) => a.id !== id);
+    state.accounts = state.accounts.filter((a) => String(a.id) !== String(id));
     showMessage(`Account "${account.name}" deleted.`);
     return true;
   } catch (err) {
