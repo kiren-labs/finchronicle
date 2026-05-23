@@ -137,7 +137,8 @@ finchronicle/
 │   ├── accounts.js         - Account CRUD & Net Worth dashboard
 │   ├── savings.js          - Savings Rate Dashboard
 │   ├── goals.js            - Savings Goals with circular progress tracking
-│   ├── alerts.js           - Smart Spending Alerts (4 detection algorithms)
+│   ├── alerts.js           - Smart Spending Alerts (4 pattern types) + Financial Health Alerts (4 types, v4.1.0)
+│   ├── forecast.js         - Cash-Flow Forecast — 30/60/90d account balance projection from recurring templates (v4.1.0)
 │   ├── annual-report.js    - Year scorecard, YoY comparison, CSV export
 │   ├── auto-backup.js      - Scheduled encrypted backups (AES-GCM-256) + storage health
 │   ├── multi-currency.js   - Per-transaction foreign currency + exchange rate history
@@ -180,7 +181,8 @@ app.js (entry point)
 ├── accounts.js     ← imports state.js, db.js, utils.js
 ├── savings.js      ← imports state.js, utils.js
 ├── goals.js        ← imports state.js, db.js, utils.js
-├── alerts.js       ← imports state.js, utils.js
+├── alerts.js       ← imports state.js, currency.js, accounts.js, savings.js
+├── forecast.js     ← imports state.js, currency.js, utils.js, accounts.js, recurring.js
 ├── annual-report.js ← imports state.js, utils.js
 ├── faq.js          (dynamic import)
 └── import-export.js (dynamic import)
@@ -716,6 +718,7 @@ const CACHE_URLS = [
     './js/savings.js',
     './js/goals.js',
     './js/alerts.js',
+    './js/forecast.js',
     './js/annual-report.js',
     // faq.js and import-export.js are lazy-loaded
     './icons/...',

@@ -156,6 +156,7 @@ import {
   clearAlertHistory,
 } from "./alerts.js";
 import { renderAnnualReport, exportAnnualCSV } from "./annual-report.js";
+import { renderForecast } from "./forecast.js";
 import {
   initAutoBackup,
   getBackupSettings,
@@ -329,6 +330,15 @@ function bindStaticEvents() {
     if (!btn) return;
     state.reportRange = btn.dataset.range;
     updateReportsView();
+  });
+
+  // ---- Reports tab: forecast horizon toggle ----
+  document.querySelector(".forecast-horizon-toggle").addEventListener("click", (e) => {
+    const btn = e.target.closest(".horizon-btn");
+    if (!btn) return;
+    document.querySelectorAll(".horizon-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderForecast(parseInt(btn.dataset.days, 10));
   });
 
   // ---- Settings toolbar buttons ----
@@ -1480,6 +1490,7 @@ function bindFormSubmit() {
           renderSavingsDashboard();
           renderAlertBanners(runAlertChecks(sanitizedTransaction));
           renderAnnualReport();
+          renderForecast();
           renderSettlementDashboard();
         }, 800);
       } catch (err) {
@@ -1703,6 +1714,7 @@ async function init() {
     renderSavingsDashboard();
     renderGoalsDashboard();
     renderAnnualReport();
+    renderForecast(30);
     renderAlertBanners(runAlertChecks());
     renderAlertHistory();
     renderMultiCurrencyFields();

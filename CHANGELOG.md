@@ -9,6 +9,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.0] — 2026-05-23
+
+### Added — Forward-Looking Intelligence (Phase 3)
+
+#### 3.1 Cash-Flow Forecast
+- New `js/forecast.js` module — pure `buildForecast(accounts, transactions, recurringTemplates, horizonDays)` function
+- Generates per-account balance timelines by walking enabled recurring templates that have account links
+- Horizon selector: 30d / 60d / 90d toggle in Reports tab
+- Warning banners when any account is projected to go negative within the horizon
+- Graceful empty state when no recurring templates have account links
+- Added to `CACHE_URLS` in `sw.js`
+
+#### 3.2 Financial Health Alerts
+- Four new alert types added to `js/alerts.js` via `runHealthAlertChecks()`:
+  - **Inactivity** (`inactivity`) — fires after 5 days with no transactions logged; deduplicated daily
+  - **Bill Due** (`bill-due`) — fires when a recurring expense is due within 3 days and the linked account balance is below 1.2× the bill amount; requires `fromAccount` link
+  - **Savings Rate Trend** (`savings-rate-trend`) — fires when savings rate is below 10% for 3 consecutive months; deduplicated per quarter to reduce noise
+  - **Monthly Pace** (`monthly-pace`) — fires when a budget category is projected to exceed its limit by >20% based on daily pace; only active after day 5 of the month
+- All four use the same `localStorage` key, dismiss flow, and render path as existing pattern alerts
+- Alert history labels updated for all four new types
+- Summary chip label changed from "spending alerts" to "alerts" to cover health alert types
+
+### Changed
+- `js/alerts.js` imports `getAccountBalance` from `accounts.js` and `getSavingsRate` from `savings.js`
+- Deduplication key uses quarterly window for `savings-rate-trend` (vs daily for all other types)
+
+### Technical
+- New module `js/forecast.js`
+- `APP_VERSION` → `4.1.0` in `js/state.js`
+- `CACHE_NAME` → `finchronicle-v4.1.0` in `sw.js`
+- `version` → `4.1.0` in `manifest.json`
+- No DB schema changes, no new IndexedDB stores, no `DB_VERSION` bump
+
+---
+
 ## [4.0.0] — 2026-05-23
 
 ### Added — Accounting Model (Phase 2)

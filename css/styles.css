@@ -879,9 +879,9 @@ button.primary.loading .btn-spinner {
 /* Label: always visible — tiny when inactive, normal when active */
 .type-option .type-label {
     display: inline-block;
-    font-size: 8px;
-    opacity: 0.6;
-    transition: font-size var(--transition-fast), opacity var(--transition-fast), font-weight var(--transition-fast);
+    font-size: 9px;
+    color: var(--color-text);
+    transition: font-size var(--transition-fast), font-weight var(--transition-fast);
 }
 
 /* ---- Active state ---- */
@@ -898,7 +898,6 @@ button.primary.loading .btn-spinner {
 
 .type-option.active .type-label {
     font-size: var(--font-md);
-    opacity: 1;
     font-weight: 700;
 }
 
@@ -2365,7 +2364,6 @@ button.primary.loading .btn-spinner {
 
 .backup-message {
     font-size: var(--font-sm);
-    opacity: 0.9;
 }
 
 .backup-description {
@@ -4260,11 +4258,11 @@ button.primary.loading .btn-spinner {
 }
 
 .template-item-type.expense {
-  color: var(--color-expense);
+  color: var(--color-expense-text);
 }
 
 .template-item-type.income {
-  color: var(--color-income);
+  color: var(--color-income-text);
 }
 
 .template-item-details {
@@ -4321,7 +4319,7 @@ button.primary.loading .btn-spinner {
 }
 
 .template-delete-btn:hover {
-  color: var(--color-expense);
+  color: var(--color-expense-text);
 }
 
 .template-edit-input {
@@ -4385,11 +4383,11 @@ button.primary.loading .btn-spinner {
 }
 
 .net-worth-main.positive .net-worth-value {
-  color: var(--color-income);
+  color: var(--color-income-text);
 }
 
 .net-worth-main.negative .net-worth-value {
-  color: var(--color-expense);
+  color: var(--color-expense-text);
 }
 
 .net-worth-breakdown {
@@ -4421,11 +4419,11 @@ button.primary.loading .btn-spinner {
 }
 
 .net-worth-item.assets .nw-item-value {
-  color: var(--color-income);
+  color: var(--color-income-text);
 }
 
 .net-worth-item.liabilities .nw-item-value {
-  color: var(--color-expense);
+  color: var(--color-expense-text);
 }
 
 .account-balances-list {
@@ -4459,11 +4457,11 @@ button.primary.loading .btn-spinner {
 }
 
 .account-balance-amount.positive {
-  color: var(--color-income);
+  color: var(--color-income-text);
 }
 
 .account-balance-amount.negative {
-  color: var(--color-expense);
+  color: var(--color-expense-text);
 }
 
 /* Net Worth Trend Chart (v3.28.0) */
@@ -4495,16 +4493,16 @@ button.primary.loading .btn-spinner {
   font-weight: 700;
 }
 
-.nw-trend-current.positive { color: var(--color-income); }
-.nw-trend-current.negative { color: var(--color-expense); }
+.nw-trend-current.positive { color: var(--color-income-text); }
+.nw-trend-current.negative { color: var(--color-expense-text); }
 
 .nw-trend-change {
   font-size: var(--font-xs);
   font-weight: 500;
 }
 
-.nw-trend-change.positive { color: var(--color-income); }
-.nw-trend-change.negative { color: var(--color-expense); }
+.nw-trend-change.positive { color: var(--color-income-text); }
+.nw-trend-change.negative { color: var(--color-expense-text); }
 
 .nw-trend-svg {
   width: 100%;
@@ -4741,6 +4739,11 @@ button.primary.loading .btn-spinner {
   margin-bottom: 2px;
 }
 
+.savings-widget.highlight .savings-widget-label,
+.savings-widget.highlight .savings-widget-sub {
+  color: var(--color-text);
+}
+
 .savings-widget-value {
   font-size: 18px;
   font-weight: 700;
@@ -4748,7 +4751,7 @@ button.primary.loading .btn-spinner {
 }
 
 .savings-widget-value.good {
-  color: var(--color-income);
+  color: var(--color-income-text);
 }
 
 .savings-widget-value.okay {
@@ -4756,7 +4759,7 @@ button.primary.loading .btn-spinner {
 }
 
 .savings-widget-value.low {
-  color: var(--color-expense);
+  color: var(--color-expense-text);
 }
 
 .savings-widget-sub {
@@ -4969,7 +4972,7 @@ button.primary.loading .btn-spinner {
 }
 
 .goal-overdue {
-  color: var(--color-expense);
+  color: var(--color-expense-text);
   font-weight: 600;
 }
 
@@ -5000,7 +5003,7 @@ button.primary.loading .btn-spinner {
 }
 
 .goal-contribute-btn {
-  color: var(--color-income) !important;
+  color: var(--color-income-text) !important;
 }
 
 /* Contribution modal extras */
@@ -5220,8 +5223,8 @@ button.primary.loading .btn-spinner {
   font-weight: 700;
 }
 
-.annual-stat-value.positive { color: var(--color-income); }
-.annual-stat-value.negative { color: var(--color-expense); }
+.annual-stat-value.positive { color: var(--color-income-text); }
+.annual-stat-value.negative { color: var(--color-expense-text); }
 
 /* Annual YoY */
 .annual-yoy {
@@ -5244,8 +5247,8 @@ button.primary.loading .btn-spinner {
   margin-right: var(--space-md);
 }
 
-.yoy-item.positive { color: var(--color-income); }
-.yoy-item.negative { color: var(--color-expense); }
+.yoy-item.positive { color: var(--color-income-text); }
+.yoy-item.negative { color: var(--color-expense-text); }
 
 /* Annual Top Expenses */
 .annual-top-list {
@@ -5272,7 +5275,7 @@ button.primary.loading .btn-spinner {
 
 .annual-top-amount {
   font-weight: 600;
-  color: var(--color-expense);
+  color: var(--color-expense-text);
 }
 
 .annual-top-date {
@@ -5702,11 +5705,11 @@ button.primary.loading .btn-spinner {
 }
 
 .settlement-person-balance.positive {
-  color: var(--color-income);
+  color: var(--color-income-text);
 }
 
 .settlement-person-balance.negative {
-  color: var(--color-expense);
+  color: var(--color-expense-text);
 }
 
 .settlement-status {
@@ -5741,11 +5744,11 @@ button.primary.loading .btn-spinner {
 }
 
 .settlement-detail-value.positive {
-  color: var(--color-income);
+  color: var(--color-income-text);
 }
 
 .settlement-detail-value.negative {
-  color: var(--color-expense);
+  color: var(--color-expense-text);
 }
 
 .settlement-export-btn {
@@ -5786,11 +5789,11 @@ button.primary.loading .btn-spinner {
 }
 
 .settlement-detail-value.outstanding {
-  color: var(--color-expense);
+  color: var(--color-expense-text);
 }
 
 .settlement-detail-value.settled {
-  color: var(--color-income);
+  color: var(--color-income-text);
 }
 
 /* Transaction list: reimbursement controls (v3.27.0) */
@@ -5799,7 +5802,7 @@ button.primary.loading .btn-spinner {
   align-items: center;
   gap: 3px;
   font-size: 11px;
-  color: var(--color-income);
+  color: var(--color-income-text);
   background: var(--color-income-bg, #e8f5e9);
   padding: 1px 7px;
   border-radius: var(--radius-sm);
@@ -6067,8 +6070,8 @@ button.primary.loading .btn-spinner {
   font-weight: 500;
 }
 
-.recon-credit { color: var(--color-income); }
-.recon-debit  { color: var(--color-expense); }
+.recon-credit { color: var(--color-income-text); }
+.recon-debit  { color: var(--color-expense-text); }
 
 .recon-status {
   font-size: 11px;
@@ -6155,4 +6158,168 @@ button.primary.loading .btn-spinner {
   background: transparent;
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
+}
+
+/* ============================================================================
+   Cash-Flow Forecast (v4.1.0)
+   ============================================================================ */
+
+.forecast-section {
+  margin-top: 24px;
+}
+
+.forecast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.forecast-horizon-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.horizon-btn {
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.horizon-btn.active,
+.horizon-btn:hover {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.forecast-empty {
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: 24px 0;
+  font-size: 14px;
+}
+
+.forecast-warnings {
+  margin-bottom: 12px;
+}
+
+.forecast-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--color-danger-bg, #fff0f0);
+  border: 1px solid var(--color-danger-border, #fca5a5);
+  border-radius: var(--radius-sm);
+  color: var(--color-danger, #dc2626);
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.forecast-account-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.forecast-account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.forecast-account-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text-primary);
+}
+
+.forecast-account-balance {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.forecast-timeline {
+  border-top: 1px solid var(--color-border);
+  padding-top: 8px;
+}
+
+.forecast-event-row {
+  display: grid;
+  grid-template-columns: 80px 1fr max-content max-content;
+  gap: 6px 12px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--color-border-light, var(--color-border));
+  font-size: 13px;
+  min-width: 0;
+}
+
+.forecast-event-row:last-child {
+  border-bottom: none;
+}
+
+.forecast-event-today {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.forecast-event-negative {
+  background: var(--color-danger-bg, #fff8f8);
+  border-radius: var(--radius-sm);
+  padding: 5px 6px;
+}
+
+.forecast-event-date {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.forecast-event-label {
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.forecast-event-amount {
+  text-align: right;
+  font-weight: 500;
+}
+
+.forecast-event-balance {
+  text-align: right;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.positive-amount {
+  color: var(--color-income-text);
+}
+
+.negative-amount {
+  color: var(--color-expense-text);
+}
+
+.balance-negative {
+  color: var(--color-danger, #dc2626) !important;
+  font-weight: 600;
+}
+
+.neutral {
+  color: var(--color-text-primary);
 }

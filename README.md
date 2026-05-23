@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.1.0-blue.svg)](CHANGELOG.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -47,6 +47,8 @@
 - ✅ **Savings Rate Dashboard** - Monitor saving habits
 - ✅ **Savings Goals** - Progress tracking with milestones
 - ✅ **Smart Spending Alerts** - Pattern detection with rolling 90-day averages (v3.21.0)
+- ✅ **Financial Health Alerts** - Inactivity, bill-due, savings rate trend, monthly pace alerts (v4.1.0)
+- ✅ **Cash-Flow Forecast** - 30/60/90-day account balance projection from recurring templates (v4.1.0)
 - ✅ **Annual Report** - Year scorecard with YoY comparison & CSV export (v3.21.0)
 - ✅ **Auto-Backup** - Scheduled encrypted backups (AES-GCM-256) + storage health (v3.22.0)
 - ✅ **Multi-Currency** - Per-transaction foreign currency + exchange rate entry (v3.24.0)
@@ -294,10 +296,11 @@ export const categories = {
 - ✅ Reconciliation Workflow — per-account statement matching with status badges (v4.0)
 - ✅ Category Hierarchy — parent/sub-category with optgroup dropdowns (v4.0)
 
-### Upcoming (v4.1+)
+- ✅ Cash-Flow Forecast — 30/60/90-day account balance projection from recurring templates (v4.1)
+- ✅ Financial Health Alerts — inactivity, bill-due, savings rate trend, monthly pace (v4.1)
 
-- [ ] Cash Flow Forecast — 30/60/90-day projection from recurring templates
-- [ ] Financial Health Alerts — inactivity, bill-due, savings rate, pace alerts
+### Upcoming (v4.2+)
+
 - [ ] Budget vs Actual Report — consolidated table with variance per category
 - [ ] Envelope Budgeting mode — allocate every rupee before spending
 - [ ] Subscription Tracker — auto-detect monthly recurring patterns
@@ -411,7 +414,7 @@ If this project helped you, please consider:
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Latest Release: v4.0.0** — Accounting Model
+**Latest Release: v4.1.0** — Forward-Looking Intelligence (Cash-Flow Forecast + Financial Health Alerts)
 
 - 🏦 Asset/Liability Classification — loan & mortgage account types; correct net worth math
 - 🔗 Transaction ↔ Account Linking — optional account field on income/expense transactions

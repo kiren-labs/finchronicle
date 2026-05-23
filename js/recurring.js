@@ -230,7 +230,7 @@ export function renderRecurringSection() {
   container.querySelector(".recurring-list").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-action]");
     if (!btn) return;
-    const id = Number(btn.dataset.id);
+    const id = btn.dataset.id;
     if (btn.dataset.action === "edit-recurring") openRecurringModal(id);
     if (btn.dataset.action === "delete-recurring") deleteRecurring(id);
     if (btn.dataset.action === "toggle-recurring") toggleRecurring(id);
@@ -405,6 +405,19 @@ export function openRecurringModal(id = null) {
   _recurringFormTags = [];
   renderRecurringTagChips();
 
+  // Populate account dropdown from state.accounts
+  const accountSel = document.getElementById("recurringAccount");
+  if (accountSel) {
+    accountSel.innerHTML = '<option value="">None — unlinked</option>';
+    (state.accounts || []).forEach((acc) => {
+      const opt = document.createElement("option");
+      opt.value = acc.name;
+      opt.textContent = acc.name;
+      accountSel.appendChild(opt);
+    });
+    accountSel.value = "";
+  }
+
   if (id !== null) {
     const template = state.recurringTemplates.find((t) => t.id === id);
     if (template) {
@@ -421,6 +434,8 @@ export function openRecurringModal(id = null) {
         template.frequency === "monthly" ? "block" : "none";
       _recurringFormTags = [...(template.tags || [])];
       renderRecurringTagChips();
+      if (accountSel && template.fromAccount) accountSel.value = template.fromAccount;
+      else if (accountSel && template.toAccount) accountSel.value = template.toAccount;
     }
   } else {
     modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Add Recurring';
@@ -481,6 +496,9 @@ export async function saveRecurringTemplate() {
   const isEditing = _editingRecurringId !== null;
 
   const tags = [..._recurringFormTags];
+  const selectedAccount = (document.getElementById("recurringAccount")?.value) || "";
+  const fromAccount = type === "expense" || type === "transfer" ? (selectedAccount || null) : null;
+  const toAccount = type === "income" ? (selectedAccount || null) : null;
 
   if (isEditing) {
     const template = state.recurringTemplates.find(
@@ -495,6 +513,8 @@ export async function saveRecurringTemplate() {
     template.dayOfMonth = dayOfMonth;
     template.nextDueDate = startDate;
     template.tags = tags;
+    template.fromAccount = fromAccount;
+    template.toAccount = toAccount;
     await saveRecurringTemplateToDB(template);
   } else {
     const template = {
@@ -510,6 +530,8 @@ export async function saveRecurringTemplate() {
       lastExecuted: null,
       enabled: true,
       tags,
+      fromAccount,
+      toAccount,
       createdAt: new Date().toISOString(),
     };
     state.recurringTemplates.push(template);

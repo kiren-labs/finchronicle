@@ -4,6 +4,8 @@
 
 import { state } from "./state.js";
 import { formatCurrency } from "./currency.js";
+import { getAccountBalance } from "./accounts.js";
+import { getSavingsRate } from "./savings.js";
 
 // ---- Constants ----
 
@@ -12,6 +14,10 @@ const ALERT_TYPES = {
   UNUSUAL_AMOUNT: "unusual_amount",
   VELOCITY_WARNING: "velocity",
   CATEGORY_DRIFT: "category_drift",
+  INACTIVITY: "inactivity",
+  BILL_DUE: "bill-due",
+  SAVINGS_RATE_TREND: "savings-rate-trend",
+  MONTHLY_PACE: "monthly-pace",
 };
 
 const ROLLING_DAYS = 90;
@@ -278,6 +284,127 @@ function checkCategoryDrift(thisMonth, lastMonth) {
   return alerts;
 }
 
+// ---- Health Alert Checks (v4.1.0) ----
+
+function checkInactivity() {
+  if (state.transactions.length === 0) return null;
+  const sorted = [...state.transactions].sort(
+    (a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
+  );
+  const latest = new Date(sorted[0].createdAt || sorted[0].date);
+  const today = new Date();
+  const diffDays = Math.floor((today - latest) / (1000 * 60 * 60 * 24));
+  if (diffDays >= 5) {
+    return {
+      type: ALERT_TYPES.INACTIVITY,
+      category: "_health",
+      message: `No transactions logged in ${diffDays} days — are you up to date?`,
+      severity: "warning",
+    };
+  }
+  return null;
+}
+
+function checkBillDue() {
+  if (!state.recurringTemplates || state.recurringTemplates.length === 0) return [];
+  const alerts = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (const tmpl of state.recurringTemplates) {
+    if (!tmpl.enabled || tmpl.type !== "expense" || !tmpl.fromAccount || !tmpl.nextDueDate) continue;
+    const due = new Date(tmpl.nextDueDate);
+    due.setHours(0, 0, 0, 0);
+    const daysUntil = Math.round((due - today) / (1000 * 60 * 60 * 24));
+    if (daysUntil < 0 || daysUntil > 3) continue;
+
+    const balance = getAccountBalance(tmpl.fromAccount);
+    if (balance < tmpl.amount * 1.2) {
+      const dayLabel = daysUntil === 0 ? "today" : daysUntil === 1 ? "tomorrow" : `in ${daysUntil} days`;
+      alerts.push({
+        type: ALERT_TYPES.BILL_DUE,
+        category: tmpl.category || "_health",
+        message: `${tmpl.name || tmpl.category} (${formatCurrency(tmpl.amount)}) is due ${dayLabel} — ${tmpl.fromAccount} balance is ${formatCurrency(balance)}.`,
+        severity: balance < tmpl.amount ? "danger" : "warning",
+        value: tmpl.amount,
+        account: tmpl.fromAccount,
+      });
+    }
+  }
+  return alerts;
+}
+
+function checkSavingsRateTrend() {
+  const now = new Date();
+  const months = [];
+  for (let i = 1; i <= 3; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  }
+  const rates = months.map((m) => getSavingsRate(m));
+  const allBelowThreshold = rates.every((r) => r !== null && r < 10);
+  if (!allBelowThreshold) return null;
+  const validRates = rates.filter((r) => r !== null);
+  const avg = (validRates.reduce((s, r) => s + r, 0) / validRates.length).toFixed(1);
+  return {
+    type: ALERT_TYPES.SAVINGS_RATE_TREND,
+    category: "_health",
+    message: `Savings rate has been below 10% for 3 months (avg ${avg}%).`,
+    severity: "warning",
+  };
+}
+
+function checkMonthlyPace() {
+  if (!state.budgets || state.budgets.length === 0) return [];
+  const alerts = [];
+  const now = new Date();
+  const dayOfMonth = now.getDate();
+  if (dayOfMonth < 5) return [];
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const expenses = getExpenses(monthStart, now);
+
+  const spendByCategory = {};
+  for (const t of expenses) {
+    const cat = t.category || "Other";
+    spendByCategory[cat] = (spendByCategory[cat] || 0) + t.amount;
+  }
+
+  for (const budget of state.budgets) {
+    const spent = spendByCategory[budget.category] || 0;
+    if (spent === 0) continue;
+    if (spent >= budget.monthlyLimit) continue; // budget alert already covers this
+    const projected = (spent / dayOfMonth) * daysInMonth;
+    if (projected > budget.monthlyLimit * 1.2) {
+      alerts.push({
+        type: ALERT_TYPES.MONTHLY_PACE,
+        category: budget.category,
+        message: `${budget.category} spending is on pace for ${formatCurrency(Math.round(projected))} this month — budget is ${formatCurrency(budget.monthlyLimit)}.`,
+        severity: projected > budget.monthlyLimit * 1.5 ? "danger" : "warning",
+        value: projected,
+        limit: budget.monthlyLimit,
+      });
+    }
+  }
+  return alerts;
+}
+
+function runHealthAlertChecks() {
+  const newAlerts = [];
+
+  const inactivity = checkInactivity();
+  if (inactivity) newAlerts.push(inactivity);
+
+  newAlerts.push(...checkBillDue());
+
+  const savingsTrend = checkSavingsRateTrend();
+  if (savingsTrend) newAlerts.push(savingsTrend);
+
+  newAlerts.push(...checkMonthlyPace());
+
+  return newAlerts;
+}
+
 // ---- Public: Run all alert checks ----
 
 /**
@@ -311,13 +438,19 @@ export function runAlertChecks(newTransaction = null) {
   // Category drift
   newAlerts.push(...checkCategoryDrift(thisMonth, lastMonth));
 
-  // Deduplicate: one alert per type+category per day
+  // Financial health alerts (v4.1.0)
+  newAlerts.push(...runHealthAlertChecks());
+
+  // Deduplicate: one alert per type+category per day (savings-rate-trend: per quarter)
   const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const quarter = `Q${Math.floor(now.getMonth() / 3) + 1}-${now.getFullYear()}`;
   const unique = [];
   const seen = new Set();
 
   for (const alert of newAlerts) {
-    const key = `${alert.type}:${alert.category}:${today}`;
+    const window = alert.type === ALERT_TYPES.SAVINGS_RATE_TREND ? quarter : today;
+    const key = `${alert.type}:${alert.category}:${window}`;
     if (seen.has(key) || dismissedAlerts.has(key)) continue;
     seen.add(key);
     alert.id = key;
@@ -405,7 +538,7 @@ export function renderAlertBanners(alerts) {
   container.innerHTML = `
     <div class="${chipClass}" id="alertSummaryChip">
       <i class="${icon}"></i>
-      <span>${sorted.length} spending alert${sorted.length > 1 ? "s" : ""}</span>
+      <span>${sorted.length} alert${sorted.length > 1 ? "s" : ""}</span>
       <button class="alert-summary-toggle" id="alertSummaryToggle" aria-expanded="${expanded}" aria-label="${expanded ? "Collapse" : "Expand"} alerts">
         <i class="ri-arrow-${expanded ? "up" : "down"}-s-line"></i>
       </button>
@@ -460,6 +593,14 @@ function getAlertTypeLabel(type) {
       return "Pace";
     case ALERT_TYPES.CATEGORY_DRIFT:
       return "Drift";
+    case ALERT_TYPES.INACTIVITY:
+      return "Inactivity";
+    case ALERT_TYPES.BILL_DUE:
+      return "Bill Due";
+    case ALERT_TYPES.SAVINGS_RATE_TREND:
+      return "Savings Trend";
+    case ALERT_TYPES.MONTHLY_PACE:
+      return "Monthly Pace";
     default:
       return "Alert";
   }

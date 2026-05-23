@@ -1,7 +1,7 @@
 # Version Management Guide
 
-## Current Version: 3.28.0
-**Last Updated:** 2026-05-12
+## Current Version: 4.1.0
+**Last Updated:** 2026-05-23
 
 ## How Versioning Works
 
@@ -88,6 +88,9 @@ Mobile users will be notified automatically:
 
 | Version | Date | Highlights |
 |---------|------|-----------|
+| v4.1.0 | 2026-05-23 | Cash-Flow Forecast (30/60/90d), Financial Health Alerts (inactivity, bill-due, savings trend, pace) |
+| v4.0.0 | 2026-05-23 | Accounting Model — asset/liability classification, account linking, reconciliation, category hierarchy |
+| v3.29.0 | 2026-05-23 | Engineering hardening — CSP, UUID IDs, storage persist, error log |
 | v3.28.0 | 2026-05-05 | Net Worth Trend — monthly snapshot store (DB_VERSION 10), SVG line chart |
 | v3.27.0 | 2026-05-05 | Reimbursement Workflow — mark-as-settled, settlement dashboard breakdown |
 | v3.26.1 | 2026-05-05 | Exchange rate validation fix, error toasts, CLAUDE.md update |
@@ -200,6 +203,6 @@ If users report wrong version:
 ---
 
 **Current Status**: Production Ready ✅
-**Next Release**: v3.28.1 — Dashboard & UI/UX fixes (savings rate, alert overload, period sync, negative value styling)
-**Roadmap**: v3.29–v3.40 — Budget vs Actual, Financial Health Ratios, Cash Flow Forecast, Subscription Tracker, Duplicate Detection, Loan/EMI Tracker, Bank Statement Importer, Notifications, Bulk Ops, Category Management, Tax Export, Receipt Photos
-**Last Updated**: 2026-05-13
+**Latest Release**: v4.1.0 — Cash-Flow Forecast + Financial Health Alerts
+**Roadmap**: v4.2 — Budget vs Actual Report, Envelope Budgeting mode, Subscription Tracker
+**Last Updated**: 2026-05-23
