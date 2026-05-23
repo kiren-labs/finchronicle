@@ -109,37 +109,72 @@ export const PAYMENT_METHODS = [
 export const EXPENSE_TYPES = ["personal", "business", "reimbursable"];
 
 // Category definitions
+// Category hierarchy: { type: { parent: [children] | [] } }
+// Parents with empty array are leaf nodes with no sub-categories.
+// Existing flat category names are preserved as parents for backwards compatibility.
 export const categories = {
-  income: [
-    "Salary",
-    "Business",
-    "Investment",
-    "Rental Income",
-    "Gifts/Refunds",
-    "Freelance",
-    "Bonus",
-    "Other Income",
-  ],
-  transfer: ["Transfer"],
-  expense: [
-    "Food",
-    "Groceries",
-    "Transport",
-    "Utilities/Bills",
-    "Kids/School",
-    "Fees/Docs",
-    "Debt/Loans",
-    "Household",
-    "Other Expense",
-    "Rent",
-    "Healthcare",
-    "Personal/Shopping",
-    "Insurance/Taxes",
-    "Savings/Investments",
-    "Charity/Gifts",
-    "Misc/Buffer",
-  ],
+  income: {
+    "Salary":            [],
+    "Business":          ["Consulting", "Sales", "Services"],
+    "Investment":        ["Dividends", "Capital Gains", "Interest"],
+    "Rental Income":     [],
+    "Freelance":         [],
+    "Bonus":             [],
+    "Gifts/Refunds":     ["Gift Received", "Refund", "Cashback"],
+    "Other Income":      [],
+  },
+  transfer: {
+    "Transfer": [],
+  },
+  expense: {
+    "Food":              ["Groceries", "Restaurants", "Coffee/Tea", "Delivery"],
+    "Transport":         ["Fuel", "Public Transit", "Taxi/Cab", "Vehicle Maintenance"],
+    "Utilities/Bills":   ["Electricity", "Water", "Internet", "Phone", "Gas"],
+    "Healthcare":        ["Doctor", "Medicine", "Insurance", "Gym"],
+    "Housing":           ["Rent", "Mortgage", "Maintenance", "Furnishings"],
+    "Kids/School":       ["Tuition", "Supplies", "Activities"],
+    "Personal/Shopping": ["Clothing", "Electronics", "Beauty", "Subscriptions"],
+    "Savings/Investments": ["Emergency Fund", "Retirement", "Stocks/Mutual Funds"],
+    "Debt/Loans":        ["EMI", "Credit Card", "Personal Loan"],
+    "Insurance/Taxes":   ["Life Insurance", "Vehicle Insurance", "Income Tax"],
+    "Charity/Gifts":     ["Donation", "Gift Given"],
+    "Fees/Docs":         [],
+    "Household":         [],
+    "Misc/Buffer":       [],
+    "Other Expense":     [],
+  },
 };
+
+// ---- Category helpers ----
+
+/**
+ * Get all valid category names for a type (parents + children, flat).
+ * Used for validation and backwards-compat category matching.
+ */
+export function getAllCategoryNames(type) {
+  const tree = categories[type];
+  if (!tree) return [];
+  const names = [];
+  for (const [parent, children] of Object.entries(tree)) {
+    names.push(parent);
+    for (const child of children) names.push(child);
+  }
+  return names;
+}
+
+/**
+ * Given a category name, find its parent category (or itself if it is a parent).
+ * Returns null if not found in the type's tree.
+ */
+export function getCategoryParent(name, type) {
+  const tree = categories[type];
+  if (!tree) return null;
+  for (const [parent, children] of Object.entries(tree)) {
+    if (parent === name) return parent;
+    if (children.includes(name)) return parent;
+  }
+  return null;
+}
 
 // Currency definitions
 export const currencies = {

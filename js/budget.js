@@ -2,7 +2,7 @@
 // Budget Management (v3.13.0)
 // ============================================================================
 
-import { state, categories } from "./state.js";
+import { state, categories, getAllCategoryNames } from "./state.js";
 import {
   saveBudgetToDB,
   loadBudgetsFromDB,
@@ -295,13 +295,15 @@ export function renderBudgetModal(budget = null) {
   const isEdit = !!budget;
   const title = isEdit ? "Edit Budget" : "Add Budget";
 
-  const categoryOptions = [...categories.expense]
-    .sort()
-    .map(
-      (cat) =>
-        `<option value="${cat}" ${budget?.category === cat ? "selected" : ""}>${cat}</option>`
-    )
-    .join("");
+  const categoryOptions = Object.entries(categories.expense).map(([parent, children]) => {
+    if (children.length === 0) {
+      return `<option value="${parent}" ${budget?.category === parent ? "selected" : ""}>${parent}</option>`;
+    }
+    return `<optgroup label="${parent}">
+      <option value="${parent}" ${budget?.category === parent ? "selected" : ""}>${parent}</option>
+      ${children.map((c) => `<option value="${c}" ${budget?.category === c ? "selected" : ""}>  ${c}</option>`).join("")}
+    </optgroup>`;
+  }).join("");
 
   const html = `
     <div class="modal" id="budgetModal">
