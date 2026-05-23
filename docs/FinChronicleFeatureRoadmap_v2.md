@@ -1,7 +1,7 @@
 # FinChronicle Feature Roadmap
 
 > Last updated: 2026-05-23
-> Current version: v4.1.0
+> Current version: v4.1.0 — v4.1.1 patch pending, v4.2.0 next
 
 ---
 
@@ -31,6 +31,7 @@ All features from the previous roadmap have shipped. The app is now a full perso
 | v3.28.0 | Net Worth Trend (monthly snapshot store + SVG line chart) | May 2026 |
 | v4.0.0 | Asset/Liability Classification, Transaction Linking, Reconciliation Workflow | May 2026 |
 | v4.1.0 | Cash-Flow Forecast (30/60/90d), Financial Health Alerts (4 types), account-linked recurring | May 2026 |
+| v4.1.1 | Accessibility contrast audit, export/restore data integrity, alert deduplication, SW error log filter | May 2026 |
 
 ---
 
@@ -85,7 +86,69 @@ These were considered and consciously ruled out. Revisiting requires a concrete 
 
 ---
 
-### v4.2.0 — Budget vs Actual Report
+### v4.2.0 — Actionable Spending Insights
+**Priority: HIGH**
+**No new module — extends `js/alerts.js`**
+
+The current alert system is data-driven — it tells you what happened. This adds a `suggestion` field to every alert, computed from existing state, that tells you what to do about it. No backend, no AI — pure JS heuristics on top of the rolling averages and budget data already calculated.
+
+**How it works:**
+
+Each alert gets an optional `suggestion` string computed at detection time:
+
+```javascript
+// Weekly spike alert — suggests trimming to 90-day average
+alerts.push({
+  type: ALERT_TYPES.WEEKLY_SPIKE,
+  message: `${cat}: ${pct}% above weekly average`,
+  suggestion: `Consider keeping ${cat} under ${formatCurrency(Math.round(avg))} this week — your 90-day weekly average.`,
+  ...
+})
+
+// Monthly pace alert — calculates the daily spend needed to hit budget
+alerts.push({
+  type: ALERT_TYPES.MONTHLY_PACE,
+  message: `${cat} on pace for ${formatCurrency(projected)} — budget is ${formatCurrency(limit)}`,
+  suggestion: `Spend no more than ${formatCurrency(Math.round(remainingBudget / remainingDays))}/day on ${cat} to stay within budget.`,
+  ...
+})
+
+// Savings rate trend — quantifies the monthly shortfall
+alerts.push({
+  type: ALERT_TYPES.SAVINGS_RATE_TREND,
+  message: `Savings rate below 10% for 3 months`,
+  suggestion: `At your average income of ${formatCurrency(avgIncome)}, saving 20% means cutting expenses by ${formatCurrency(gap)}/month.`,
+  ...
+})
+```
+
+**UI:** Suggestions rendered below the alert message in a muted style — secondary text, no icon, clearly subordinate to the alert. Dismissed with the same dismiss button.
+
+**Alert-to-suggestion mapping:**
+
+| Alert type | Suggestion formula |
+|---|---|
+| Weekly spike | "Keep {cat} under {90d weekly avg} this week" |
+| Monthly pace | "Spend ≤ {remaining budget ÷ remaining days}/day on {cat}" |
+| Savings rate trend | "Cut expenses by {income × 20% − current savings}/month to reach 20% savings rate" |
+| Bill due + low balance | "Transfer {shortfall} to {account} before {due date}" |
+| Category drift | "Last month you spent {lastMonth} — this month is on track for {projected}" |
+
+**Key constraints:**
+- Suggestions are advisory only — never blocking, never persistent
+- Only shown when the maths produces a meaningful number (e.g., no suggestion if remainingDays ≤ 0)
+- Uses `formatCurrency()` throughout — respects user's currency setting
+- No new state, no DB changes
+
+**Files to modify:**
+- `js/alerts.js` — add `suggestion` field computation in each `check*` function
+- `css/styles.css`, `css/dark-mode.css` — `.smart-alert-suggestion` muted sub-text style
+- `index.html` — render suggestion in `renderAlertBanner()` template
+- Version: bump to 4.2.0
+
+---
+
+### v4.3.0 — Budget vs Actual Report
 **Priority: HIGH**
 **No new module — extends `js/budget.js`**
 
@@ -393,22 +456,112 @@ Last significant data-capture gap. Storage-first constraints apply.
 
 ---
 
-## Release Timeline
+## v4.1.1 — Accessibility, Data Integrity & Alert Quality Patch
+**Priority: HIGH**
+**No new modules, no DB changes**
+
+Post-release audit identified contrast failures across light and dark mode, data loss in CSV/JSON export-restore, and a duplicate alert problem introduced with v4.1.0 health alerts. All are purely CSS/JS fixes.
+
+---
+
+### Fix 1 — Monthly-pace alert fires alongside existing budget alert (duplicate noise)
+**File:** `js/alerts.js` → `checkMonthlyPace()`
+
+When a category's current spending already reached or exceeded the budget limit, both the existing budget alert ("Groceries at 97%") and the new monthly-pace alert ("on pace for ฿11,822") fired simultaneously. The pace alert is an early warning — it should only fire while there is still time to act (spend below limit but trending over).
+
+**Fix:** Skip monthly-pace for any category where `spent >= budget.monthlyLimit`. Budget alert already covers that case.
+
+---
+
+### Fix 2 — CSV/JSON export missing fields introduced in v4.0 and v4.1
+**Files:** `js/import-export.js`, `js/auto-backup.js`
+
+`exportToCSV()` and `buildCsvBackup()` did not include `tags`, `status` (pending/cleared/reconciled), `recurringId`, `settled`, `settledAt`, `settledBy`. Tags silently dropped on every CSV export — permanent data loss on round-trip.
+
+**Fix:** All fields now included in every export format (CSV export, full backup CSV, auto-backup CSV). Import and restore parse them back correctly.
+
+---
+
+### Fix 3 — JSON backup restore only recovered transactions, dropped all other stores
+**File:** `js/import-export.js` → `processRestoredData()`, `confirmRestore()`
+
+Restoring an encrypted `.enc` backup (JSON format) recovered transactions but silently discarded `recurringTemplates`, `budgets`, `accounts`, `savingsGoals`, and `quickTemplates` — the user lost all configuration after a full restore.
+
+**Fix:** `confirmRestore()` now saves all stores back to IndexedDB when present in the backup payload, then reloads full state.
+
+---
+
+### Fix 4 — CSV import mutated state before DB write
+**File:** `js/import-export.js` → `importFromCSV()`
+
+`state.transactions.unshift(txn)` ran inside the row-parsing loop before `bulkSaveTransactionsToDB()`. If the DB write failed, state showed imported data that was never persisted.
+
+**Fix:** State is only updated after a successful DB write.
+
+---
+
+### Fix 5 — WCAG AA contrast failures across light and dark mode
+**Files:** `css/tokens.css`, `css/styles.css`, `css/dark-mode.css`
+
+Multiple contrast failures identified via accessibility audit:
+
+| Element | Problem | Fix |
+|---------|---------|-----|
+| `.net-worth-value`, `.nw-item-value`, `.account-balance-amount` | `--color-income` (#34c759) on white = 2.1:1 — fails all WCAG levels | New `--color-income-text: #1a7a3a` (5.4:1) and `--color-expense-text: #C41E1A` (5.9:1) tokens. Dark mode: `#34c759` / `#FF6B6B` |
+| `.savings-widget-value.low` | Red on blue highlight bg = 3.4:1 — fails normal text | Switched to `--color-expense-text` |
+| `.savings-widget-label`, `.savings-widget-sub` on highlight | Muted text on blue bg = 4.4:1 — fails normal text | Override to `--color-text` on `.savings-widget.highlight` |
+| `.type-option .type-label` | `opacity: 0.6` on 8px text = ~2.6:1 — fails | Removed opacity, bumped to 9px, set `color: var(--color-text)` |
+| `.backup-message` | `opacity: 0.9` on success-strong text = ~3.8:1 — fails | Removed opacity |
+| `.storage-warning-text` dark mode | `--color-warning-text: #FCD34D` on light-mode `--color-warning-bg: #fff3cd` — near identical | Added `--color-warning-bg: #2d2200` and `--color-warning-border: #b45309` dark mode tokens |
+
+All text colour uses of `--color-income` / `--color-expense` (net worth, settlement, annual report, reconciliation, goals, savings, forecast amounts) migrated to the new accessible tokens. Display uses (chart bars, SVG strokes, backgrounds) unchanged.
+
+---
+
+### Fix 6 — SW script load failures logged as app errors
+**File:** `js/app.js` → `window.onerror`
+
+Transient network failures when the Service Worker tries to fetch `sw.js` (background update check on tab focus) were captured by `window.onerror` and written to the in-app error log, causing false entries like "Script sw.js load failed". These are browser-level network hiccups, not app bugs.
+
+**Fix:** `window.onerror` now filters SW script load failures before logging.
+
+---
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `js/alerts.js` | `checkMonthlyPace()` — skip categories already at/over budget limit |
+| `js/import-export.js` | Add `tags`, `status`, `recurringId`, `settled*` to all export formats; restore all stores on JSON restore; fix state mutation order in import |
+| `js/auto-backup.js` | `buildCsvBackup()` — full field parity with `createBackup()` |
+| `js/app.js` | Filter SW load failures from `window.onerror` |
+| `css/tokens.css` | Add `--color-income-text` and `--color-expense-text` tokens |
+| `css/styles.css` | Migrate all text colour uses to `*-text` tokens; fix type-label opacity; fix backup-message opacity |
+| `css/dark-mode.css` | Dark mode token overrides for new text tokens and warning bg/border; remove redundant explicit overrides |
+| `js/state.js` | Bump `APP_VERSION` → `4.1.1` |
+| `sw.js` | Bump `CACHE_NAME` → `finchronicle-v4.1.1` |
+| `manifest.json` | Bump `version` → `4.1.1` |
+
+---
+
+
 
 | Version | Feature | DB Version | Priority | Status |
 |---------|---------|-----------|---------|--------|
 | v4.1.0 | Cash-Flow Forecast (30/60/90d) + Financial Health Alerts | 12 | HIGH | ✅ Shipped |
-| v4.2.0 | Budget vs Actual Report | 12 | HIGH | Planned |
-| v4.3.0 | Financial Health Ratios (emergency fund, debt-to-income, housing cost) | 12 | HIGH | Planned |
-| v4.4.0 | Subscription Tracker | 12 | MEDIUM | Planned |
-| v4.5.0 | Duplicate Transaction Detection | 12 | MEDIUM | Planned |
-| v4.6.0 | Bank Statement CSV Importer | 12 | MEDIUM | Planned |
-| v4.7.0 | Local Notifications | 12 | HIGH | Planned |
-| v4.8.0 | Bulk Transaction Operations | 12 | MEDIUM | Planned |
-| v4.9.0 | Category Management (rename, merge, cleanup) | 12 | MEDIUM | Planned |
-| v4.10.0 | Business & Tax Export | 12 | MEDIUM | Planned |
-| v4.11.0 | Loan / EMI Tracker with amortization schedule | 13 | MEDIUM | Planned |
-| v4.12.0 | Receipt Photos | 14 | LOW | Planned |
+| v4.1.1 | Accessibility, data integrity & alert quality patch | 12 | HIGH | Pending |
+| v4.2.0 | Actionable Spending Insights — `suggestion` field on every alert | 12 | HIGH | Planned |
+| v4.3.0 | Budget vs Actual Report — consolidated variance table | 12 | HIGH | Planned |
+| v4.4.0 | Financial Health Ratios (emergency fund, debt-to-income, housing cost) | 12 | HIGH | Planned |
+| v4.5.0 | Subscription Tracker | 12 | MEDIUM | Planned |
+| v4.6.0 | Duplicate Transaction Detection | 12 | MEDIUM | Planned |
+| v4.7.0 | Bank Statement CSV Importer | 12 | MEDIUM | Planned |
+| v4.8.0 | Local Notifications | 12 | HIGH | Planned |
+| v4.9.0 | Bulk Transaction Operations | 12 | MEDIUM | Planned |
+| v4.10.0 | Category Management (rename, merge, cleanup) | 12 | MEDIUM | Planned |
+| v4.11.0 | Business & Tax Export | 12 | MEDIUM | Planned |
+| v4.12.0 | Loan / EMI Tracker with amortization schedule | 13 | MEDIUM | Planned |
+| v4.13.0 | Receipt Photos | 14 | LOW | Planned |
 
 ---
 
@@ -428,8 +581,8 @@ Last significant data-capture gap. Storage-first constraints apply.
 | 10 | v3.28.0 | + `netWorthSnapshots` store |
 | 11 | v4.0.0 | `accounts` + `classification` field; `transactions` + `status` field; `dateType` composite index |
 | 12 | v4.0.0 | (same migration block) reconciliation indexes |
-| 13 | v4.11.0 | + `loans` store (planned) |
-| 14 | v4.12.0 | + `receipts` store (planned) |
+| 13 | v4.12.0 | + `loans` store (planned) |
+| 14 | v4.13.0 | + `receipts` store (planned) |
 
 ---
 
