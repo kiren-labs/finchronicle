@@ -1418,6 +1418,7 @@ function bindFormSubmit() {
           updateUI();
           renderQuickBar();
           renderNetWorthDashboard();
+          renderAccountManager();
           renderSavingsDashboard();
           renderAlertBanners(runAlertChecks(sanitizedTransaction));
           renderAnnualReport();

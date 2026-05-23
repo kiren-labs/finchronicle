@@ -45,13 +45,9 @@ export function getAccountBalance(accountName) {
       if (t.toAccount === accountName) credits += t.amount;
       if (t.fromAccount === accountName) debits += t.amount;
     } else if (t.type === "income") {
-      if (t.fromAccount === accountName || t.toAccount === accountName) {
-        credits += t.amount;
-      }
+      if (t.toAccount === accountName) credits += t.amount;
     } else if (t.type === "expense") {
-      if (t.fromAccount === accountName || t.toAccount === accountName) {
-        debits += t.amount;
-      }
+      if (t.fromAccount === accountName) debits += t.amount;
     }
   });
 
