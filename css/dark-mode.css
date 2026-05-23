@@ -793,3 +793,10 @@ body.dark-mode .horizon-btn {
   border-color: var(--color-border);
   color: var(--color-text-secondary);
 }
+
+body.dark-mode .horizon-btn.active,
+body.dark-mode .horizon-btn:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
