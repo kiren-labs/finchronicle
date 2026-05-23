@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.1] — 2026-05-23
+
+### Fixed
+
+- **Duplicate alerts**: monthly-pace alert no longer fires for categories already over budget — added `spent >= budget.monthlyLimit` guard in `checkMonthlyPace()` so pace fires only as an early warning
+- **CSV export missing fields**: `exportToCSV()` and `createBackup()` now include `Tags` (semicolon-joined), `Status`, `RecurringId`, `Settled`, `SettledAt`, `SettledBy` columns; full 27-column parity across all export paths
+- **JSON restore dropped non-transaction stores**: `processRestoredData()` and `confirmRestore()` now restore `recurringTemplates`, `budgets`, `accounts`, `savingsGoals`, `quickTemplates` to IndexedDB after a full backup restore
+- **State mutated before DB write in CSV import**: removed `state.transactions.unshift(txn)` inside parsing loop; state now updated only after `bulkSaveTransactionsToDB()` succeeds
+- **WCAG AA contrast failures**: introduced `--color-income-text: #1a7a3a` (5.4:1) and `--color-expense-text: #C41E1A` (5.9:1) tokens; migrated all text `color:` uses from display-only `--color-income`/`--color-expense` tokens; dark mode remaps to `#34c759` / `#FF6B6B`; fixes net worth values, account balances, savings widget, settlement, annual report, reconciliation amounts, type-toggle labels, backup message, storage warning
+- **False-positive SW errors in error log**: `window.onerror` now filters out `"load failed"` events from `sw.js` source — these are browser-level background SW update failures, not app errors
+
+### Technical
+- `APP_VERSION` → `4.1.1` in `js/state.js`
+- `CACHE_NAME` → `finchronicle-v4.1.1` in `sw.js`
+- `version` → `4.1.1` in `manifest.json`
+
+---
+
 ## [4.1.0] — 2026-05-23
 
 ### Added — Forward-Looking Intelligence (Phase 3)

@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-4.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.1.1-blue.svg)](CHANGELOG.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -417,12 +417,14 @@ If this project helped you, please consider:
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Latest Release: v4.1.0** — Forward-Looking Intelligence
+**Latest Release: v4.1.1** — Patch
 
-- 📈 Cash-Flow Forecast — 30/60/90-day account balance projection from recurring templates
-- 🏥 Financial Health Alerts — inactivity, bill-due, savings rate trend, monthly pace
-- 🔗 Account-linked recurring transactions — link recurring templates to accounts for forecast accuracy
-- 🔧 Engineering: DB_VERSION 12, 27 modules, Playwright E2E suite, accessibility contrast audit
+- 🐛 Monthly-pace alert no longer duplicates budget alert for same category
+- 🐛 CSV/JSON export now includes Tags, Status, RecurringId, Settled fields (27-column parity)
+- 🐛 JSON restore now recovers all stores (recurring templates, budgets, accounts, goals, quick templates)
+- 🐛 CSV import state mutation fixed — state updated only after successful DB write
+- ♿ WCAG AA contrast fixes across net worth, accounts, savings, settlement, annual report (new accessible text tokens)
+- 🐛 SW background-update errors no longer appear in in-app error log
 
 ---
 
