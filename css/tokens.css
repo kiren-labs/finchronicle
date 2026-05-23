@@ -14,6 +14,9 @@
     --color-success-strong: #147A33;
     --color-success-deep: #28a745;
 
+    --color-income: #34c759;
+    --color-expense: #ff3b30;
+
     --color-danger: #ff3b30;
     --color-danger-strong: #C41E1A;
     --color-danger-deep: #c5221f;
@@ -53,6 +56,10 @@
     --color-danger-bg: #fdecea;
     --color-danger-border: #ff3b30;
     --color-danger-text: #9a1c14;
+
+    --color-success-bg: #e7f5eb;
+    --color-success-border: #34c759;
+    --color-success-text: #145a37;
 
     --color-primary-bg: #e6f0ff;
 

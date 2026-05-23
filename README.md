@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-3.28.0-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](CHANGELOG.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -35,12 +35,15 @@
 
 ### 💰 Financial Tracking
 - ✅ **Income, Expenses & Transfers** - Track all transaction types
-- ✅ **Categories** - Organize by customizable categories
+- ✅ **Category Hierarchy** - Parent/sub-category structure with drill-down filtering (v4.0.0)
+- ✅ **Account Linking** - Link transactions to accounts for accurate balance tracking (v4.0.0)
+- ✅ **Reconciliation** - Compare records against bank statements per account (v4.0.0)
+- ✅ **Asset/Liability Classification** - Correct net worth math across all account types (v4.0.0)
 - ✅ **Multi-Currency** - Support for 20+ major currencies
 - ✅ **Monthly Budgets** - Set limits with over-budget alerts
 - ✅ **Recurring Transactions** - Templates for regular payments
 - ✅ **Tags & Search** - Full-text search and tag-based filtering
-- ✅ **Accounts & Net Worth** - Track multiple accounts
+- ✅ **Accounts & Net Worth** - Track multiple accounts with trend chart
 - ✅ **Savings Rate Dashboard** - Monitor saving habits
 - ✅ **Savings Goals** - Progress tracking with milestones
 - ✅ **Smart Spending Alerts** - Pattern detection with rolling 90-day averages (v3.21.0)
@@ -48,27 +51,29 @@
 - ✅ **Auto-Backup** - Scheduled encrypted backups (AES-GCM-256) + storage health (v3.22.0)
 - ✅ **Multi-Currency** - Per-transaction foreign currency + exchange rate entry (v3.24.0)
 - ✅ **Family Settlement** - Per-person balance from `attachedTo` tags (v3.26.0)
-- ✅ **Reimbursement Workflow** - Mark-as-settled flow + settlement dashboard breakdown (v3.27.0)
+- ✅ **Reimbursement Workflow** - Mark-as-settled flow + settlement dashboard (v3.27.0)
 - ✅ **Net Worth Trend** - Monthly snapshot store + SVG line chart (v3.28.0)
 - ✅ **Export to CSV** - Backup, restore, and annual exports
 
 ### 🎨 User Experience
-- ✅ **Quick Entry Templates** - Save & reuse common transactions
-- ✅ **Optional Fields** - Payment method, merchant, expense type
-- ✅ **Smart Category Suggestions** - Auto-suggest from notes
+- ✅ **Quick Entry Templates** - Save & reuse common transaction patterns
+- ✅ **Optional Fields** - Payment method, merchant, expense type, account linking
+- ✅ **Smart Category Suggestions** - Auto-suggest categories from notes text
 - ✅ **Transfer Autocomplete** - From/to account suggestions
+- ✅ **Transaction Status Badges** - Pending (yellow) and Reconciled (lock) visual indicators
 - ✅ **Edit & Delete** - Manage transactions easily
-- ✅ **Month & Category Filtering** - View specific time periods
+- ✅ **Month & Category Filtering** - Filter by parent category to include all sub-categories
 - ✅ **Auto-Updates** - Get notified of new versions
 - ✅ **Modern Icons** - Professional Remix Icon font
 
 ### 🛠️ Technical Features
-- ✅ **ES Modules** - 25 focused modules, no build step required
+- ✅ **ES Modules** - 26 focused modules, no build step required
 - ✅ **Zero Dependencies** - No npm, no frameworks
 - ✅ **Service Worker** - Cache-first offline strategy
-- ✅ **IndexedDB** - 8 object stores for robust data (DB_VERSION 10)
+- ✅ **IndexedDB** - 9 object stores for robust data (DB_VERSION 12)
+- ✅ **Automated Tests** - 323 unit tests (Vitest) + E2E suite (Playwright)
 - ✅ **Responsive Design** - Works on all screen sizes
-- ✅ **WCAG AA Compliant** - Fully accessible
+- ✅ **WCAG AA Compliant** - Fully accessible with ARIA attributes
 - ✅ **Version Management** - Semantic versioning with auto-update
 
 ---
@@ -167,14 +172,14 @@ finchronicle/
 2. **Update version** in three places:
    ```javascript
    // js/state.js
-   export const APP_VERSION = '3.28.0';
+   export const APP_VERSION = '4.0.0';
 
    // sw.js
-   const CACHE_NAME = 'finchronicle-v3.28.0';
+   const CACHE_NAME = 'finchronicle-v4.0.0';
    ```
    ```json
    // manifest.json
-   "version": "3.28.0"
+   "version": "4.0.0"
    ```
 3. **Test locally**:
    ```bash
@@ -267,7 +272,7 @@ export const categories = {
 
 ## 🛣️ Roadmap
 
-### Completed (v3.11–3.28)
+### Completed (v3.11–4.0)
 - ✅ Recurring transactions (v3.11)
 - ✅ Budget limits & alerts (v3.13)
 - ✅ Tags & full-text search (v3.14)
@@ -283,21 +288,19 @@ export const categories = {
 - ✅ Family Expense Settlement (v3.26)
 - ✅ Reimbursement Workflow (v3.27)
 - ✅ Net Worth Trend chart (v3.28)
+- ✅ Engineering hardening: CSP, UUID IDs, error log, storage persist (v3.29)
+- ✅ Asset/Liability Classification — loan, mortgage types; correct net worth (v4.0)
+- ✅ Transaction ↔ Account Linking — optional account field on income/expense (v4.0)
+- ✅ Reconciliation Workflow — per-account statement matching with status badges (v4.0)
+- ✅ Category Hierarchy — parent/sub-category with optgroup dropdowns (v4.0)
 
-### Upcoming
+### Upcoming (v4.1+)
 
-- [ ] Dashboard & UI/UX fixes — savings rate, alert overload, period sync (v3.28.1)
-- [ ] Budget vs Actual Report — consolidated table with variance per category (v3.29)
-- [ ] Financial Health Ratios — emergency fund, debt-to-income, housing cost KPIs (v3.30)
-- [ ] Cash Flow Forecast — 30/60/90-day projection from recurring templates (v3.31)
-- [ ] Subscription Tracker — total monthly/yearly subscription cost view (v3.32)
-- [ ] Duplicate Transaction Detection (v3.33)
-- [ ] Loan / EMI Tracker — amortization schedule, payoff calculator (v3.34)
-- [ ] Bank Statement CSV Importer — generic column mapper (v3.35)
-- [ ] Local Notifications — recurring reminders, budget warnings (v3.36)
-- [ ] Bulk Transaction Operations — recategorize, tag, delete (v3.37)
-- [ ] Category Management — rename, merge, cleanup suggestions (v3.38)
-- [ ] Business & Tax Export with tax year configuration (v3.39)
+- [ ] Cash Flow Forecast — 30/60/90-day projection from recurring templates
+- [ ] Financial Health Alerts — inactivity, bill-due, savings rate, pace alerts
+- [ ] Budget vs Actual Report — consolidated table with variance per category
+- [ ] Envelope Budgeting mode — allocate every rupee before spending
+- [ ] Subscription Tracker — auto-detect monthly recurring patterns
 - [ ] Receipt Photos (v3.40)
 
 See [FinChronicleFeatureRoadmap_v2.md](docs/FinChronicleFeatureRoadmap_v2.md) for detailed roadmap.
@@ -408,12 +411,13 @@ If this project helped you, please consider:
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Latest Release: v3.28.0**
-- 📈 Net Worth Trend — monthly snapshot store (DB_VERSION 10) + SVG line chart
-- ✅ Reimbursement Workflow — mark-as-settled flow + settlement dashboard breakdown (v3.27.0)
-- 🌍 Multi-Currency Transactions — per-transaction FX + exchange rate history (v3.24.0)
-- 🔐 Auto-Backup — AES-GCM-256 encryption + storage health dashboard (v3.22.0)
-- 👨‍👩‍👧 Family Expense Settlement — per-person balance from `attachedTo` tags (v3.26.0)
+**Latest Release: v4.0.0** — Accounting Model
+
+- 🏦 Asset/Liability Classification — loan & mortgage account types; correct net worth math
+- 🔗 Transaction ↔ Account Linking — optional account field on income/expense transactions
+- ✅ Reconciliation Workflow — per-account statement matching; pending/cleared/reconciled status badges
+- 🗂️ Category Hierarchy — parent/sub-category structure with optgroup dropdowns and parent-aware filtering
+- 🔧 Engineering: DB_VERSION 12, 26 modules, 323 unit tests, Playwright E2E suite
 
 ---
 

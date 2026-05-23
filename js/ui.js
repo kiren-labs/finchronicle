@@ -2,14 +2,14 @@
 // UI Rendering: Summary, Transactions, Groups, Insights, Tabs, Filters
 // ============================================================================
 
-import { state, getDOM, categories, ITEMS_PER_PAGE } from "./state.js";
+import { state, getDOM, categories, getAllCategoryNames, getCategoryParent, ITEMS_PER_PAGE } from "./state.js";
 import { filterTransactions, getAllTags, getTagColor } from "./search.js";
 import { sanitizeHTML, formatDate, formatMonth, showMessage } from "./utils.js";
 import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
 import { renderBudgetAlerts, renderBudgetList, deleteBudget } from "./budget.js";
-import { setOptionalFieldValues, clearOptionalFields } from "./optional-fields.js";
+import { setOptionalFieldValues, clearOptionalFields, renderOptionalFieldsForm } from "./optional-fields.js";
 import { formatMultiCurrency, setMultiCurrencyFormData } from "./multi-currency.js";
 import {
   renderCategoryPieChart,
@@ -155,7 +155,16 @@ export function updateTransactionsList() {
     filtered = filtered.filter((t) => t.date.startsWith(state.selectedMonth));
   }
   if (state.selectedCategory !== "all") {
-    filtered = filtered.filter((t) => t.category === state.selectedCategory);
+    // If selected value is a parent category, also match its children
+    const expenseTree = categories.expense || {};
+    const incomeTree = categories.income || {};
+    const children = (expenseTree[state.selectedCategory] || incomeTree[state.selectedCategory] || []);
+    if (children.length > 0) {
+      const matchSet = new Set([state.selectedCategory, ...children]);
+      filtered = filtered.filter((t) => matchSet.has(t.category));
+    } else {
+      filtered = filtered.filter((t) => t.category === state.selectedCategory);
+    }
   }
   if (state.selectedType !== "all") {
     filtered = filtered.filter((t) => t.type === state.selectedType);
@@ -245,6 +254,14 @@ export function updateTransactionsList() {
     if (ef.location && t.location) metaParts.push(`<span class="tx-meta-item"><i class="ri-map-pin-line"></i> ${sanitizeHTML(t.location)}</span>`);
     const metaHtml = metaParts.length > 0 ? `<div class="tx-meta">${metaParts.join("")}</div>` : "";
 
+    // Reconciliation status badge (v4.0.0) — only shown for non-default statuses
+    let statusBadgeHtml = "";
+    if (t.status === "pending") {
+      statusBadgeHtml = `<span class="tx-status-badge tx-status-pending" title="Pending — not yet cleared by bank"><i class="ri-time-line"></i> pending</span>`;
+    } else if (t.status === "reconciled") {
+      statusBadgeHtml = `<span class="tx-status-badge tx-status-reconciled" title="Reconciled"><i class="ri-lock-line"></i></span>`;
+    }
+
     // Reimbursement status (v3.27.0)
     let reimbursementHtml = "";
     if (t.expenseType === "reimbursable") {
@@ -262,6 +279,7 @@ export function updateTransactionsList() {
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
                 ${metaHtml}
                 ${reimbursementHtml}
+                ${statusBadgeHtml}
                 <div class="transaction-date">${formatDate(t.date)}</div>
                 ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
             </div>
@@ -318,20 +336,42 @@ export function updateMonthFilters() {
 // ---- Category Filter ----
 
 export function updateCategoryFilter() {
-  const cats = [...new Set(state.transactions.map((t) => t.category))];
-  cats.sort();
+  const usedCats = [...new Set(state.transactions.map((t) => t.category))];
+
+  // Group used categories by their parent for display
+  const grouped = {}; // { parent: [cat, ...] }
+  const ungrouped = [];
+
+  for (const cat of usedCats) {
+    const parent = getCategoryParent(cat, "expense") || getCategoryParent(cat, "income");
+    if (!parent || parent === cat) {
+      ungrouped.push(cat);
+    } else {
+      if (!grouped[parent]) grouped[parent] = [];
+      if (!grouped[parent].includes(cat)) grouped[parent].push(cat);
+      // Add parent itself as a selectable filter too (selects all children)
+      if (!grouped[parent].includes(parent)) grouped[parent].unshift(parent);
+    }
+  }
 
   const filter = getDOM().categoryFilter;
-  filter.innerHTML = `
-        <option value="all">All Categories</option>
-        ${cats
-          .map(
-            (cat) => `
-            <option value="${cat}" ${state.selectedCategory === cat ? "selected" : ""}>${cat}</option>
-        `,
-          )
-          .join("")}
-    `;
+  let html = `<option value="all">All Categories</option>`;
+
+  // Ungrouped (parents with no children used, or transfer)
+  for (const cat of [...new Set(ungrouped)].sort()) {
+    html += `<option value="${cat}" ${state.selectedCategory === cat ? "selected" : ""}>${cat}</option>`;
+  }
+
+  // Grouped under parent optgroups
+  for (const [parent, children] of Object.entries(grouped).sort()) {
+    html += `<optgroup label="${parent}">`;
+    for (const cat of children) {
+      html += `<option value="${cat}" ${state.selectedCategory === cat ? "selected" : ""}>${cat === parent ? `All ${parent}` : "  " + cat}</option>`;
+    }
+    html += `</optgroup>`;
+  }
+
+  filter.innerHTML = html;
 }
 
 export function filterByMonth(month) {
@@ -836,16 +876,17 @@ export function selectType(type) {
     transferFields.hidden = type !== "transfer";
   }
 
+  // Re-evaluate optional fields visibility (accountLinking hides on transfer)
+  renderOptionalFieldsForm();
+
   updateCategoryOptions(type);
 }
 
 export function updateCategoryOptions(type) {
   const categorySelect = document.getElementById("category");
-  const cats = categories[type] || [];
+  const tree = categories[type] || {};
 
-  categorySelect.innerHTML = cats
-    .map((cat) => `<option value="${cat}">${cat}</option>`)
-    .join("");
+  categorySelect.innerHTML = renderCategoryOptions(tree);
 
   // For transfers, auto-select "Transfer" and disable
   if (type === "transfer") {
@@ -859,10 +900,28 @@ export function updateCategoryOptions(type) {
 
   if (state.editingId) {
     const currentCategory = categorySelect.dataset.editValue;
-    if (currentCategory && cats.includes(currentCategory)) {
+    const allNames = getAllCategoryNames(type);
+    if (currentCategory && allNames.includes(currentCategory)) {
       categorySelect.value = currentCategory;
     }
   }
+}
+
+/**
+ * Build <optgroup>/<option> HTML from a category tree object.
+ * Parents with children become <optgroup label="Parent"> with children as options.
+ * Parents with no children are plain <option> entries.
+ */
+function renderCategoryOptions(tree) {
+  return Object.entries(tree).map(([parent, children]) => {
+    if (children.length === 0) {
+      return `<option value="${parent}">${parent}</option>`;
+    }
+    return `<optgroup label="${parent}">
+      <option value="${parent}">${parent}</option>
+      ${children.map((c) => `<option value="${c}">  ${c}</option>`).join("")}
+    </optgroup>`;
+  }).join("");
 }
 
 // ---- Trend / Helpers ----

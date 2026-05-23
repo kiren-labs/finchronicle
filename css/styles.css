@@ -1,5 +1,5 @@
 /* FinChronicle - Main Styles */
-/* Version: 3.29.0 */
+/* Version: 4.0.0 */
 
 /* ==========================================================================
    Pagination Controls
@@ -4622,12 +4622,28 @@ button.primary.loading .btn-spinner {
 .savings-badge {
   display: inline-block;
   font-size: 10px;
+  font-weight: 600;
   padding: 1px 5px;
   border-radius: var(--radius-sm);
-  background: var(--color-income);
-  color: #fff;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
   text-transform: uppercase;
   letter-spacing: 0.3px;
+}
+
+.liability-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-left: 4px;
 }
 
 .account-item-right {
@@ -4643,11 +4659,11 @@ button.primary.loading .btn-spinner {
 }
 
 .account-item-balance.positive {
-  color: var(--color-income);
+  color: var(--color-success-strong);
 }
 
 .account-item-balance.negative {
-  color: var(--color-expense);
+  color: var(--color-danger-strong);
 }
 
 .account-item-actions {
@@ -4657,6 +4673,11 @@ button.primary.loading .btn-spinner {
 
 .modal-sm {
   max-width: 360px;
+  overflow: hidden;
+}
+
+.modal-lg {
+  max-width: 640px;
 }
 
 .toggle-row {
@@ -5805,4 +5826,333 @@ button.primary.loading .btn-spinner {
 .mark-settled-btn:hover {
   background: var(--color-primary);
   color: #fff;
+}
+
+/* ============================================================================
+   Account Form Modal (v4.0.0)
+   ============================================================================ */
+
+.account-form-type-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.account-form-type-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-2xl);
+  color: var(--color-primary);
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 2px;
+}
+
+.account-form-type-select-group {
+  flex: 1;
+  margin-bottom: 0;
+  gap: var(--space-xs);
+}
+
+.account-form-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-md) 0;
+}
+
+.account-form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+/* Account modal: no scrollbar — content always fits */
+#accountFormModal .modal-body {
+  max-height: none;
+  overflow: visible;
+}
+
+/* Compact inputs + tighter spacing inside the account modal */
+#accountFormModal .form-group {
+  margin-bottom: var(--space-sm);
+}
+
+#accountFormModal .form-group input,
+#accountFormModal .form-group select {
+  padding: 8px var(--space-md);
+}
+
+#accountFormModal .account-form-type-row {
+  margin-bottom: var(--space-sm);
+}
+
+#accountFormModal .account-form-actions {
+  margin-top: var(--space-md);
+}
+
+#accountFormModal button.primary {
+  min-height: 44px;
+  font-size: var(--font-md);
+}
+
+/* ============================================================================
+   Reconciliation (v4.0.0)
+   ============================================================================ */
+
+.reconcile-trigger-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.reconcile-trigger-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Explainer banner */
+.reconciliation-explainer {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+
+.recon-explainer-icon {
+  font-size: 22px;
+  color: var(--color-primary);
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.recon-explainer-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 4px;
+}
+
+.recon-explainer-body {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Step labels */
+.recon-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.recon-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.recon-step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+/* Load button — inline with inputs */
+.recon-load-btn {
+  height: 42px;
+  white-space: nowrap;
+  align-self: end;
+}
+
+.reconciliation-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 480px) {
+  .reconciliation-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reconciliation-list {
+  max-height: 340px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 12px;
+}
+
+.reconciliation-row {
+  display: grid;
+  grid-template-columns: 20px 80px 1fr 1fr 80px 64px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.1s;
+}
+
+.reconciliation-row:last-child {
+  border-bottom: none;
+}
+
+.reconciliation-row:hover {
+  background: var(--color-bg-secondary);
+}
+
+.reconciliation-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+.recon-col {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recon-date {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.recon-notes {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.recon-amount {
+  text-align: right;
+  font-weight: 500;
+}
+
+.recon-credit { color: var(--color-income); }
+.recon-debit  { color: var(--color-expense); }
+
+.recon-status {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.reconciliation-difference {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  margin-bottom: 12px;
+  background: var(--color-bg-secondary);
+  min-height: 36px;
+}
+
+.reconciliation-match {
+  background: color-mix(in srgb, var(--color-success) 12%, transparent);
+  color: var(--color-success);
+}
+
+.reconciliation-mismatch {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
+}
+
+.recon-hint {
+  font-size: 12px;
+  margin: 4px 0 0;
+  opacity: 0.85;
+}
+
+.reconciliation-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.reconcile-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.reconcile-action-btn:active { opacity: 0.8; }
+
+.reconcile-action-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.reconcile-action-danger {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+/* Transaction list: reconciliation status badges (v4.0.0) */
+.tx-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.tx-status-pending {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-border);
+}
+
+.tx-status-reconciled {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
 }

@@ -28,7 +28,7 @@ window.addEventListener("unhandledrejection", (event) => {
   );
 });
 
-import { state, currencies } from "./state.js";
+import { state, currencies, ACCOUNT_CLASSIFICATION } from "./state.js";
 import { showMessage, generateId, sanitizeHTML, getErrorLog, clearErrorLog } from "./utils.js";
 import {
   initDB,
@@ -143,6 +143,7 @@ import {
   closeAccountForm,
   handleAccountFormSubmit,
   removeAccount,
+  updateAccountTypeIcon,
 } from "./accounts.js";
 import { renderSavingsDashboard } from "./savings.js";
 import {
@@ -189,6 +190,14 @@ import {
   handleContributionSubmit,
   removeGoal,
 } from "./goals.js";
+
+import {
+  openReconciliationModal,
+  closeReconciliationModal,
+  loadReconciliationTransactions,
+  toggleReconciliationItem,
+  finaliseReconciliation,
+} from "./reconciliation.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -437,6 +446,9 @@ function bindStaticEvents() {
   // ---- Accounts (v3.18.0) ----
   bindAccountEvents();
 
+  // ---- Reconciliation (v4.0.0) ----
+  bindReconciliationEvents();
+
   // ---- Goals (v3.20.0) ----
   bindGoalEvents();
 
@@ -497,7 +509,7 @@ function bindDelegatedEvents() {
   document.getElementById("transactionsList").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-action]");
     if (btn) {
-      const id = Number(btn.dataset.id);
+      const id = btn.dataset.id;
       if (btn.dataset.action === "edit") editTransaction(id);
       if (btn.dataset.action === "delete") deleteTransaction(id);
       if (btn.dataset.action === "mark-settled") handleMarkSettled(id);
@@ -827,6 +839,8 @@ function bindOptionalFieldsEvents() {
       toggle.setAttribute("aria-expanded", String(!expanded));
       container.hidden = expanded;
       toggle.querySelector(".optional-fields-chevron").classList.toggle("expanded", !expanded);
+      // Re-populate account dropdown each time section opens (accounts may have changed)
+      if (!expanded) renderOptionalFieldsForm();
     });
   }
 
@@ -956,11 +970,34 @@ function bindAccountEvents() {
     closeBtn.addEventListener("click", closeAccountForm);
   }
 
+  // Reconcile button inside edit-account modal
+  const reconcileBtn = document.getElementById("accountReconcileBtn");
+  if (reconcileBtn) {
+    reconcileBtn.addEventListener("click", () => {
+      const name = reconcileBtn.dataset.accountName;
+      if (!name) return;
+      closeAccountForm();
+      openReconciliationModal(name);
+    });
+  }
+
   // Close modal on backdrop click
   const modal = document.getElementById("accountFormModal");
   if (modal) {
     modal.addEventListener("click", (e) => {
       if (e.target === modal) closeAccountForm();
+    });
+  }
+
+  // Auto-select classification + update icon preview when account type changes (v4.0.0)
+  const typeSelect = document.getElementById("accountTypeSelect");
+  if (typeSelect) {
+    typeSelect.addEventListener("change", () => {
+      const classSelect = document.getElementById("accountClassificationSelect");
+      if (classSelect) {
+        classSelect.value = ACCOUNT_CLASSIFICATION[typeSelect.value] || "asset";
+      }
+      updateAccountTypeIcon(typeSelect.value);
     });
   }
 
@@ -970,13 +1007,13 @@ function bindAccountEvents() {
     accountsList.addEventListener("click", async (e) => {
       const editBtn = e.target.closest(".account-edit-btn");
       if (editBtn) {
-        showEditAccountForm(Number(editBtn.dataset.id));
+        showEditAccountForm(editBtn.dataset.id);
         return;
       }
       const deleteBtn = e.target.closest(".account-delete-btn");
       if (deleteBtn) {
-        const id = Number(deleteBtn.dataset.id);
-        const account = state.accounts.find((a) => a.id === id);
+        const id = deleteBtn.dataset.id;
+        const account = state.accounts.find((a) => String(a.id) === id);
         if (account && confirm(`Delete account "${account.name}"?`)) {
           await removeAccount(id);
           renderAccountManager();
@@ -986,6 +1023,38 @@ function bindAccountEvents() {
       }
     });
   }
+}
+
+// ============================================================================
+// Reconciliation Events (v4.0.0)
+// ============================================================================
+
+function bindReconciliationEvents() {
+  const modal = document.getElementById("reconciliationModal");
+  if (!modal) return;
+
+  // Close button
+  modal.querySelector(".reconciliation-close")?.addEventListener("click", closeReconciliationModal);
+
+  // Close on backdrop click
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeReconciliationModal();
+  });
+
+  // Load transactions button
+  document.getElementById("reconciliationLoadBtn")?.addEventListener("click", loadReconciliationTransactions);
+
+  // Finalise button
+  document.getElementById("reconciliationFinaliseBtn")?.addEventListener("click", () => finaliseReconciliation(false));
+
+  // Force reconcile button
+  document.getElementById("reconciliationForceBtn")?.addEventListener("click", () => finaliseReconciliation(true));
+
+  // Checklist delegation — change events on checkboxes
+  document.getElementById("reconciliationList")?.addEventListener("change", (e) => {
+    const chk = e.target.closest("[data-recon-id]");
+    if (chk) toggleReconciliationItem(chk.dataset.reconId);
+  });
 }
 
 // ============================================================================
@@ -1306,6 +1375,7 @@ function bindFormSubmit() {
 
       const type = document.getElementById("type").value;
       const now = new Date().toISOString();
+      const existingTx = state.editingId ? state.transactions.find((t) => t.id === state.editingId) : null;
       const transaction = {
         id: state.editingId || generateId(),
         type: type,
@@ -1314,9 +1384,8 @@ function bindFormSubmit() {
         date: document.getElementById("date").value,
         notes: document.getElementById("notes").value,
         tags: [...state.formTags],
-        createdAt: state.editingId
-          ? state.transactions.find((t) => t.id === state.editingId)?.createdAt
-          : now,
+        status: existingTx ? (existingTx.status || "cleared") : "cleared",
+        createdAt: existingTx ? existingTx.createdAt : now,
         updatedAt: now,
       };
 
@@ -1381,7 +1450,16 @@ function bindFormSubmit() {
           showMessage("Transaction saved!");
         }
 
+        const savedEditingId = state.editingId;
         setTimeout(() => {
+          submitBtn.classList.remove("success");
+          submitBtn.disabled = false;
+          submitBtn.textContent = state.editingId ? "Update Transaction" : "Save Transaction";
+          formCard.classList.remove("success-pulse");
+
+          // If the user quickly opened a new edit session, don't reset the form
+          if (state.editingId !== savedEditingId) return;
+
           document.getElementById("transactionForm").reset();
           document.getElementById("date").valueAsDate = new Date();
           state.editingId = null;
@@ -1395,15 +1473,10 @@ function bindFormSubmit() {
           document.getElementById("formTitle").textContent = "Add Transaction";
           document.getElementById("cancelEditBtn").style.display = "none";
 
-          submitBtn.classList.remove("success");
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Save Transaction";
-
-          formCard.classList.remove("success-pulse");
-
           updateUI();
           renderQuickBar();
           renderNetWorthDashboard();
+          renderAccountManager();
           renderSavingsDashboard();
           renderAlertBanners(runAlertChecks(sanitizedTransaction));
           renderAnnualReport();

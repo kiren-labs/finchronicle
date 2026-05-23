@@ -2,7 +2,7 @@
 // Transaction Validation Layer (v3.10.2)
 // ============================================================================
 
-import { categories, PAYMENT_METHODS, EXPENSE_TYPES, currencies, state } from "./state.js";
+import { categories, getAllCategoryNames, PAYMENT_METHODS, EXPENSE_TYPES, currencies, state } from "./state.js";
 import { sanitizeHTML } from "./utils.js";
 
 // Validate transaction before saving
@@ -30,8 +30,7 @@ export function validateTransaction(transaction) {
     // Transfers always have category "Transfer" — auto-set it
     transaction.category = "Transfer";
   } else {
-    const validCategories =
-      transaction.type === "income" ? categories.income : categories.expense;
+    const validCategories = getAllCategoryNames(transaction.type);
     if (!validCategories.includes(transaction.category)) {
       errors.push({
         field: "category",

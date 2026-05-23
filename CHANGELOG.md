@@ -9,6 +9,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] — 2026-05-23
+
+### Added — Accounting Model (Phase 2)
+
+#### 2.1 Asset/Liability Classification
+- New account types: "loan" and "mortgage" → automatically classified as liabilities
+- All existing accounts backfilled via v11 DB migration (`credit-card` → liability, rest → asset)
+- `ACCOUNT_CLASSIFICATION` map in `js/state.js` for type → classification lookup
+- Account form (add/edit) has "Classification" dropdown (asset/liability) with auto-derive on type change
+- Liability badge rendered in account list (red, `var(--color-expense)`)
+- `getNetWorth()` uses `classification` field: liabilities subtract as `Math.abs(balance)`, assets add normally
+
+#### 2.2 Transaction ↔ Account Linking
+- Optional "Account" dropdown in income/expense form controlled by `appSettings.enabledFields.accountLinking`
+- Expense + linked account → sets `fromAccount`; income + linked account → sets `toAccount`
+- Dropdown auto-populates from `state.accounts` when optional fields section is expanded
+- Pre-populates on edit; hidden when transaction type is "transfer"
+- `getAccountBalance()` fixed: income credits only `toAccount`, expense debits only `fromAccount` (eliminates balance-drift-on-reload bug)
+
+#### 2.3 Reconciliation Workflow
+- New `js/reconciliation.js` module — three pure functions (`computeReconciledBase`, `computeCheckedBalance`, `filterCandidates`) plus DOM-bound workflow
+- Transaction `status` field: `'pending' | 'cleared' | 'reconciled'` (default `'cleared'`; backfilled via v12 DB migration)
+- Reconciliation triggered from account edit modal via "Reconcile this account" button
+- Step 1: enter statement balance + date → load unreconciled candidates up to that date
+- Step 2: check off each transaction; live difference display updates as items are checked
+- Finalise: marks all checked transactions as `reconciled` in IndexedDB; blocks on mismatch with optional "Reconcile Anyway" force path
+- Transaction list shows lock icon badge for `reconciled` transactions; yellow chip for `pending`
+
+#### 2.4 Category Hierarchy
+- `categories` in `js/state.js` changed from flat arrays to hierarchy objects: `{ parent: [children] }`
+- Expense categories reorganised with meaningful sub-categories (e.g. `Food → [Groceries, Restaurants, Coffee/Tea, Delivery]`, `Housing → [Rent, Mortgage, Maintenance]`)
+- Income sub-categories added (e.g. `Business → [Consulting, Sales, Services]`, `Investment → [Dividends, Capital Gains, Interest]`)
+- `getAllCategoryNames(type)` helper — returns flat list of all valid names (parents + children) for validation
+- `getCategoryParent(name, type)` helper — resolves a category name to its parent
+- All dropdowns (transaction form, recurring, budget) render `<optgroup>` with indented children
+- Category filter groups used categories by parent; selecting a parent filters all its children too
+- Validation accepts both parent and child category names — fully backwards compatible with existing data
+- New `css/tokens.css` income/expense color tokens; dark mode token overrides
+
+### Changed
+- Account Add/Edit modal redesigned: type icon preview, compact inputs, visual divider between core and advanced fields, `role="dialog"` + `aria-modal` accessibility attributes, focus on open
+- `button.primary` used throughout (was incorrectly using `.btn.primary-btn` class which had no CSS)
+- `showAddAccountForm` / `showEditAccountForm` now focus `#accountNameInput` on open
+- SW update polling changed from `setInterval` (60 s) to `visibilitychange` event (throttled to 5 min) — reduces background CPU on mobile
+
+### Fixed
+- Balance reducing on every page reload: `getAccountBalance()` was matching income on `fromAccount` OR `toAccount`; fixed to credit only `toAccount` for income, debit only `fromAccount` for expense
+- Reconciliation modal not opening: modal was using `hidden` attribute but CSS controls visibility via `.modal` / `.modal.show` class; fixed to `classList.add/remove("show")`
+- Account dropdown showing only "None": `populateLinkedAccountSelect` ran once at init when section was hidden; now re-runs on optional-fields expand
+- Reconciliation action buttons unstyled: were using non-existent `.btn.primary-btn` / `.btn.danger-btn`; replaced with scoped `.reconcile-action-primary` / `.reconcile-action-danger` classes
+
+### Technical
+- `DB_VERSION` bumped to 12 (v11: classification backfill; v12: status backfill)
+- New module `js/reconciliation.js` added to `CACHE_URLS` in `sw.js`
+- Test suite: 10 unit test files, 323 tests passing; 1 new E2E spec (`reconciliation.spec.js`, 18 tests)
+- `scripts/extract-functions.js` updated with brace-counting extractor for nested `categories` object; `getAllCategoryNames` and `getCategoryParent` added to extraction map
+
 ## [3.29.0] — 2026-05-23
 
 ### Added — Engineering Hardening (Phase 1)

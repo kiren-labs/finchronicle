@@ -2,7 +2,7 @@
 // Recurring Transactions (v3.11.0)
 // ============================================================================
 
-import { state, categories } from "./state.js";
+import { state, categories, getAllCategoryNames } from "./state.js";
 import { sanitizeHTML, formatDate, showMessage, generateId } from "./utils.js";
 import { formatCurrency } from "./currency.js";
 import { getAllTags, getTagColor, ensureTagColor } from "./search.js";
@@ -355,10 +355,15 @@ export function initRecurringTagEvents() {
 function _updateRecurringCategoryOptions(type) {
   const select = document.getElementById("recurringCategory");
   if (!select) return;
-  const opts = categories[type] || [];
-  select.innerHTML =
-    '<option value="" disabled selected>Select category</option>' +
-    opts.map((c) => `<option value="${c}">${c}</option>`).join("");
+  const tree = categories[type] || {};
+  const optionsHtml = Object.entries(tree).map(([parent, children]) => {
+    if (children.length === 0) return `<option value="${parent}">${parent}</option>`;
+    return `<optgroup label="${parent}">
+      <option value="${parent}">${parent}</option>
+      ${children.map((c) => `<option value="${c}">  ${c}</option>`).join("")}
+    </optgroup>`;
+  }).join("");
+  select.innerHTML = '<option value="" disabled selected>Select category</option>' + optionsHtml;
 }
 
 export function selectRecurringType(type) {

@@ -2,7 +2,7 @@
 // Accounts & Net Worth (v3.18.0)
 // ============================================================================
 
-import { state, ACCOUNT_TYPES } from "./state.js";
+import { state, ACCOUNT_TYPES, ACCOUNT_CLASSIFICATION } from "./state.js";
 import { loadAccounts, saveAccount, deleteAccount, saveNetWorthSnapshot, loadNetWorthSnapshots, getNetWorthSnapshotByDate } from "./db.js";
 import { formatCurrency } from "./currency.js";
 import { sanitizeHTML, showMessage, generateId } from "./utils.js";
@@ -45,13 +45,9 @@ export function getAccountBalance(accountName) {
       if (t.toAccount === accountName) credits += t.amount;
       if (t.fromAccount === accountName) debits += t.amount;
     } else if (t.type === "income") {
-      if (t.fromAccount === accountName || t.toAccount === accountName) {
-        credits += t.amount;
-      }
+      if (t.toAccount === accountName) credits += t.amount;
     } else if (t.type === "expense") {
-      if (t.fromAccount === accountName || t.toAccount === accountName) {
-        debits += t.amount;
-      }
+      if (t.fromAccount === accountName) debits += t.amount;
     }
   });
 
@@ -60,6 +56,7 @@ export function getAccountBalance(accountName) {
 
 /**
  * Get net worth breakdown: assets, liabilities, net.
+ * Uses account.classification field (v4.0.0) with fallback to type-based heuristic.
  */
 export function getNetWorth() {
   let totalAssets = 0;
@@ -73,8 +70,8 @@ export function getNetWorth() {
     });
 
   accountBalances.forEach((a) => {
-    if (a.type === "credit-card") {
-      // Credit card: positive balance = owed (liability)
+    const classification = a.classification || ACCOUNT_CLASSIFICATION[a.type] || "asset";
+    if (classification === "liability") {
       totalLiabilities += Math.abs(a.balance);
     } else {
       if (a.balance >= 0) {
@@ -122,6 +119,7 @@ export async function addAccount(formData) {
     id: generateId(),
     name: trimmedName,
     type,
+    classification: ACCOUNT_CLASSIFICATION[type] || "asset",
     openingBalance: parsedBalance,
     isSavings: type === "savings" || type === "investment",
     isActive: true,
@@ -142,7 +140,7 @@ export async function addAccount(formData) {
 }
 
 export async function updateAccount(id, updates) {
-  const index = state.accounts.findIndex((a) => a.id === id);
+  const index = state.accounts.findIndex((a) => String(a.id) === String(id));
   if (index === -1) return false;
 
   const account = state.accounts[index];
@@ -150,7 +148,7 @@ export async function updateAccount(id, updates) {
   // If name changed, check for duplicates
   if (updates.name && updates.name !== account.name) {
     const trimmedName = sanitizeHTML(updates.name.trim());
-    if (state.accounts.some((a) => a.id !== id && a.name.toLowerCase() === trimmedName.toLowerCase())) {
+    if (state.accounts.some((a) => String(a.id) !== String(id) && a.name.toLowerCase() === trimmedName.toLowerCase())) {
       showMessage("An account with that name already exists.");
       return false;
     }
@@ -171,7 +169,7 @@ export async function updateAccount(id, updates) {
 }
 
 export async function removeAccount(id) {
-  const account = state.accounts.find((a) => a.id === id);
+  const account = state.accounts.find((a) => String(a.id) === String(id));
   if (!account) return false;
 
   // Check if account is referenced by any transaction
@@ -186,7 +184,7 @@ export async function removeAccount(id) {
 
   try {
     await deleteAccount(id);
-    state.accounts = state.accounts.filter((a) => a.id !== id);
+    state.accounts = state.accounts.filter((a) => String(a.id) !== String(id));
     showMessage(`Account "${account.name}" deleted.`);
     return true;
   } catch (err) {
@@ -374,7 +372,9 @@ export function renderAccountManager() {
     const balClass = balance >= 0 ? "positive" : "negative";
     const typeLabel = account.type.replace("-", " ");
     const inactive = account.isActive === false ? " inactive" : "";
-    const savingsBadge = account.isSavings ? `<span class="savings-badge">savings</span>` : "";
+    const savingsBadge = account.isSavings ? `<span class="savings-badge" aria-label="Savings account">savings</span>` : "";
+    const classification = account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
+    const classificationBadge = classification === "liability" ? `<span class="liability-badge" aria-label="Liability account">liability</span>` : "";
 
     html += `
     <div class="account-item${inactive}" data-id="${account.id}">
@@ -382,7 +382,7 @@ export function renderAccountManager() {
         <div class="account-item-icon">${getAccountIcon(account.type)}</div>
         <div class="account-item-details">
           <span class="account-item-name">${sanitizeHTML(account.name)}</span>
-          <span class="account-item-meta">${typeLabel} ${savingsBadge}</span>
+          <span class="account-item-meta">${typeLabel} ${savingsBadge}${classificationBadge}</span>
         </div>
       </div>
       <div class="account-item-right">
@@ -414,12 +414,22 @@ function getAccountIcon(type) {
       return '<i class="ri-money-dollar-circle-line"></i>';
     case "investment":
       return '<i class="ri-line-chart-line"></i>';
+    case "loan":
+      return '<i class="ri-hand-coin-line"></i>';
+    case "mortgage":
+      return '<i class="ri-home-line"></i>';
     default:
       return '<i class="ri-wallet-3-line"></i>';
   }
 }
 
 // ---- Account Form Helpers ----
+
+export function updateAccountTypeIcon(type) {
+  const preview = document.getElementById("accountTypeIconPreview");
+  if (!preview) return;
+  preview.innerHTML = getAccountIcon(type);
+}
 
 export function showAddAccountForm() {
   const modal = document.getElementById("accountFormModal");
@@ -429,13 +439,21 @@ export function showAddAccountForm() {
   document.getElementById("accountNameInput").value = "";
   document.getElementById("accountTypeSelect").value = "checking";
   document.getElementById("accountBalanceInput").value = "";
+  document.getElementById("accountClassificationSelect").value = "asset";
   document.getElementById("accountSavingsToggle").checked = false;
   modal.dataset.editId = "";
+
+  updateAccountTypeIcon("checking");
+
+  const reconcileBtn = document.getElementById("accountReconcileBtn");
+  if (reconcileBtn) reconcileBtn.hidden = true;
+
   modal.classList.add("show");
+  document.getElementById("accountNameInput")?.focus();
 }
 
 export function showEditAccountForm(id) {
-  const account = state.accounts.find((a) => a.id === id);
+  const account = state.accounts.find((a) => String(a.id) === String(id));
   if (!account) return;
 
   const modal = document.getElementById("accountFormModal");
@@ -445,9 +463,20 @@ export function showEditAccountForm(id) {
   document.getElementById("accountNameInput").value = account.name;
   document.getElementById("accountTypeSelect").value = account.type;
   document.getElementById("accountBalanceInput").value = account.openingBalance || "";
+  document.getElementById("accountClassificationSelect").value = account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
   document.getElementById("accountSavingsToggle").checked = account.isSavings || false;
   modal.dataset.editId = String(id);
+
+  updateAccountTypeIcon(account.type);
+
+  const reconcileBtn = document.getElementById("accountReconcileBtn");
+  if (reconcileBtn) {
+    reconcileBtn.hidden = false;
+    reconcileBtn.dataset.accountName = account.name;
+  }
+
   modal.classList.add("show");
+  document.getElementById("accountNameInput")?.focus();
 }
 
 export function closeAccountForm() {
@@ -457,23 +486,27 @@ export function closeAccountForm() {
 
 export async function handleAccountFormSubmit() {
   const modal = document.getElementById("accountFormModal");
-  const editId = modal.dataset.editId ? Number(modal.dataset.editId) : null;
+  const editId = modal.dataset.editId || null;
 
   const name = document.getElementById("accountNameInput").value;
   const type = document.getElementById("accountTypeSelect").value;
   const openingBalance = document.getElementById("accountBalanceInput").value;
+  const classification = document.getElementById("accountClassificationSelect").value;
   const isSavings = document.getElementById("accountSavingsToggle").checked;
 
   let success;
   if (editId) {
-    success = await updateAccount(editId, { name: name.trim(), type, openingBalance: parseFloat(openingBalance) || 0, isSavings });
+    success = await updateAccount(editId, { name: name.trim(), type, classification, openingBalance: parseFloat(openingBalance) || 0, isSavings });
   } else {
     success = await addAccount({ name, type, openingBalance });
-    // Also set isSavings if user toggled it
-    if (success && isSavings) {
+    // Set classification + isSavings if user overrode defaults
+    if (success) {
       const newAccount = state.accounts[state.accounts.length - 1];
-      if (newAccount && !newAccount.isSavings) {
-        await updateAccount(newAccount.id, { isSavings: true });
+      if (newAccount) {
+        const updates = {};
+        if (classification !== (ACCOUNT_CLASSIFICATION[type] || "asset")) updates.classification = classification;
+        if (isSavings && !newAccount.isSavings) updates.isSavings = true;
+        if (Object.keys(updates).length > 0) await updateAccount(newAccount.id, updates);
       }
     }
   }
