@@ -122,6 +122,23 @@ export function initDB() {
           snapshotsStore.createIndex("snapshotDate", "snapshotDate", { unique: true });
         }
       }
+
+      // v11: Account classification — asset vs liability (v4.0.0)
+      if (oldVersion < 11) {
+        if (database.objectStoreNames.contains(ACCOUNTS_STORE)) {
+          const accStore = event.target.transaction.objectStore(ACCOUNTS_STORE);
+          const getAllReq = accStore.getAll();
+          getAllReq.onsuccess = () => {
+            const liabilityTypes = ["credit-card", "loan", "mortgage"];
+            getAllReq.result.forEach((account) => {
+              if (!account.classification) {
+                account.classification = liabilityTypes.includes(account.type) ? "liability" : "asset";
+                accStore.put(account);
+              }
+            });
+          };
+        }
+      }
     };
   });
 }

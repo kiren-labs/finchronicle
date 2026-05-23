@@ -8,7 +8,7 @@ export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
 export const DB_NAME = "FinChronicleDB";
-export const DB_VERSION = 10;
+export const DB_VERSION = 11;
 export const STORE_NAME = "transactions";
 export const RECURRING_STORE = "recurringTemplates";
 export const BUDGETS_STORE = "budgets";
@@ -26,8 +26,22 @@ export const ACCOUNT_TYPES = [
   "credit-card",
   "cash",
   "investment",
+  "loan",
+  "mortgage",
   "other",
 ];
+
+// Default classification per account type (v4.0.0)
+export const ACCOUNT_CLASSIFICATION = {
+  "checking": "asset",
+  "savings": "asset",
+  "credit-card": "liability",
+  "cash": "asset",
+  "investment": "asset",
+  "loan": "liability",
+  "mortgage": "liability",
+  "other": "asset",
+};
 
 // Pagination
 export const ITEMS_PER_PAGE = 20;

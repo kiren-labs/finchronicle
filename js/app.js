@@ -28,7 +28,7 @@ window.addEventListener("unhandledrejection", (event) => {
   );
 });
 
-import { state, currencies } from "./state.js";
+import { state, currencies, ACCOUNT_CLASSIFICATION } from "./state.js";
 import { showMessage, generateId, sanitizeHTML, getErrorLog, clearErrorLog } from "./utils.js";
 import {
   initDB,
@@ -497,7 +497,7 @@ function bindDelegatedEvents() {
   document.getElementById("transactionsList").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-action]");
     if (btn) {
-      const id = Number(btn.dataset.id);
+      const id = btn.dataset.id;
       if (btn.dataset.action === "edit") editTransaction(id);
       if (btn.dataset.action === "delete") deleteTransaction(id);
       if (btn.dataset.action === "mark-settled") handleMarkSettled(id);
@@ -964,19 +964,30 @@ function bindAccountEvents() {
     });
   }
 
+  // Auto-select classification when account type changes (v4.0.0)
+  const typeSelect = document.getElementById("accountTypeSelect");
+  if (typeSelect) {
+    typeSelect.addEventListener("change", () => {
+      const classSelect = document.getElementById("accountClassificationSelect");
+      if (classSelect) {
+        classSelect.value = ACCOUNT_CLASSIFICATION[typeSelect.value] || "asset";
+      }
+    });
+  }
+
   // Account list delegated events (edit, delete)
   const accountsList = document.getElementById("accountsList");
   if (accountsList) {
     accountsList.addEventListener("click", async (e) => {
       const editBtn = e.target.closest(".account-edit-btn");
       if (editBtn) {
-        showEditAccountForm(Number(editBtn.dataset.id));
+        showEditAccountForm(editBtn.dataset.id);
         return;
       }
       const deleteBtn = e.target.closest(".account-delete-btn");
       if (deleteBtn) {
-        const id = Number(deleteBtn.dataset.id);
-        const account = state.accounts.find((a) => a.id === id);
+        const id = deleteBtn.dataset.id;
+        const account = state.accounts.find((a) => String(a.id) === id);
         if (account && confirm(`Delete account "${account.name}"?`)) {
           await removeAccount(id);
           renderAccountManager();
@@ -1381,7 +1392,16 @@ function bindFormSubmit() {
           showMessage("Transaction saved!");
         }
 
+        const savedEditingId = state.editingId;
         setTimeout(() => {
+          submitBtn.classList.remove("success");
+          submitBtn.disabled = false;
+          submitBtn.textContent = state.editingId ? "Update Transaction" : "Save Transaction";
+          formCard.classList.remove("success-pulse");
+
+          // If the user quickly opened a new edit session, don't reset the form
+          if (state.editingId !== savedEditingId) return;
+
           document.getElementById("transactionForm").reset();
           document.getElementById("date").valueAsDate = new Date();
           state.editingId = null;
@@ -1394,12 +1414,6 @@ function bindFormSubmit() {
           selectType("expense");
           document.getElementById("formTitle").textContent = "Add Transaction";
           document.getElementById("cancelEditBtn").style.display = "none";
-
-          submitBtn.classList.remove("success");
-          submitBtn.disabled = false;
-          submitBtn.textContent = "Save Transaction";
-
-          formCard.classList.remove("success-pulse");
 
           updateUI();
           renderQuickBar();
