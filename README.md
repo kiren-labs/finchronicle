@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-4.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.1.1-blue.svg)](CHANGELOG.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -69,14 +69,14 @@
 - ✅ **Modern Icons** - Professional Remix Icon font
 
 ### 🛠️ Technical Features
-- ✅ **ES Modules** - 26 focused modules, no build step required
+- ✅ **ES Modules** - 27 focused modules, no build step required
 - ✅ **Zero Dependencies** - No npm, no frameworks
 - ✅ **Service Worker** - Cache-first offline strategy
-- ✅ **IndexedDB** - 9 object stores for robust data (DB_VERSION 12)
-- ✅ **Automated Tests** - 323 unit tests (Vitest) + E2E suite (Playwright)
+- ✅ **IndexedDB** - 8 object stores for robust local data (DB_VERSION 12)
+- ✅ **Automated Tests** - 50+ unit tests (Vitest) + E2E suite (Playwright)
 - ✅ **Responsive Design** - Works on all screen sizes
-- ✅ **WCAG AA Compliant** - Fully accessible with ARIA attributes
-- ✅ **Version Management** - Semantic versioning with auto-update
+- ✅ **WCAG AA Accessible** - Sufficient color contrast, ARIA attributes throughout
+- ✅ **Version Management** - Semantic versioning with auto-update prompt
 
 ---
 
@@ -149,13 +149,15 @@ finchronicle/
 │   ├── accounts.js     # Account CRUD & net worth dashboard
 │   ├── savings.js      # Savings rate dashboard
 │   ├── goals.js        # Savings goals with progress tracking
-│   ├── alerts.js       # Smart spending alerts (v3.21.0)
+│   ├── alerts.js       # Smart spending + financial health alerts (v4.1.0)
+│   ├── forecast.js     # Cash-flow forecast engine (v4.1.0)
+│   ├── reconciliation.js # Reconciliation workflow + status management (v4.0.0)
 │   ├── annual-report.js # Year scorecard & CSV export (v3.21.0)
 │   ├── auto-backup.js  # Scheduled encrypted backups + storage health (v3.22.0)
 │   ├── multi-currency.js # Per-transaction FX + exchange rate history (v3.24.0)
 │   ├── settlement.js   # Family expense settlement (v3.26.0)
 │   ├── faq.js          # Lazy-loaded FAQ
-│   └── import-export.js # Lazy-loaded CSV import/export
+│   └── import-export.js # Lazy-loaded CSV/JSON import, export, backup & restore
 ├── css/
 │   ├── tokens.css      # Design tokens (CSS custom properties)
 │   ├── styles.css      # Component styles
@@ -174,14 +176,14 @@ finchronicle/
 2. **Update version** in three places:
    ```javascript
    // js/state.js
-   export const APP_VERSION = '4.0.0';
+   export const APP_VERSION = '4.1.0';
 
    // sw.js
-   const CACHE_NAME = 'finchronicle-v4.0.0';
+   const CACHE_NAME = 'finchronicle-v4.1.0';
    ```
    ```json
    // manifest.json
-   "version": "4.0.0"
+   "version": "4.1.0"
    ```
 3. **Test locally**:
    ```bash
@@ -301,12 +303,16 @@ export const categories = {
 
 ### Upcoming (v4.2+)
 
-- [ ] Budget vs Actual Report — consolidated table with variance per category
-- [ ] Envelope Budgeting mode — allocate every rupee before spending
-- [ ] Subscription Tracker — auto-detect monthly recurring patterns
-- [ ] Receipt Photos (v3.40)
+- [ ] **v4.2** — Budget vs Actual Report — consolidated table with variance per category
+- [ ] **v4.3** — Financial Health Ratios — emergency fund, debt-to-income, housing cost KPIs
+- [ ] **v4.4** — Subscription Tracker — monthly/annual cost summary from recurring templates
+- [ ] **v4.5** — Duplicate Transaction Detection — inline warning before save
+- [ ] **v4.6** — Bank Statement CSV Importer — generic column mapper, client-side only
+- [ ] **v4.7** — Local Notifications — bill-due and budget reminders via Service Worker
+- [ ] **v4.8** — Bulk Transaction Operations — recategorize, tag, delete multiple at once
+- [ ] **v4.9** — Category Management — rename, merge, cleanup suggestions
 
-See [FinChronicleFeatureRoadmap_v2.md](docs/FinChronicleFeatureRoadmap_v2.md) for detailed roadmap.
+See [FinChronicleFeatureRoadmap_v2.md](docs/FinChronicleFeatureRoadmap_v2.md) for full details.
 
 ---
 
@@ -333,35 +339,32 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📈 Stats
 
-- **Size**: ~15KB (total app)
-- **Dependencies**: 1 (Remix Icon font - CDN)
-- **Performance**: 100/100 Lighthouse score
+- **Size**: ~15KB (total app shell, no frameworks)
+- **Runtime dependencies**: 1 (Remix Icon font - CDN, cached offline)
+- **Modules**: 27 ES modules, zero build step
+- **IndexedDB stores**: 8 (DB_VERSION 12)
 - **Accessibility**: WCAG AA compliant
-- **PWA Score**: Fully installable
+- **PWA**: Fully installable, 100% offline-capable
 
 ---
 
-## 🌟 Why This App?
+## 🌟 Why FinChronicle?
 
-### vs Mint / YNAB
-- ✅ Free forever (no subscription)
-- ✅ No sign-up required
-- ✅ Complete privacy (data stays local)
-- ✅ Works 100% offline
-- ❌ No bank integration
+Most finance apps ask you to create an account, pay a subscription, and hand over your transaction history to a server you don't control. FinChronicle takes the opposite approach.
 
-### vs Spreadsheets
-- ✅ Easier to use on mobile
-- ✅ Offline-first mobile app
-- ✅ Quick transaction entry
-- ✅ Built-in insights
-- ✅ Can export to CSV anytime
+**It's built for people who:**
+- Want their financial data on their device and nowhere else
+- Log transactions manually — quick 10-second entries on mobile
+- Travel or live somewhere with unreliable internet
+- Track across multiple currencies and accounts
+- Want a full budget + net worth + reconciliation stack without paying monthly
 
-### vs Other PWAs
-- ✅ Ultra lightweight (~15KB)
-- ✅ True offline-first (no internet needed)
-- ✅ Open source
-- ✅ No vendor lock-in
+**What you give up:**
+- Automatic bank transaction sync (manual entry only)
+- Multi-user or shared finance features
+- Double-entry accounting (journal entries, trial balance)
+
+If manual entry and local-first privacy match how you work, FinChronicle is built exactly for that. If you need bank sync, a subscription-based cloud app will serve you better.
 
 ---
 
@@ -414,13 +417,14 @@ If this project helped you, please consider:
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-**Latest Release: v4.1.0** — Forward-Looking Intelligence (Cash-Flow Forecast + Financial Health Alerts)
+**Latest Release: v4.1.1** — Patch
 
-- 🏦 Asset/Liability Classification — loan & mortgage account types; correct net worth math
-- 🔗 Transaction ↔ Account Linking — optional account field on income/expense transactions
-- ✅ Reconciliation Workflow — per-account statement matching; pending/cleared/reconciled status badges
-- 🗂️ Category Hierarchy — parent/sub-category structure with optgroup dropdowns and parent-aware filtering
-- 🔧 Engineering: DB_VERSION 12, 26 modules, 323 unit tests, Playwright E2E suite
+- 🐛 Monthly-pace alert no longer duplicates budget alert for same category
+- 🐛 CSV/JSON export now includes Tags, Status, RecurringId, Settled fields (27-column parity)
+- 🐛 JSON restore now recovers all stores (recurring templates, budgets, accounts, goals, quick templates)
+- 🐛 CSV import state mutation fixed — state updated only after successful DB write
+- ♿ WCAG AA contrast fixes across net worth, accounts, savings, settlement, annual report (new accessible text tokens)
+- 🐛 SW background-update errors no longer appear in in-app error log
 
 ---
 

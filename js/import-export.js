@@ -14,7 +14,16 @@ import {
   generateId,
 } from "./utils.js";
 import { getCurrency, formatCurrency } from "./currency.js";
-import { loadDataFromDB, bulkSaveTransactionsToDB, loadAllTransactionsFromDB } from "./db.js";
+import {
+  loadDataFromDB,
+  bulkSaveTransactionsToDB,
+  loadAllTransactionsFromDB,
+  saveRecurringTemplateToDB,
+  saveBudgetToDB,
+  saveAccount,
+  saveGoal,
+  bulkSaveQuickTemplates,
+} from "./db.js";
 import { updateBackupTimestamp } from "./settings.js";
 import { updateUI } from "./ui.js";
 
@@ -33,6 +42,8 @@ export function exportToCSV() {
     "Category",
     `Amount (${currencyCode})`,
     "Notes",
+    "Tags",
+    "Status",
     "From Account",
     "To Account",
     "UpdatedAt",
@@ -52,6 +63,8 @@ export function exportToCSV() {
     t.category,
     t.amount,
     t.notes || "",
+    (t.tags || []).join(";"),
+    t.status || "",
     t.fromAccount || "",
     t.toAccount || "",
     t.updatedAt || "",
@@ -138,6 +151,8 @@ export async function createBackup() {
     "Category",
     `Amount (${currencyCode})`,
     "Notes",
+    "Tags",
+    "Status",
     "ID",
     "CreatedAt",
     "UpdatedAt",
@@ -145,6 +160,10 @@ export async function createBackup() {
     "To Account",
     "Deleted",
     "DeletedAt",
+    "RecurringId",
+    "Settled",
+    "SettledAt",
+    "SettledBy",
     "Payment Method",
     "Merchant",
     "Expense Type",
@@ -161,6 +180,8 @@ export async function createBackup() {
     t.category,
     t.amount,
     t.notes || "",
+    (t.tags || []).join(";"),
+    t.status || "",
     t.id,
     t.createdAt,
     t.updatedAt || "",
@@ -168,6 +189,10 @@ export async function createBackup() {
     t.toAccount || "",
     t.deleted ? "yes" : "",
     t.deletedAt || "",
+    t.recurringId || "",
+    t.settled ? "yes" : "",
+    t.settledAt || "",
+    t.settledBy || "",
     t.paymentMethod || "",
     t.merchant || "",
     t.expenseType || "",
@@ -265,6 +290,8 @@ export async function importFromCSV(text) {
   const txCurrencyIndex = findHeaderIndex(headers, /^transaction currency$/i);
   const exchangeRateIndex = findHeaderIndex(headers, /^exchange rate$/i);
   const homeAmountIndex = findHeaderIndex(headers, /^home amount$/i);
+  const tagsIndex = findHeaderIndex(headers, /^tags$/i);
+  const statusIndex = findHeaderIndex(headers, /^status$/i);
 
   if (dateIndex === -1 || categoryIndex === -1 || amountIndex === -1) {
     throw new Error("Missing required headers");
@@ -351,14 +378,26 @@ export async function importFromCSV(text) {
       const val = parseFloat((row[homeAmountIndex] || "").trim());
       if (!isNaN(val) && val > 0) txn.homeAmount = val;
     }
+    // Tags
+    if (tagsIndex !== -1) {
+      const raw = (row[tagsIndex] || "").trim();
+      if (raw) txn.tags = raw.split(";").map(s => s.trim()).filter(Boolean);
+    }
+    // Status (v4.0.0)
+    if (statusIndex !== -1) {
+      const val = (row[statusIndex] || "").trim().toLowerCase();
+      if (val === "cleared" || val === "reconciled") txn.status = val;
+    }
 
     newTransactions.push(txn);
-    state.transactions.unshift(txn);
     added += 1;
   });
 
   if (newTransactions.length > 0) {
     await bulkSaveTransactionsToDB(newTransactions);
+    newTransactions.forEach(t => { t.dateTs = new Date(t.date).getTime(); });
+    state.transactions.push(...newTransactions);
+    state.transactions.sort((a, b) => b.dateTs - a.dateTs);
     updateUI();
   }
 
@@ -463,6 +502,12 @@ export function parseBackupCSV(text) {
   const txCurrencyIdx = headers.findIndex((h) => h === "transaction currency");
   const exchangeRateIdx = headers.findIndex((h) => h === "exchange rate");
   const homeAmountIdx = headers.findIndex((h) => h === "home amount");
+  const tagsIdx = headers.findIndex((h) => h === "tags");
+  const statusIdx = headers.findIndex((h) => h === "status");
+  const recurringIdIdx = headers.findIndex((h) => h === "recurringid");
+  const settledIdx = headers.findIndex((h) => h === "settled");
+  const settledAtIdx = headers.findIndex((h) => h === "settledat");
+  const settledByIdx = headers.findIndex((h) => h === "settledby");
 
   const parsedTransactions = [];
   const dataRows = rows.slice(1);
@@ -559,6 +604,27 @@ export function parseBackupCSV(text) {
     if (homeAmountIdx !== -1) {
       const val = parseFloat((row[homeAmountIdx] || "").trim());
       if (!isNaN(val) && val > 0) transaction.homeAmount = val;
+    }
+    // Tags
+    if (tagsIdx !== -1) {
+      const raw = (row[tagsIdx] || "").trim();
+      if (raw) transaction.tags = raw.split(";").map(s => s.trim()).filter(Boolean);
+    }
+    // Status (v4.0.0)
+    if (statusIdx !== -1) {
+      const val = (row[statusIdx] || "").trim().toLowerCase();
+      if (val === "cleared" || val === "reconciled") transaction.status = val;
+    }
+    // Recurring link
+    if (recurringIdIdx !== -1) {
+      const val = (row[recurringIdIdx] || "").trim();
+      if (val) transaction.recurringId = val;
+    }
+    // Settlement fields (v3.27.0)
+    if (settledIdx !== -1 && (row[settledIdx] || "").trim().toLowerCase() === "yes") {
+      transaction.settled = true;
+      transaction.settledAt = settledAtIdx !== -1 && row[settledAtIdx] ? row[settledAtIdx].trim() : new Date().toISOString();
+      transaction.settledBy = settledByIdx !== -1 ? (row[settledByIdx] || "").trim() || null : null;
     }
 
     parsedTransactions.push(transaction);
@@ -674,6 +740,34 @@ export async function confirmRestore() {
       state.transactions.sort((a, b) => b.dateTs - a.dateTs);
     }
 
+    // Restore other stores from JSON backup if present
+    if (backupData.recurringTemplates) {
+      for (const tmpl of backupData.recurringTemplates) {
+        await saveRecurringTemplateToDB(tmpl);
+      }
+    }
+    if (backupData.budgets) {
+      for (const budget of backupData.budgets) {
+        await saveBudgetToDB(budget);
+      }
+    }
+    if (backupData.accounts) {
+      for (const account of backupData.accounts) {
+        await saveAccount(account);
+      }
+    }
+    if (backupData.savingsGoals) {
+      for (const goal of backupData.savingsGoals) {
+        await saveGoal(goal);
+      }
+    }
+    if (backupData.quickTemplates && backupData.quickTemplates.length > 0) {
+      await bulkSaveQuickTemplates(backupData.quickTemplates);
+    }
+
+    // Reload all state from DB to pick up restored stores
+    await loadDataFromDB();
+
     stats.currentTotal = state.transactions.length;
     updateUI();
     showRestoreReport(stats);
@@ -693,7 +787,6 @@ export async function confirmRestore() {
 // ---- Process Restored Data from Encrypted Backup (v3.22.0) ----
 
 export function processRestoredData(data) {
-  // Convert JSON backup format to the internal restore format
   const backupData = {
     valid: true,
     metadata: {
@@ -702,6 +795,12 @@ export function processRestoredData(data) {
       Currency: data.currency || "INR",
     },
     transactions: data.transactions || [],
+    // Preserve all other stores from JSON backup
+    recurringTemplates: data.recurringTemplates || null,
+    budgets: data.budgets || null,
+    accounts: data.accounts || null,
+    savingsGoals: data.savingsGoals || null,
+    quickTemplates: data.quickTemplates || null,
   };
 
   state.pendingRestoreData = backupData;
