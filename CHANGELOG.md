@@ -9,6 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.2.0] — 2026-05-24
+
+### Changed — Backup & Restore Overhaul
+
+#### Unified "Data & Backup" Card
+- Replaced 4 scattered toolbar buttons (Export CSV, Import CSV, Create Backup, Restore Backup) with a single **Data & Backup** card in Settings
+- Clear section labels: Export / Restore / Auto-Backup
+- **Download Backup** — full lossless JSON (replaces "Create Backup")
+- **Encrypted Backup** — AES-256-GCM passphrase-protected export (unchanged function, consolidated into card)
+- **Export to Spreadsheet** — CSV for spreadsheet use, clearly labelled as transactions-only (replaces "Export CSV")
+- **Restore from Backup** — accepts `.json` and `.enc` files (replaces "Restore Backup")
+- **Import Spreadsheet** — CSV import, adds transactions only (replaces "Import CSV")
+- Auto-Backup toggle, frequency selector, and last-backup timestamp now live inside the card with static HTML (no JS injection)
+- Storage Health widget now rendered inline inside the card, no double-wrapping
+
+#### Data Completeness
+- `netWorthSnapshots` IDB store now included in JSON backup and restored on import
+- `appSettings` IDB store now restored on import (was backed up but never restored)
+- `exchangeRateHistory` and `tagColors` from localStorage now included in backup envelope under `localStorage` key and restored on import
+- `loadAllTransactionsFromDB()` used in backup build — includes soft-deleted records for full audit trail
+- `backupSchemaVersion: 1` added to backup envelope for forward-compatibility
+- `migrateBackupPayload()` normalises older backups (schema 0) on restore
+
+#### Restore UX
+- Restore preview now shows SHA-256 integrity status (✓ verified / ⚠ mismatch / — none)
+- Two restore modes: **Merge** (adds missing records by id) and **Replace All** (clears relevant stores first, with confirmation)
+- Unified file handler routes `.enc` to passphrase decrypt, `.json` to parse, `.csv` to legacy CSV path with warning
+
+#### Hardening
+- `verifyIntegrity()` validates SHA-256 on restore, warns but does not block
+- `clearAllStores(storeNames)` clears only stores present in backup payload
+- `bulkSaveNetWorthSnapshots()` skips duplicates by `snapshotDate` index
+- Auto-backup one-shot migration: CSV format setting silently upgraded to JSON (CSV auto-backup was lossy)
+
+### Technical
+- `APP_VERSION` → `4.2.0` in `js/state.js`
+- `CACHE_NAME` → `finchronicle-v4.2.0` in `sw.js`
+- `version` → `4.2.0` in `manifest.json`
+- New exports in `js/db.js`: `getAllNetWorthSnapshots`, `bulkSaveNetWorthSnapshots`, `clearAllStores`
+- New exports in `js/import-export.js`: `migrateBackupPayload`, `verifyIntegrity`, `handleRestoreFileInput`, `handleCsvRestore`, `handleCsvImportFile`
+- New export in `js/auto-backup.js`: `updateAutoBackupUI`
+
+---
+
 ## [4.1.1] — 2026-05-23
 
 ### Fixed
