@@ -13,12 +13,12 @@ jobs:
 
     steps:
     - name: Checkout main app
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         path: finance-tracker
 
     - name: Checkout test repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       continue-on-error: true
       id: checkout-tests
       with:
