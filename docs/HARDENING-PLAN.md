@@ -290,25 +290,22 @@ Only after Phase 1 and 2 are shipped and stable.
 ## Implementation Order
 
 ```
-v3.29.0 — Phase 1 (all 7 items, can ship incrementally)
-  ├── 1.1 storage.persist()          ← do first, smallest win
-  ├── 1.2 CSP meta tag               ← do first, 1 line
-  ├── 1.3 crypto.randomUUID()        ← do second, 7 files
-  ├── 1.4 innerHTML audit            ← do third, safety sweep
-  ├── 1.5 local error log            ← do fourth
-  ├── 1.6 backup urgency             ← do fifth
-  └── 1.7 SW visibilitychange        ← do sixth
+v3.29.0 — Phase 1 (all 7 items, can ship incrementally)   ✅ SHIPPED
+  ├── 1.1 storage.persist()          ✅
+  ├── 1.2 CSP meta tag               ✅
+  ├── 1.3 crypto.randomUUID()        ✅
+  ├── 1.4 innerHTML audit            ✅
+  ├── 1.5 local error log            ✅
+  ├── 1.6 backup urgency             ✅
+  └── 1.7 SW visibilitychange        ✅
 
-v3.30.0 — Phase 3.3 (Tests)
-  └── Start test suite alongside Phase 2 work
+v4.0.0 — Phase 2 (accounting model)                        ✅ SHIPPED 2026-05-23
+  ├── 2.1 asset/liability types       ✅ DB_VERSION 11
+  ├── 2.2 transaction ↔ account link  ✅ optional-fields system
+  ├── 2.3 reconciliation              ✅ js/reconciliation.js, DB_VERSION 12
+  └── 2.4 category hierarchy          ✅ optgroup dropdowns, parent-aware filter
 
-v4.0.0 — Phase 2 (accounting model)
-  ├── 2.1 asset/liability types       ← do first (DB migration)
-  ├── 2.2 transaction ↔ account link  ← do second (builds on 2.1)
-  ├── 2.3 reconciliation              ← do third (builds on 2.2)
-  └── 2.4 category hierarchy          ← do last (largest surface area)
-
-v4.1.0 — Phase 3 (product value)
+v4.1.0 — Phase 3 (product value)                           ← NEXT
   ├── 3.1 cash-flow forecast
   └── 3.2 financial health alerts
 ```
