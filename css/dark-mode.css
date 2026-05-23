@@ -771,3 +771,25 @@ body.dark-mode .mark-settled-btn:hover {
   color: #fff;
 }
 
+
+/* Cash-Flow Forecast (v4.1.0) */
+body.dark-mode .forecast-account-card {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .forecast-warning {
+  background: rgba(220, 38, 38, 0.12);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #f87171;
+}
+
+body.dark-mode .forecast-event-negative {
+  background: rgba(220, 38, 38, 0.08);
+}
+
+body.dark-mode .horizon-btn {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+}
