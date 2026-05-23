@@ -425,6 +425,12 @@ function getAccountIcon(type) {
 
 // ---- Account Form Helpers ----
 
+export function updateAccountTypeIcon(type) {
+  const preview = document.getElementById("accountTypeIconPreview");
+  if (!preview) return;
+  preview.innerHTML = getAccountIcon(type);
+}
+
 export function showAddAccountForm() {
   const modal = document.getElementById("accountFormModal");
   if (!modal) return;
@@ -437,11 +443,13 @@ export function showAddAccountForm() {
   document.getElementById("accountSavingsToggle").checked = false;
   modal.dataset.editId = "";
 
-  // Hide reconcile button — only visible when editing an existing account
+  updateAccountTypeIcon("checking");
+
   const reconcileBtn = document.getElementById("accountReconcileBtn");
   if (reconcileBtn) reconcileBtn.hidden = true;
 
   modal.classList.add("show");
+  document.getElementById("accountNameInput")?.focus();
 }
 
 export function showEditAccountForm(id) {
@@ -459,7 +467,8 @@ export function showEditAccountForm(id) {
   document.getElementById("accountSavingsToggle").checked = account.isSavings || false;
   modal.dataset.editId = String(id);
 
-  // Show reconcile button with account name
+  updateAccountTypeIcon(account.type);
+
   const reconcileBtn = document.getElementById("accountReconcileBtn");
   if (reconcileBtn) {
     reconcileBtn.hidden = false;
@@ -467,6 +476,7 @@ export function showEditAccountForm(id) {
   }
 
   modal.classList.add("show");
+  document.getElementById("accountNameInput")?.focus();
 }
 
 export function closeAccountForm() {

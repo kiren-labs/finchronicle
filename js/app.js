@@ -143,6 +143,7 @@ import {
   closeAccountForm,
   handleAccountFormSubmit,
   removeAccount,
+  updateAccountTypeIcon,
 } from "./accounts.js";
 import { renderSavingsDashboard } from "./savings.js";
 import {
@@ -988,7 +989,7 @@ function bindAccountEvents() {
     });
   }
 
-  // Auto-select classification when account type changes (v4.0.0)
+  // Auto-select classification + update icon preview when account type changes (v4.0.0)
   const typeSelect = document.getElementById("accountTypeSelect");
   if (typeSelect) {
     typeSelect.addEventListener("change", () => {
@@ -996,6 +997,7 @@ function bindAccountEvents() {
       if (classSelect) {
         classSelect.value = ACCOUNT_CLASSIFICATION[typeSelect.value] || "asset";
       }
+      updateAccountTypeIcon(typeSelect.value);
     });
   }
 

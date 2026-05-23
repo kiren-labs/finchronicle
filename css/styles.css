@@ -4673,6 +4673,7 @@ button.primary.loading .btn-spinner {
 
 .modal-sm {
   max-width: 360px;
+  overflow: hidden;
 }
 
 .modal-lg {
@@ -5828,12 +5829,86 @@ button.primary.loading .btn-spinner {
 }
 
 /* ============================================================================
+   Account Form Modal (v4.0.0)
+   ============================================================================ */
+
+.account-form-type-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.account-form-type-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-2xl);
+  color: var(--color-primary);
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 2px;
+}
+
+.account-form-type-select-group {
+  flex: 1;
+  margin-bottom: 0;
+  gap: var(--space-xs);
+}
+
+.account-form-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-md) 0;
+}
+
+.account-form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+/* Account modal: no scrollbar — content always fits */
+#accountFormModal .modal-body {
+  max-height: none;
+  overflow: visible;
+}
+
+/* Compact inputs + tighter spacing inside the account modal */
+#accountFormModal .form-group {
+  margin-bottom: var(--space-sm);
+}
+
+#accountFormModal .form-group input,
+#accountFormModal .form-group select {
+  padding: 8px var(--space-md);
+}
+
+#accountFormModal .account-form-type-row {
+  margin-bottom: var(--space-sm);
+}
+
+#accountFormModal .account-form-actions {
+  margin-top: var(--space-md);
+}
+
+#accountFormModal button.primary {
+  min-height: 44px;
+  font-size: var(--font-md);
+}
+
+/* ============================================================================
    Reconciliation (v4.0.0)
    ============================================================================ */
 
 .reconcile-trigger-btn {
   width: 100%;
-  margin-top: 8px;
   background: transparent;
   border: 1px solid var(--color-border);
   color: var(--color-text-secondary);
