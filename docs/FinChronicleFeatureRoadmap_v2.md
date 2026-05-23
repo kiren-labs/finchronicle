@@ -458,7 +458,7 @@ Budget warnings and recurring due-date reminders exist as in-app alerts but go u
 
 ---
 
-### v4.9.0 — Bulk Transaction Operations
+### v4.10.0 — Bulk Transaction Operations
 **Priority: MEDIUM**
 
 No way to recategorize or re-tag multiple transactions at once. Primary friction when cleaning up historical data or after a bank statement import.
@@ -476,11 +476,11 @@ No way to recategorize or re-tag multiple transactions at once. Primary friction
 - `js/app.js` — bulk operation handlers
 - `js/db.js` — extend `bulkSaveTransactionsToDB` for bulk soft-delete
 - `css/styles.css`, `css/dark-mode.css` — selection styles, bulk action bar
-- Version: bump to 4.9.0
+- Version: bump to 4.10.0
 
 ---
 
-### v4.10.0 — Category Management
+### v4.11.0 — Category Management
 **Priority: MEDIUM**
 
 No mechanism to rename a category across all transactions or merge two categories. Real-usage audit found "Shopping" / "Personal/Shopping" used interchangeably.
@@ -499,13 +499,13 @@ No mechanism to rename a category across all transactions or merge two categorie
 - `js/app.js` — wire events
 - `index.html` — category management in Settings
 - `css/styles.css`, `css/dark-mode.css` — manager styles
-- Version: bump to 4.10.0
+- Version: bump to 4.11.0
 
 **Note:** Category Management is a soft prerequisite for Bank CSV Import — clean categories make auto-categorization more accurate. Can ship independently but benefits from being available first.
 
 ---
 
-### v4.11.0 — Business & Tax Export
+### v4.12.0 — Business & Tax Export
 **Priority: MEDIUM**
 
 `expenseType: "business"` and `referenceId` (receipt/invoice) exist since v3.16 but there's no business-only export for tax filing.
@@ -523,11 +523,11 @@ No mechanism to rename a category across all transactions or merge two categorie
 - `js/state.js` — add `taxYearStartMonth` to default appSettings
 - `index.html` — tax year setting, tax export tab
 - `css/styles.css`, `css/dark-mode.css` — tab styles
-- Version: bump to 4.11.0
+- Version: bump to 4.12.0
 
 ---
 
-### v4.12.0 — Loan / EMI Tracker
+### v4.13.0 — Loan / EMI Tracker
 **Priority: MEDIUM**
 **New file: `js/loans.js`**
 
@@ -565,7 +565,7 @@ Currently EMIs are logged as recurring expenses — no view of outstanding princ
 
 ---
 
-### v4.13.0 — Receipt Photos
+### v4.14.0 — Receipt Photos
 **Priority: LOW**
 **New file: `js/receipts.js`**
 
@@ -588,7 +588,7 @@ Last significant data-capture gap. Storage-first constraints apply.
 - `index.html` — file input in form, receipts settings
 - `css/styles.css`, `css/dark-mode.css`
 - `sw.js` — add to CACHE_URLS, exclude blobs from cache
-- Version: bump to 4.13.0
+- Version: bump to 4.14.0
 
 ---
 
@@ -606,11 +606,10 @@ Last significant data-capture gap. Storage-first constraints apply.
 | v4.7.0 | Duplicate Transaction Detection | 12 | MEDIUM | Planned |
 | v4.8.0 | Bank Statement CSV Importer | 12 | MEDIUM | Planned |
 | v4.9.0 | Local Notifications | 12 | HIGH | Planned |
-| v4.9.0 | Local Notifications | 12 | HIGH | Planned |
 | v4.10.0 | Bulk Transaction Operations | 12 | MEDIUM | Planned |
 | v4.11.0 | Category Management (rename, merge, cleanup) | 12 | MEDIUM | Planned |
-| v4.12.0 | Loan / EMI Tracker with amortization schedule | 13 | MEDIUM | Planned |
-| v4.13.0 | Business & Tax Export | 12 | MEDIUM | Planned |
+| v4.12.0 | Business & Tax Export | 12 | MEDIUM | Planned |
+| v4.13.0 | Loan / EMI Tracker with amortization schedule | 13 | MEDIUM | Planned |
 | v4.14.0 | Receipt Photos | 14 | LOW | Planned |
 
 ---
@@ -631,8 +630,8 @@ Last significant data-capture gap. Storage-first constraints apply.
 | 10 | v3.28.0 | + `netWorthSnapshots` store |
 | 11 | v4.0.0 | `accounts` + `classification` field; `transactions` + `status` field; `dateType` composite index |
 | 12 | v4.0.0 | (same migration block) reconciliation indexes |
-| 13 | v4.13.0 | + `loans` store (planned) |
-| 14 | v4.14.0 | + `receipts` store (planned) |
+| 13 | v4.13.0 (Loan / EMI Tracker) | + `loans` store (planned) |
+| 14 | v4.14.0 (Receipt Photos) | + `receipts` store (planned) |
 
 ---
 
