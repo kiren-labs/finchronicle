@@ -29,7 +29,7 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 import { state, currencies } from "./state.js";
-import { showMessage, generateId, sanitizeHTML } from "./utils.js";
+import { showMessage, generateId, sanitizeHTML, getErrorLog, clearErrorLog } from "./utils.js";
 import {
   initDB,
   migrateFromLocalStorage,
