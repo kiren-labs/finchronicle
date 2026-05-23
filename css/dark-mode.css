@@ -737,6 +737,22 @@ body.dark-mode .auto-backup-actions button:hover {
   background: var(--color-surface);
 }
 
+/* Data & Backup (v4.2.0) */
+body.dark-mode .data-backup-btn {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .data-backup-btn:hover {
+  background: var(--color-surface);
+}
+
+body.dark-mode #backupFrequency2 {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
 /* Settlement (v3.26.0) */
 body.dark-mode .settlement-person-card {
   background: var(--color-surface);

@@ -267,6 +267,28 @@ export function handleImport(event) {
   reader.readAsText(file);
 }
 
+export function handleCsvImportFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      const result = await importFromCSV(reader.result);
+      if (result.added === 0) {
+        showMessage("No valid rows to import.");
+        return;
+      }
+      showMessage(
+        `Imported ${result.added} transaction(s)` +
+          (result.skipped ? ` • Skipped ${result.skipped}` : ""),
+      );
+    } catch (err) {
+      console.error("Import failed:", err);
+      showMessage("Import failed. Check the CSV format.");
+    }
+  };
+  reader.readAsText(file);
+}
+
 export async function importFromCSV(text) {
   const rows = parseCSV(text).filter((row) =>
     row.some((cell) => cell.trim() !== ""),

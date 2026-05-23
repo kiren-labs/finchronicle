@@ -528,11 +528,7 @@ export async function renderStorageHealth() {
 
   if (!health.supported) {
     container.innerHTML = `
-      <div class="storage-health-card">
-        <div class="storage-health-header">
-          <i class="ri-hard-drive-2-line" aria-hidden="true"></i>
-          <h4>Storage</h4>
-        </div>
+      <div class="storage-health-inline">
         <p class="storage-unsupported">Storage estimation not available in this browser.</p>
       </div>
     `;
@@ -551,7 +547,7 @@ export async function renderStorageHealth() {
   }
 
   container.innerHTML = `
-    <div class="storage-health-card">
+    <div class="storage-health-inline">
       <div class="storage-health-header">
         <i class="ri-hard-drive-2-line" aria-hidden="true"></i>
         <h4>Storage Health</h4>

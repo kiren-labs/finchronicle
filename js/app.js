@@ -165,11 +165,7 @@ import {
   getBackupSettings,
   saveBackupSettings,
   performJsonBackup,
-  performCsvBackup,
   performEncryptedBackup,
-  importEncryptedBackup,
-  renderAutoBackupSettings,
-  renderStorageHealth,
   requestStoragePersistence,
 } from "./auto-backup.js";
 import {
@@ -483,22 +479,6 @@ function bindStaticEvents() {
 
 function bindSettingsButtons() {
   const actions = {
-    "Export CSV": async () => {
-      const mod = await getImportExportModule();
-      mod.exportToCSV();
-    },
-    "Import CSV": async () => {
-      const mod = await getImportExportModule();
-      mod.triggerImport();
-    },
-    "Create Backup": async () => {
-      const mod = await getImportExportModule();
-      await mod.createBackup();
-    },
-    "Restore from Backup": async () => {
-      const mod = await getImportExportModule();
-      mod.triggerRestore();
-    },
     "Check for updates": checkForUpdates,
     "Change currency": toggleCurrencySelector,
     "Toggle dark mode": toggleDarkMode,
@@ -1223,87 +1203,75 @@ function bindAnnualReportEvents() {
 }
 
 function bindAutoBackupEvents() {
-  // Use event delegation on the auto-backup container
-  const container = document.getElementById("autoBackupContainer");
-  if (!container) return;
-
-  container.addEventListener("click", (e) => {
-    // Toggle auto-backup on/off
-    const toggle = e.target.closest("#autoBackupToggle");
-    if (toggle) {
-      const settings = getBackupSettings();
-      settings.autoBackupEnabled = !settings.autoBackupEnabled;
-      saveBackupSettings(settings);
-      container.innerHTML = renderAutoBackupSettings();
-      return;
-    }
-
-    // Manual backup now
-    const manualBtn = e.target.closest("#manualBackupBtn");
-    if (manualBtn) {
-      const settings = getBackupSettings();
-      if (settings.backupFormat === "json") {
-        performJsonBackup(false);
-      } else {
-        performCsvBackup(false);
-      }
-      return;
-    }
-
-    // Encrypted backup
-    const encBtn = e.target.closest("#encryptedBackupBtn");
-    if (encBtn) {
-      const passphrase = prompt(
-        "Enter a passphrase (min 6 characters) to encrypt your backup:",
-      );
-      if (passphrase) {
-        performEncryptedBackup(passphrase);
-      }
-      return;
-    }
-
-    // Import encrypted
-    const impBtn = e.target.closest("#importEncryptedBtn");
-    if (impBtn) {
-      document.getElementById("encryptedRestoreFile").click();
-      return;
-    }
+  // ---- Auto-backup toggle ----
+  document.getElementById("autoBackupToggle2")?.addEventListener("click", () => {
+    const { getBackupSettings: get, saveBackupSettings: save, updateAutoBackupUI } = { getBackupSettings, saveBackupSettings };
+    const settings = getBackupSettings();
+    settings.autoBackupEnabled = !settings.autoBackupEnabled;
+    saveBackupSettings(settings);
+    import("./auto-backup.js").then(m => m.updateAutoBackupUI());
   });
 
-  container.addEventListener("change", (e) => {
-    // Frequency select
-    if (e.target.id === "backupFrequency") {
-      const settings = getBackupSettings();
-      settings.backupFrequency = e.target.value;
-      saveBackupSettings(settings);
-    }
-    // Format select
-    if (e.target.id === "backupFormat") {
-      const settings = getBackupSettings();
-      settings.backupFormat = e.target.value;
-      saveBackupSettings(settings);
-    }
+  // ---- Frequency select ----
+  document.getElementById("backupFrequency2")?.addEventListener("change", (e) => {
+    const settings = getBackupSettings();
+    settings.backupFrequency = e.target.value;
+    saveBackupSettings(settings);
   });
 
-  // Encrypted file input handler
-  document
-    .getElementById("encryptedRestoreFile")
-    .addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const passphrase = prompt(
-        "Enter the passphrase used to encrypt this backup:",
-      );
-      if (!passphrase) return;
+  // ---- Download Backup (JSON) ----
+  document.getElementById("downloadBackupBtn")?.addEventListener("click", () => {
+    performJsonBackup(false);
+  });
 
-      const data = await importEncryptedBackup(file, passphrase);
-      if (data) {
-        // Hand off to import-export module's restore flow
-        const mod = await getImportExportModule();
-        mod.processRestoredData(data);
-      }
-      e.target.value = "";
-    });
+  // ---- Encrypted Backup ----
+  document.getElementById("encryptedBackupBtn2")?.addEventListener("click", () => {
+    const passphrase = prompt("Enter a passphrase (min 6 characters) to encrypt your backup:");
+    if (passphrase) performEncryptedBackup(passphrase);
+  });
+
+  // ---- Export to Spreadsheet (CSV) ----
+  document.getElementById("exportSpreadsheetBtn")?.addEventListener("click", async () => {
+    const mod = await getImportExportModule();
+    mod.exportToCSV();
+  });
+
+  // ---- Restore from Backup (.json or .enc) ----
+  document.getElementById("restoreBackupBtn2")?.addEventListener("click", () => {
+    document.getElementById("dataRestoreFile").click();
+  });
+
+  document.getElementById("dataRestoreFile")?.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const mod = await getImportExportModule();
+    await mod.handleRestoreFileInput(file);
+    e.target.value = "";
+  });
+
+  // ---- Import Spreadsheet (CSV) ----
+  document.getElementById("importSpreadsheetBtn")?.addEventListener("click", () => {
+    document.getElementById("spreadsheetImportFile").click();
+  });
+
+  document.getElementById("spreadsheetImportFile")?.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const mod = await getImportExportModule();
+    mod.handleCsvImportFile(file);
+    e.target.value = "";
+  });
+
+  // ---- Restore modal: Merge / Replace All ----
+  document.getElementById("restoreMergeBtn")?.addEventListener("click", async () => {
+    const mod = await getImportExportModule();
+    mod.confirmRestore("merge");
+  });
+
+  document.getElementById("restoreReplaceBtn")?.addEventListener("click", async () => {
+    const mod = await getImportExportModule();
+    mod.confirmRestore("replace");
+  });
 }
 
 // ============================================================================
