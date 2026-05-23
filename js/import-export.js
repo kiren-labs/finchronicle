@@ -894,3 +894,50 @@ export async function processRestoredData(data) {
   state.pendingRestoreData = backupData;
   showRestorePreview(backupData);
 }
+
+// ---- Unified Restore File Handler (v4.2.0) ----
+
+export async function handleRestoreFileInput(file) {
+  if (!file) return;
+  const name = file.name.toLowerCase();
+
+  if (name.endsWith(".enc")) {
+    const passphrase = prompt("Enter the passphrase used to encrypt this backup:");
+    if (!passphrase) return;
+    const data = await importEncryptedBackup(file, passphrase);
+    if (data) await processRestoredData(data);
+  } else if (name.endsWith(".json")) {
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      await processRestoredData(data);
+    } catch {
+      showMessage("Invalid JSON backup file.");
+    }
+  } else if (name.endsWith(".csv")) {
+    showMessage("CSV restores transactions only. Use a .json backup for full restore.", "warning");
+    handleCsvRestore(file);
+  } else {
+    showMessage("Unsupported file format. Use .json, .enc, or .csv");
+  }
+}
+
+export function handleCsvRestore(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const backupData = parseBackupCSV(reader.result);
+      if (!backupData.valid) {
+        showMessage(`Invalid backup file: ${backupData.error}`);
+        return;
+      }
+      state.pendingRestoreData = backupData;
+      showRestorePreview(backupData);
+    } catch (err) {
+      console.error("Backup parse error:", err);
+      showMessage("Failed to read backup file. Please check the file format.");
+    }
+  };
+  reader.onerror = () => showMessage("Failed to read file. Please try again.");
+  reader.readAsText(file);
+}
