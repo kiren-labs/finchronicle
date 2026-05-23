@@ -5482,6 +5482,12 @@ button.primary.loading .btn-spinner {
   box-shadow: var(--shadow-sm);
 }
 
+.storage-health-inline {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--color-border);
+}
+
 .storage-health-card h4 {
   display: flex;
   align-items: center;
