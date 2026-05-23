@@ -9,7 +9,7 @@ import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
 import { renderBudgetAlerts, renderBudgetList, deleteBudget } from "./budget.js";
-import { setOptionalFieldValues, clearOptionalFields } from "./optional-fields.js";
+import { setOptionalFieldValues, clearOptionalFields, renderOptionalFieldsForm } from "./optional-fields.js";
 import { formatMultiCurrency, setMultiCurrencyFormData } from "./multi-currency.js";
 import {
   renderCategoryPieChart,
@@ -835,6 +835,9 @@ export function selectType(type) {
   if (transferFields) {
     transferFields.hidden = type !== "transfer";
   }
+
+  // Re-evaluate optional fields visibility (accountLinking hides on transfer)
+  renderOptionalFieldsForm();
 
   updateCategoryOptions(type);
 }

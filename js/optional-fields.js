@@ -173,17 +173,45 @@ export function renderOptionalFieldsForm() {
   }
 
   // Show/hide individual fields
+  const currentType = document.getElementById("type")?.value;
   const fields = container.querySelectorAll("[data-optional-field]");
   fields.forEach((el) => {
     const fieldName = el.dataset.optionalField;
-    el.hidden = !enabled[fieldName];
+    // accountLinking only applies to income/expense, not transfer
+    if (fieldName === "accountLinking") {
+      el.hidden = !enabled[fieldName] || currentType === "transfer";
+    } else {
+      el.hidden = !enabled[fieldName];
+    }
   });
+
+  // Populate account dropdown when visible
+  if (enabled.accountLinking && currentType !== "transfer") {
+    populateLinkedAccountSelect();
+  }
 
   // Hide Tags management section in Settings when tags are disabled
   const tagMgmt = document.getElementById("tagManagementContainer");
   if (tagMgmt) {
     tagMgmt.hidden = !enabled.tags;
   }
+}
+
+/**
+ * Populate the linked account <select> from state.accounts.
+ */
+function populateLinkedAccountSelect(selectedValue) {
+  const el = document.getElementById("linkedAccount");
+  if (!el) return;
+  const accounts = state.accounts || [];
+  el.innerHTML =
+    '<option value="">None</option>' +
+    accounts
+      .map(
+        (a) =>
+          `<option value="${sanitizeHTML(a.name)}"${a.name === selectedValue ? " selected" : ""}>${sanitizeHTML(a.name)}</option>`
+      )
+      .join("");
 }
 
 /**
@@ -220,6 +248,14 @@ export function getOptionalFieldValues() {
     values.location = el ? sanitizeHTML(el.value.trim()) || null : null;
   }
 
+  if (enabled.accountLinking) {
+    const el = document.getElementById("linkedAccount");
+    const type = document.getElementById("type")?.value;
+    const accountName = el ? el.value || null : null;
+    if (accountName && type === "expense") values.fromAccount = accountName;
+    if (accountName && type === "income") values.toAccount = accountName;
+  }
+
   return values;
 }
 
@@ -241,6 +277,17 @@ export function setOptionalFieldValues(transaction) {
     el("referenceId").value = transaction.referenceId || "";
   if (el("locationField"))
     el("locationField").value = transaction.location || "";
+
+  if (el("linkedAccount")) {
+    const linkedValue =
+      transaction.type === "expense"
+        ? transaction.fromAccount || ""
+        : transaction.type === "income"
+          ? transaction.toAccount || ""
+          : "";
+    populateLinkedAccountSelect(linkedValue);
+    el("linkedAccount").value = linkedValue;
+  }
 }
 
 /**
@@ -338,6 +385,7 @@ const FIELD_LABELS = {
   referenceId: "Reference / Receipt ID",
   location: "Location",
   transactionCurrency: "Transaction Currency",
+  accountLinking: "Account Linking",
 };
 
 /**
