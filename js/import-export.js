@@ -23,7 +23,11 @@ import {
   saveAccount,
   saveGoal,
   bulkSaveQuickTemplates,
+  saveAppSettings,
+  bulkSaveNetWorthSnapshots,
+  clearAllStores,
 } from "./db.js";
+import { importEncryptedBackup } from "./auto-backup.js";
 import { updateBackupTimestamp } from "./settings.js";
 import { updateUI } from "./ui.js";
 
@@ -784,23 +788,61 @@ export async function confirmRestore() {
   }
 }
 
+// ---- Backup Schema Migration ----
+
+function migrateBackupPayload(data) {
+  if (!data.backupSchemaVersion) {
+    data.backupSchemaVersion = 0;
+    data.netWorthSnapshots = data.netWorthSnapshots || [];
+    data.localStorage = data.localStorage || {};
+  }
+  return data;
+}
+
+async function verifyIntegrity(data) {
+  if (!data.integrity || !data.integrity.startsWith("sha256:")) return null;
+  const storedHash = data.integrity.slice(7);
+  try {
+    const copy = { ...data, integrity: "" };
+    const jsonStr = JSON.stringify(copy, null, 2);
+    const hashBuffer = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(jsonStr),
+    );
+    const computedHash = Array.from(new Uint8Array(hashBuffer))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+    return computedHash === storedHash;
+  } catch {
+    return null;
+  }
+}
+
 // ---- Process Restored Data from Encrypted Backup (v3.22.0) ----
 
-export function processRestoredData(data) {
+export async function processRestoredData(data) {
+  migrateBackupPayload(data);
+
+  const integrityOk = await verifyIntegrity(data);
+
   const backupData = {
     valid: true,
+    integrityOk,
     metadata: {
       "Backup Date": data.exportDate || new Date().toISOString(),
       "App Version": data.version || "unknown",
       Currency: data.currency || "INR",
+      "Schema Version": data.backupSchemaVersion ?? 0,
     },
     transactions: data.transactions || [],
-    // Preserve all other stores from JSON backup
     recurringTemplates: data.recurringTemplates || null,
     budgets: data.budgets || null,
     accounts: data.accounts || null,
     savingsGoals: data.savingsGoals || null,
     quickTemplates: data.quickTemplates || null,
+    appSettings: data.appSettings || null,
+    netWorthSnapshots: data.netWorthSnapshots || null,
+    localStorage: data.localStorage || null,
   };
 
   state.pendingRestoreData = backupData;

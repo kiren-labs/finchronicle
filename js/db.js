@@ -707,3 +707,62 @@ export function getNetWorthSnapshotByDate(snapshotDate) {
     request.onerror = () => reject(request.error);
   });
 }
+
+export function getAllNetWorthSnapshots() {
+  return new Promise((resolve, reject) => {
+    if (!state.db || !state.db.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
+      resolve([]);
+      return;
+    }
+    const tx = state.db.transaction([NET_WORTH_SNAPSHOTS_STORE], "readonly");
+    const store = tx.objectStore(NET_WORTH_SNAPSHOTS_STORE);
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export function bulkSaveNetWorthSnapshots(snapshots) {
+  return new Promise((resolve, reject) => {
+    if (!state.db || !state.db.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
+      resolve();
+      return;
+    }
+    const tx = state.db.transaction([NET_WORTH_SNAPSHOTS_STORE], "readwrite");
+    const store = tx.objectStore(NET_WORTH_SNAPSHOTS_STORE);
+    // Use snapshotDate index to skip duplicates
+    const index = store.index("snapshotDate");
+    let pending = snapshots.length;
+    if (pending === 0) { resolve(); return; }
+    snapshots.forEach((snapshot) => {
+      const check = index.get(snapshot.snapshotDate);
+      check.onsuccess = () => {
+        if (!check.result) {
+          store.put(snapshot);
+        }
+        pending--;
+        if (pending === 0) resolve();
+      };
+      check.onerror = () => { pending--; if (pending === 0) resolve(); };
+    });
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+export function clearAllStores(storeNames) {
+  return new Promise((resolve, reject) => {
+    if (!state.db) { resolve(); return; }
+    const validStores = storeNames.filter(name =>
+      state.db.objectStoreNames.contains(name)
+    );
+    if (validStores.length === 0) { resolve(); return; }
+    const tx = state.db.transaction(validStores, "readwrite");
+    let pending = validStores.length;
+    validStores.forEach(name => {
+      const req = tx.objectStore(name).clear();
+      req.onsuccess = () => { pending--; if (pending === 0) resolve(); };
+      req.onerror = () => { pending--; if (pending === 0) resolve(); };
+    });
+    tx.onerror = () => reject(tx.error);
+  });
+}
