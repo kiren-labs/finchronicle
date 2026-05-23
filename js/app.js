@@ -838,6 +838,8 @@ function bindOptionalFieldsEvents() {
       toggle.setAttribute("aria-expanded", String(!expanded));
       container.hidden = expanded;
       toggle.querySelector(".optional-fields-chevron").classList.toggle("expanded", !expanded);
+      // Re-populate account dropdown each time section opens (accounts may have changed)
+      if (!expanded) renderOptionalFieldsForm();
     });
   }
 

@@ -159,13 +159,15 @@ export function openReconciliationModal(accountName) {
   const diff = document.getElementById("reconciliationDifference");
   if (diff) { diff.textContent = ""; diff.className = "reconciliation-difference"; }
 
+  const step2 = document.getElementById("reconciliationStep2");
+  if (step2) step2.hidden = true;
+
   const finaliseBtn = document.getElementById("reconciliationFinaliseBtn");
   const forceBtn = document.getElementById("reconciliationForceBtn");
   if (finaliseBtn) finaliseBtn.hidden = true;
   if (forceBtn) forceBtn.hidden = true;
 
-  modal.hidden = false;
-  modal.setAttribute("aria-hidden", "false");
+  modal.classList.add("show");
   document.getElementById("reconciliationStatementBalance")?.focus();
 }
 
@@ -197,6 +199,9 @@ export function loadReconciliationTransactions() {
 
   renderCandidateList();
   renderReconciliationDifference();
+
+  const step2 = document.getElementById("reconciliationStep2");
+  if (step2) step2.hidden = false;
 
   const finaliseBtn = document.getElementById("reconciliationFinaliseBtn");
   if (finaliseBtn) finaliseBtn.hidden = false;
@@ -293,9 +298,6 @@ export async function finaliseReconciliation(force = false) {
 
 export function closeReconciliationModal() {
   const modal = getModal();
-  if (modal) {
-    modal.hidden = true;
-    modal.setAttribute("aria-hidden", "true");
-  }
+  if (modal) modal.classList.remove("show");
   reconciliationState = null;
 }

@@ -907,36 +907,62 @@
                 </div>
 
                 <!-- Reconciliation Modal (v4.0.0) -->
-                <div id="reconciliationModal" class="modal" hidden aria-modal="true" aria-labelledby="reconciliationAccountName" role="dialog">
+                <div id="reconciliationModal" class="modal" aria-modal="true" aria-labelledby="reconciliationAccountName" role="dialog">
                     <div class="modal-content modal-lg">
                         <div class="modal-header">
                             <h3 id="reconciliationAccountName">Reconcile Account</h3>
                             <button class="close-btn reconciliation-close" aria-label="Close reconciliation"><i class="ri-close-line"></i></button>
                         </div>
                         <div class="modal-body">
+
+                            <!-- What is reconciliation -->
+                            <div class="reconciliation-explainer">
+                                <div class="recon-explainer-icon"><i class="ri-scales-3-line"></i></div>
+                                <div>
+                                    <p class="recon-explainer-title">What is reconciliation?</p>
+                                    <p class="recon-explainer-body">Reconciliation confirms that your FinChronicle records match your official bank statement. Tick off each transaction that appears on your statement — when the difference reaches zero, your books are accurate.</p>
+                                </div>
+                            </div>
+
+                            <!-- Step 1: Enter statement details -->
+                            <div class="recon-step">
+                                <span class="recon-step-num">1</span>
+                                <span class="recon-step-label">Enter your bank statement details</span>
+                            </div>
                             <div class="reconciliation-inputs">
                                 <div class="form-group">
-                                    <label for="reconciliationStatementBalance">Statement Balance</label>
+                                    <label for="reconciliationStatementBalance">Closing Balance</label>
                                     <input type="number" id="reconciliationStatementBalance" placeholder="0.00" step="0.01" inputmode="decimal">
                                 </div>
                                 <div class="form-group">
                                     <label for="reconciliationStatementDate">Statement Date</label>
                                     <input type="date" id="reconciliationStatementDate">
                                 </div>
-                                <button type="button" id="reconciliationLoadBtn" class="btn secondary-btn">
-                                    <i class="ri-search-line"></i> Load Transactions
+                                <button type="button" id="reconciliationLoadBtn" class="toolbar-btn recon-load-btn">
+                                    <i class="ri-search-line"></i> Load
                                 </button>
                             </div>
+
+                            <!-- Step 2: Tick off transactions -->
+                            <div class="recon-step" id="reconciliationStep2" hidden>
+                                <span class="recon-step-num">2</span>
+                                <span class="recon-step-label">Tick each transaction that appears on your statement</span>
+                            </div>
                             <div id="reconciliationList" class="reconciliation-list" aria-label="Transactions to reconcile"></div>
+
+                            <!-- Difference indicator -->
                             <div id="reconciliationDifference" class="reconciliation-difference" aria-live="polite"></div>
+
+                            <!-- Step 3: Finalise -->
                             <div class="reconciliation-actions">
-                                <button type="button" id="reconciliationFinaliseBtn" class="btn primary-btn" hidden>
+                                <button type="button" id="reconciliationFinaliseBtn" class="reconcile-action-btn reconcile-action-primary" hidden>
                                     <i class="ri-check-double-line"></i> Finalise Reconciliation
                                 </button>
-                                <button type="button" id="reconciliationForceBtn" class="btn danger-btn" hidden>
+                                <button type="button" id="reconciliationForceBtn" class="reconcile-action-btn reconcile-action-danger" hidden>
                                     <i class="ri-alert-line"></i> Reconcile Anyway
                                 </button>
                             </div>
+
                         </div>
                     </div>
                 </div>
