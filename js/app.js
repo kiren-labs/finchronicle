@@ -353,18 +353,16 @@ function bindStaticEvents() {
 
   // ---- Restore Preview modal buttons ----
   document
-    .querySelectorAll("#restorePreviewModal .modal-btn-cancel")
-    .forEach((btn) =>
-      btn.addEventListener("click", async () => {
-        const mod = await getImportExportModule();
-        mod.closeRestorePreview();
-      }),
-    );
-  document
-    .querySelector("#restorePreviewModal .modal-btn-confirm")
-    .addEventListener("click", async () => {
+    .querySelector("#restoreCancelBtn")
+    ?.addEventListener("click", async () => {
       const mod = await getImportExportModule();
-      mod.confirmRestore();
+      mod.closeRestorePreview();
+    });
+  document
+    .querySelector("#restorePreviewModal .close-btn")
+    ?.addEventListener("click", async () => {
+      const mod = await getImportExportModule();
+      mod.closeRestorePreview();
     });
 
   // ---- Restore Report modal ----
@@ -416,15 +414,6 @@ function bindStaticEvents() {
   document.addEventListener("click", (e) => {
     if (e.target.closest("#addBudgetBtn")) openBudgetModal();
   });
-
-  // ---- Restore Preview modal close (X button) ----
-  document
-    .querySelector("#restorePreviewModal .close-btn")
-    .addEventListener("click", async () => {
-      const mod = await getImportExportModule();
-      mod.closeRestorePreview();
-    });
-
 
   // ---- Search bar (v3.14.0) ----
   bindSearchEvents();

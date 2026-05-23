@@ -82,17 +82,22 @@
                 </div>
             </div>
 
-            <div class="modal-info" id="restorePreviewInfo">
-                <i class="ri-information-line"></i>
-                Choose how to restore: <strong>Merge</strong> adds missing records while keeping your existing data.
-                <strong>Replace</strong> wipes all current data and writes the backup.
+            <div class="restore-mode-info">
+                <div class="restore-mode-option">
+                    <span class="restore-mode-badge restore-mode-badge-merge">Merge</span>
+                    <span class="restore-mode-desc">Adds missing records, keeps your existing data intact.</span>
+                </div>
+                <div class="restore-mode-option">
+                    <span class="restore-mode-badge restore-mode-badge-replace">Replace All</span>
+                    <span class="restore-mode-desc">Wipes all current data and writes the backup. Cannot be undone.</span>
+                </div>
             </div>
 
             <div class="modal-actions restore-mode-actions">
-                <button class="modal-btn modal-btn-cancel">
+                <button class="modal-btn modal-btn-cancel" id="restoreCancelBtn">
                     Cancel
                 </button>
-                <button class="modal-btn modal-btn-confirm" id="restoreMergeBtn">
+                <button class="modal-btn modal-btn-primary" id="restoreMergeBtn">
                     Merge
                 </button>
                 <button class="modal-btn modal-btn-danger" id="restoreReplaceBtn">

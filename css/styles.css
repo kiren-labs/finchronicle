@@ -1641,6 +1641,59 @@ button.primary.loading .btn-spinner {
     flex-shrink: 0;
 }
 
+/* Restore Preview — mode selector */
+.restore-mode-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+}
+
+.restore-mode-option {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+}
+
+.restore-mode-badge {
+    flex-shrink: 0;
+    font-size: var(--font-sm);
+    font-weight: 700;
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-sm);
+    min-width: 80px;
+    text-align: center;
+}
+
+.restore-mode-badge-merge {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+
+.restore-mode-badge-replace {
+    background: var(--color-danger-bg, #fff0f0);
+    color: var(--color-danger);
+}
+
+.restore-mode-desc {
+    font-size: var(--font-sm);
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+/* Primary action button (safe confirm) */
+.modal-btn-primary {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.modal-btn-primary:hover {
+    background: var(--color-primary-hover);
+}
+
 /* Restore Report Modal */
 .restore-report-info {
     display: grid;

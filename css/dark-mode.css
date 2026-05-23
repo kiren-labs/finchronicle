@@ -139,6 +139,18 @@ body.dark-mode .modal-btn-cancel {
     color: var(--color-on-primary);
 }
 
+body.dark-mode .restore-mode-option {
+    background: var(--color-surface);
+}
+
+body.dark-mode .restore-mode-badge-merge {
+    background: rgba(0, 81, 213, 0.2);
+}
+
+body.dark-mode .restore-mode-badge-replace {
+    background: rgba(220, 53, 69, 0.2);
+}
+
 body.dark-mode .close-btn:hover {
     background: var(--color-toggle-bg);
 }
