@@ -376,9 +376,9 @@ export function renderAccountManager() {
     const balClass = balance >= 0 ? "positive" : "negative";
     const typeLabel = account.type.replace("-", " ");
     const inactive = account.isActive === false ? " inactive" : "";
-    const savingsBadge = account.isSavings ? `<span class="savings-badge">savings</span>` : "";
+    const savingsBadge = account.isSavings ? `<span class="savings-badge" aria-label="Savings account">savings</span>` : "";
     const classification = account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
-    const classificationBadge = classification === "liability" ? `<span class="liability-badge">liability</span>` : "";
+    const classificationBadge = classification === "liability" ? `<span class="liability-badge" aria-label="Liability account">liability</span>` : "";
 
     html += `
     <div class="account-item${inactive}" data-id="${account.id}">

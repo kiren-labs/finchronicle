@@ -4622,10 +4622,12 @@ button.primary.loading .btn-spinner {
 .savings-badge {
   display: inline-block;
   font-size: 10px;
+  font-weight: 600;
   padding: 1px 5px;
   border-radius: var(--radius-sm);
-  background: var(--color-income);
-  color: #fff;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success-border);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -4633,10 +4635,12 @@ button.primary.loading .btn-spinner {
 .liability-badge {
   display: inline-block;
   font-size: 10px;
+  font-weight: 600;
   padding: 1px 5px;
   border-radius: var(--radius-sm);
-  background: var(--color-expense);
-  color: #fff;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   margin-left: 4px;
@@ -4655,11 +4659,11 @@ button.primary.loading .btn-spinner {
 }
 
 .account-item-balance.positive {
-  color: var(--color-income);
+  color: var(--color-success-strong);
 }
 
 .account-item-balance.negative {
-  color: var(--color-expense);
+  color: var(--color-danger-strong);
 }
 
 .account-item-actions {

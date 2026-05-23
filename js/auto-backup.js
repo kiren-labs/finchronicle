@@ -505,8 +505,8 @@ export async function renderStorageHealth() {
       <div class="storage-health-info">
         <span><i class="${health.persisted === true ? "ri-shield-check-line" : health.persisted === false ? "ri-error-warning-line" : "ri-question-line"}" aria-hidden="true"></i> Persistent storage: ${health.persisted === true ? "Protected" : health.persisted === false ? "Not granted — data may be evicted" : "Unknown"}</span>
       </div>
-      ${health.persisted === false ? `<p class="storage-warning-text">⚠️ Browser may delete your data under storage pressure. Add to Home Screen and export backups regularly.</p>` : ""}
-      ${health.usedPercent > 80 ? `<p class="storage-warning-text">⚠️ Storage is getting full. Consider exporting and clearing old data.</p>` : ""}
+      ${health.persisted === false ? `<p class="storage-warning-text" role="alert">⚠️ Browser may delete your data under storage pressure. Add to Home Screen and export backups regularly.</p>` : ""}
+      ${health.usedPercent > 80 ? `<p class="storage-warning-text" role="alert">⚠️ Storage is getting full. Consider exporting and clearing old data.</p>` : ""}
     </div>
   `;
 }

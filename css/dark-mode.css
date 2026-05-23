@@ -46,8 +46,15 @@ body.dark-mode {
     /* Mobile amount chips — override light-mode pastel backgrounds */
     --color-chip-negative-bg: #3a1a1a;
     --color-chip-positive-bg: #1a3a23;
-}
 
+    /* Badge tokens for dark mode */
+    --color-success-bg: #1a3a23;
+    --color-success-border: #2fbf5b;
+    --color-success-text: #7BFF9A;
+
+    --color-danger-bg: #3a1a18;
+    --color-danger-border: #FF6B6B;
+    --color-danger-text: #FFB3AE;
 /* ==========================================================================
    Pagination — custom glow (base uses --shadow-primary token)
    ========================================================================== */
