@@ -660,6 +660,14 @@ body.dark-mode .savings-widget.highlight {
   background: rgba(10, 132, 255, 0.1);
 }
 
+body.dark-mode .savings-widget-value.low {
+  color: #FF6B6B;
+}
+
+body.dark-mode .savings-widget-value.okay {
+  color: #FCD34D;
+}
+
 body.dark-mode .savings-trend {
   background: var(--color-surface);
 }

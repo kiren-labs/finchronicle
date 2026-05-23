@@ -879,9 +879,9 @@ button.primary.loading .btn-spinner {
 /* Label: always visible — tiny when inactive, normal when active */
 .type-option .type-label {
     display: inline-block;
-    font-size: 8px;
-    opacity: 0.6;
-    transition: font-size var(--transition-fast), opacity var(--transition-fast), font-weight var(--transition-fast);
+    font-size: 9px;
+    color: var(--color-text);
+    transition: font-size var(--transition-fast), font-weight var(--transition-fast);
 }
 
 /* ---- Active state ---- */
@@ -898,7 +898,6 @@ button.primary.loading .btn-spinner {
 
 .type-option.active .type-label {
     font-size: var(--font-md);
-    opacity: 1;
     font-weight: 700;
 }
 
@@ -2365,7 +2364,6 @@ button.primary.loading .btn-spinner {
 
 .backup-message {
     font-size: var(--font-sm);
-    opacity: 0.9;
 }
 
 .backup-description {
@@ -4756,7 +4754,7 @@ button.primary.loading .btn-spinner {
 }
 
 .savings-widget-value.low {
-  color: var(--color-expense);
+  color: var(--color-danger-strong);
 }
 
 .savings-widget-sub {
