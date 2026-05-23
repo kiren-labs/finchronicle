@@ -373,6 +373,7 @@ function checkMonthlyPace() {
   for (const budget of state.budgets) {
     const spent = spendByCategory[budget.category] || 0;
     if (spent === 0) continue;
+    if (spent >= budget.monthlyLimit) continue; // budget alert already covers this
     const projected = (spent / dayOfMonth) * daysInMonth;
     if (projected > budget.monthlyLimit * 1.2) {
       alerts.push({

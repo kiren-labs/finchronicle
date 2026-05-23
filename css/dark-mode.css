@@ -32,6 +32,8 @@ body.dark-mode {
     --color-danger-bg: #3a1a18;
     --color-danger-border: #FF453A;
     --color-danger-text: #FF6B6B;
+    --color-warning-bg: #2d2200;
+    --color-warning-border: #b45309;
     --color-warning-text: #FCD34D;
 
     --color-primary-bg: #1a2a3a;
