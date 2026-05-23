@@ -4630,6 +4630,18 @@ button.primary.loading .btn-spinner {
   letter-spacing: 0.3px;
 }
 
+.liability-badge {
+  display: inline-block;
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  background: var(--color-expense);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-left: 4px;
+}
+
 .account-item-right {
   display: flex;
   align-items: center;
