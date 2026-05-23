@@ -144,7 +144,7 @@ export async function addAccount(formData) {
 }
 
 export async function updateAccount(id, updates) {
-  const index = state.accounts.findIndex((a) => a.id === id);
+  const index = state.accounts.findIndex((a) => String(a.id) === String(id));
   if (index === -1) return false;
 
   const account = state.accounts[index];
@@ -152,7 +152,7 @@ export async function updateAccount(id, updates) {
   // If name changed, check for duplicates
   if (updates.name && updates.name !== account.name) {
     const trimmedName = sanitizeHTML(updates.name.trim());
-    if (state.accounts.some((a) => a.id !== id && a.name.toLowerCase() === trimmedName.toLowerCase())) {
+    if (state.accounts.some((a) => String(a.id) !== String(id) && a.name.toLowerCase() === trimmedName.toLowerCase())) {
       showMessage("An account with that name already exists.");
       return false;
     }
@@ -173,7 +173,7 @@ export async function updateAccount(id, updates) {
 }
 
 export async function removeAccount(id) {
-  const account = state.accounts.find((a) => a.id === id);
+  const account = state.accounts.find((a) => String(a.id) === String(id));
   if (!account) return false;
 
   // Check if account is referenced by any transaction
