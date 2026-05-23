@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] — 2026-06-XX
+
+### Added — Accounting Model (Phase 2)
+
+#### 2.1 Asset/Liability Classification (COMPLETE)
+- New account types: "loan" and "mortgage" → automatically classified as liabilities
+- All existing accounts classified via v11 DB migration (credit-card=liability, others=asset)
+- `ACCOUNT_CLASSIFICATION` map in `js/state.js` for type→classification lookup
+- Account form (add/edit) has new "Classification" dropdown (asset/liability)
+- Type select auto-updates classification (e.g., choose "loan" → auto-set "liability")
+- Liability badge rendered in account list (red, `var(--color-expense)`)
+- `getNetWorth()` refactored to use classification logic: liabilities subtract as `Math.abs(balance)`, assets add normally
+- Fixed: Account ID handling to support UUIDs (from v3.29.0 `generateId()`) and legacy numeric IDs
+
+#### 2.2 Transaction ↔ Account Link (NOT STARTED)
+- Optional "Account" dropdown in income/expense form (via optional-fields system)
+- Expense + selected account → sets `fromAccount` field (like transfers already do)
+- Income + selected account → sets `toAccount` field
+- Existing transfer logic reused via `getAccountBalance()`
+
+#### 2.3 Reconciliation Workflow (NOT STARTED)
+- Transaction status field: `'pending'|'cleared'|'reconciled'`
+- New module `js/reconciliation.js` with workflow UI
+- Reconciliation screen per account with pending/cleared/reconciled tabs
+
+#### 2.4 Category Hierarchy (NOT STARTED)
+- Replace flat category list with parent/child structure
+- Impacts: state.js, ui.js, chart.js, validation.js, index.html form
+
 ## [3.29.0] — 2026-05-23
 
 ### Added — Engineering Hardening (Phase 1)
