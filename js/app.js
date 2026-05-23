@@ -17,7 +17,10 @@ function logError(message, stack) {
 }
 
 window.onerror = (message, source, lineno, colno, error) => {
-  logError(String(message), error?.stack || `${source}:${lineno}:${colno}`);
+  const msg = String(message);
+  // SW script fetch failures are transient network errors — not app bugs
+  if (msg.includes("load failed") && source && source.includes("sw.js")) return;
+  logError(msg, error?.stack || `${source}:${lineno}:${colno}`);
 };
 
 window.addEventListener("unhandledrejection", (event) => {
