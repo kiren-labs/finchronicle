@@ -23,6 +23,8 @@ body.dark-mode {
     --color-primary-soft: #1a2a3a;
     --color-toggle-bg: #2c2c2e;
     --color-toggle-active-bg: #1c1c1e;
+    --color-income-text: #34c759;
+    --color-expense-text: #FF6B6B;
 
     /* Semantic colors optimized for #1c1c1e surface */
     --color-success: #32D74B;
@@ -658,14 +660,6 @@ body.dark-mode .savings-widget {
 
 body.dark-mode .savings-widget.highlight {
   background: rgba(10, 132, 255, 0.1);
-}
-
-body.dark-mode .savings-widget-value.low {
-  color: #FF6B6B;
-}
-
-body.dark-mode .savings-widget-value.okay {
-  color: #FCD34D;
 }
 
 body.dark-mode .savings-trend {
