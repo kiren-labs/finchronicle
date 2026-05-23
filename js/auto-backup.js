@@ -13,7 +13,7 @@ const BACKUP_SETTINGS_KEY = "autoBackupSettings";
 const STORAGE_HEALTH_KEY = "storageHealthLastCheck";
 
 const DEFAULT_SETTINGS = {
-  autoBackupEnabled: false,
+  autoBackupEnabled: true,
   backupFrequency: "weekly", // 'daily' | 'weekly' | 'monthly'
   lastAutoBackup: null,
   backupFormat: "json", // 'json' | 'csv'
@@ -45,11 +45,39 @@ export function saveBackupSettings(settings) {
   localStorage.setItem(BACKUP_SETTINGS_KEY, JSON.stringify(settings));
 }
 
+// ---- Storage Persistence (v3.29.0) ----
+
+export async function requestStoragePersistence() {
+  if (!navigator.storage || !navigator.storage.persist) {
+    state.storagePersisted = null;
+    return null;
+  }
+  try {
+    // Check current status first
+    const already = await navigator.storage.persisted();
+    if (already) {
+      state.storagePersisted = true;
+      return true;
+    }
+    // Request persistence
+    const granted = await navigator.storage.persist();
+    state.storagePersisted = granted;
+    if (!granted) {
+      console.warn("⚠️ Storage persistence denied. Data may be evicted by browser.");
+    }
+    return granted;
+  } catch (e) {
+    console.warn("Storage persistence request failed:", e);
+    state.storagePersisted = null;
+    return null;
+  }
+}
+
 // ---- Storage Health ----
 
 export async function checkStorageHealth() {
   if (!navigator.storage || !navigator.storage.estimate) {
-    return { supported: false, usedPercent: 0, usedMB: 0, quotaMB: 0 };
+    return { supported: false, usedPercent: 0, usedMB: 0, quotaMB: 0, persisted: state.storagePersisted };
   }
 
   try {
@@ -60,10 +88,10 @@ export async function checkStorageHealth() {
     const usedPercent =
       Math.round((estimate.usage / estimate.quota) * 1000) / 10;
 
-    return { supported: true, usedPercent, usedMB, quotaMB };
+    return { supported: true, usedPercent, usedMB, quotaMB, persisted: state.storagePersisted };
   } catch (e) {
     console.warn("Storage estimate failed:", e);
-    return { supported: false, usedPercent: 0, usedMB: 0, quotaMB: 0 };
+    return { supported: false, usedPercent: 0, usedMB: 0, quotaMB: 0, persisted: state.storagePersisted };
   }
 }
 
@@ -474,6 +502,10 @@ export async function renderStorageHealth() {
       <div class="storage-health-info">
         <span><i class="${statusIcon}" aria-hidden="true"></i> ${health.usedMB} MB used of ${health.quotaMB} MB (${health.usedPercent}%)</span>
       </div>
+      <div class="storage-health-info">
+        <span><i class="${health.persisted === true ? "ri-shield-check-line" : health.persisted === false ? "ri-error-warning-line" : "ri-question-line"}" aria-hidden="true"></i> Persistent storage: ${health.persisted === true ? "Protected" : health.persisted === false ? "Not granted — data may be evicted" : "Unknown"}</span>
+      </div>
+      ${health.persisted === false ? `<p class="storage-warning-text">⚠️ Browser may delete your data under storage pressure. Add to Home Screen and export backups regularly.</p>` : ""}
       ${health.usedPercent > 80 ? `<p class="storage-warning-text">⚠️ Storage is getting full. Consider exporting and clearing old data.</p>` : ""}
     </div>
   `;

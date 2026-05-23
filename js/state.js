@@ -3,7 +3,7 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "3.28.0";
+export const APP_VERSION = "3.29.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
@@ -60,6 +60,7 @@ export const state = {
   quickTemplates: [],
   accounts: [],
   savingsGoals: [],
+  storagePersisted: null, // null = unknown, true = persisted, false = denied
 };
 
 // Default optional fields configuration

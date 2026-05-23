@@ -11,6 +11,7 @@ import {
   normalizeDate,
   normalizeImportedCategory,
   formatDate,
+  generateId,
 } from "./utils.js";
 import { getCurrency, formatCurrency } from "./currency.js";
 import { loadDataFromDB, bulkSaveTransactionsToDB, loadAllTransactionsFromDB } from "./db.js";
@@ -272,7 +273,6 @@ export async function importFromCSV(text) {
   let added = 0;
   let skipped = 0;
   const nowIso = new Date().toISOString();
-  const startId = Date.now();
   const newTransactions = [];
 
   rows.slice(1).forEach((row, i) => {
@@ -296,7 +296,7 @@ export async function importFromCSV(text) {
     const category = type === "transfer" ? "Transfer" : normalizeImportedCategory(baseCategory, rawNotes, type);
 
     const txn = {
-      id: startId + i,
+      id: generateId(),
       type,
       amount: Math.abs(amount),
       category,
@@ -480,9 +480,9 @@ export function parseBackupCSV(text) {
 
     const transaction = {
       id:
-        idIndex !== -1 && row[idIndex]
-          ? parseInt(row[idIndex])
-          : Date.now() + i,
+        idIndex !== -1 && row[idIndex] && row[idIndex].trim()
+          ? row[idIndex].trim()
+          : generateId(),
       type:
         typeIndex !== -1
           ? (row[typeIndex] || "").trim().toLowerCase()

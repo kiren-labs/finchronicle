@@ -3,7 +3,7 @@
 // ============================================================================
 
 import { state, categories } from "./state.js";
-import { sanitizeHTML, formatDate, showMessage } from "./utils.js";
+import { sanitizeHTML, formatDate, showMessage, generateId } from "./utils.js";
 import { formatCurrency } from "./currency.js";
 import { getAllTags, getTagColor, ensureTagColor } from "./search.js";
 import {
@@ -80,14 +80,13 @@ export async function checkRecurringTransactions() {
   );
   if (!due.length) return 0;
 
-  let idBase = Date.now();
   let generated = 0;
 
   for (let i = 0; i < due.length; i++) {
     const template = due[i];
 
     const transaction = {
-      id: idBase + i,
+      id: generateId(),
       type: template.type,
       amount: template.amount,
       category: template.category,
@@ -494,7 +493,7 @@ export async function saveRecurringTemplate() {
     await saveRecurringTemplateToDB(template);
   } else {
     const template = {
-      id: Date.now(),
+      id: generateId(),
       type,
       amount,
       category,

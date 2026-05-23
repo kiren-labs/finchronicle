@@ -2,6 +2,23 @@
 // Pure Utility Functions
 // ============================================================================
 
+// Generate collision-safe unique ID (v3.29.0)
+export function generateId() {
+  return crypto.randomUUID();
+}
+
+// ---- Error Log Access (v3.29.0) ----
+
+export function getErrorLog() {
+  try {
+    return JSON.parse(localStorage.getItem("errorLog") || "[]");
+  } catch (_) { return []; }
+}
+
+export function clearErrorLog() {
+  localStorage.removeItem("errorLog");
+}
+
 // Sanitize HTML to prevent XSS attacks
 export function sanitizeHTML(str) {
   if (!str) return "";

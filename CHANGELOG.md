@@ -9,6 +9,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.29.0] — 2026-05-23
+
+### Added — Engineering Hardening (Phase 1)
+
+#### 1.1 Storage Persistence
+- Call `navigator.storage.persist()` after DB init to prevent browser eviction
+- Display persistence status in Storage Health widget
+- Store `state.storagePersisted` for runtime access
+
+#### 1.2 Content Security Policy
+- Added `<meta http-equiv="Content-Security-Policy">` to `index.html`
+- Restricts scripts to `'self'`, allows styles from self + jsdelivr CDN (Remix Icons)
+- Blocks inline scripts, eval, and all external script sources
+
+#### 1.3 Collision-Safe IDs
+- New `generateId()` in `js/utils.js` using `crypto.randomUUID()`
+- Replaced `Date.now()` IDs in 7 modules: app, goals, budget, accounts, quick-entry, recurring, import-export
+- Existing numeric IDs continue to work (IndexedDB accepts mixed key types)
+- Fixed `shouldShowBackupReminder()` — now uses `createdAt` field instead of treating ID as timestamp
+
+#### 1.4 innerHTML XSS Audit
+- Sanitized tag suggestion rendering in `app.js` via `sanitizeHTML()`
+- Sanitized goal names and account option labels in `goals.js`
+- All user-sourced strings now pass through `sanitizeHTML()` before innerHTML insertion
+
+#### 1.5 Local Error Log
+- Global `window.onerror` + `unhandledrejection` handler at top of `app.js` (before imports)
+- Stores last 50 errors in `localStorage.errorLog` with timestamp and stack trace
+- "Error Log" section in Settings tab with copy-to-clipboard and clear buttons
+- Errors are viewable without DevTools — critical for mobile debugging
+
+#### 1.6 Backup Urgency
+- Backup reminder threshold: 30 days → 14 days
+- Auto-backup default changed from `false` to `true`
+- Ensures new users get weekly JSON backups out of the box
+
+#### 1.7 Service Worker Update Strategy
+- Removed `setInterval(() => registration.update(), 60000)` polling
+- Replaced with `visibilitychange` listener — checks for SW update when tab becomes visible
+- Throttled to max once per 5 minutes to avoid unnecessary network calls
+- Saves CPU on mobile when tab is backgrounded
+
+### Fixed
+- Circular ES module import between `settings.js` ↔ `app.js` — moved `getErrorLog`/`clearErrorLog` to `utils.js`
+
+### Changed
+- `js/utils.js` — added `generateId()`, `getErrorLog()`, `clearErrorLog()`
+- `js/auto-backup.js` — added `requestStoragePersistence()`, persistence status in health widget
+
+---
+
 ### Planned — v3.28.1 (Dashboard & UI/UX Fix Patch)
 - Fix savings rate showing `0.0%` when income is ฿0 but saved amount is non-zero → show `"N/A"` instead
 - Fix annual projection showing positive when monthly average is negative → replace with deficit label in red

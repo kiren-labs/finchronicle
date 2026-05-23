@@ -5,7 +5,7 @@
 import { state, MAX_QUICK_TEMPLATES } from "./state.js";
 import { loadQuickTemplates, saveQuickTemplate, deleteQuickTemplate } from "./db.js";
 import { formatCurrency } from "./currency.js";
-import { sanitizeHTML, showMessage } from "./utils.js";
+import { sanitizeHTML, showMessage, generateId } from "./utils.js";
 
 // ============================================================================
 // Initialisation
@@ -211,7 +211,7 @@ export async function saveAsTemplate() {
     : category;
 
   const template = {
-    id: Date.now(),
+    id: generateId(),
     label: sanitizeHTML(label),
     type: type,
     amount: amount,
