@@ -5976,13 +5976,13 @@ button.primary.loading .btn-spinner {
 }
 
 .tx-status-pending {
-  background: color-mix(in srgb, var(--color-warning, #f59e0b) 15%, transparent);
-  color: var(--color-warning, #f59e0b);
-  border: 1px solid color-mix(in srgb, var(--color-warning, #f59e0b) 30%, transparent);
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-border);
 }
 
 .tx-status-reconciled {
-  background: color-mix(in srgb, var(--color-text-secondary) 10%, transparent);
+  background: transparent;
   color: var(--color-text-secondary);
   border: 1px solid var(--color-border);
 }
