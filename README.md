@@ -72,7 +72,7 @@
 - ✅ **ES Modules** - 27 focused modules, no build step required
 - ✅ **Zero Dependencies** - No npm, no frameworks
 - ✅ **Service Worker** - Cache-first offline strategy
-- ✅ **IndexedDB** - 9 object stores for robust local data (DB_VERSION 12)
+- ✅ **IndexedDB** - 8 object stores for robust local data (DB_VERSION 12)
 - ✅ **Automated Tests** - 50+ unit tests (Vitest) + E2E suite (Playwright)
 - ✅ **Responsive Design** - Works on all screen sizes
 - ✅ **WCAG AA Accessible** - Sufficient color contrast, ARIA attributes throughout
@@ -342,7 +342,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - **Size**: ~15KB (total app shell, no frameworks)
 - **Runtime dependencies**: 1 (Remix Icon font - CDN, cached offline)
 - **Modules**: 27 ES modules, zero build step
-- **IndexedDB stores**: 9 (DB_VERSION 12)
+- **IndexedDB stores**: 8 (DB_VERSION 12)
 - **Accessibility**: WCAG AA compliant
 - **PWA**: Fully installable, 100% offline-capable
 

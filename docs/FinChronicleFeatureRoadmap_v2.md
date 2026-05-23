@@ -1,7 +1,7 @@
 # FinChronicle Feature Roadmap
 
 > Last updated: 2026-05-23
-> Current version: v4.1.0 — v4.1.1 patch pending, v4.2.0 next
+> Current version: v4.1.1 — v4.2.0 next
 
 ---
 
@@ -37,7 +37,7 @@ All features from the previous roadmap have shipped. The app is now a full perso
 
 ## Architecture Snapshot (as of v4.1.0)
 
-**27 JS modules, DB_VERSION 12, 9 IndexedDB stores**
+**27 JS modules, DB_VERSION 12, 8 IndexedDB stores**
 
 | Store | Purpose | Since |
 |-------|---------|-------|
@@ -74,7 +74,95 @@ These were considered and consciously ruled out. Revisiting requires a concrete 
 
 ---
 
-## What Comes Next — Proposed Roadmap v4.2–v4.9
+## v4.1.1 — Accessibility, Data Integrity & Alert Quality Patch
+**Priority: HIGH**
+**No new modules, no DB changes**
+
+Post-release audit identified contrast failures across light and dark mode, data loss in CSV/JSON export-restore, and a duplicate alert problem introduced with v4.1.0 health alerts. All are purely CSS/JS fixes.
+
+---
+
+### Fix 1 — Monthly-pace alert fires alongside existing budget alert (duplicate noise)
+**File:** `js/alerts.js` → `checkMonthlyPace()`
+
+When a category's current spending already reached or exceeded the budget limit, both the existing budget alert ("Groceries at 97%") and the new monthly-pace alert ("on pace for ฿11,822") fired simultaneously. The pace alert is an early warning — it should only fire while there is still time to act (spend below limit but trending over).
+
+**Fix:** Skip monthly-pace for any category where `spent >= budget.monthlyLimit`. Budget alert already covers that case.
+
+---
+
+### Fix 2 — CSV/JSON export missing fields introduced in v4.0 and v4.1
+**Files:** `js/import-export.js`, `js/auto-backup.js`
+
+`exportToCSV()` and `buildCsvBackup()` did not include `tags`, `status` (pending/cleared/reconciled), `recurringId`, `settled`, `settledAt`, `settledBy`. Tags silently dropped on every CSV export — permanent data loss on round-trip.
+
+**Fix:** All fields now included in every export format (CSV export, full backup CSV, auto-backup CSV). Import and restore parse them back correctly.
+
+---
+
+### Fix 3 — JSON backup restore only recovered transactions, dropped all other stores
+**File:** `js/import-export.js` → `processRestoredData()`, `confirmRestore()`
+
+Restoring an encrypted `.enc` backup (JSON format) recovered transactions but silently discarded `recurringTemplates`, `budgets`, `accounts`, `savingsGoals`, and `quickTemplates` — the user lost all configuration after a full restore.
+
+**Fix:** `confirmRestore()` now saves all stores back to IndexedDB when present in the backup payload, then reloads full state.
+
+---
+
+### Fix 4 — CSV import mutated state before DB write
+**File:** `js/import-export.js` → `importFromCSV()`
+
+`state.transactions.unshift(txn)` ran inside the row-parsing loop before `bulkSaveTransactionsToDB()`. If the DB write failed, state showed imported data that was never persisted.
+
+**Fix:** State is only updated after a successful DB write.
+
+---
+
+### Fix 5 — WCAG AA contrast failures across light and dark mode
+**Files:** `css/tokens.css`, `css/styles.css`, `css/dark-mode.css`
+
+Multiple contrast failures identified via accessibility audit:
+
+| Element | Problem | Fix |
+|---------|---------|-----|
+| `.net-worth-value`, `.nw-item-value`, `.account-balance-amount` | `--color-income` (#34c759) on white = 2.1:1 — fails all WCAG levels | New `--color-income-text: #1a7a3a` (5.4:1) and `--color-expense-text: #C41E1A` (5.9:1) tokens. Dark mode: `#34c759` / `#FF6B6B` |
+| `.savings-widget-value.low` | Red on blue highlight bg = 3.4:1 — fails normal text | Switched to `--color-expense-text` |
+| `.savings-widget-label`, `.savings-widget-sub` on highlight | Muted text on blue bg = 4.4:1 — fails normal text | Override to `--color-text` on `.savings-widget.highlight` |
+| `.type-option .type-label` | `opacity: 0.6` on 8px text = ~2.6:1 — fails | Removed opacity, bumped to 9px, set `color: var(--color-text)` |
+| `.backup-message` | `opacity: 0.9` on success-strong text = ~3.8:1 — fails | Removed opacity |
+| `.storage-warning-text` dark mode | `--color-warning-text: #FCD34D` on light-mode `--color-warning-bg: #fff3cd` — near identical | Added `--color-warning-bg: #2d2200` and `--color-warning-border: #b45309` dark mode tokens |
+
+All text colour uses of `--color-income` / `--color-expense` (net worth, settlement, annual report, reconciliation, goals, savings, forecast amounts) migrated to the new accessible tokens. Display uses (chart bars, SVG strokes, backgrounds) unchanged.
+
+---
+
+### Fix 6 — SW script load failures logged as app errors
+**File:** `js/app.js` → `window.onerror`
+
+Transient network failures when the Service Worker tries to fetch `sw.js` (background update check on tab focus) were captured by `window.onerror` and written to the in-app error log, causing false entries like "Script sw.js load failed". These are browser-level network hiccups, not app bugs.
+
+**Fix:** `window.onerror` now filters SW script load failures before logging.
+
+---
+
+### v4.1.1 Files Modified
+
+| File | Change |
+|------|--------|
+| `js/alerts.js` | `checkMonthlyPace()` — skip categories already at/over budget limit |
+| `js/import-export.js` | Add `tags`, `status`, `recurringId`, `settled*` to all export formats; restore all stores on JSON restore; fix state mutation order in import |
+| `js/auto-backup.js` | `buildCsvBackup()` — full field parity with `createBackup()` |
+| `js/app.js` | Filter SW load failures from `window.onerror` |
+| `css/tokens.css` | Add `--color-income-text` and `--color-expense-text` tokens |
+| `css/styles.css` | Migrate all text colour uses to `*-text` tokens; fix type-label opacity; fix backup-message opacity |
+| `css/dark-mode.css` | Dark mode token overrides for new text tokens and warning bg/border; remove redundant explicit overrides |
+| `js/state.js` | Bump `APP_VERSION` → `4.1.1` |
+| `sw.js` | Bump `CACHE_NAME` → `finchronicle-v4.1.1` |
+| `manifest.json` | Bump `version` → `4.1.1` |
+
+---
+
+## What Comes Next — Proposed Roadmap v4.2–v4.13
 
 > **Roadmap revised 2026-05-23** — Aligned to v4.1.0. Forecast and health alerts shipped in v4.1.0. Remaining items reordered by daily impact.
 
@@ -176,11 +264,11 @@ Total         ฿16,000  ฿16,550    -฿550        103%
 - `js/annual-report.js` — reuse for year-level budget vs actual
 - `index.html` — budget table in Summary tab
 - `css/styles.css`, `css/dark-mode.css` — table + variance column coloring
-- Version: bump to 4.2.0
+- Version: bump to 4.3.0
 
 ---
 
-### v4.3.0 — Financial Health Ratios
+### v4.4.0 — Financial Health Ratios
 **Priority: HIGH**
 **No new module — extends `js/savings.js`**
 
@@ -198,15 +286,15 @@ Beyond savings rate, no diagnostic ratios exist. Four KPIs computed entirely fro
 **UI:** 2×2 KPI grid, each card shows ratio value + target indicator (green/yellow/red). Cards hidden if < 2 months of data. Summary line: "3 of 4 ratios are healthy."
 
 **Files to modify:**
-- `js/savings.js` — ratio calculation functions
+- `js/savings.js` — ratio calculation functions (Savings Rate already computed in v3.19 — re-render existing value, do not re-implement)
 - `js/ui.js` — render ratio cards
 - `index.html` — health ratio grid in Summary tab
 - `css/styles.css`, `css/dark-mode.css` — ratio card styles
-- Version: bump to 4.3.0
+- Version: bump to 4.4.0
 
 ---
 
-### v4.4.0 — Subscription Tracker
+### v4.5.0 — Subscription Tracker
 **Priority: MEDIUM**
 **No new module — extends `js/recurring.js`**
 
@@ -232,11 +320,11 @@ Active Subscriptions                          ฿2,340/month
 - `js/recurring.js` — `getSubscriptions()` helper, total calculation
 - `index.html` — subscription section in Recurring tab
 - `css/styles.css`, `css/dark-mode.css` — subscription list styles
-- Version: bump to 4.4.0
+- Version: bump to 4.5.0
 
 ---
 
-### v4.5.0 — Duplicate Transaction Detection
+### v4.6.0 — Duplicate Transaction Detection
 **Priority: MEDIUM**
 **No new module — extends `js/validation.js`**
 
@@ -262,11 +350,11 @@ function detectDuplicate(candidate, existingTransactions) {
 - `js/app.js` — call in save handler, show inline warning
 - `index.html` — duplicate warning slot in form
 - `css/styles.css` — warning banner style
-- Version: bump to 4.5.0
+- Version: bump to 4.6.0
 
 ---
 
-### v4.6.0 — Bank Statement CSV Importer
+### v4.7.0 — Bank Statement CSV Importer
 **Priority: MEDIUM**
 **Extends `js/import-export.js` (lazy-loaded)**
 
@@ -280,7 +368,7 @@ Generic column mapper that accepts any bank's CSV export — no fixed format ass
 5. Import with duplicate detection (v4.5) on every row
 6. Summary: "Imported 45 transactions. 3 duplicates skipped."
 
-**Saved mappings:** Store column mapping per bank name in localStorage (up to 5). Auto-applied on next import from same bank.
+**Saved mappings:** Store column mapping per bank name in `appSettings` IDB store (up to 5). Auto-applied on next import from same bank.
 
 **Key behaviors:**
 - Runs entirely client-side — file never leaves device
@@ -292,11 +380,13 @@ Generic column mapper that accepts any bank's CSV export — no fixed format ass
 - `js/import-export.js` — `importFromBankCSV()`, column mapper UI, saved mappings
 - `index.html` — bank import section in Settings
 - `css/styles.css`, `css/dark-mode.css` — column mapper, preview table
-- Version: bump to 4.6.0
+- Version: bump to 4.7.0
+
+**Note:** Saved column mappings stored in `appSettings` IDB store (not localStorage) to maintain the pattern of "localStorage only for small settings."
 
 ---
 
-### v4.7.0 — Local Notifications
+### v4.8.0 — Local Notifications
 **Priority: HIGH**
 **New file: `js/notifications.js`**
 
@@ -319,11 +409,13 @@ Budget warnings and recurring due-date reminders exist as in-app alerts but go u
 - `sw.js` — `notificationclick` handler + add to `CACHE_URLS`
 - `index.html` — notification settings section
 - `css/styles.css`, `css/dark-mode.css` — preference toggle styles
-- Version: bump to 4.7.0
+- Version: bump to 4.8.0
+
+**Note:** Quiet hours use local `Date` object — no explicit timezone handling needed since all data is device-local.
 
 ---
 
-### v4.8.0 — Bulk Transaction Operations
+### v4.9.0 — Bulk Transaction Operations
 **Priority: MEDIUM**
 
 No way to recategorize or re-tag multiple transactions at once. Primary friction when cleaning up historical data or after a bank statement import.
@@ -337,16 +429,15 @@ No way to recategorize or re-tag multiple transactions at once. Primary friction
 **UI:** "Select" mode toggle in List tab header. Tap to select (checkboxes). Sticky action bar when N > 0: "Recategorize | Tag | Delete | Cancel". Confirmation step for delete.
 
 **Files to modify:**
-- `js/ui.js` — select mode rendering, selection state, action bar
+- `js/ui.js` — select mode rendering, selection state, action bar (keep `selectedTransactionIds` module-local in `ui.js` — UI-only state, not persisted)
 - `js/app.js` — bulk operation handlers
 - `js/db.js` — extend `bulkSaveTransactionsToDB` for bulk soft-delete
-- `js/state.js` — add `selectedTransactionIds: []` to state
 - `css/styles.css`, `css/dark-mode.css` — selection styles, bulk action bar
-- Version: bump to 4.8.0
+- Version: bump to 4.9.0
 
 ---
 
-### v4.9.0 — Category Management
+### v4.10.0 — Category Management
 **Priority: MEDIUM**
 
 No mechanism to rename a category across all transactions or merge two categories. Real-usage audit found "Shopping" / "Personal/Shopping" used interchangeably.
@@ -365,11 +456,13 @@ No mechanism to rename a category across all transactions or merge two categorie
 - `js/app.js` — wire events
 - `index.html` — category management in Settings
 - `css/styles.css`, `css/dark-mode.css` — manager styles
-- Version: bump to 4.9.0
+- Version: bump to 4.10.0
+
+**Note:** Category Management is a soft prerequisite for Bank CSV Import — clean categories make auto-categorization more accurate. Can ship independently but benefits from being available first.
 
 ---
 
-### v4.10.0 — Business & Tax Export
+### v4.11.0 — Business & Tax Export
 **Priority: MEDIUM**
 
 `expenseType: "business"` and `referenceId` (receipt/invoice) exist since v3.16 but there's no business-only export for tax filing.
@@ -387,11 +480,11 @@ No mechanism to rename a category across all transactions or merge two categorie
 - `js/state.js` — add `taxYearStartMonth` to default appSettings
 - `index.html` — tax year setting, tax export tab
 - `css/styles.css`, `css/dark-mode.css` — tab styles
-- Version: bump to 4.10.0
+- Version: bump to 4.11.0
 
 ---
 
-### v4.11.0 — Loan / EMI Tracker
+### v4.12.0 — Loan / EMI Tracker
 **Priority: MEDIUM**
 **New file: `js/loans.js`**
 
@@ -425,11 +518,11 @@ Currently EMIs are logged as recurring expenses — no view of outstanding princ
 - `index.html` — loan section
 - `css/styles.css`, `css/dark-mode.css`
 - `sw.js` — add to CACHE_URLS
-- Version: bump to 4.11.0
+- Version: bump to 4.12.0
 
 ---
 
-### v4.12.0 — Receipt Photos
+### v4.13.0 — Receipt Photos
 **Priority: LOW**
 **New file: `js/receipts.js`**
 
@@ -452,104 +545,16 @@ Last significant data-capture gap. Storage-first constraints apply.
 - `index.html` — file input in form, receipts settings
 - `css/styles.css`, `css/dark-mode.css`
 - `sw.js` — add to CACHE_URLS, exclude blobs from cache
-- Version: bump to 4.12.0
+- Version: bump to 4.13.0
 
 ---
 
-## v4.1.1 — Accessibility, Data Integrity & Alert Quality Patch
-**Priority: HIGH**
-**No new modules, no DB changes**
-
-Post-release audit identified contrast failures across light and dark mode, data loss in CSV/JSON export-restore, and a duplicate alert problem introduced with v4.1.0 health alerts. All are purely CSS/JS fixes.
-
----
-
-### Fix 1 — Monthly-pace alert fires alongside existing budget alert (duplicate noise)
-**File:** `js/alerts.js` → `checkMonthlyPace()`
-
-When a category's current spending already reached or exceeded the budget limit, both the existing budget alert ("Groceries at 97%") and the new monthly-pace alert ("on pace for ฿11,822") fired simultaneously. The pace alert is an early warning — it should only fire while there is still time to act (spend below limit but trending over).
-
-**Fix:** Skip monthly-pace for any category where `spent >= budget.monthlyLimit`. Budget alert already covers that case.
-
----
-
-### Fix 2 — CSV/JSON export missing fields introduced in v4.0 and v4.1
-**Files:** `js/import-export.js`, `js/auto-backup.js`
-
-`exportToCSV()` and `buildCsvBackup()` did not include `tags`, `status` (pending/cleared/reconciled), `recurringId`, `settled`, `settledAt`, `settledBy`. Tags silently dropped on every CSV export — permanent data loss on round-trip.
-
-**Fix:** All fields now included in every export format (CSV export, full backup CSV, auto-backup CSV). Import and restore parse them back correctly.
-
----
-
-### Fix 3 — JSON backup restore only recovered transactions, dropped all other stores
-**File:** `js/import-export.js` → `processRestoredData()`, `confirmRestore()`
-
-Restoring an encrypted `.enc` backup (JSON format) recovered transactions but silently discarded `recurringTemplates`, `budgets`, `accounts`, `savingsGoals`, and `quickTemplates` — the user lost all configuration after a full restore.
-
-**Fix:** `confirmRestore()` now saves all stores back to IndexedDB when present in the backup payload, then reloads full state.
-
----
-
-### Fix 4 — CSV import mutated state before DB write
-**File:** `js/import-export.js` → `importFromCSV()`
-
-`state.transactions.unshift(txn)` ran inside the row-parsing loop before `bulkSaveTransactionsToDB()`. If the DB write failed, state showed imported data that was never persisted.
-
-**Fix:** State is only updated after a successful DB write.
-
----
-
-### Fix 5 — WCAG AA contrast failures across light and dark mode
-**Files:** `css/tokens.css`, `css/styles.css`, `css/dark-mode.css`
-
-Multiple contrast failures identified via accessibility audit:
-
-| Element | Problem | Fix |
-|---------|---------|-----|
-| `.net-worth-value`, `.nw-item-value`, `.account-balance-amount` | `--color-income` (#34c759) on white = 2.1:1 — fails all WCAG levels | New `--color-income-text: #1a7a3a` (5.4:1) and `--color-expense-text: #C41E1A` (5.9:1) tokens. Dark mode: `#34c759` / `#FF6B6B` |
-| `.savings-widget-value.low` | Red on blue highlight bg = 3.4:1 — fails normal text | Switched to `--color-expense-text` |
-| `.savings-widget-label`, `.savings-widget-sub` on highlight | Muted text on blue bg = 4.4:1 — fails normal text | Override to `--color-text` on `.savings-widget.highlight` |
-| `.type-option .type-label` | `opacity: 0.6` on 8px text = ~2.6:1 — fails | Removed opacity, bumped to 9px, set `color: var(--color-text)` |
-| `.backup-message` | `opacity: 0.9` on success-strong text = ~3.8:1 — fails | Removed opacity |
-| `.storage-warning-text` dark mode | `--color-warning-text: #FCD34D` on light-mode `--color-warning-bg: #fff3cd` — near identical | Added `--color-warning-bg: #2d2200` and `--color-warning-border: #b45309` dark mode tokens |
-
-All text colour uses of `--color-income` / `--color-expense` (net worth, settlement, annual report, reconciliation, goals, savings, forecast amounts) migrated to the new accessible tokens. Display uses (chart bars, SVG strokes, backgrounds) unchanged.
-
----
-
-### Fix 6 — SW script load failures logged as app errors
-**File:** `js/app.js` → `window.onerror`
-
-Transient network failures when the Service Worker tries to fetch `sw.js` (background update check on tab focus) were captured by `window.onerror` and written to the in-app error log, causing false entries like "Script sw.js load failed". These are browser-level network hiccups, not app bugs.
-
-**Fix:** `window.onerror` now filters SW script load failures before logging.
-
----
-
-### Files Modified
-
-| File | Change |
-|------|--------|
-| `js/alerts.js` | `checkMonthlyPace()` — skip categories already at/over budget limit |
-| `js/import-export.js` | Add `tags`, `status`, `recurringId`, `settled*` to all export formats; restore all stores on JSON restore; fix state mutation order in import |
-| `js/auto-backup.js` | `buildCsvBackup()` — full field parity with `createBackup()` |
-| `js/app.js` | Filter SW load failures from `window.onerror` |
-| `css/tokens.css` | Add `--color-income-text` and `--color-expense-text` tokens |
-| `css/styles.css` | Migrate all text colour uses to `*-text` tokens; fix type-label opacity; fix backup-message opacity |
-| `css/dark-mode.css` | Dark mode token overrides for new text tokens and warning bg/border; remove redundant explicit overrides |
-| `js/state.js` | Bump `APP_VERSION` → `4.1.1` |
-| `sw.js` | Bump `CACHE_NAME` → `finchronicle-v4.1.1` |
-| `manifest.json` | Bump `version` → `4.1.1` |
-
----
-
-
+## Release Summary Table
 
 | Version | Feature | DB Version | Priority | Status |
 |---------|---------|-----------|---------|--------|
 | v4.1.0 | Cash-Flow Forecast (30/60/90d) + Financial Health Alerts | 12 | HIGH | ✅ Shipped |
-| v4.1.1 | Accessibility, data integrity & alert quality patch | 12 | HIGH | Pending |
+| v4.1.1 | Accessibility, data integrity & alert quality patch | 12 | HIGH | ✅ Shipped |
 | v4.2.0 | Actionable Spending Insights — `suggestion` field on every alert | 12 | HIGH | Planned |
 | v4.3.0 | Budget vs Actual Report — consolidated variance table | 12 | HIGH | Planned |
 | v4.4.0 | Financial Health Ratios (emergency fund, debt-to-income, housing cost) | 12 | HIGH | Planned |
