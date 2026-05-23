@@ -245,6 +245,14 @@ export function updateTransactionsList() {
     if (ef.location && t.location) metaParts.push(`<span class="tx-meta-item"><i class="ri-map-pin-line"></i> ${sanitizeHTML(t.location)}</span>`);
     const metaHtml = metaParts.length > 0 ? `<div class="tx-meta">${metaParts.join("")}</div>` : "";
 
+    // Reconciliation status badge (v4.0.0) — only shown for non-default statuses
+    let statusBadgeHtml = "";
+    if (t.status === "pending") {
+      statusBadgeHtml = `<span class="tx-status-badge tx-status-pending" title="Pending — not yet cleared by bank"><i class="ri-time-line"></i> pending</span>`;
+    } else if (t.status === "reconciled") {
+      statusBadgeHtml = `<span class="tx-status-badge tx-status-reconciled" title="Reconciled"><i class="ri-lock-line"></i></span>`;
+    }
+
     // Reimbursement status (v3.27.0)
     let reimbursementHtml = "";
     if (t.expenseType === "reimbursable") {
@@ -262,6 +270,7 @@ export function updateTransactionsList() {
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
                 ${metaHtml}
                 ${reimbursementHtml}
+                ${statusBadgeHtml}
                 <div class="transaction-date">${formatDate(t.date)}</div>
                 ${t.tags && t.tags.length > 0 ? `<div class="tx-tags">${t.tags.map((tag) => `<span class="tx-tag" data-tag="${sanitizeHTML(tag)}"><span class="tag-dot" style="background:${getTagColor(tag)}"></span>${sanitizeHTML(tag)}</span>`).join("")}</div>` : ""}
             </div>

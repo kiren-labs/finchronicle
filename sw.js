@@ -33,6 +33,7 @@ const CACHE_URLS = [
   "./js/auto-backup.js",
   "./js/multi-currency.js",
   "./js/settlement.js",
+  "./js/reconciliation.js",
   "./manifest.json",
   "./css/tokens.css",
   "./css/styles.css",

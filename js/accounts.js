@@ -436,6 +436,11 @@ export function showAddAccountForm() {
   document.getElementById("accountClassificationSelect").value = "asset";
   document.getElementById("accountSavingsToggle").checked = false;
   modal.dataset.editId = "";
+
+  // Hide reconcile button — only visible when editing an existing account
+  const reconcileBtn = document.getElementById("accountReconcileBtn");
+  if (reconcileBtn) reconcileBtn.hidden = true;
+
   modal.classList.add("show");
 }
 
@@ -453,6 +458,14 @@ export function showEditAccountForm(id) {
   document.getElementById("accountClassificationSelect").value = account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
   document.getElementById("accountSavingsToggle").checked = account.isSavings || false;
   modal.dataset.editId = String(id);
+
+  // Show reconcile button with account name
+  const reconcileBtn = document.getElementById("accountReconcileBtn");
+  if (reconcileBtn) {
+    reconcileBtn.hidden = false;
+    reconcileBtn.dataset.accountName = account.name;
+  }
+
   modal.classList.add("show");
 }
 

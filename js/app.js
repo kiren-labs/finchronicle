@@ -967,6 +967,17 @@ function bindAccountEvents() {
     closeBtn.addEventListener("click", closeAccountForm);
   }
 
+  // Reconcile button inside edit-account modal
+  const reconcileBtn = document.getElementById("accountReconcileBtn");
+  if (reconcileBtn) {
+    reconcileBtn.addEventListener("click", () => {
+      const name = reconcileBtn.dataset.accountName;
+      if (!name) return;
+      closeAccountForm();
+      openReconciliationModal(name);
+    });
+  }
+
   // Close modal on backdrop click
   const modal = document.getElementById("accountFormModal");
   if (modal) {
