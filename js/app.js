@@ -28,16 +28,6 @@ window.addEventListener("unhandledrejection", (event) => {
   );
 });
 
-export function getErrorLog() {
-  try {
-    return JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || "[]");
-  } catch (_) { return []; }
-}
-
-export function clearErrorLog() {
-  localStorage.removeItem(ERROR_LOG_KEY);
-}
-
 import { state, currencies } from "./state.js";
 import { showMessage, generateId, sanitizeHTML } from "./utils.js";
 import {
