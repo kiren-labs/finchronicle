@@ -669,6 +669,23 @@ export function showRestorePreview(backupData) {
   document.getElementById("previewCurrency").textContent =
     backupData.metadata["Currency"] || getCurrency();
 
+  // Integrity indicator
+  const integrityRow = document.getElementById("previewIntegrityRow");
+  const integrityEl = document.getElementById("previewIntegrity");
+  if (integrityRow && integrityEl) {
+    if (backupData.integrityOk === true) {
+      integrityRow.style.display = "";
+      integrityEl.textContent = "Verified ✓";
+      integrityEl.style.color = "var(--color-income-text)";
+    } else if (backupData.integrityOk === false) {
+      integrityRow.style.display = "";
+      integrityEl.textContent = "⚠ Hash mismatch — file may be corrupted";
+      integrityEl.style.color = "var(--color-expense-text)";
+    } else {
+      integrityRow.style.display = "none";
+    }
+  }
+
   modal.classList.add("show");
 }
 
@@ -707,15 +724,34 @@ function showRestoreReport(stats) {
   modal.classList.add("show");
 }
 
-export async function confirmRestore() {
+export async function confirmRestore(mode = "merge") {
   const backupData = state.pendingRestoreData;
   if (!backupData) return;
+
+  if (mode === "replace") {
+    const confirmed = confirm(
+      `This will DELETE all current data and replace it with the backup (${backupData.transactions.length} transactions). This cannot be undone. Continue?`
+    );
+    if (!confirmed) return;
+  }
 
   closeRestorePreview();
   showMessage("Restoring backup...");
 
   try {
-    await loadDataFromDB();
+    const CLEARABLE_STORES = [
+      "transactions", "recurringTemplates", "budgets",
+      "accounts", "savingsGoals", "quickTemplates",
+      "appSettings", "netWorthSnapshots",
+    ];
+
+    if (mode === "replace") {
+      const storesToClear = CLEARABLE_STORES.filter(s => backupData[s] != null);
+      await clearAllStores(storesToClear);
+      await loadDataFromDB();
+    } else {
+      await loadDataFromDB();
+    }
 
     const stats = {
       backupTotal: backupData.transactions.length,
@@ -725,9 +761,8 @@ export async function confirmRestore() {
     };
 
     const newTransactions = [];
-
     backupData.transactions.forEach((backupTxn) => {
-      if (isDuplicateTransaction(backupTxn, state.transactions)) {
+      if (mode === "merge" && isDuplicateTransaction(backupTxn, state.transactions)) {
         stats.duplicates++;
       } else {
         newTransactions.push(backupTxn);
@@ -744,7 +779,6 @@ export async function confirmRestore() {
       state.transactions.sort((a, b) => b.dateTs - a.dateTs);
     }
 
-    // Restore other stores from JSON backup if present
     if (backupData.recurringTemplates) {
       for (const tmpl of backupData.recurringTemplates) {
         await saveRecurringTemplateToDB(tmpl);
@@ -768,8 +802,21 @@ export async function confirmRestore() {
     if (backupData.quickTemplates && backupData.quickTemplates.length > 0) {
       await bulkSaveQuickTemplates(backupData.quickTemplates);
     }
+    if (backupData.appSettings) {
+      await saveAppSettings(backupData.appSettings);
+    }
+    if (backupData.netWorthSnapshots && backupData.netWorthSnapshots.length > 0) {
+      await bulkSaveNetWorthSnapshots(backupData.netWorthSnapshots);
+    }
+    if (backupData.localStorage) {
+      if (backupData.localStorage.exchangeRateHistory) {
+        localStorage.setItem("exchangeRateHistory", JSON.stringify(backupData.localStorage.exchangeRateHistory));
+      }
+      if (backupData.localStorage.tagColors) {
+        localStorage.setItem("tagColors", JSON.stringify(backupData.localStorage.tagColors));
+      }
+    }
 
-    // Reload all state from DB to pick up restored stores
     await loadDataFromDB();
 
     stats.currentTotal = state.transactions.length;
@@ -778,7 +825,6 @@ export async function confirmRestore() {
   } catch (err) {
     console.error("Restore failed:", err);
     showMessage("Restore failed. Your existing data was preserved.");
-
     try {
       await loadDataFromDB();
       updateUI();
