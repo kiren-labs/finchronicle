@@ -55,6 +55,8 @@ body.dark-mode {
     --color-danger-bg: #3a1a18;
     --color-danger-border: #FF6B6B;
     --color-danger-text: #FFB3AE;
+  }
+
 /* ==========================================================================
    Pagination — custom glow (base uses --shadow-primary token)
    ========================================================================== */
