@@ -425,19 +425,6 @@ function bindStaticEvents() {
       mod.closeRestorePreview();
     });
 
-  // ---- Hidden file inputs ----
-  document
-    .getElementById("importFile")
-    .addEventListener("change", async (e) => {
-      const mod = await getImportExportModule();
-      mod.handleImport(e);
-    });
-  document
-    .getElementById("restoreFile")
-    .addEventListener("change", async (e) => {
-      const mod = await getImportExportModule();
-      mod.handleRestore(e);
-    });
 
   // ---- Search bar (v3.14.0) ----
   bindSearchEvents();

@@ -238,7 +238,8 @@ export async function createBackup() {
 // ---- Import CSV ----
 
 export function triggerImport() {
-  const input = document.getElementById("importFile");
+  const input = document.getElementById("spreadsheetImportFile");
+  if (!input) return;
   input.value = "";
   input.click();
 }
@@ -433,7 +434,8 @@ export async function importFromCSV(text) {
 // ---- Restore Backup ----
 
 export function triggerRestore() {
-  const input = document.getElementById("restoreFile");
+  const input = document.getElementById("dataRestoreFile");
+  if (!input) return;
   input.value = "";
   input.click();
 }
