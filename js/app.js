@@ -2,8 +2,44 @@
 // App Entry Point — Initialisation, Event Bindings, Service Worker
 // ============================================================================
 
+// ---- Global Error Log (v3.29.0) ----
+// Must be before any imports to catch early errors.
+const ERROR_LOG_KEY = "errorLog";
+const MAX_ERRORS = 50;
+
+function logError(message, stack) {
+  try {
+    const log = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || "[]");
+    log.push({ timestamp: new Date().toISOString(), message, stack: stack || "" });
+    if (log.length > MAX_ERRORS) log.splice(0, log.length - MAX_ERRORS);
+    localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
+  } catch (_) { /* localStorage full or unavailable — silently ignore */ }
+}
+
+window.onerror = (message, source, lineno, colno, error) => {
+  logError(String(message), error?.stack || `${source}:${lineno}:${colno}`);
+};
+
+window.addEventListener("unhandledrejection", (event) => {
+  const reason = event.reason;
+  logError(
+    reason?.message || String(reason),
+    reason?.stack || ""
+  );
+});
+
+export function getErrorLog() {
+  try {
+    return JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || "[]");
+  } catch (_) { return []; }
+}
+
+export function clearErrorLog() {
+  localStorage.removeItem(ERROR_LOG_KEY);
+}
+
 import { state, currencies } from "./state.js";
-import { showMessage } from "./utils.js";
+import { showMessage, generateId, sanitizeHTML } from "./utils.js";
 import {
   initDB,
   migrateFromLocalStorage,
@@ -139,6 +175,7 @@ import {
   importEncryptedBackup,
   renderAutoBackupSettings,
   renderStorageHealth,
+  requestStoragePersistence,
 } from "./auto-backup.js";
 import {
   renderMultiCurrencyFields,
@@ -654,6 +691,25 @@ function bindDelegatedEvents() {
         mod.scrollToFAQ();
       }
     });
+
+  // Error log container: copy & clear actions (v3.29.0)
+  const errorLogEl = document.getElementById("errorLogContainer");
+  if (errorLogEl) {
+    errorLogEl.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      if (btn.dataset.action === "copyErrorLog") {
+        const log = getErrorLog();
+        const text = log.map((e) => `[${e.timestamp}] ${e.message}\n${e.stack}`).join("\n---\n");
+        navigator.clipboard.writeText(text).then(() => showMessage("Error log copied"));
+      }
+      if (btn.dataset.action === "clearErrorLog") {
+        clearErrorLog();
+        updateSettingsContent();
+        showMessage("Error log cleared");
+      }
+    });
+  }
 }
 
 // ============================================================================
@@ -728,7 +784,7 @@ function bindTagInputEvents() {
     }
     suggestions.innerHTML = existing
       .slice(0, 8)
-      .map((t) => `<div class="tag-suggestion-item" data-suggestion="${t}">${t}</div>`)
+      .map((t) => `<div class="tag-suggestion-item" data-suggestion="${sanitizeHTML(t)}">${sanitizeHTML(t)}</div>`)
       .join("");
     suggestions.hidden = false;
   }
@@ -1261,7 +1317,7 @@ function bindFormSubmit() {
       const type = document.getElementById("type").value;
       const now = new Date().toISOString();
       const transaction = {
-        id: state.editingId || Date.now(),
+        id: state.editingId || generateId(),
         type: type,
         amount: amount,
         category: document.getElementById("category").value,
@@ -1432,9 +1488,14 @@ function registerServiceWorker() {
       console.log("✅ Service Worker registered - App works offline!");
       registration.update();
 
-      setInterval(() => {
-        registration.update();
-      }, 60000);
+      // Check for SW updates on tab visibility (throttled to 5 min)
+      let lastUpdateCheck = Date.now();
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible" && Date.now() - lastUpdateCheck > 5 * 60 * 1000) {
+          lastUpdateCheck = Date.now();
+          registration.update();
+        }
+      });
 
       registration.addEventListener("updatefound", () => {
         const newWorker = registration.installing;
@@ -1537,6 +1598,7 @@ function openBudgetModal(budget = null) {
 async function init() {
   try {
     await initDB();
+    await requestStoragePersistence();
     await migrateFromLocalStorage();
     await loadDataFromDB();
     await loadRecurringIntoState();

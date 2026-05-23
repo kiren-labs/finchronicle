@@ -5,7 +5,7 @@
 import { state, ACCOUNT_TYPES } from "./state.js";
 import { loadAccounts, saveAccount, deleteAccount, saveNetWorthSnapshot, loadNetWorthSnapshots, getNetWorthSnapshotByDate } from "./db.js";
 import { formatCurrency } from "./currency.js";
-import { sanitizeHTML, showMessage } from "./utils.js";
+import { sanitizeHTML, showMessage, generateId } from "./utils.js";
 
 // ---- Init ----
 
@@ -119,7 +119,7 @@ export async function addAccount(formData) {
   const parsedBalance = parseFloat(openingBalance) || 0;
 
   const account = {
-    id: Date.now(),
+    id: generateId(),
     name: trimmedName,
     type,
     openingBalance: parsedBalance,

@@ -5,7 +5,7 @@
 import { state } from "./state.js";
 import { loadGoals, saveGoal, deleteGoal } from "./db.js";
 import { formatCurrency } from "./currency.js";
-import { sanitizeHTML, showMessage } from "./utils.js";
+import { sanitizeHTML, showMessage, generateId } from "./utils.js";
 import { getActiveAccountNames } from "./accounts.js";
 
 // ---- Init ----
@@ -18,7 +18,7 @@ export async function initGoals() {
 
 export async function addGoal(formData) {
   const goal = {
-    id: Date.now(),
+    id: generateId(),
     name: sanitizeHTML(formData.name.trim()),
     targetAmount: Math.abs(parseFloat(formData.targetAmount)),
     currentAmount: 0,
@@ -162,7 +162,7 @@ export function renderGoalsDashboard() {
           <span class="goal-ring-pct">${Math.round(percent)}%</span>
         </div>
         <div class="goal-info">
-          <span class="goal-name">${goal.name}</span>
+          <span class="goal-name">${sanitizeHTML(goal.name)}</span>
           <span class="goal-amounts">${formatCurrency(goal.currentAmount)} / ${formatCurrency(goal.targetAmount)}</span>
           ${deadlineText}
         </div>
@@ -194,7 +194,7 @@ export function showGoalForm(goalId = null) {
   // Populate linked account options
   const accounts = getActiveAccountNames();
   linkedSelect.innerHTML = '<option value="">None</option>' +
-    accounts.map((a) => `<option value="${a}">${a}</option>`).join("");
+    accounts.map((a) => `<option value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</option>`).join("");
 
   if (goalId) {
     const goal = state.savingsGoals.find((g) => g.id === goalId);

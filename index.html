@@ -10,6 +10,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="FinChronicle">
     <meta name="theme-color" content="#0051D5">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' data: blob:; script-src 'self'; connect-src 'self';">
     <title>FinChronicle - Track Your Financial Journey</title>
 
     <!-- PWA Icons -->
@@ -944,6 +946,9 @@
 
                 <!-- FAQ Section (v3.9.0) -->
                 <div id="faqContainer"></div>
+
+                <!-- Error Log (v3.29.0) -->
+                <div id="errorLogContainer"></div>
             </div>
         </main>
     </div>

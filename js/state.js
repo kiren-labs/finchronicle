@@ -60,6 +60,7 @@ export const state = {
   quickTemplates: [],
   accounts: [],
   savingsGoals: [],
+  storagePersisted: null, // null = unknown, true = persisted, false = denied
 };
 
 // Default optional fields configuration

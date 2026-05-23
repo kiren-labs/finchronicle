@@ -2,6 +2,11 @@
 // Pure Utility Functions
 // ============================================================================
 
+// Generate collision-safe unique ID (v3.29.0)
+export function generateId() {
+  return crypto.randomUUID();
+}
+
 // Sanitize HTML to prevent XSS attacks
 export function sanitizeHTML(str) {
   if (!str) return "";

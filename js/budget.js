@@ -9,7 +9,7 @@ import {
   deleteBudgetFromDB,
   getBudgetByCategory,
 } from "./db.js";
-import { showMessage } from "./utils.js";
+import { showMessage, generateId } from "./utils.js";
 import { formatCurrency } from "./currency.js";
 
 // Initialize budgets on app startup
@@ -55,7 +55,7 @@ export async function saveBudget(budget) {
 
     // Set timestamps
     if (!budget.id) {
-      budget.id = Date.now();
+      budget.id = generateId();
       budget.createdAt = new Date().toISOString();
     }
     budget.updatedAt = new Date().toISOString();

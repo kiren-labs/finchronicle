@@ -9,6 +9,7 @@ import { renderFAQ } from "./faq.js";
 import { renderRecurringSection } from "./recurring.js";
 import { renderBudgetList } from "./budget.js";
 import { getAllTags, renameTag, deleteTag, getTagColor, TAG_PALETTE } from "./search.js";
+import { getErrorLog, clearErrorLog } from "./app.js";
 
 // ---- Dark Mode ----
 
@@ -195,17 +196,21 @@ export function shouldShowBackupReminder() {
   const days = getDaysSinceBackup();
 
   if (days === null && state.transactions.length > 0) {
+    // Use createdAt timestamp of earliest transaction (not id, which may be UUID)
     const sortedTransactions = [...state.transactions].sort(
-      (a, b) => a.id - b.id,
+      (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0),
     );
     const firstTransaction = sortedTransactions[0];
+    const createdTime = firstTransaction.createdAt
+      ? new Date(firstTransaction.createdAt).getTime()
+      : (typeof firstTransaction.id === "number" ? firstTransaction.id : Date.now());
     const daysSinceFirst = Math.floor(
-      (Date.now() - firstTransaction.id) / (1000 * 60 * 60 * 24),
+      (Date.now() - createdTime) / (1000 * 60 * 60 * 24),
     );
     return daysSinceFirst >= 7;
   }
 
-  if (days !== null && days >= 30) return true;
+  if (days !== null && days >= 14) return true;
 
   return false;
 }
@@ -235,7 +240,7 @@ export function renderBackupStatus() {
     statusIcon = "ri-checkbox-circle-line";
     statusLabel = `Last backup: ${days} ${days === 1 ? "day" : "days"} ago`;
     statusMessage = "Your data is protected.";
-  } else if (days <= 30) {
+  } else if (days <= 14) {
     statusClass = "backup-status-warning";
     statusIcon = "ri-error-warning-line";
     statusLabel = `Last backup: ${days} days ago`;
@@ -290,6 +295,7 @@ export function updateSettingsContent() {
   renderRecurringSection();
   renderBudgetList();
   renderTagManagement();
+  renderErrorLogSection();
 
   if (backupContainer) {
     backupContainer.innerHTML = renderBackupStatus();
@@ -298,6 +304,47 @@ export function updateSettingsContent() {
   if (faqContainer) {
     faqContainer.innerHTML = renderFAQ();
   }
+}
+
+// ---- Error Log (v3.29.0) ----
+
+function renderErrorLogSection() {
+  const container = document.getElementById("errorLogContainer");
+  if (!container) return;
+
+  const errors = getErrorLog();
+
+  if (errors.length === 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  const rows = errors
+    .slice()
+    .reverse()
+    .map((e) => {
+      const ts = new Date(e.timestamp).toLocaleString();
+      return `<div class="error-log-entry"><span class="error-log-time">${sanitizeHTML(ts)}</span> <span class="error-log-msg">${sanitizeHTML(e.message)}</span></div>`;
+    })
+    .join("");
+
+  container.innerHTML = `
+    <div class="card" style="margin-top: var(--space-4);">
+      <h3 style="margin-bottom: var(--space-2);"><i class="ri-bug-line"></i> Error Log (${errors.length})</h3>
+      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: var(--space-2);">Local-only. Copy and paste into a GitHub issue to report bugs.</p>
+      <div class="error-log-list" style="max-height: 200px; overflow-y: auto; font-size: 0.8rem; font-family: monospace; background: var(--color-surface); padding: var(--space-2); border-radius: var(--radius-sm);">
+        ${rows}
+      </div>
+      <div style="display: flex; gap: var(--space-2); margin-top: var(--space-2);">
+        <button class="btn btn-primary" data-action="copyErrorLog" type="button" style="font-size: 0.85rem;">
+          <i class="ri-file-copy-line"></i> Copy Log
+        </button>
+        <button class="btn" data-action="clearErrorLog" type="button" style="font-size: 0.85rem;">
+          <i class="ri-delete-bin-line"></i> Clear
+        </button>
+      </div>
+    </div>
+  `;
 }
 
 // ---- Tag Management (v3.14.0) ----
