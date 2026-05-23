@@ -89,6 +89,7 @@ export const DEFAULT_APP_SETTINGS = {
     referenceId: false,
     location: false,
     transactionCurrency: false,
+    accountLinking: false,
   },
   smartCategoryKeywords: {},
   lastUpdated: null,

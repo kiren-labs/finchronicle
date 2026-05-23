@@ -59,8 +59,11 @@ export async function requestStoragePersistence() {
       state.storagePersisted = true;
       return true;
     }
-    // Request persistence
-    const granted = await navigator.storage.persist();
+    // Request persistence (timeout guards against browsers that hang on this prompt)
+    const granted = await Promise.race([
+      navigator.storage.persist(),
+      new Promise(resolve => setTimeout(() => resolve(false), 3000)),
+    ]);
     state.storagePersisted = granted;
     if (!granted) {
       console.warn("⚠️ Storage persistence denied. Data may be evicted by browser.");
