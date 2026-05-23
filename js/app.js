@@ -190,6 +190,14 @@ import {
   removeGoal,
 } from "./goals.js";
 
+import {
+  openReconciliationModal,
+  closeReconciliationModal,
+  loadReconciliationTransactions,
+  toggleReconciliationItem,
+  finaliseReconciliation,
+} from "./reconciliation.js";
+
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
 // ============================================================================
@@ -436,6 +444,9 @@ function bindStaticEvents() {
 
   // ---- Accounts (v3.18.0) ----
   bindAccountEvents();
+
+  // ---- Reconciliation (v4.0.0) ----
+  bindReconciliationEvents();
 
   // ---- Goals (v3.20.0) ----
   bindGoalEvents();
@@ -1000,6 +1011,38 @@ function bindAccountEvents() {
 }
 
 // ============================================================================
+// Reconciliation Events (v4.0.0)
+// ============================================================================
+
+function bindReconciliationEvents() {
+  const modal = document.getElementById("reconciliationModal");
+  if (!modal) return;
+
+  // Close button
+  modal.querySelector(".reconciliation-close")?.addEventListener("click", closeReconciliationModal);
+
+  // Close on backdrop click
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeReconciliationModal();
+  });
+
+  // Load transactions button
+  document.getElementById("reconciliationLoadBtn")?.addEventListener("click", loadReconciliationTransactions);
+
+  // Finalise button
+  document.getElementById("reconciliationFinaliseBtn")?.addEventListener("click", () => finaliseReconciliation(false));
+
+  // Force reconcile button
+  document.getElementById("reconciliationForceBtn")?.addEventListener("click", () => finaliseReconciliation(true));
+
+  // Checklist delegation — change events on checkboxes
+  document.getElementById("reconciliationList")?.addEventListener("change", (e) => {
+    const chk = e.target.closest("[data-recon-id]");
+    if (chk) toggleReconciliationItem(chk.dataset.reconId);
+  });
+}
+
+// ============================================================================
 // Goal Events (v3.20.0)
 // ============================================================================
 
@@ -1317,6 +1360,7 @@ function bindFormSubmit() {
 
       const type = document.getElementById("type").value;
       const now = new Date().toISOString();
+      const existingTx = state.editingId ? state.transactions.find((t) => t.id === state.editingId) : null;
       const transaction = {
         id: state.editingId || generateId(),
         type: type,
@@ -1325,9 +1369,8 @@ function bindFormSubmit() {
         date: document.getElementById("date").value,
         notes: document.getElementById("notes").value,
         tags: [...state.formTags],
-        createdAt: state.editingId
-          ? state.transactions.find((t) => t.id === state.editingId)?.createdAt
-          : now,
+        status: existingTx ? (existingTx.status || "cleared") : "cleared",
+        createdAt: existingTx ? existingTx.createdAt : now,
         updatedAt: now,
       };
 

@@ -8,7 +8,7 @@ export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
 export const DB_NAME = "FinChronicleDB";
-export const DB_VERSION = 11;
+export const DB_VERSION = 12;
 export const STORE_NAME = "transactions";
 export const RECURRING_STORE = "recurringTemplates";
 export const BUDGETS_STORE = "budgets";

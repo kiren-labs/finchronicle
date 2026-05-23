@@ -139,6 +139,22 @@ export function initDB() {
           };
         }
       }
+
+      // v12: Transaction status field — 'pending' | 'cleared' | 'reconciled' (v4.0.0)
+      if (oldVersion < 12) {
+        if (database.objectStoreNames.contains(STORE_NAME)) {
+          const txStore = event.target.transaction.objectStore(STORE_NAME);
+          const getAllReq = txStore.getAll();
+          getAllReq.onsuccess = () => {
+            getAllReq.result.forEach((record) => {
+              if (!record.status) {
+                record.status = "cleared";
+                txStore.put(record);
+              }
+            });
+          };
+        }
+      }
     };
   });
 }
