@@ -405,7 +405,7 @@ function runHealthAlertChecks() {
   return newAlerts;
 }
 
-// ---- Public: Run all alert checks ----
+// ---- Alert Engine (computation) ----
 
 /**
  * Run the full alert detection engine.
@@ -503,7 +503,7 @@ export function clearAlertHistory() {
   persistAlerts();
 }
 
-// ---- Public: Render alert banners ----
+// ---- Rendering ----
 
 export function renderAlertBanners(alerts) {
   const container = document.getElementById("smartAlerts");
