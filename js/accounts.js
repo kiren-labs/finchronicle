@@ -24,7 +24,7 @@ export async function initAccounts() {
   }
 }
 
-// ---- Balance Calculation ----
+// ---- Pure Computation ----
 
 /**
  * Compute derived balance for an account from opening balance + transactions.
@@ -92,7 +92,16 @@ export function getNetWorth() {
   };
 }
 
-// ---- Account CRUD UI ----
+/**
+ * Get active account names for dropdowns.
+ */
+export function getActiveAccountNames() {
+  return state.accounts
+    .filter((a) => a.isActive !== false)
+    .map((a) => a.name);
+}
+
+// ---- Account CRUD ----
 
 export async function addAccount(formData) {
   const { name, type, openingBalance } = formData;
@@ -196,6 +205,28 @@ export async function removeAccount(id) {
   }
 }
 
+// ---- Monthly Snapshot (v3.28.0) ----
+
+export async function captureMonthlySnapshot() {
+  try {
+    const now = new Date();
+    const snapshotDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+    const existing = await getNetWorthSnapshotByDate(snapshotDate);
+    if (existing) return; // already captured this month
+
+    const { assets, liabilities, netWorth } = getNetWorth();
+    await saveNetWorthSnapshot({
+      snapshotDate,
+      assets: Math.round(assets * 100) / 100,
+      liabilities: Math.round(liabilities * 100) / 100,
+      netWorth: Math.round(netWorth * 100) / 100,
+      capturedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("Failed to capture net worth snapshot:", err);
+  }
+}
+
 // ---- Render: Net Worth Dashboard ----
 
 export function renderNetWorthDashboard() {
@@ -248,28 +279,6 @@ export function renderNetWorthDashboard() {
 
   // Render net worth trend chart below dashboard (v3.28.0)
   renderNetWorthTrend();
-}
-
-// ---- Net Worth Trend: Snapshot Capture (v3.28.0) ----
-
-export async function captureMonthlySnapshot() {
-  try {
-    const now = new Date();
-    const snapshotDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-    const existing = await getNetWorthSnapshotByDate(snapshotDate);
-    if (existing) return; // already captured this month
-
-    const { assets, liabilities, netWorth } = getNetWorth();
-    await saveNetWorthSnapshot({
-      snapshotDate,
-      assets: Math.round(assets * 100) / 100,
-      liabilities: Math.round(liabilities * 100) / 100,
-      netWorth: Math.round(netWorth * 100) / 100,
-      capturedAt: new Date().toISOString(),
-    });
-  } catch (err) {
-    console.error("Failed to capture net worth snapshot:", err);
-  }
 }
 
 // ---- Net Worth Trend: Chart Rendering (v3.28.0) ----
@@ -518,15 +527,6 @@ export async function handleAccountFormSubmit() {
     renderAccountManager();
     renderNetWorthDashboard();
   }
-}
-
-/**
- * Get active account names for dropdowns (replaces free-text savedAccounts).
- */
-export function getActiveAccountNames() {
-  return state.accounts
-    .filter((a) => a.isActive !== false)
-    .map((a) => a.name);
 }
 
 // ============================================================================
