@@ -79,13 +79,13 @@ export function renderMultiCurrencyFields() {
     </div>
   `;
 
-  bindMultiCurrencyEvents();
+  bindMultiCurrencyFormFields();
 }
 
 /**
  * Bind events for the multi-currency form fields.
  */
-function bindMultiCurrencyEvents() {
+function bindMultiCurrencyFormFields() {
   const select = document.getElementById("txCurrencySelect");
   const rateGroup = document.getElementById("exchangeRateGroup");
   const rateInput = document.getElementById("exchangeRateInput");
