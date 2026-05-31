@@ -304,3 +304,63 @@ export async function handleContributionSubmit() {
     renderGoalsDashboard();
   }
 }
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindGoalEvents() {
+  const addBtn = document.getElementById("addGoalBtn");
+  if (addBtn) addBtn.addEventListener("click", () => showGoalForm());
+
+  const saveBtn = document.getElementById("goalFormSaveBtn");
+  if (saveBtn) saveBtn.addEventListener("click", handleGoalFormSubmit);
+
+  const closeBtn = document.getElementById("goalFormCloseBtn");
+  if (closeBtn) closeBtn.addEventListener("click", closeGoalForm);
+
+  const goalModal = document.getElementById("goalFormModal");
+  if (goalModal) {
+    goalModal.addEventListener("click", (e) => {
+      if (e.target === goalModal) closeGoalForm();
+    });
+  }
+
+  const contribSaveBtn = document.getElementById("contributionSaveBtn");
+  if (contribSaveBtn) contribSaveBtn.addEventListener("click", handleContributionSubmit);
+
+  const contribCloseBtn = document.getElementById("contributionCloseBtn");
+  if (contribCloseBtn) contribCloseBtn.addEventListener("click", closeContributionForm);
+
+  const contribModal = document.getElementById("contributionModal");
+  if (contribModal) {
+    contribModal.addEventListener("click", (e) => {
+      if (e.target === contribModal) closeContributionForm();
+    });
+  }
+
+  const goalsDashboard = document.getElementById("goalsDashboard");
+  if (goalsDashboard) {
+    goalsDashboard.addEventListener("click", async (e) => {
+      const contributeBtn = e.target.closest(".goal-contribute-btn");
+      if (contributeBtn) {
+        showContributionForm(Number(contributeBtn.dataset.id));
+        return;
+      }
+      const editBtn = e.target.closest(".goal-edit-btn");
+      if (editBtn) {
+        showGoalForm(Number(editBtn.dataset.id));
+        return;
+      }
+      const deleteBtn = e.target.closest(".goal-delete-btn");
+      if (deleteBtn) {
+        const id = Number(deleteBtn.dataset.id);
+        const goal = state.savingsGoals.find((g) => g.id === id);
+        if (goal && confirm(`Delete goal "${goal.name}"?`)) {
+          await removeGoal(id);
+          renderGoalsDashboard();
+        }
+      }
+    });
+  }
+}

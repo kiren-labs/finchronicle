@@ -301,3 +301,27 @@ export function closeReconciliationModal() {
   if (modal) modal.classList.remove("show");
   reconciliationState = null;
 }
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindReconciliationEvents() {
+  const modal = document.getElementById("reconciliationModal");
+  if (!modal) return;
+
+  modal.querySelector(".reconciliation-close")?.addEventListener("click", closeReconciliationModal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeReconciliationModal();
+  });
+
+  document.getElementById("reconciliationLoadBtn")?.addEventListener("click", loadReconciliationTransactions);
+  document.getElementById("reconciliationFinaliseBtn")?.addEventListener("click", () => finaliseReconciliation(false));
+  document.getElementById("reconciliationForceBtn")?.addEventListener("click", () => finaliseReconciliation(true));
+
+  document.getElementById("reconciliationList")?.addEventListener("change", (e) => {
+    const chk = e.target.closest("[data-recon-id]");
+    if (chk) toggleReconciliationItem(chk.dataset.reconId);
+  });
+}

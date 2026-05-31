@@ -321,3 +321,24 @@ export async function copySettlementSummary() {
     return true;
   }
 }
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindSettlementEvents() {
+  const container = document.getElementById("settlementDashboard");
+  if (!container) return;
+
+  container.addEventListener("click", async (e) => {
+    const periodBtn = e.target.closest("[data-settlement-period]");
+    if (periodBtn) {
+      navigateSettlementPeriod(periodBtn.dataset.settlementPeriod);
+      return;
+    }
+    const exportBtn = e.target.closest("[data-settlement-export]");
+    if (exportBtn) {
+      await copySettlementSummary();
+    }
+  });
+}

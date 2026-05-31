@@ -268,3 +268,16 @@ export function convertAmount(amount, fromCurrency, toCurrency) {
   if (!rate) return null;
   return Math.round(amount * rate * 100) / 100;
 }
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindMultiCurrencyEvents() {
+  document.getElementById("optionalFieldToggles").addEventListener("change", (e) => {
+    const checkbox = e.target.closest("[data-field-toggle]");
+    if (checkbox && checkbox.dataset.fieldToggle === "transactionCurrency") {
+      setTimeout(() => renderMultiCurrencyFields(), 50);
+    }
+  });
+}

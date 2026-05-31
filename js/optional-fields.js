@@ -480,3 +480,40 @@ export function dismissCategorySuggestion() {
   const banner = document.getElementById("categorySuggestion");
   if (banner) banner.hidden = true;
 }
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindOptionalFieldsEvents() {
+  const toggle = document.getElementById("optionalFieldsToggle");
+  const container = document.getElementById("optionalFieldsContainer");
+  if (toggle && container) {
+    toggle.addEventListener("click", () => {
+      const expanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!expanded));
+      container.hidden = expanded;
+      toggle.querySelector(".optional-fields-chevron").classList.toggle("expanded", !expanded);
+      if (!expanded) renderOptionalFieldsForm();
+    });
+  }
+
+  const notesInput = document.getElementById("notes");
+  if (notesInput) {
+    notesInput.addEventListener("input", () => {
+      handleNoteInput(notesInput.value);
+    });
+  }
+
+  const suggestionBanner = document.getElementById("categorySuggestion");
+  if (suggestionBanner) {
+    suggestionBanner.querySelector(".suggestion-accept").addEventListener("click", acceptCategorySuggestion);
+    suggestionBanner.querySelector(".suggestion-dismiss").addEventListener("click", dismissCategorySuggestion);
+  }
+
+  document.getElementById("optionalFieldToggles").addEventListener("change", (e) => {
+    const checkbox = e.target.closest("[data-field-toggle]");
+    if (!checkbox) return;
+    handleFieldToggle(checkbox.dataset.fieldToggle, checkbox.checked);
+  });
+}

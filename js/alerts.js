@@ -605,3 +605,45 @@ function getAlertTypeLabel(type) {
       return "Alert";
   }
 }
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindAlertEvents() {
+  const alertsContainer = document.getElementById("smartAlerts");
+  if (alertsContainer) {
+    alertsContainer.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-dismiss]");
+      if (btn) {
+        dismissAlert(btn.dataset.dismiss);
+        const banner = btn.closest(".smart-alert");
+        if (banner) banner.remove();
+        if (!alertsContainer.querySelector(".smart-alert")) {
+          alertsContainer.hidden = true;
+        }
+        return;
+      }
+      if (e.target.closest("#alertSummaryToggle")) {
+        const expanded = localStorage.getItem("alertsExpanded") === "true";
+        localStorage.setItem("alertsExpanded", expanded ? "false" : "true");
+        renderAlertBanners(runAlertChecks());
+        return;
+      }
+      if (e.target.closest("#alertDismissAll")) {
+        const alerts = runAlertChecks();
+        dismissAllAlerts(alerts);
+        localStorage.removeItem("alertsExpanded");
+        renderAlertBanners([]);
+      }
+    });
+  }
+
+  const clearBtn = document.getElementById("clearAlertsBtn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      clearAlertHistory();
+      renderAlertHistory();
+    });
+  }
+}

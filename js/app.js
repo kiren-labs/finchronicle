@@ -31,7 +31,7 @@ window.addEventListener("unhandledrejection", (event) => {
   );
 });
 
-import { state, currencies, ACCOUNT_CLASSIFICATION } from "./state.js";
+import { state, currencies } from "./state.js";
 import { showMessage, generateId, sanitizeHTML, getErrorLog, clearErrorLog } from "./utils.js";
 import {
   initDB,
@@ -107,97 +107,62 @@ import {
   renderBudgetModal,
 } from "./budget.js";
 import {
-  toggleTransferFields,
   bindAccountAutocomplete,
   getTransferFormData,
   clearTransferFields,
 } from "./transfer.js";
 import {
   initOptionalFields,
-  renderOptionalFieldsForm,
   getOptionalFieldValues,
-  setOptionalFieldValues,
   clearOptionalFields,
   bindFieldAutocomplete,
   renderFieldToggles,
-  handleFieldToggle,
-  handleNoteInput,
-  acceptCategorySuggestion,
   dismissCategorySuggestion,
-  rebuildSmartKeywords,
+  bindOptionalFieldsEvents,
 } from "./optional-fields.js";
 import {
   initQuickEntry,
   renderQuickBar,
-  prefillFromTemplate,
-  cloneLast,
-  saveAsTemplate,
   renderTemplateManager,
-  deleteTemplate,
-  moveTemplate,
-  editTemplateLabel,
+  bindQuickEntryEvents,
 } from "./quick-entry.js";
 import {
   initAccounts,
   renderNetWorthDashboard,
   renderAccountManager,
-  showAddAccountForm,
-  showEditAccountForm,
-  closeAccountForm,
-  handleAccountFormSubmit,
-  removeAccount,
-  updateAccountTypeIcon,
+  bindAccountEvents,
 } from "./accounts.js";
 import { renderSavingsDashboard } from "./savings.js";
 import {
   initAlerts,
   runAlertChecks,
   renderAlertBanners,
-  dismissAlert,
-  dismissAllAlerts,
   renderAlertHistory,
-  clearAlertHistory,
+  bindAlertEvents,
 } from "./alerts.js";
-import { renderAnnualReport, exportAnnualCSV } from "./annual-report.js";
+import { renderAnnualReport, bindAnnualReportEvents } from "./annual-report.js";
 import { renderForecast } from "./forecast.js";
 import {
   initAutoBackup,
-  getBackupSettings,
-  saveBackupSettings,
-  performJsonBackup,
-  performEncryptedBackup,
   requestStoragePersistence,
+  bindAutoBackupEvents,
 } from "./auto-backup.js";
 import {
   renderMultiCurrencyFields,
   getMultiCurrencyFormData,
-  setMultiCurrencyFormData,
   clearMultiCurrencyFields,
+  bindMultiCurrencyEvents,
 } from "./multi-currency.js";
 import {
   renderSettlementDashboard,
-  navigateSettlementPeriod,
-  copySettlementSummary,
+  bindSettlementEvents,
 } from "./settlement.js";
 import {
   initGoals,
   renderGoalsDashboard,
-  showGoalForm,
-  closeGoalForm,
-  handleGoalFormSubmit,
-  showContributionForm,
-  closeContributionForm,
-  handleContributionSubmit,
-  removeGoal,
+  bindGoalEvents,
 } from "./goals.js";
-
-import {
-  openReconciliationModal,
-  closeReconciliationModal,
-  loadReconciliationTransactions,
-  toggleReconciliationItem,
-  finaliseReconciliation,
-} from "./reconciliation.js";
+import { bindReconciliationEvents } from "./reconciliation.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -790,520 +755,6 @@ function bindTagInputEvents() {
   document.addEventListener("click", (e) => {
     if (!e.target.closest("#tagInputWrapper") && !e.target.closest("#tagSuggestions")) {
       hideSuggestions();
-    }
-  });
-}
-
-// ============================================================================
-// Optional Fields Events (v3.16.0)
-// ============================================================================
-
-function bindOptionalFieldsEvents() {
-  // Collapsible "Additional Details" toggle
-  const toggle = document.getElementById("optionalFieldsToggle");
-  const container = document.getElementById("optionalFieldsContainer");
-  if (toggle && container) {
-    toggle.addEventListener("click", () => {
-      const expanded = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", String(!expanded));
-      container.hidden = expanded;
-      toggle.querySelector(".optional-fields-chevron").classList.toggle("expanded", !expanded);
-      // Re-populate account dropdown each time section opens (accounts may have changed)
-      if (!expanded) renderOptionalFieldsForm();
-    });
-  }
-
-  // Notes input → smart category suggestion
-  const notesInput = document.getElementById("notes");
-  if (notesInput) {
-    notesInput.addEventListener("input", () => {
-      handleNoteInput(notesInput.value);
-    });
-  }
-
-  // Category suggestion accept/dismiss
-  const suggestionBanner = document.getElementById("categorySuggestion");
-  if (suggestionBanner) {
-    suggestionBanner.querySelector(".suggestion-accept").addEventListener("click", acceptCategorySuggestion);
-    suggestionBanner.querySelector(".suggestion-dismiss").addEventListener("click", dismissCategorySuggestion);
-  }
-
-  // Field toggle switches in Settings
-  document.getElementById("optionalFieldToggles").addEventListener("change", (e) => {
-    const checkbox = e.target.closest("[data-field-toggle]");
-    if (!checkbox) return;
-    handleFieldToggle(checkbox.dataset.fieldToggle, checkbox.checked);
-  });
-}
-
-// ============================================================================
-// Quick Entry Events (v3.17.0)
-// ============================================================================
-
-function bindQuickEntryEvents() {
-  // Quick bar pill clicks
-  const bar = document.getElementById("quickEntryBar");
-  if (bar) {
-    bar.addEventListener("click", (e) => {
-      const pill = e.target.closest("[data-template-id]");
-      if (pill) {
-        prefillFromTemplate(Number(pill.dataset.templateId));
-        return;
-      }
-      if (e.target.closest("#cloneLastBtn")) {
-        cloneLast();
-      }
-    });
-  }
-
-  // "Save as Template" button
-  const saveTemplateBtn = document.getElementById("saveAsTemplateBtn");
-  if (saveTemplateBtn) {
-    saveTemplateBtn.addEventListener("click", saveAsTemplate);
-  }
-
-  // Custom event: quick-entry-type → update category options + transfer fields
-  document.addEventListener("quick-entry-type", (e) => {
-    updateCategoryOptions(e.detail);
-    selectType(e.detail);
-  });
-
-  // Custom event: quick-entry-tags → re-render form tag chips
-  document.addEventListener("quick-entry-tags", () => {
-    renderFormTagChips();
-  });
-
-  // Template manager delegated events (Settings)
-  const templatesList = document.getElementById("quickTemplatesList");
-  if (templatesList) {
-    templatesList.addEventListener("click", (e) => {
-      const deleteBtn = e.target.closest("[data-delete]");
-      if (deleteBtn) {
-        deleteTemplate(Number(deleteBtn.dataset.delete));
-        return;
-      }
-      const moveBtn = e.target.closest("[data-move]");
-      if (moveBtn) {
-        moveTemplate(Number(moveBtn.dataset.id), moveBtn.dataset.move);
-        return;
-      }
-      // Double-click to edit label
-      const label = e.target.closest(".template-item-label");
-      if (label) {
-        const item = label.closest(".template-item");
-        if (!item) return;
-        const id = Number(item.dataset.templateId);
-        const currentLabel = label.textContent;
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = currentLabel;
-        input.maxLength = 30;
-        input.className = "template-edit-input";
-        label.replaceWith(input);
-        input.focus();
-        input.select();
-        const commit = () => {
-          const newVal = input.value.trim() || currentLabel;
-          editTemplateLabel(id, newVal);
-        };
-        input.addEventListener("blur", commit);
-        input.addEventListener("keydown", (ev) => {
-          if (ev.key === "Enter") input.blur();
-          if (ev.key === "Escape") { input.value = currentLabel; input.blur(); }
-        });
-      }
-    });
-  }
-}
-
-// ============================================================================
-// Account Events (v3.18.0)
-// ============================================================================
-
-function bindAccountEvents() {
-  // Add account button
-  const addBtn = document.getElementById("addAccountBtn");
-  if (addBtn) {
-    addBtn.addEventListener("click", showAddAccountForm);
-  }
-
-  // Account form save
-  const saveBtn = document.getElementById("accountFormSaveBtn");
-  if (saveBtn) {
-    saveBtn.addEventListener("click", handleAccountFormSubmit);
-  }
-
-  // Account form close
-  const closeBtn = document.querySelector(".account-form-close");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", closeAccountForm);
-  }
-
-  // Reconcile button inside edit-account modal
-  const reconcileBtn = document.getElementById("accountReconcileBtn");
-  if (reconcileBtn) {
-    reconcileBtn.addEventListener("click", () => {
-      const name = reconcileBtn.dataset.accountName;
-      if (!name) return;
-      closeAccountForm();
-      openReconciliationModal(name);
-    });
-  }
-
-  // Close modal on backdrop click
-  const modal = document.getElementById("accountFormModal");
-  if (modal) {
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeAccountForm();
-    });
-  }
-
-  // Auto-select classification + update icon preview when account type changes (v4.0.0)
-  const typeSelect = document.getElementById("accountTypeSelect");
-  if (typeSelect) {
-    typeSelect.addEventListener("change", () => {
-      const classSelect = document.getElementById("accountClassificationSelect");
-      if (classSelect) {
-        classSelect.value = ACCOUNT_CLASSIFICATION[typeSelect.value] || "asset";
-      }
-      updateAccountTypeIcon(typeSelect.value);
-    });
-  }
-
-  // Account list delegated events (edit, delete)
-  const accountsList = document.getElementById("accountsList");
-  if (accountsList) {
-    accountsList.addEventListener("click", async (e) => {
-      const editBtn = e.target.closest(".account-edit-btn");
-      if (editBtn) {
-        showEditAccountForm(editBtn.dataset.id);
-        return;
-      }
-      const deleteBtn = e.target.closest(".account-delete-btn");
-      if (deleteBtn) {
-        const id = deleteBtn.dataset.id;
-        const account = state.accounts.find((a) => String(a.id) === id);
-        if (account && confirm(`Delete account "${account.name}"?`)) {
-          await removeAccount(id);
-          renderAccountManager();
-          renderNetWorthDashboard();
-          renderSavingsDashboard();
-        }
-      }
-    });
-  }
-}
-
-// ============================================================================
-// Reconciliation Events (v4.0.0)
-// ============================================================================
-
-function bindReconciliationEvents() {
-  const modal = document.getElementById("reconciliationModal");
-  if (!modal) return;
-
-  // Close button
-  modal.querySelector(".reconciliation-close")?.addEventListener("click", closeReconciliationModal);
-
-  // Close on backdrop click
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeReconciliationModal();
-  });
-
-  // Load transactions button
-  document.getElementById("reconciliationLoadBtn")?.addEventListener("click", loadReconciliationTransactions);
-
-  // Finalise button
-  document.getElementById("reconciliationFinaliseBtn")?.addEventListener("click", () => finaliseReconciliation(false));
-
-  // Force reconcile button
-  document.getElementById("reconciliationForceBtn")?.addEventListener("click", () => finaliseReconciliation(true));
-
-  // Checklist delegation — change events on checkboxes
-  document.getElementById("reconciliationList")?.addEventListener("change", (e) => {
-    const chk = e.target.closest("[data-recon-id]");
-    if (chk) toggleReconciliationItem(chk.dataset.reconId);
-  });
-}
-
-// ============================================================================
-// Goal Events (v3.20.0)
-// ============================================================================
-
-function bindGoalEvents() {
-  // Add goal button
-  const addBtn = document.getElementById("addGoalBtn");
-  if (addBtn) {
-    addBtn.addEventListener("click", () => showGoalForm());
-  }
-
-  // Goal form save
-  const saveBtn = document.getElementById("goalFormSaveBtn");
-  if (saveBtn) {
-    saveBtn.addEventListener("click", handleGoalFormSubmit);
-  }
-
-  // Goal form close
-  const closeBtn = document.getElementById("goalFormCloseBtn");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", closeGoalForm);
-  }
-
-  // Goal form modal backdrop
-  const goalModal = document.getElementById("goalFormModal");
-  if (goalModal) {
-    goalModal.addEventListener("click", (e) => {
-      if (e.target === goalModal) closeGoalForm();
-    });
-  }
-
-  // Contribution modal save
-  const contribSaveBtn = document.getElementById("contributionSaveBtn");
-  if (contribSaveBtn) {
-    contribSaveBtn.addEventListener("click", handleContributionSubmit);
-  }
-
-  // Contribution modal close
-  const contribCloseBtn = document.getElementById("contributionCloseBtn");
-  if (contribCloseBtn) {
-    contribCloseBtn.addEventListener("click", closeContributionForm);
-  }
-
-  // Contribution modal backdrop
-  const contribModal = document.getElementById("contributionModal");
-  if (contribModal) {
-    contribModal.addEventListener("click", (e) => {
-      if (e.target === contribModal) closeContributionForm();
-    });
-  }
-
-  // Goals dashboard delegated events (contribute, edit, delete)
-  const goalsDashboard = document.getElementById("goalsDashboard");
-  if (goalsDashboard) {
-    goalsDashboard.addEventListener("click", async (e) => {
-      const contributeBtn = e.target.closest(".goal-contribute-btn");
-      if (contributeBtn) {
-        showContributionForm(Number(contributeBtn.dataset.id));
-        return;
-      }
-      const editBtn = e.target.closest(".goal-edit-btn");
-      if (editBtn) {
-        showGoalForm(Number(editBtn.dataset.id));
-        return;
-      }
-      const deleteBtn = e.target.closest(".goal-delete-btn");
-      if (deleteBtn) {
-        const id = Number(deleteBtn.dataset.id);
-        const goal = state.savingsGoals.find((g) => g.id === id);
-        if (goal && confirm(`Delete goal "${goal.name}"?`)) {
-          await removeGoal(id);
-          renderGoalsDashboard();
-        }
-      }
-    });
-  }
-}
-
-// ============================================================================
-// Alert Events (v3.21.0)
-// ============================================================================
-
-function bindAlertEvents() {
-  // Dismiss alert banners
-  const alertsContainer = document.getElementById("smartAlerts");
-  if (alertsContainer) {
-    alertsContainer.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-dismiss]");
-      if (!btn) return;
-      const alertId = btn.dataset.dismiss;
-      dismissAlert(alertId);
-      const banner = btn.closest(".smart-alert");
-      if (banner) banner.remove();
-      // Hide container if empty
-      if (!alertsContainer.querySelector(".smart-alert")) {
-        alertsContainer.hidden = true;
-      }
-    });
-  }
-
-  // Alert summary chip toggle (collapse/expand when > 2 alerts)
-  if (alertsContainer) {
-    alertsContainer.addEventListener("click", (e) => {
-      if (e.target.closest("#alertSummaryToggle")) {
-        const expanded = localStorage.getItem("alertsExpanded") === "true";
-        localStorage.setItem("alertsExpanded", expanded ? "false" : "true");
-        renderAlertBanners(runAlertChecks());
-        return;
-      }
-      if (e.target.closest("#alertDismissAll")) {
-        const alerts = runAlertChecks();
-        dismissAllAlerts(alerts);
-        localStorage.removeItem("alertsExpanded");
-        renderAlertBanners([]);
-        return;
-      }
-    });
-  }
-
-  // Clear alert history button
-  const clearBtn = document.getElementById("clearAlertsBtn");
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      clearAlertHistory();
-      renderAlertHistory();
-    });
-  }
-}
-
-// ============================================================================
-// Annual Report Events (v3.21.0)
-// ============================================================================
-
-function bindAnnualReportEvents() {
-  const container = document.getElementById("annualReportContent");
-  if (!container) return;
-
-  container.addEventListener("click", (e) => {
-    // Year selector pills
-    const yearBtn = e.target.closest("[data-annual-year]");
-    if (yearBtn) {
-      renderAnnualReport(yearBtn.dataset.annualYear);
-      return;
-    }
-    // Export CSV button
-    const exportBtn = e.target.closest("[data-annual-export]");
-    if (exportBtn) {
-      exportAnnualCSV(exportBtn.dataset.annualExport);
-    }
-  });
-}
-
-function bindAutoBackupEvents() {
-  // ---- Auto-backup toggle ----
-  document.getElementById("autoBackupToggle2")?.addEventListener("click", () => {
-    const { getBackupSettings: get, saveBackupSettings: save, updateAutoBackupUI } = { getBackupSettings, saveBackupSettings };
-    const settings = getBackupSettings();
-    settings.autoBackupEnabled = !settings.autoBackupEnabled;
-    saveBackupSettings(settings);
-    import("./auto-backup.js").then(m => m.updateAutoBackupUI());
-  });
-
-  // ---- Frequency select ----
-  document.getElementById("backupFrequency2")?.addEventListener("change", (e) => {
-    const settings = getBackupSettings();
-    settings.backupFrequency = e.target.value;
-    saveBackupSettings(settings);
-  });
-
-  // ---- Download Backup (JSON) ----
-  document.getElementById("downloadBackupBtn")?.addEventListener("click", () => {
-    performJsonBackup(false);
-  });
-
-  // ---- Encrypted Backup ----
-  document.getElementById("encryptedBackupBtn2")?.addEventListener("click", () => {
-    const passphrase = prompt("Enter a passphrase (min 6 characters) to encrypt your backup:");
-    if (passphrase) performEncryptedBackup(passphrase);
-  });
-
-  // ---- Export to Spreadsheet (CSV) ----
-  document.getElementById("exportSpreadsheetBtn")?.addEventListener("click", async () => {
-    const mod = await getImportExportModule();
-    mod.exportToCSV();
-  });
-
-  // ---- Restore from Backup (.json or .enc) ----
-  document.getElementById("restoreBackupBtn2")?.addEventListener("click", () => {
-    document.getElementById("dataRestoreFile").click();
-  });
-
-  document.getElementById("dataRestoreFile")?.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const mod = await getImportExportModule();
-    await mod.handleRestoreFileInput(file);
-    e.target.value = "";
-  });
-
-  // ---- Import Spreadsheet (CSV) ----
-  document.getElementById("importSpreadsheetBtn")?.addEventListener("click", () => {
-    document.getElementById("spreadsheetImportFile").click();
-  });
-
-  document.getElementById("spreadsheetImportFile")?.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const mod = await getImportExportModule();
-    mod.handleCsvImportFile(file);
-    e.target.value = "";
-  });
-
-  // ---- Restore modal: Merge / Replace All ----
-  document.getElementById("restoreMergeBtn")?.addEventListener("click", async () => {
-    const mod = await getImportExportModule();
-    mod.confirmRestore("merge");
-  });
-
-  document.getElementById("restoreReplaceBtn")?.addEventListener("click", async () => {
-    const mod = await getImportExportModule();
-    mod.confirmRestore("replace");
-  });
-
-  // ---- Overdue backup banner ----
-  document.getElementById("backupOverdueBtn")?.addEventListener("click", () => {
-    performJsonBackup(false);
-  });
-
-  // Set overdue message text with days-ago context
-  const settings = getBackupSettings();
-  if (settings.lastAutoBackup) {
-    const days = Math.floor((Date.now() - new Date(settings.lastAutoBackup).getTime()) / (1000 * 60 * 60 * 24));
-    const msg = document.getElementById("backupOverdueMsg");
-    if (msg && days > 0) msg.textContent = `Backup overdue — last backup was ${days} day${days === 1 ? "" : "s"} ago.`;
-  }
-}
-
-// ============================================================================
-// Multi-Currency Events (v3.24.0)
-// ============================================================================
-
-function bindMultiCurrencyEvents() {
-  // The multi-currency fields are rendered inside the optional fields container.
-  // renderMultiCurrencyFields() handles its own event binding.
-  // We just need to re-render when optional field toggles change.
-  document.getElementById("optionalFieldToggles").addEventListener("change", (e) => {
-    const checkbox = e.target.closest("[data-field-toggle]");
-    if (checkbox && checkbox.dataset.fieldToggle === "transactionCurrency") {
-      setTimeout(() => renderMultiCurrencyFields(), 50);
-    }
-  });
-}
-
-// ============================================================================
-// Settlement Events (v3.26.0)
-// ============================================================================
-
-function bindSettlementEvents() {
-  const container = document.getElementById("settlementDashboard");
-  if (!container) return;
-
-  container.addEventListener("click", async (e) => {
-    // Period navigation
-    const periodBtn = e.target.closest("[data-settlement-period]");
-    if (periodBtn) {
-      navigateSettlementPeriod(periodBtn.dataset.settlementPeriod);
-      return;
-    }
-
-    // Copy summary
-    const exportBtn = e.target.closest("[data-settlement-export]");
-    if (exportBtn) {
-      const ok = await copySettlementSummary();
-      if (ok) {
-        const { showMessage: msg } = await import("./utils.js");
-        msg("Summary copied to clipboard!");
-      }
-      return;
     }
   });
 }

@@ -632,3 +632,81 @@ export async function initAutoBackup() {
   updateAutoBackupUI();
   await renderStorageHealth();
 }
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindAutoBackupEvents() {
+  document.getElementById("autoBackupToggle2")?.addEventListener("click", () => {
+    const settings = getBackupSettings();
+    settings.autoBackupEnabled = !settings.autoBackupEnabled;
+    saveBackupSettings(settings);
+    updateAutoBackupUI();
+  });
+
+  document.getElementById("backupFrequency2")?.addEventListener("change", (e) => {
+    const settings = getBackupSettings();
+    settings.backupFrequency = e.target.value;
+    saveBackupSettings(settings);
+  });
+
+  document.getElementById("downloadBackupBtn")?.addEventListener("click", () => {
+    performJsonBackup(false);
+  });
+
+  document.getElementById("encryptedBackupBtn2")?.addEventListener("click", () => {
+    const passphrase = prompt("Enter a passphrase (min 6 characters) to encrypt your backup:");
+    if (passphrase) performEncryptedBackup(passphrase);
+  });
+
+  document.getElementById("exportSpreadsheetBtn")?.addEventListener("click", async () => {
+    const mod = await import("./import-export.js");
+    mod.exportToCSV();
+  });
+
+  document.getElementById("restoreBackupBtn2")?.addEventListener("click", () => {
+    document.getElementById("dataRestoreFile").click();
+  });
+
+  document.getElementById("dataRestoreFile")?.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const mod = await import("./import-export.js");
+    await mod.handleRestoreFileInput(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("importSpreadsheetBtn")?.addEventListener("click", () => {
+    document.getElementById("spreadsheetImportFile").click();
+  });
+
+  document.getElementById("spreadsheetImportFile")?.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const mod = await import("./import-export.js");
+    mod.handleCsvImportFile(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("restoreMergeBtn")?.addEventListener("click", async () => {
+    const mod = await import("./import-export.js");
+    mod.confirmRestore("merge");
+  });
+
+  document.getElementById("restoreReplaceBtn")?.addEventListener("click", async () => {
+    const mod = await import("./import-export.js");
+    mod.confirmRestore("replace");
+  });
+
+  document.getElementById("backupOverdueBtn")?.addEventListener("click", () => {
+    performJsonBackup(false);
+  });
+
+  const settings = getBackupSettings();
+  if (settings.lastAutoBackup) {
+    const days = Math.floor((Date.now() - new Date(settings.lastAutoBackup).getTime()) / (1000 * 60 * 60 * 24));
+    const msg = document.getElementById("backupOverdueMsg");
+    if (msg && days > 0) msg.textContent = `Backup overdue \u2014 last backup was ${days} day${days === 1 ? "" : "s"} ago.`;
+  }
+}

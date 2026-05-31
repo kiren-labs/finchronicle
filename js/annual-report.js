@@ -220,3 +220,24 @@ export function exportAnnualCSV(year) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindAnnualReportEvents() {
+  const container = document.getElementById("annualReportContent");
+  if (!container) return;
+
+  container.addEventListener("click", (e) => {
+    const yearBtn = e.target.closest("[data-annual-year]");
+    if (yearBtn) {
+      renderAnnualReport(yearBtn.dataset.annualYear);
+      return;
+    }
+    const exportBtn = e.target.closest("[data-annual-export]");
+    if (exportBtn) {
+      exportAnnualCSV(exportBtn.dataset.annualExport);
+    }
+  });
+}

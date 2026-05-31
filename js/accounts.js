@@ -6,6 +6,8 @@ import { state, ACCOUNT_TYPES, ACCOUNT_CLASSIFICATION } from "./state.js";
 import { loadAccounts, saveAccount, deleteAccount, saveNetWorthSnapshot, loadNetWorthSnapshots, getNetWorthSnapshotByDate } from "./db.js";
 import { formatCurrency } from "./currency.js";
 import { sanitizeHTML, showMessage, generateId } from "./utils.js";
+import { renderSavingsDashboard } from "./savings.js";
+import { openReconciliationModal } from "./reconciliation.js";
 
 // ---- Init ----
 
@@ -525,4 +527,69 @@ export function getActiveAccountNames() {
   return state.accounts
     .filter((a) => a.isActive !== false)
     .map((a) => a.name);
+}
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindAccountEvents() {
+  const addBtn = document.getElementById("addAccountBtn");
+  if (addBtn) addBtn.addEventListener("click", showAddAccountForm);
+
+  const saveBtn = document.getElementById("accountFormSaveBtn");
+  if (saveBtn) saveBtn.addEventListener("click", handleAccountFormSubmit);
+
+  const closeBtn = document.querySelector(".account-form-close");
+  if (closeBtn) closeBtn.addEventListener("click", closeAccountForm);
+
+  const reconcileBtn = document.getElementById("accountReconcileBtn");
+  if (reconcileBtn) {
+    reconcileBtn.addEventListener("click", () => {
+      const name = reconcileBtn.dataset.accountName;
+      if (!name) return;
+      closeAccountForm();
+      openReconciliationModal(name);
+    });
+  }
+
+  const modal = document.getElementById("accountFormModal");
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeAccountForm();
+    });
+  }
+
+  const typeSelect = document.getElementById("accountTypeSelect");
+  if (typeSelect) {
+    typeSelect.addEventListener("change", () => {
+      const classSelect = document.getElementById("accountClassificationSelect");
+      if (classSelect) {
+        classSelect.value = ACCOUNT_CLASSIFICATION[typeSelect.value] || "asset";
+      }
+      updateAccountTypeIcon(typeSelect.value);
+    });
+  }
+
+  const accountsList = document.getElementById("accountsList");
+  if (accountsList) {
+    accountsList.addEventListener("click", async (e) => {
+      const editBtn = e.target.closest(".account-edit-btn");
+      if (editBtn) {
+        showEditAccountForm(editBtn.dataset.id);
+        return;
+      }
+      const deleteBtn = e.target.closest(".account-delete-btn");
+      if (deleteBtn) {
+        const id = deleteBtn.dataset.id;
+        const account = state.accounts.find((a) => String(a.id) === id);
+        if (account && confirm(`Delete account "${account.name}"?`)) {
+          await removeAccount(id);
+          renderAccountManager();
+          renderNetWorthDashboard();
+          renderSavingsDashboard();
+        }
+      }
+    });
+  }
 }

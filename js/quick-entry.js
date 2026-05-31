@@ -6,6 +6,7 @@ import { state, MAX_QUICK_TEMPLATES } from "./state.js";
 import { loadQuickTemplates, saveQuickTemplate, deleteQuickTemplate } from "./db.js";
 import { formatCurrency } from "./currency.js";
 import { sanitizeHTML, showMessage, generateId } from "./utils.js";
+import { updateCategoryOptions, selectType, renderFormTagChips } from "./ui.js";
 
 // ============================================================================
 // Initialisation
@@ -315,4 +316,76 @@ export async function editTemplateLabel(id, newLabel) {
   await saveQuickTemplate(template);
   renderQuickBar();
   renderTemplateManager();
+}
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindQuickEntryEvents() {
+  const bar = document.getElementById("quickEntryBar");
+  if (bar) {
+    bar.addEventListener("click", (e) => {
+      const pill = e.target.closest("[data-template-id]");
+      if (pill) {
+        prefillFromTemplate(Number(pill.dataset.templateId));
+        return;
+      }
+      if (e.target.closest("#cloneLastBtn")) {
+        cloneLast();
+      }
+    });
+  }
+
+  const saveTemplateBtn = document.getElementById("saveAsTemplateBtn");
+  if (saveTemplateBtn) saveTemplateBtn.addEventListener("click", saveAsTemplate);
+
+  document.addEventListener("quick-entry-type", (e) => {
+    updateCategoryOptions(e.detail);
+    selectType(e.detail);
+  });
+
+  document.addEventListener("quick-entry-tags", () => {
+    renderFormTagChips();
+  });
+
+  const templatesList = document.getElementById("quickTemplatesList");
+  if (templatesList) {
+    templatesList.addEventListener("click", (e) => {
+      const deleteBtn = e.target.closest("[data-delete]");
+      if (deleteBtn) {
+        deleteTemplate(Number(deleteBtn.dataset.delete));
+        return;
+      }
+      const moveBtn = e.target.closest("[data-move]");
+      if (moveBtn) {
+        moveTemplate(Number(moveBtn.dataset.id), moveBtn.dataset.move);
+        return;
+      }
+      const label = e.target.closest(".template-item-label");
+      if (label) {
+        const item = label.closest(".template-item");
+        if (!item) return;
+        const id = Number(item.dataset.templateId);
+        const currentLabel = label.textContent;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = currentLabel;
+        input.maxLength = 30;
+        input.className = "template-edit-input";
+        label.replaceWith(input);
+        input.focus();
+        input.select();
+        const commit = () => {
+          const newVal = input.value.trim() || currentLabel;
+          editTemplateLabel(id, newVal);
+        };
+        input.addEventListener("blur", commit);
+        input.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") input.blur();
+          if (ev.key === "Escape") { input.value = currentLabel; input.blur(); }
+        });
+      }
+    });
+  }
 }
