@@ -69,7 +69,7 @@ export async function removeGoal(id) {
   state.savingsGoals = state.savingsGoals.filter((g) => g.id !== id);
 }
 
-// ---- Progress Calculation ----
+// ---- Pure Computation ----
 
 function getProgressPercent(goal) {
   if (!goal.targetAmount || goal.targetAmount <= 0) return 0;
@@ -107,7 +107,7 @@ function getDaysRemaining(deadline) {
   return diff;
 }
 
-// ---- Render ----
+// ---- Rendering ----
 
 export function renderGoalsDashboard() {
   const container = document.getElementById("goalsDashboard");
@@ -178,7 +178,7 @@ export function renderGoalsDashboard() {
   container.innerHTML = html;
 }
 
-// ---- Goal Form Modal ----
+// ---- Form UI ----
 
 export function showGoalForm(goalId = null) {
   const modal = document.getElementById("goalFormModal");
