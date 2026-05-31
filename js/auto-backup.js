@@ -114,16 +114,13 @@ export function isBackupDue() {
   return elapsed >= threshold;
 }
 
-export async function runAutoBackupIfDue() {
-  if (!isBackupDue()) return false;
-
-  try {
-    await performJsonBackup(true);
-    return true;
-  } catch (e) {
-    console.warn("Auto-backup failed:", e);
+export function runAutoBackupIfDue() {
+  if (!isBackupDue()) {
+    state.backupDue = false;
     return false;
   }
+  state.backupDue = true;
+  return true;
 }
 
 // ---- Backup Generation ----
@@ -315,7 +312,21 @@ export async function decryptBackup(passphrase, arrayBuffer) {
 
 // ---- File Download Helpers ----
 
-function downloadBlob(blob, filename) {
+async function downloadBlob(blob, filename) {
+  // iOS Safari: programmatic downloads open a blank tab — use Web Share API instead
+  if (navigator.share && navigator.canShare) {
+    const file = new File([blob], filename, { type: blob.type });
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: "FinChronicle Backup" });
+        return;
+      } catch (e) {
+        // User cancelled share — not an error
+        if (e.name === "AbortError") return;
+        // Other error: fall through to blob download
+      }
+    }
+  }
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -346,19 +357,17 @@ export async function performJsonBackup(isAuto = false) {
   const blob = new Blob([data], { type: "application/json" });
   const filename = getBackupFilename("json", false);
 
-  downloadBlob(blob, filename);
+  await downloadBlob(blob, filename);
 
   // Update timestamps
   const settings = getBackupSettings();
   settings.lastAutoBackup = new Date().toISOString();
   saveBackupSettings(settings);
   updateBackupTimestamp();
+  state.backupDue = false;
+  updateAutoBackupUI();
 
-  if (isAuto) {
-    showMessage("📦 Auto-backup saved to Downloads");
-  } else {
-    showMessage("✅ JSON backup exported!");
-  }
+  if (!isAuto) showMessage("✅ Backup saved!");
 }
 
 export async function performCsvBackup(isAuto = false) {
@@ -401,14 +410,16 @@ export async function performEncryptedBackup(passphrase) {
     const blob = new Blob([encrypted], { type: "application/octet-stream" });
     const filename = getBackupFilename("json", true);
 
-    downloadBlob(blob, filename);
+    await downloadBlob(blob, filename);
 
     const settings = getBackupSettings();
     settings.lastAutoBackup = new Date().toISOString();
     saveBackupSettings(settings);
     updateBackupTimestamp();
+    state.backupDue = false;
+    updateAutoBackupUI();
 
-    showMessage("🔒 Encrypted backup exported!");
+    showMessage("🔒 Encrypted backup saved!");
   } catch (e) {
     console.error("Encryption failed:", e);
     showMessage("Encryption failed. Try again.");
@@ -596,6 +607,12 @@ export function updateAutoBackupUI() {
       : "Never";
     hint.textContent = `Last backup: ${last}`;
   }
+
+  // Show overdue banner if backup is due
+  const banner = document.getElementById("backupOverdueBanner");
+  if (banner) {
+    banner.hidden = !state.backupDue;
+  }
 }
 
 // ---- Init (called from app.js) ----
@@ -608,13 +625,10 @@ export async function initAutoBackup() {
     saveBackupSettings(settings);
   }
 
-  // Update static UI elements
+  // Check due state (sets state.backupDue — no download)
+  runAutoBackupIfDue();
+
+  // Update static UI (banner visibility driven by state.backupDue)
   updateAutoBackupUI();
   await renderStorageHealth();
-
-  // Check if auto-backup is due (non-blocking)
-  const didBackup = await runAutoBackupIfDue();
-  if (didBackup) {
-    updateAutoBackupUI();
-  }
 }

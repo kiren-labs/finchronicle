@@ -5657,6 +5657,53 @@ button.primary.loading .btn-spinner {
    Data & Backup (v4.2.0)
    ============================================================================ */
 
+/* Overdue backup banner */
+.backup-overdue-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.backup-overdue-text {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-md);
+  color: var(--color-warning-text);
+  font-weight: 500;
+}
+
+.backup-overdue-text i {
+  font-size: var(--icon-lg);
+  flex-shrink: 0;
+}
+
+.backup-overdue-btn {
+  flex-shrink: 0;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-warning-border);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity var(--transition-fast);
+}
+
+.backup-overdue-btn:hover {
+  opacity: 0.85;
+}
+
 .data-backup-section {
   margin-bottom: var(--space-xl);
   padding-bottom: var(--space-xl);

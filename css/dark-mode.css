@@ -749,6 +749,12 @@ body.dark-mode .auto-backup-actions button:hover {
   background: var(--color-surface);
 }
 
+/* Data & Backup — overdue banner */
+body.dark-mode .backup-overdue-banner {
+  background: rgba(255, 159, 10, 0.12);
+  border-color: rgba(255, 159, 10, 0.4);
+}
+
 /* Data & Backup (v4.2.0) */
 body.dark-mode .data-backup-btn {
   background: var(--color-bg);

@@ -1248,6 +1248,19 @@ function bindAutoBackupEvents() {
     const mod = await getImportExportModule();
     mod.confirmRestore("replace");
   });
+
+  // ---- Overdue backup banner ----
+  document.getElementById("backupOverdueBtn")?.addEventListener("click", () => {
+    performJsonBackup(false);
+  });
+
+  // Set overdue message text with days-ago context
+  const settings = getBackupSettings();
+  if (settings.lastAutoBackup) {
+    const days = Math.floor((Date.now() - new Date(settings.lastAutoBackup).getTime()) / (1000 * 60 * 60 * 24));
+    const msg = document.getElementById("backupOverdueMsg");
+    if (msg && days > 0) msg.textContent = `Backup overdue — last backup was ${days} day${days === 1 ? "" : "s"} ago.`;
+  }
 }
 
 // ============================================================================
