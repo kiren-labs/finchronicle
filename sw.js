@@ -43,6 +43,9 @@ const CACHE_URLS = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/maskable-icon-512.png",
+  "./fonts/remixicon.css",
+  "./fonts/remixicon.woff2",
+  "./fonts/remixicon.woff",
 ];
 
 // Optional files (cache if available, don't fail if missing)
