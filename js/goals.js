@@ -56,9 +56,11 @@ export async function editGoal(id, updates) {
   if (!goal) return false;
 
   if (updates.name !== undefined) goal.name = sanitizeHTML(updates.name.trim());
-  if (updates.targetAmount !== undefined) goal.targetAmount = Math.abs(parseFloat(updates.targetAmount));
+  if (updates.targetAmount !== undefined)
+    goal.targetAmount = Math.abs(parseFloat(updates.targetAmount));
   if (updates.deadline !== undefined) goal.deadline = updates.deadline || null;
-  if (updates.linkedAccount !== undefined) goal.linkedAccount = updates.linkedAccount || null;
+  if (updates.linkedAccount !== undefined)
+    goal.linkedAccount = updates.linkedAccount || null;
 
   await saveGoal(goal);
   return true;
@@ -102,7 +104,7 @@ function checkMilestone(goal, prevPercent, newPercent) {
 function getDaysRemaining(deadline) {
   if (!deadline) return null;
   const now = new Date();
-  const end = new Date(`${deadline  }T23:59:59`);
+  const end = new Date(`${deadline}T23:59:59`);
   const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
   return diff;
 }
@@ -137,7 +139,13 @@ export function renderGoalsDashboard() {
     const days = getDaysRemaining(goal.deadline);
     const circumference = 2 * Math.PI * 36; // r=36
     const offset = circumference - (percent / 100) * circumference;
-    const colorClass = isComplete ? "complete" : percent >= 75 ? "high" : percent >= 50 ? "mid" : "low";
+    const colorClass = isComplete
+      ? "complete"
+      : percent >= 75
+        ? "high"
+        : percent >= 50
+          ? "mid"
+          : "low";
 
     let deadlineText = "";
     if (goal.deadline) {
@@ -146,7 +154,7 @@ export function renderGoalsDashboard() {
       } else if (days !== null && days <= 30) {
         deadlineText = `<span class="goal-deadline-near">${days}d left</span>`;
       } else if (goal.deadline) {
-        deadlineText = `<span class="goal-deadline">${new Date(`${goal.deadline  }T00:00:00`).toLocaleDateString("en", { month: "short", year: "numeric" })}</span>`;
+        deadlineText = `<span class="goal-deadline">${new Date(`${goal.deadline}T00:00:00`).toLocaleDateString("en", { month: "short", year: "numeric" })}</span>`;
       }
     }
 
@@ -193,8 +201,11 @@ export function showGoalForm(goalId = null) {
 
   // Populate linked account options
   const accounts = getActiveAccountNames();
-  linkedSelect.innerHTML = `<option value="">None</option>${ 
-    accounts.map((a) => `<option value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</option>`).join("")}`;
+  linkedSelect.innerHTML = `<option value="">None</option>${accounts
+    .map(
+      (a) => `<option value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</option>`,
+    )
+    .join("")}`;
 
   if (goalId) {
     const goal = state.savingsGoals.find((g) => g.id === goalId);
@@ -327,10 +338,12 @@ export function bindGoalEvents() {
   }
 
   const contribSaveBtn = document.getElementById("contributionSaveBtn");
-  if (contribSaveBtn) contribSaveBtn.addEventListener("click", handleContributionSubmit);
+  if (contribSaveBtn)
+    contribSaveBtn.addEventListener("click", handleContributionSubmit);
 
   const contribCloseBtn = document.getElementById("contributionCloseBtn");
-  if (contribCloseBtn) contribCloseBtn.addEventListener("click", closeContributionForm);
+  if (contribCloseBtn)
+    contribCloseBtn.addEventListener("click", closeContributionForm);
 
   const contribModal = document.getElementById("contributionModal");
   if (contribModal) {

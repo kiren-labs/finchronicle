@@ -2,7 +2,14 @@
 // Transaction Validation Layer (v3.10.2)
 // ============================================================================
 
-import { categories, getAllCategoryNames, PAYMENT_METHODS, EXPENSE_TYPES, currencies, state } from "./state.js";
+import {
+  categories,
+  getAllCategoryNames,
+  PAYMENT_METHODS,
+  EXPENSE_TYPES,
+  currencies,
+  state,
+} from "./state.js";
 import { sanitizeHTML } from "./utils.js";
 
 // Validate transaction before saving
@@ -44,18 +51,29 @@ export function validateTransaction(transaction) {
     const from = (transaction.fromAccount || "").trim();
     const to = (transaction.toAccount || "").trim();
     if (!from) {
-      errors.push({ field: "fromAccount", message: "Source account is required for transfers" });
+      errors.push({
+        field: "fromAccount",
+        message: "Source account is required for transfers",
+      });
     }
     if (!to) {
-      errors.push({ field: "toAccount", message: "Destination account is required for transfers" });
+      errors.push({
+        field: "toAccount",
+        message: "Destination account is required for transfers",
+      });
     }
     if (from && to && from.toLowerCase() === to.toLowerCase()) {
-      errors.push({ field: "toAccount", message: "Source and destination cannot be the same" });
+      errors.push({
+        field: "toAccount",
+        message: "Source and destination cannot be the same",
+      });
     }
     // Sanitize account names
     transaction.fromAccount = sanitizeHTML(from);
     transaction.toAccount = sanitizeHTML(to);
-    transaction.transferNote = sanitizeHTML((transaction.transferNote || "").trim());
+    transaction.transferNote = sanitizeHTML(
+      (transaction.transferNote || "").trim(),
+    );
   }
 
   // 4. Date validation
@@ -106,38 +124,56 @@ export function validateTransaction(transaction) {
   transaction.tags = sanitizedTags.slice(0, 15);
 
   // 7. Optional fields validation (v3.16.0) — all nullable, validate only if present
-  if (transaction.paymentMethod && !PAYMENT_METHODS.includes(transaction.paymentMethod)) {
+  if (
+    transaction.paymentMethod &&
+    !PAYMENT_METHODS.includes(transaction.paymentMethod)
+  ) {
     errors.push({ field: "paymentMethod", message: "Invalid payment method" });
   }
 
-  if (transaction.expenseType && !EXPENSE_TYPES.includes(transaction.expenseType)) {
+  if (
+    transaction.expenseType &&
+    !EXPENSE_TYPES.includes(transaction.expenseType)
+  ) {
     errors.push({ field: "expenseType", message: "Invalid expense type" });
   }
 
   if (transaction.merchant) {
     if (transaction.merchant.length > 100) {
-      errors.push({ field: "merchant", message: "Merchant name too long (max 100)" });
+      errors.push({
+        field: "merchant",
+        message: "Merchant name too long (max 100)",
+      });
     }
     transaction.merchant = sanitizeHTML(transaction.merchant);
   }
 
   if (transaction.attachedTo) {
     if (transaction.attachedTo.length > 50) {
-      errors.push({ field: "attachedTo", message: "Person name too long (max 50)" });
+      errors.push({
+        field: "attachedTo",
+        message: "Person name too long (max 50)",
+      });
     }
     transaction.attachedTo = sanitizeHTML(transaction.attachedTo);
   }
 
   if (transaction.referenceId) {
     if (transaction.referenceId.length > 100) {
-      errors.push({ field: "referenceId", message: "Reference ID too long (max 100)" });
+      errors.push({
+        field: "referenceId",
+        message: "Reference ID too long (max 100)",
+      });
     }
     transaction.referenceId = sanitizeHTML(transaction.referenceId);
   }
 
   if (transaction.location) {
     if (transaction.location.length > 100) {
-      errors.push({ field: "location", message: "Location too long (max 100)" });
+      errors.push({
+        field: "location",
+        message: "Location too long (max 100)",
+      });
     }
     transaction.location = sanitizeHTML(transaction.location);
   }
@@ -145,16 +181,34 @@ export function validateTransaction(transaction) {
   // 8. Multi-currency validation (v3.24.0)
   if (transaction.transactionCurrency) {
     if (!currencies[transaction.transactionCurrency]) {
-      errors.push({ field: "transactionCurrency", message: "Invalid transaction currency" });
+      errors.push({
+        field: "transactionCurrency",
+        message: "Invalid transaction currency",
+      });
     }
-    const homeCurrency = state.currency ?? localStorage.getItem("currency") ?? "USD";
+    const homeCurrency =
+      state.currency ?? localStorage.getItem("currency") ?? "USD";
     if (transaction.transactionCurrency !== homeCurrency) {
-      if (!transaction.exchangeRate || isNaN(transaction.exchangeRate) || transaction.exchangeRate <= 0) {
-        errors.push({ field: "exchangeRate", message: "Exchange rate is required for foreign currency transactions" });
+      if (
+        !transaction.exchangeRate ||
+        isNaN(transaction.exchangeRate) ||
+        transaction.exchangeRate <= 0
+      ) {
+        errors.push({
+          field: "exchangeRate",
+          message:
+            "Exchange rate is required for foreign currency transactions",
+        });
       }
-    } else if (transaction.exchangeRate !== null && transaction.exchangeRate !== undefined) {
+    } else if (
+      transaction.exchangeRate !== null &&
+      transaction.exchangeRate !== undefined
+    ) {
       if (isNaN(transaction.exchangeRate) || transaction.exchangeRate <= 0) {
-        errors.push({ field: "exchangeRate", message: "Exchange rate must be a positive number" });
+        errors.push({
+          field: "exchangeRate",
+          message: "Exchange rate must be a positive number",
+        });
       }
     }
   }

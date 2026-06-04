@@ -166,8 +166,7 @@ export function updateSummary() {
 
   // Update compact summary
   $.compactNet.textContent = formatCurrency(net);
-  $.compactNet.className =
-    `compact-stat ${  net >= 0 ? "compact-income" : "compact-expense"}`;
+  $.compactNet.className = `compact-stat ${net >= 0 ? "compact-income" : "compact-expense"}`;
   $.compactEntries.textContent = count;
   $.compactIncome.textContent = formatCurrency(income);
   $.compactExpense.textContent = formatCurrency(expense);
@@ -426,7 +425,7 @@ export function updateCategoryFilter() {
   for (const [parent, children] of Object.entries(grouped).sort()) {
     html += `<optgroup label="${parent}">`;
     for (const cat of children) {
-      html += `<option value="${cat}" ${state.selectedCategory === cat ? "selected" : ""}>${cat === parent ? `All ${parent}` : `  ${  cat}`}</option>`;
+      html += `<option value="${cat}" ${state.selectedCategory === cat ? "selected" : ""}>${cat === parent ? `All ${parent}` : `  ${cat}`}</option>`;
     }
     html += `</optgroup>`;
   }
@@ -564,10 +563,10 @@ export function updateReportsView() {
     let fromDate;
     if (range === "all") {
       const sorted = txns.map((t) => t.date).sort();
-      fromDate = sorted.length > 0 ? new Date(`${sorted[0]  }T00:00:00`) : today;
+      fromDate = sorted.length > 0 ? new Date(`${sorted[0]}T00:00:00`) : today;
     } else {
       const months = getRangeMonths(range);
-      fromDate = new Date(`${months[0]  }-01T00:00:00`);
+      fromDate = new Date(`${months[0]}-01T00:00:00`);
     }
     rangeSpan.textContent = `${fmt(fromDate)} – ${fmt(today)}`;
   }
@@ -698,7 +697,7 @@ export function switchTab(tab) {
   });
 
   // Set active state on bottom nav
-  const activeNav = document.getElementById(`${tab  }-nav`);
+  const activeNav = document.getElementById(`${tab}-nav`);
   if (activeNav) {
     activeNav.classList.add("active");
     activeNav.setAttribute("aria-selected", "true");
@@ -708,7 +707,7 @@ export function switchTab(tab) {
   document
     .querySelectorAll(".tab-content")
     .forEach((t) => t.classList.remove("active"));
-  document.getElementById(`${tab  }Tab`).classList.add("active");
+  document.getElementById(`${tab}Tab`).classList.add("active");
 
   // Hide summary on settings tab, show on all others
   const summarySection = document.querySelector(".summary-section");

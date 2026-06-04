@@ -49,11 +49,14 @@ export function getLastRate(fromCurrency, toCurrency) {
  * Called when the transactionCurrency optional field is enabled.
  */
 export function renderMultiCurrencyFields() {
-  const container = document.querySelector('[data-optional-field="transactionCurrency"]');
+  const container = document.querySelector(
+    '[data-optional-field="transactionCurrency"]',
+  );
   if (!container) return;
 
   const homeCurrency = getCurrency();
-  const isEnabled = state.appSettings && state.appSettings.enabledFields.transactionCurrency;
+  const isEnabled =
+    state.appSettings && state.appSettings.enabledFields.transactionCurrency;
 
   container.hidden = !isEnabled;
   if (!isEnabled) return;
@@ -67,7 +70,10 @@ export function renderMultiCurrencyFields() {
       <option value="">Same as home (${homeCurrency})</option>
       ${Object.entries(currencies)
         .filter(([code]) => code !== homeCurrency)
-        .map(([code, c]) => `<option value="${code}">${c.symbol} ${code} — ${c.name}</option>`)
+        .map(
+          ([code, c]) =>
+            `<option value="${code}">${c.symbol} ${code} — ${c.name}</option>`,
+        )
         .join("")}
     </select>
     <div id="exchangeRateGroup" class="exchange-rate-group" hidden>
@@ -122,7 +128,9 @@ function bindMultiCurrencyFormFields() {
     const amountInput = document.getElementById("amount");
     const amount = parseFloat(amountInput ? amountInput.value : 0);
     const homeCurrency = getCurrency();
-    const symbol = currencies[homeCurrency] ? currencies[homeCurrency].symbol : "";
+    const symbol = currencies[homeCurrency]
+      ? currencies[homeCurrency].symbol
+      : "";
 
     if (rate > 0 && amount > 0) {
       const homeAmount = amount * rate;
@@ -170,13 +178,19 @@ export function getMultiCurrencyFormData() {
   }
 
   if (isNaN(rate) || rate <= 0) {
-    return { transactionCurrency: txCurrency, exchangeRate: null, homeAmount: null };
+    return {
+      transactionCurrency: txCurrency,
+      exchangeRate: null,
+      homeAmount: null,
+    };
   }
 
   // Save this rate for future auto-fill
   saveRate(txCurrency, homeCurrency, rate);
 
-  const homeAmount = isNaN(amount) ? null : Math.round(amount * rate * 100) / 100;
+  const homeAmount = isNaN(amount)
+    ? null
+    : Math.round(amount * rate * 100) / 100;
 
   return {
     transactionCurrency: txCurrency,
@@ -243,7 +257,7 @@ export function formatMultiCurrency(transaction) {
 
   const foreignSymbol = currencies[transaction.transactionCurrency]
     ? currencies[transaction.transactionCurrency].symbol
-    : `${transaction.transactionCurrency  } `;
+    : `${transaction.transactionCurrency} `;
 
   const homeSymbol = currencies[getCurrency()]
     ? currencies[getCurrency()].symbol
@@ -274,10 +288,12 @@ export function convertAmount(amount, fromCurrency, toCurrency) {
 // ============================================================================
 
 export function bindMultiCurrencyEvents() {
-  document.getElementById("optionalFieldToggles").addEventListener("change", (e) => {
-    const checkbox = e.target.closest("[data-field-toggle]");
-    if (checkbox && checkbox.dataset.fieldToggle === "transactionCurrency") {
-      setTimeout(() => renderMultiCurrencyFields(), 50);
-    }
-  });
+  document
+    .getElementById("optionalFieldToggles")
+    .addEventListener("change", (e) => {
+      const checkbox = e.target.closest("[data-field-toggle]");
+      if (checkbox && checkbox.dataset.fieldToggle === "transactionCurrency") {
+        setTimeout(() => renderMultiCurrencyFields(), 50);
+      }
+    });
 }

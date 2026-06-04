@@ -49,49 +49,67 @@ function txToPromise(tx) {
 /** Get all records from a store. Returns [] if DB not ready or store missing. */
 function idbGetAll(storeName, fallback = []) {
   if (!state.db || !hasStore(storeName)) return Promise.resolve(fallback);
-  const store = state.db.transaction([storeName], "readonly").objectStore(storeName);
+  const store = state.db
+    .transaction([storeName], "readonly")
+    .objectStore(storeName);
   return reqToPromise(store.getAll()).then((r) => r || fallback);
 }
 
 /** Get all records via an index. */
 function idbGetAllByIndex(storeName, indexName, fallback = []) {
   if (!state.db || !hasStore(storeName)) return Promise.resolve(fallback);
-  const store = state.db.transaction([storeName], "readonly").objectStore(storeName);
-  return reqToPromise(store.index(indexName).getAll()).then((r) => r || fallback);
+  const store = state.db
+    .transaction([storeName], "readonly")
+    .objectStore(storeName);
+  return reqToPromise(store.index(indexName).getAll()).then(
+    (r) => r || fallback,
+  );
 }
 
 /** Get a single record by key. Returns fallback if not found. */
 function idbGet(storeName, key, fallback = null) {
   if (!state.db || !hasStore(storeName)) return Promise.resolve(fallback);
-  const store = state.db.transaction([storeName], "readonly").objectStore(storeName);
+  const store = state.db
+    .transaction([storeName], "readonly")
+    .objectStore(storeName);
   return reqToPromise(store.get(key)).then((r) => r ?? fallback);
 }
 
 /** Get a single record by index key. */
 function idbGetByIndex(storeName, indexName, key, fallback = null) {
   if (!state.db || !hasStore(storeName)) return Promise.resolve(fallback);
-  const store = state.db.transaction([storeName], "readonly").objectStore(storeName);
-  return reqToPromise(store.index(indexName).get(key)).then((r) => r ?? fallback);
+  const store = state.db
+    .transaction([storeName], "readonly")
+    .objectStore(storeName);
+  return reqToPromise(store.index(indexName).get(key)).then(
+    (r) => r ?? fallback,
+  );
 }
 
 /** Put (insert or update) a record. Returns the key. */
 function idbPut(storeName, record) {
   assertDB();
-  const store = state.db.transaction([storeName], "readwrite").objectStore(storeName);
+  const store = state.db
+    .transaction([storeName], "readwrite")
+    .objectStore(storeName);
   return reqToPromise(store.put(record));
 }
 
 /** Delete a record by key. */
 function idbDelete(storeName, key) {
   assertDB();
-  const store = state.db.transaction([storeName], "readwrite").objectStore(storeName);
+  const store = state.db
+    .transaction([storeName], "readwrite")
+    .objectStore(storeName);
   return reqToPromise(store.delete(key));
 }
 
 /** Clear all records from a store. */
 function idbClear(storeName) {
   assertDB();
-  const store = state.db.transaction([storeName], "readwrite").objectStore(storeName);
+  const store = state.db
+    .transaction([storeName], "readwrite")
+    .objectStore(storeName);
   return reqToPromise(store.clear());
 }
 
@@ -113,7 +131,10 @@ function idbModify(storeName, key, mutator) {
     const getReq = store.get(key);
     getReq.onsuccess = () => {
       const record = getReq.result;
-      if (!record) { resolve(null); return; }
+      if (!record) {
+        resolve(null);
+        return;
+      }
       const updated = mutator(record);
       const putReq = store.put(updated);
       putReq.onsuccess = () => resolve(updated);
@@ -153,8 +174,12 @@ export function initDB() {
       // v2: recurringTemplates store
       if (oldVersion < 2) {
         if (!database.objectStoreNames.contains(RECURRING_STORE)) {
-          const recurringStore = database.createObjectStore(RECURRING_STORE, { keyPath: "id" });
-          recurringStore.createIndex("nextDueDate", "nextDueDate", { unique: false });
+          const recurringStore = database.createObjectStore(RECURRING_STORE, {
+            keyPath: "id",
+          });
+          recurringStore.createIndex("nextDueDate", "nextDueDate", {
+            unique: false,
+          });
           recurringStore.createIndex("enabled", "enabled", { unique: false });
         }
       }
@@ -162,7 +187,9 @@ export function initDB() {
       // v3: budgets store
       if (oldVersion < 3) {
         if (!database.objectStoreNames.contains(BUDGETS_STORE)) {
-          const budgetsStore = database.createObjectStore(BUDGETS_STORE, { keyPath: "id" });
+          const budgetsStore = database.createObjectStore(BUDGETS_STORE, {
+            keyPath: "id",
+          });
           budgetsStore.createIndex("category", "category", { unique: false });
         }
       }
@@ -171,12 +198,17 @@ export function initDB() {
       if (oldVersion < 4) {
         const txStore = event.target.transaction.objectStore(STORE_NAME);
         if (!txStore.indexNames.contains("tags")) {
-          txStore.createIndex("tags", "tags", { unique: false, multiEntry: true });
+          txStore.createIndex("tags", "tags", {
+            unique: false,
+            multiEntry: true,
+          });
         }
       }
 
       // v5: Transfer transaction type support (schema-only, no new stores)
-      if (oldVersion < 5) { /* existing type index handles 'transfer' */ }
+      if (oldVersion < 5) {
+        /* existing type index handles 'transfer' */
+      }
 
       // v6: App settings store for optional fields configuration
       if (oldVersion < 6) {
@@ -188,7 +220,9 @@ export function initDB() {
       // v7: Quick templates store for Quick Entry (v3.17.0)
       if (oldVersion < 7) {
         if (!database.objectStoreNames.contains(QUICK_TEMPLATES_STORE)) {
-          const qtStore = database.createObjectStore(QUICK_TEMPLATES_STORE, { keyPath: "id" });
+          const qtStore = database.createObjectStore(QUICK_TEMPLATES_STORE, {
+            keyPath: "id",
+          });
           qtStore.createIndex("sortOrder", "sortOrder", { unique: false });
         }
       }
@@ -196,7 +230,9 @@ export function initDB() {
       // v8: Accounts store for Accounts & Net Worth (v3.18.0)
       if (oldVersion < 8) {
         if (!database.objectStoreNames.contains(ACCOUNTS_STORE)) {
-          const accStore = database.createObjectStore(ACCOUNTS_STORE, { keyPath: "id" });
+          const accStore = database.createObjectStore(ACCOUNTS_STORE, {
+            keyPath: "id",
+          });
           accStore.createIndex("name", "name", { unique: true });
           accStore.createIndex("type", "type", { unique: false });
           accStore.createIndex("sortOrder", "sortOrder", { unique: false });
@@ -206,7 +242,9 @@ export function initDB() {
       // v9: Savings Goals store (v3.20.0)
       if (oldVersion < 9) {
         if (!database.objectStoreNames.contains(GOALS_STORE)) {
-          const goalsStore = database.createObjectStore(GOALS_STORE, { keyPath: "id" });
+          const goalsStore = database.createObjectStore(GOALS_STORE, {
+            keyPath: "id",
+          });
           goalsStore.createIndex("deadline", "deadline", { unique: false });
         }
       }
@@ -214,8 +252,13 @@ export function initDB() {
       // v10: Net Worth Snapshots store (v3.28.0)
       if (oldVersion < 10) {
         if (!database.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
-          const snapshotsStore = database.createObjectStore(NET_WORTH_SNAPSHOTS_STORE, { keyPath: "id", autoIncrement: true });
-          snapshotsStore.createIndex("snapshotDate", "snapshotDate", { unique: true });
+          const snapshotsStore = database.createObjectStore(
+            NET_WORTH_SNAPSHOTS_STORE,
+            { keyPath: "id", autoIncrement: true },
+          );
+          snapshotsStore.createIndex("snapshotDate", "snapshotDate", {
+            unique: true,
+          });
         }
       }
 
@@ -227,7 +270,9 @@ export function initDB() {
           getAllReq.onsuccess = () => {
             const liabilityTypes = ["credit-card", "loan", "mortgage"];
             getAllReq.result.forEach((account) => {
-              account.classification ??= liabilityTypes.includes(account.type) ? "liability" : "asset";
+              account.classification ??= liabilityTypes.includes(account.type)
+                ? "liability"
+                : "asset";
               accStore.put(account);
             });
           };
@@ -261,7 +306,9 @@ export async function loadDataFromDB() {
   assertDB();
   const all = await idbGetAll(STORE_NAME);
   state.transactions = all.filter((t) => !t.deleted);
-  state.transactions.forEach((t) => { t.dateTs = new Date(t.date).getTime(); });
+  state.transactions.forEach((t) => {
+    t.dateTs = new Date(t.date).getTime();
+  });
   state.transactions.sort((a, b) => b.dateTs - a.dateTs);
   return state.transactions;
 }
@@ -269,7 +316,9 @@ export async function loadDataFromDB() {
 export async function loadAllTransactionsFromDB() {
   assertDB();
   const all = await idbGetAll(STORE_NAME);
-  all.forEach((t) => { t.dateTs = new Date(t.date).getTime(); });
+  all.forEach((t) => {
+    t.dateTs = new Date(t.date).getTime();
+  });
   all.sort((a, b) => b.dateTs - a.dateTs);
   return all;
 }
@@ -353,12 +402,16 @@ export async function migrateFromLocalStorage() {
       const oldTransactions = JSON.parse(stored);
       if (oldTransactions.length > 0) {
         await bulkSaveTransactionsToDB(oldTransactions);
-        console.log(`Migrated ${oldTransactions.length} transactions to IndexedDB`);
+        console.log(
+          `Migrated ${oldTransactions.length} transactions to IndexedDB`,
+        );
       }
       localStorage.removeItem("transactions");
     } catch (err) {
       console.error("Migration failed:", err);
-      showMessage("Data migration failed. Your existing transactions may not have loaded.");
+      showMessage(
+        "Data migration failed. Your existing transactions may not have loaded.",
+      );
       return;
     }
   }
@@ -449,7 +502,8 @@ export function deleteGoal(id) {
 // ============================================================================
 
 export function saveNetWorthSnapshot(snapshot) {
-  if (!state.db || !hasStore(NET_WORTH_SNAPSHOTS_STORE)) return Promise.resolve(null);
+  if (!state.db || !hasStore(NET_WORTH_SNAPSHOTS_STORE))
+    return Promise.resolve(null);
   return idbPut(NET_WORTH_SNAPSHOTS_STORE, snapshot);
 }
 
@@ -466,7 +520,8 @@ export function getAllNetWorthSnapshots() {
 }
 
 export function bulkSaveNetWorthSnapshots(snapshots) {
-  if (!state.db || !hasStore(NET_WORTH_SNAPSHOTS_STORE)) return Promise.resolve();
+  if (!state.db || !hasStore(NET_WORTH_SNAPSHOTS_STORE))
+    return Promise.resolve();
   if (snapshots.length === 0) return Promise.resolve();
 
   return new Promise((resolve, reject) => {
@@ -481,7 +536,10 @@ export function bulkSaveNetWorthSnapshots(snapshots) {
         pending--;
         if (pending === 0) resolve();
       };
-      check.onerror = () => { pending--; if (pending === 0) resolve(); };
+      check.onerror = () => {
+        pending--;
+        if (pending === 0) resolve();
+      };
     });
     tx.onerror = () => reject(tx.error);
   });

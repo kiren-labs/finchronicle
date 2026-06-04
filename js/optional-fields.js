@@ -2,7 +2,12 @@
 // Optional Fields System (v3.16.0)
 // ============================================================================
 
-import { state, DEFAULT_APP_SETTINGS, PAYMENT_METHODS, EXPENSE_TYPES } from "./state.js";
+import {
+  state,
+  DEFAULT_APP_SETTINGS,
+  PAYMENT_METHODS,
+  EXPENSE_TYPES,
+} from "./state.js";
 import { loadAppSettings, saveAppSettings } from "./db.js";
 import { sanitizeHTML } from "./utils.js";
 
@@ -70,7 +75,9 @@ export async function initOptionalFields() {
 function buildSmartKeywords() {
   const cutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
   const recent = state.transactions.filter(
-    (t) => t.type !== "transfer" && (t.dateTs || new Date(t.date).getTime()) >= cutoff
+    (t) =>
+      t.type !== "transfer" &&
+      (t.dateTs || new Date(t.date).getTime()) >= cutoff,
   );
 
   const keywordMap = {}; // { keyword: { category: count } }
@@ -204,14 +211,12 @@ function populateLinkedAccountSelect(selectedValue) {
   const el = document.getElementById("linkedAccount");
   if (!el) return;
   const accounts = state.accounts || [];
-  el.innerHTML =
-    `<option value="">None</option>${ 
-    accounts
-      .map(
-        (a) =>
-          `<option value="${sanitizeHTML(a.name)}"${a.name === selectedValue ? " selected" : ""}>${sanitizeHTML(a.name)}</option>`
-      )
-      .join("")}`;
+  el.innerHTML = `<option value="">None</option>${accounts
+    .map(
+      (a) =>
+        `<option value="${sanitizeHTML(a.name)}"${a.name === selectedValue ? " selected" : ""}>${sanitizeHTML(a.name)}</option>`,
+    )
+    .join("")}`;
 }
 
 /**
@@ -296,9 +301,7 @@ export function setOptionalFieldValues(transaction) {
 export function clearOptionalFields() {
   const container = document.getElementById("optionalFieldsContainer");
   if (!container) return;
-  container
-    .querySelectorAll("input, select")
-    .forEach((el) => (el.value = ""));
+  container.querySelectorAll("input, select").forEach((el) => (el.value = ""));
 }
 
 // ============================================================================
@@ -345,7 +348,7 @@ export function bindFieldAutocomplete(inputId, suggestionsId, fieldName) {
       .slice(0, 8)
       .map(
         (a) =>
-          `<div class="account-suggestion" data-value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</div>`
+          `<div class="account-suggestion" data-value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</div>`,
       )
       .join("");
     suggestionsEl.hidden = false;
@@ -405,7 +408,7 @@ export function renderFieldToggles() {
         <input type="checkbox" class="field-toggle-checkbox"
                data-field-toggle="${key}" ${enabled[key] ? "checked" : ""}>
         <span class="field-toggle-switch"></span>
-      </label>`
+      </label>`,
     )
     .join("");
 }
@@ -493,7 +496,9 @@ export function bindOptionalFieldsEvents() {
       const expanded = toggle.getAttribute("aria-expanded") === "true";
       toggle.setAttribute("aria-expanded", String(!expanded));
       container.hidden = expanded;
-      toggle.querySelector(".optional-fields-chevron").classList.toggle("expanded", !expanded);
+      toggle
+        .querySelector(".optional-fields-chevron")
+        .classList.toggle("expanded", !expanded);
       if (!expanded) renderOptionalFieldsForm();
     });
   }
@@ -507,13 +512,19 @@ export function bindOptionalFieldsEvents() {
 
   const suggestionBanner = document.getElementById("categorySuggestion");
   if (suggestionBanner) {
-    suggestionBanner.querySelector(".suggestion-accept").addEventListener("click", acceptCategorySuggestion);
-    suggestionBanner.querySelector(".suggestion-dismiss").addEventListener("click", dismissCategorySuggestion);
+    suggestionBanner
+      .querySelector(".suggestion-accept")
+      .addEventListener("click", acceptCategorySuggestion);
+    suggestionBanner
+      .querySelector(".suggestion-dismiss")
+      .addEventListener("click", dismissCategorySuggestion);
   }
 
-  document.getElementById("optionalFieldToggles").addEventListener("change", (e) => {
-    const checkbox = e.target.closest("[data-field-toggle]");
-    if (!checkbox) return;
-    handleFieldToggle(checkbox.dataset.fieldToggle, checkbox.checked);
-  });
+  document
+    .getElementById("optionalFieldToggles")
+    .addEventListener("change", (e) => {
+      const checkbox = e.target.closest("[data-field-toggle]");
+      if (!checkbox) return;
+      handleFieldToggle(checkbox.dataset.fieldToggle, checkbox.checked);
+    });
 }

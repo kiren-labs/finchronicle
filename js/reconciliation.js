@@ -28,8 +28,10 @@ export function computeReconciledBase(accountName, accounts, transactions) {
   for (const t of transactions || []) {
     if (t.status !== "reconciled") continue;
     if (t.type === "transfer") continue;
-    if (t.type === "income" && t.toAccount === accountName) balance += parseFloat(t.amount) || 0;
-    if (t.type === "expense" && t.fromAccount === accountName) balance -= parseFloat(t.amount) || 0;
+    if (t.type === "income" && t.toAccount === accountName)
+      balance += parseFloat(t.amount) || 0;
+    if (t.type === "expense" && t.fromAccount === accountName)
+      balance -= parseFloat(t.amount) || 0;
   }
 
   return balance;
@@ -38,13 +40,20 @@ export function computeReconciledBase(accountName, accounts, transactions) {
 /**
  * Add/subtract checked candidate transactions on top of reconciledBase.
  */
-export function computeCheckedBalance(reconciledBase, accountName, candidates, checkedIds) {
+export function computeCheckedBalance(
+  reconciledBase,
+  accountName,
+  candidates,
+  checkedIds,
+) {
   let balance = reconciledBase;
 
   for (const t of candidates || []) {
     if (!checkedIds.has(t.id)) continue;
-    if (t.type === "income" && t.toAccount === accountName) balance += parseFloat(t.amount) || 0;
-    if (t.type === "expense" && t.fromAccount === accountName) balance -= parseFloat(t.amount) || 0;
+    if (t.type === "income" && t.toAccount === accountName)
+      balance += parseFloat(t.amount) || 0;
+    if (t.type === "expense" && t.fromAccount === accountName)
+      balance -= parseFloat(t.amount) || 0;
   }
 
   return balance;
@@ -54,14 +63,16 @@ export function computeCheckedBalance(reconciledBase, accountName, candidates, c
  * Filter transactions to reconciliation candidates for an account up to statementDate.
  */
 export function filterCandidates(accountName, statementDate, transactions) {
-  return (transactions || []).filter((t) => {
-    if (t.type === "transfer") return false;
-    if (t.status === "reconciled") return false;
-    if (t.date > statementDate) return false;
-    const isCredit = t.type === "income" && t.toAccount === accountName;
-    const isDebit = t.type === "expense" && t.fromAccount === accountName;
-    return isCredit || isDebit;
-  }).sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  return (transactions || [])
+    .filter((t) => {
+      if (t.type === "transfer") return false;
+      if (t.status === "reconciled") return false;
+      if (t.date > statementDate) return false;
+      const isCredit = t.type === "income" && t.toAccount === accountName;
+      const isDebit = t.type === "expense" && t.fromAccount === accountName;
+      return isCredit || isDebit;
+    })
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 }
 
 // ---- Render helpers ----
@@ -86,11 +97,11 @@ function renderCandidateList() {
 
     const row = document.createElement("label");
     row.className = "reconciliation-row";
-    row.setAttribute("for", `recon-chk-${  t.id}`);
+    row.setAttribute("for", `recon-chk-${t.id}`);
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.id = `recon-chk-${  t.id}`;
+    checkbox.id = `recon-chk-${t.id}`;
     checkbox.dataset.reconId = t.id;
     checkbox.checked = checkedIds.has(t.id);
     checkbox.setAttribute("aria-label", "Reconcile transaction");
@@ -108,7 +119,7 @@ function renderCandidateList() {
     notesSpan.textContent = t.notes || "";
 
     const amtSpan = document.createElement("span");
-    amtSpan.className = `recon-col recon-amount ${  isCredit ? "recon-credit" : "recon-debit"}`;
+    amtSpan.className = `recon-col recon-amount ${isCredit ? "recon-credit" : "recon-debit"}`;
     amtSpan.textContent = (signed >= 0 ? "+" : "") + formatCurrency(signed);
 
     const statusSpan = document.createElement("span");
@@ -143,7 +154,7 @@ export function openReconciliationModal(accountName) {
   if (!modal) return;
 
   const heading = document.getElementById("reconciliationAccountName");
-  if (heading) heading.textContent = `Reconcile: ${  accountName}`;
+  if (heading) heading.textContent = `Reconcile: ${accountName}`;
 
   const balInput = document.getElementById("reconciliationStatementBalance");
   const dateInput = document.getElementById("reconciliationStatementDate");
@@ -157,7 +168,10 @@ export function openReconciliationModal(accountName) {
   if (list) list.innerHTML = "";
 
   const diff = document.getElementById("reconciliationDifference");
-  if (diff) { diff.textContent = ""; diff.className = "reconciliation-difference"; }
+  if (diff) {
+    diff.textContent = "";
+    diff.className = "reconciliation-difference";
+  }
 
   const step2 = document.getElementById("reconciliationStep2");
   if (step2) step2.hidden = true;
@@ -194,7 +208,7 @@ export function loadReconciliationTransactions() {
   reconciliationState.candidates = filterCandidates(
     reconciliationState.accountName,
     rawDate,
-    state.transactions
+    state.transactions,
   );
 
   renderCandidateList();
@@ -230,11 +244,24 @@ export function renderReconciliationDifference() {
   const diffEl = document.getElementById("reconciliationDifference");
   if (!diffEl) return;
 
-  const { statementBalance, accountName, candidates, checkedIds } = reconciliationState;
-  if (statementBalance === null) { diffEl.textContent = ""; return; }
+  const { statementBalance, accountName, candidates, checkedIds } =
+    reconciliationState;
+  if (statementBalance === null) {
+    diffEl.textContent = "";
+    return;
+  }
 
-  const base = computeReconciledBase(accountName, state.accounts, state.transactions);
-  const checked = computeCheckedBalance(base, accountName, candidates, checkedIds);
+  const base = computeReconciledBase(
+    accountName,
+    state.accounts,
+    state.transactions,
+  );
+  const checked = computeCheckedBalance(
+    base,
+    accountName,
+    candidates,
+    checkedIds,
+  );
   const difference = Math.round((checked - statementBalance) * 100) / 100;
 
   diffEl.innerHTML = "";
@@ -261,9 +288,19 @@ export function renderReconciliationDifference() {
 export async function finaliseReconciliation(force = false) {
   if (!reconciliationState) return;
 
-  const { accountName, candidates, checkedIds, statementBalance } = reconciliationState;
-  const base = computeReconciledBase(accountName, state.accounts, state.transactions);
-  const checked = computeCheckedBalance(base, accountName, candidates, checkedIds);
+  const { accountName, candidates, checkedIds, statementBalance } =
+    reconciliationState;
+  const base = computeReconciledBase(
+    accountName,
+    state.accounts,
+    state.transactions,
+  );
+  const checked = computeCheckedBalance(
+    base,
+    accountName,
+    candidates,
+    checkedIds,
+  );
   const difference = Math.round((checked - statementBalance) * 100) / 100;
 
   if (difference !== 0 && !force) {
@@ -271,7 +308,8 @@ export async function finaliseReconciliation(force = false) {
     if (diffEl && !diffEl.querySelector(".recon-force-warning")) {
       const warning = document.createElement("p");
       warning.className = "recon-hint recon-force-warning";
-      warning.textContent = "Balance does not match. Use \"Reconcile Anyway\" to proceed.";
+      warning.textContent =
+        'Balance does not match. Use "Reconcile Anyway" to proceed.';
       diffEl.appendChild(warning);
     }
     const forceBtn = document.getElementById("reconciliationForceBtn");
@@ -291,7 +329,7 @@ export async function finaliseReconciliation(force = false) {
   }
 
   const count = toReconcile.length;
-  showMessage(`${count  } transaction${  count !== 1 ? "s" : ""  } reconciled.`);
+  showMessage(`${count} transaction${count !== 1 ? "s" : ""} reconciled.`);
   closeReconciliationModal();
   updateUI();
 }
@@ -310,18 +348,28 @@ export function bindReconciliationEvents() {
   const modal = document.getElementById("reconciliationModal");
   if (!modal) return;
 
-  modal.querySelector(".reconciliation-close")?.addEventListener("click", closeReconciliationModal);
+  modal
+    .querySelector(".reconciliation-close")
+    ?.addEventListener("click", closeReconciliationModal);
 
   modal.addEventListener("click", (e) => {
     if (e.target === modal) closeReconciliationModal();
   });
 
-  document.getElementById("reconciliationLoadBtn")?.addEventListener("click", loadReconciliationTransactions);
-  document.getElementById("reconciliationFinaliseBtn")?.addEventListener("click", () => finaliseReconciliation(false));
-  document.getElementById("reconciliationForceBtn")?.addEventListener("click", () => finaliseReconciliation(true));
+  document
+    .getElementById("reconciliationLoadBtn")
+    ?.addEventListener("click", loadReconciliationTransactions);
+  document
+    .getElementById("reconciliationFinaliseBtn")
+    ?.addEventListener("click", () => finaliseReconciliation(false));
+  document
+    .getElementById("reconciliationForceBtn")
+    ?.addEventListener("click", () => finaliseReconciliation(true));
 
-  document.getElementById("reconciliationList")?.addEventListener("change", (e) => {
-    const chk = e.target.closest("[data-recon-id]");
-    if (chk) toggleReconciliationItem(chk.dataset.reconId);
-  });
+  document
+    .getElementById("reconciliationList")
+    ?.addEventListener("change", (e) => {
+      const chk = e.target.closest("[data-recon-id]");
+      if (chk) toggleReconciliationItem(chk.dataset.reconId);
+    });
 }

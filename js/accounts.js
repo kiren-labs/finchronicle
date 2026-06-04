@@ -3,7 +3,14 @@
 // ============================================================================
 
 import { state, ACCOUNT_TYPES, ACCOUNT_CLASSIFICATION } from "./state.js";
-import { loadAccounts, saveAccount, deleteAccount, saveNetWorthSnapshot, loadNetWorthSnapshots, getNetWorthSnapshotByDate } from "./db.js";
+import {
+  loadAccounts,
+  saveAccount,
+  deleteAccount,
+  saveNetWorthSnapshot,
+  loadNetWorthSnapshots,
+  getNetWorthSnapshotByDate,
+} from "./db.js";
 import { formatCurrency } from "./currency.js";
 import { sanitizeHTML, showMessage, generateId } from "./utils.js";
 import { renderSavingsDashboard } from "./savings.js";
@@ -72,7 +79,8 @@ export function getNetWorth() {
     });
 
   accountBalances.forEach((a) => {
-    const classification = a.classification || ACCOUNT_CLASSIFICATION[a.type] || "asset";
+    const classification =
+      a.classification || ACCOUNT_CLASSIFICATION[a.type] || "asset";
     if (classification === "liability") {
       totalLiabilities += Math.abs(a.balance);
     } else {
@@ -96,9 +104,7 @@ export function getNetWorth() {
  * Get active account names for dropdowns.
  */
 export function getActiveAccountNames() {
-  return state.accounts
-    .filter((a) => a.isActive !== false)
-    .map((a) => a.name);
+  return state.accounts.filter((a) => a.isActive !== false).map((a) => a.name);
 }
 
 // ---- Account CRUD ----
@@ -114,7 +120,11 @@ export async function addAccount(formData) {
   const trimmedName = sanitizeHTML(name.trim());
 
   // Check for duplicate name
-  if (state.accounts.some((a) => a.name.toLowerCase() === trimmedName.toLowerCase())) {
+  if (
+    state.accounts.some(
+      (a) => a.name.toLowerCase() === trimmedName.toLowerCase(),
+    )
+  ) {
     showMessage("An account with that name already exists.");
     return false;
   }
@@ -159,14 +169,24 @@ export async function updateAccount(id, updates) {
   // If name changed, check for duplicates
   if (updates.name && updates.name !== account.name) {
     const trimmedName = sanitizeHTML(updates.name.trim());
-    if (state.accounts.some((a) => String(a.id) !== String(id) && a.name.toLowerCase() === trimmedName.toLowerCase())) {
+    if (
+      state.accounts.some(
+        (a) =>
+          String(a.id) !== String(id) &&
+          a.name.toLowerCase() === trimmedName.toLowerCase(),
+      )
+    ) {
       showMessage("An account with that name already exists.");
       return false;
     }
     updates.name = trimmedName;
   }
 
-  const updated = { ...account, ...updates, updatedAt: new Date().toISOString() };
+  const updated = {
+    ...account,
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
 
   try {
     await saveAccount(updated);
@@ -328,10 +348,12 @@ async function renderNetWorthTrend() {
 
   const polylinePoints = points.map((p) => `${p.x},${p.y}`).join(" ");
 
-  const dotSVG = points.map((p, i) => {
-    const isLast = i === points.length - 1;
-    return `<circle cx="${p.x}" cy="${p.y}" r="${isLast ? 4 : 3}" class="nw-trend-dot${isLast ? " nw-trend-dot-last" : ""}" data-value="${p.snapshot.netWorth}" data-date="${p.snapshot.snapshotDate}" />`;
-  }).join("");
+  const dotSVG = points
+    .map((p, i) => {
+      const isLast = i === points.length - 1;
+      return `<circle cx="${p.x}" cy="${p.y}" r="${isLast ? 4 : 3}" class="nw-trend-dot${isLast ? " nw-trend-dot-last" : ""}" data-value="${p.snapshot.netWorth}" data-date="${p.snapshot.snapshotDate}" />`;
+    })
+    .join("");
 
   const labelFirst = formatMonthLabel(snapshots[0].snapshotDate);
   const labelLast = formatMonthLabel(snapshots.at(-1).snapshotDate);
@@ -359,7 +381,7 @@ async function renderNetWorthTrend() {
 }
 
 function formatMonthLabel(snapshotDate) {
-  const d = new Date(`${snapshotDate  }T00:00:00`);
+  const d = new Date(`${snapshotDate}T00:00:00`);
   return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
 
@@ -383,9 +405,15 @@ export function renderAccountManager() {
     const balClass = balance >= 0 ? "positive" : "negative";
     const typeLabel = account.type.replace("-", " ");
     const inactive = account.isActive === false ? " inactive" : "";
-    const savingsBadge = account.isSavings ? `<span class="savings-badge" aria-label="Savings account">savings</span>` : "";
-    const classification = account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
-    const classificationBadge = classification === "liability" ? `<span class="liability-badge" aria-label="Liability account">liability</span>` : "";
+    const savingsBadge = account.isSavings
+      ? `<span class="savings-badge" aria-label="Savings account">savings</span>`
+      : "";
+    const classification =
+      account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
+    const classificationBadge =
+      classification === "liability"
+        ? `<span class="liability-badge" aria-label="Liability account">liability</span>`
+        : "";
 
     html += `
     <div class="account-item${inactive}" data-id="${account.id}">
@@ -473,9 +501,12 @@ export function showEditAccountForm(id) {
   document.getElementById("accountFormTitle").textContent = "Edit Account";
   document.getElementById("accountNameInput").value = account.name;
   document.getElementById("accountTypeSelect").value = account.type;
-  document.getElementById("accountBalanceInput").value = account.openingBalance || "";
-  document.getElementById("accountClassificationSelect").value = account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
-  document.getElementById("accountSavingsToggle").checked = account.isSavings || false;
+  document.getElementById("accountBalanceInput").value =
+    account.openingBalance || "";
+  document.getElementById("accountClassificationSelect").value =
+    account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
+  document.getElementById("accountSavingsToggle").checked =
+    account.isSavings || false;
   modal.dataset.editId = String(id);
 
   updateAccountTypeIcon(account.type);
@@ -502,12 +533,20 @@ export async function handleAccountFormSubmit() {
   const name = document.getElementById("accountNameInput").value;
   const type = document.getElementById("accountTypeSelect").value;
   const openingBalance = document.getElementById("accountBalanceInput").value;
-  const classification = document.getElementById("accountClassificationSelect").value;
+  const classification = document.getElementById(
+    "accountClassificationSelect",
+  ).value;
   const isSavings = document.getElementById("accountSavingsToggle").checked;
 
   let success;
   if (editId) {
-    success = await updateAccount(editId, { name: name.trim(), type, classification, openingBalance: parseFloat(openingBalance) || 0, isSavings });
+    success = await updateAccount(editId, {
+      name: name.trim(),
+      type,
+      classification,
+      openingBalance: parseFloat(openingBalance) || 0,
+      isSavings,
+    });
   } else {
     success = await addAccount({ name, type, openingBalance });
     // Set classification + isSavings if user overrode defaults
@@ -515,9 +554,11 @@ export async function handleAccountFormSubmit() {
       const newAccount = state.accounts.at(-1);
       if (newAccount) {
         const updates = {};
-        if (classification !== (ACCOUNT_CLASSIFICATION[type] || "asset")) updates.classification = classification;
+        if (classification !== (ACCOUNT_CLASSIFICATION[type] || "asset"))
+          updates.classification = classification;
         if (isSavings && !newAccount.isSavings) updates.isSavings = true;
-        if (Object.keys(updates).length > 0) await updateAccount(newAccount.id, updates);
+        if (Object.keys(updates).length > 0)
+          await updateAccount(newAccount.id, updates);
       }
     }
   }
@@ -563,7 +604,9 @@ export function bindAccountEvents() {
   const typeSelect = document.getElementById("accountTypeSelect");
   if (typeSelect) {
     typeSelect.addEventListener("change", () => {
-      const classSelect = document.getElementById("accountClassificationSelect");
+      const classSelect = document.getElementById(
+        "accountClassificationSelect",
+      );
       if (classSelect) {
         classSelect.value = ACCOUNT_CLASSIFICATION[typeSelect.value] || "asset";
       }

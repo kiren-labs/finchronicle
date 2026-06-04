@@ -20,7 +20,9 @@ import { sanitizeHTML } from "./utils.js";
  */
 export function calculateSettlement(startDate, endDate) {
   const now = new Date();
-  const start = startDate || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  const start =
+    startDate ||
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
   const end = endDate || now.toISOString().slice(0, 10);
 
   // Filter transactions in range with attachedTo set
@@ -39,7 +41,12 @@ export function calculateSettlement(startDate, endDate) {
     if (!person) return;
 
     if (!personMap[person]) {
-      personMap[person] = { spentOn: 0, contributed: 0, outstanding: 0, settled: 0 };
+      personMap[person] = {
+        spentOn: 0,
+        contributed: 0,
+        outstanding: 0,
+        settled: 0,
+      };
     }
 
     if (t.type === "expense") {
@@ -104,7 +111,8 @@ export function renderSettlementDashboard(startDate, endDate) {
   const section = document.getElementById("settlementSection");
 
   // Only show if attachedTo field is enabled
-  const isEnabled = state.appSettings && state.appSettings.enabledFields.attachedTo;
+  const isEnabled =
+    state.appSettings && state.appSettings.enabledFields.attachedTo;
   if (!isEnabled) {
     if (section) section.hidden = true;
     return;
@@ -126,7 +134,10 @@ export function renderSettlementDashboard(startDate, endDate) {
     return;
   }
 
-  const periodLabel = formatPeriodLabel(settlement.period.start, settlement.period.end);
+  const periodLabel = formatPeriodLabel(
+    settlement.period.start,
+    settlement.period.end,
+  );
 
   container.innerHTML = `
     <div class="settlement-period">
@@ -155,27 +166,36 @@ export function renderSettlementDashboard(startDate, endDate) {
  */
 function renderPersonCard(person) {
   const balanceClass = person.balance >= 0 ? "positive" : "negative";
-  const balanceLabel = person.balance >= 0
-    ? `+${formatCurrency(person.balance)}`
-    : `-${formatCurrency(Math.abs(person.balance))}`;
-  const statusLabel = person.balance >= 0
-    ? "surplus"
-    : "owes";
+  const balanceLabel =
+    person.balance >= 0
+      ? `+${formatCurrency(person.balance)}`
+      : `-${formatCurrency(Math.abs(person.balance))}`;
+  const statusLabel = person.balance >= 0 ? "surplus" : "owes";
 
   const hasReimbursable = person.outstanding > 0 || person.settled > 0;
-  const reimbursementHtml = hasReimbursable ? `
+  const reimbursementHtml = hasReimbursable
+    ? `
     <div class="settlement-reimbursement">
-      ${person.outstanding > 0 ? `
+      ${
+        person.outstanding > 0
+          ? `
       <div class="settlement-detail settlement-outstanding">
         <span class="settlement-detail-label"><i class="ri-time-line"></i> Outstanding</span>
         <span class="settlement-detail-value outstanding">${formatCurrency(person.outstanding)}</span>
-      </div>` : ""}
-      ${person.settled > 0 ? `
+      </div>`
+          : ""
+      }
+      ${
+        person.settled > 0
+          ? `
       <div class="settlement-detail settlement-settled">
         <span class="settlement-detail-label"><i class="ri-check-line"></i> Settled</span>
         <span class="settlement-detail-value settled">${formatCurrency(person.settled)}</span>
-      </div>` : ""}
-    </div>` : "";
+      </div>`
+          : ""
+      }
+    </div>`
+    : "";
 
   return `
     <div class="settlement-person-card">
@@ -208,12 +228,15 @@ function renderPersonCard(person) {
  * Format a period label from start/end dates.
  */
 function formatPeriodLabel(start, end) {
-  const startDate = new Date(`${start  }T00:00:00`);
-  const endDate = new Date(`${end  }T00:00:00`);
+  const startDate = new Date(`${start}T00:00:00`);
+  const endDate = new Date(`${end}T00:00:00`);
 
   // If same month, show "May 2026" format
   if (start.slice(0, 7) === end.slice(0, 7)) {
-    return startDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    return startDate.toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
   }
 
   // Otherwise show range
@@ -258,7 +281,11 @@ export function navigateSettlementPeriod(direction) {
   currentSettlementMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 
   const start = `${currentSettlementMonth}-01`;
-  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  const lastDay = new Date(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    0,
+  ).getDate();
   const end = `${currentSettlementMonth}-${String(lastDay).padStart(2, "0")}`;
 
   renderSettlementDashboard(start, end);
@@ -273,7 +300,10 @@ export function navigateSettlementPeriod(direction) {
  */
 export function getSettlementSummaryText(startDate, endDate) {
   const settlement = calculateSettlement(startDate, endDate);
-  const periodLabel = formatPeriodLabel(settlement.period.start, settlement.period.end);
+  const periodLabel = formatPeriodLabel(
+    settlement.period.start,
+    settlement.period.end,
+  );
 
   let text = `Family Settlement — ${periodLabel}\n`;
   text += `${"─".repeat(40)}\n`;
@@ -281,11 +311,13 @@ export function getSettlementSummaryText(startDate, endDate) {
 
   settlement.persons.forEach((p) => {
     const status = p.balance >= 0 ? "surplus" : "owes";
-    const balanceStr = p.balance >= 0
-      ? `+${formatCurrency(p.balance)}`
-      : `-${formatCurrency(Math.abs(p.balance))}`;
+    const balanceStr =
+      p.balance >= 0
+        ? `+${formatCurrency(p.balance)}`
+        : `-${formatCurrency(Math.abs(p.balance))}`;
     text += `${p.name}: spent ${formatCurrency(p.spentOn)}, contributed ${formatCurrency(p.contributed)} → ${balanceStr} (${status})`;
-    if (p.outstanding > 0) text += ` | outstanding: ${formatCurrency(p.outstanding)}`;
+    if (p.outstanding > 0)
+      text += ` | outstanding: ${formatCurrency(p.outstanding)}`;
     if (p.settled > 0) text += ` | settled: ${formatCurrency(p.settled)}`;
     text += "\n";
   });

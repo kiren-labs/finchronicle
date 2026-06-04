@@ -71,11 +71,13 @@ export async function requestStoragePersistence() {
     // Request persistence (timeout guards against browsers that hang on this prompt)
     const granted = await Promise.race([
       navigator.storage.persist(),
-      new Promise(resolve => setTimeout(() => resolve(false), 3000)),
+      new Promise((resolve) => setTimeout(() => resolve(false), 3000)),
     ]);
     state.storagePersisted = granted;
     if (!granted) {
-      console.warn("⚠️ Storage persistence denied. Data may be evicted by browser.");
+      console.warn(
+        "⚠️ Storage persistence denied. Data may be evicted by browser.",
+      );
     }
     return granted;
   } catch (e) {
@@ -89,21 +91,38 @@ export async function requestStoragePersistence() {
 
 export async function checkStorageHealth() {
   if (!navigator.storage || !navigator.storage.estimate) {
-    return { supported: false, usedPercent: 0, usedMB: 0, quotaMB: 0, persisted: state.storagePersisted };
+    return {
+      supported: false,
+      usedPercent: 0,
+      usedMB: 0,
+      quotaMB: 0,
+      persisted: state.storagePersisted,
+    };
   }
 
   try {
     const estimate = await navigator.storage.estimate();
     const usedMB = Math.round((estimate.usage / (1024 * 1024)) * 10) / 10;
-    const quotaMB =
-      Math.round((estimate.quota / (1024 * 1024)) * 10) / 10;
+    const quotaMB = Math.round((estimate.quota / (1024 * 1024)) * 10) / 10;
     const usedPercent =
       Math.round((estimate.usage / estimate.quota) * 1000) / 10;
 
-    return { supported: true, usedPercent, usedMB, quotaMB, persisted: state.storagePersisted };
+    return {
+      supported: true,
+      usedPercent,
+      usedMB,
+      quotaMB,
+      persisted: state.storagePersisted,
+    };
   } catch (e) {
     console.warn("Storage estimate failed:", e);
-    return { supported: false, usedPercent: 0, usedMB: 0, quotaMB: 0, persisted: state.storagePersisted };
+    return {
+      supported: false,
+      usedPercent: 0,
+      usedMB: 0,
+      quotaMB: 0,
+      persisted: state.storagePersisted,
+    };
   }
 }
 
@@ -117,7 +136,8 @@ export function isBackupDue() {
   if (!lastBackup) return true;
 
   const elapsed = Date.now() - new Date(lastBackup).getTime();
-  const threshold = FREQUENCY_MS[settings.backupFrequency] || FREQUENCY_MS.weekly;
+  const threshold =
+    FREQUENCY_MS[settings.backupFrequency] || FREQUENCY_MS.weekly;
 
   return elapsed >= threshold;
 }
@@ -171,7 +191,9 @@ async function buildJsonBackup() {
     appSettings,
     netWorthSnapshots,
     localStorage: {
-      exchangeRateHistory: JSON.parse(localStorage.getItem("exchangeRateHistory") || "null"),
+      exchangeRateHistory: JSON.parse(
+        localStorage.getItem("exchangeRateHistory") || "null",
+      ),
       tagColors: JSON.parse(localStorage.getItem("tagColors") || "null"),
     },
   };
@@ -184,9 +206,9 @@ async function buildJsonBackup() {
       new TextEncoder().encode(jsonForHash),
     );
     const hashHex = Array.from(new Uint8Array(hashBuffer))
-      .map(b => b.toString(16).padStart(2, "0"))
+      .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
-    payload.integrity = `sha256:${  hashHex}`;
+    payload.integrity = `sha256:${hashHex}`;
   } catch {
     payload.integrity = "";
   }
@@ -255,7 +277,7 @@ function buildCsvBackup() {
     t.homeAmount || "",
   ]);
 
-  let csv = `${headers.join(",")  }\n`;
+  let csv = `${headers.join(",")}\n`;
   csv += rows
     .map((row) =>
       row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
@@ -298,7 +320,9 @@ export async function encryptBackup(passphrase) {
   );
 
   // Pack salt + iv + ciphertext into one ArrayBuffer
-  const packed = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
+  const packed = new Uint8Array(
+    salt.length + iv.length + ciphertext.byteLength,
+  );
   packed.set(salt, 0);
   packed.set(iv, salt.length);
   packed.set(new Uint8Array(ciphertext), salt.length + iv.length);
@@ -362,7 +386,8 @@ function getBackupFilename(format, encrypted) {
 // ---- Public Backup Actions ----
 
 export async function performJsonBackup(isAuto = false) {
-  const hasData = state.transactions.length > 0 ||
+  const hasData =
+    state.transactions.length > 0 ||
     (state.accounts || []).length > 0 ||
     (state.budgets || []).length > 0 ||
     (state.recurringTemplates || []).length > 0 ||
@@ -415,7 +440,8 @@ export async function performCsvBackup(isAuto = false) {
 }
 
 export async function performEncryptedBackup(passphrase) {
-  const hasData = state.transactions.length > 0 ||
+  const hasData =
+    state.transactions.length > 0 ||
     (state.accounts || []).length > 0 ||
     (state.budgets || []).length > 0 ||
     (state.recurringTemplates || []).length > 0 ||
@@ -577,9 +603,13 @@ export async function initAutoBackup() {
   // Update overdue message text
   const settings2 = getBackupSettings();
   if (settings2.lastAutoBackup) {
-    const days = Math.floor((Date.now() - new Date(settings2.lastAutoBackup).getTime()) / (1000 * 60 * 60 * 24));
+    const days = Math.floor(
+      (Date.now() - new Date(settings2.lastAutoBackup).getTime()) /
+        (1000 * 60 * 60 * 24),
+    );
     const msg = document.getElementById("backupOverdueMsg");
-    if (msg && days > 0) msg.textContent = `Backup overdue — last backup was ${days} day${days === 1 ? "" : "s"} ago.`;
+    if (msg && days > 0)
+      msg.textContent = `Backup overdue — last backup was ${days} day${days === 1 ? "" : "s"} ago.`;
   }
 
   // Update static UI (banner visibility driven by state.backupDue)
@@ -591,66 +621,90 @@ export async function initAutoBackup() {
 // ============================================================================
 
 export function bindAutoBackupEvents() {
-  document.getElementById("autoBackupToggle2")?.addEventListener("click", () => {
-    const settings = getBackupSettings();
-    settings.autoBackupEnabled = !settings.autoBackupEnabled;
-    saveBackupSettings(settings);
-    updateAutoBackupUI();
-  });
+  document
+    .getElementById("autoBackupToggle2")
+    ?.addEventListener("click", () => {
+      const settings = getBackupSettings();
+      settings.autoBackupEnabled = !settings.autoBackupEnabled;
+      saveBackupSettings(settings);
+      updateAutoBackupUI();
+    });
 
-  document.getElementById("backupFrequency2")?.addEventListener("change", (e) => {
-    const settings = getBackupSettings();
-    settings.backupFrequency = e.target.value;
-    saveBackupSettings(settings);
-  });
+  document
+    .getElementById("backupFrequency2")
+    ?.addEventListener("change", (e) => {
+      const settings = getBackupSettings();
+      settings.backupFrequency = e.target.value;
+      saveBackupSettings(settings);
+    });
 
-  document.getElementById("downloadBackupBtn")?.addEventListener("click", () => {
-    performJsonBackup(false);
-  });
+  document
+    .getElementById("downloadBackupBtn")
+    ?.addEventListener("click", () => {
+      performJsonBackup(false);
+    });
 
-  document.getElementById("encryptedBackupBtn2")?.addEventListener("click", () => {
-    const passphrase = prompt("Enter a passphrase (min 12 characters) to encrypt your backup:");
-    if (passphrase) performEncryptedBackup(passphrase);
-  });
+  document
+    .getElementById("encryptedBackupBtn2")
+    ?.addEventListener("click", () => {
+      const passphrase = prompt(
+        "Enter a passphrase (min 12 characters) to encrypt your backup:",
+      );
+      if (passphrase) performEncryptedBackup(passphrase);
+    });
 
-  document.getElementById("exportSpreadsheetBtn")?.addEventListener("click", async () => {
-    const mod = await import("./import-export.js");
-    mod.exportToCSV();
-  });
+  document
+    .getElementById("exportSpreadsheetBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await import("./import-export.js");
+      mod.exportToCSV();
+    });
 
-  document.getElementById("restoreBackupBtn2")?.addEventListener("click", () => {
-    document.getElementById("dataRestoreFile").click();
-  });
+  document
+    .getElementById("restoreBackupBtn2")
+    ?.addEventListener("click", () => {
+      document.getElementById("dataRestoreFile").click();
+    });
 
-  document.getElementById("dataRestoreFile")?.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const mod = await import("./import-export.js");
-    await mod.handleRestoreFileInput(file);
-    e.target.value = "";
-  });
+  document
+    .getElementById("dataRestoreFile")
+    ?.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const mod = await import("./import-export.js");
+      await mod.handleRestoreFileInput(file);
+      e.target.value = "";
+    });
 
-  document.getElementById("importSpreadsheetBtn")?.addEventListener("click", () => {
-    document.getElementById("spreadsheetImportFile").click();
-  });
+  document
+    .getElementById("importSpreadsheetBtn")
+    ?.addEventListener("click", () => {
+      document.getElementById("spreadsheetImportFile").click();
+    });
 
-  document.getElementById("spreadsheetImportFile")?.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const mod = await import("./import-export.js");
-    mod.handleCsvImportFile(file);
-    e.target.value = "";
-  });
+  document
+    .getElementById("spreadsheetImportFile")
+    ?.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const mod = await import("./import-export.js");
+      mod.handleCsvImportFile(file);
+      e.target.value = "";
+    });
 
-  document.getElementById("restoreMergeBtn")?.addEventListener("click", async () => {
-    const mod = await import("./import-export.js");
-    mod.confirmRestore("merge");
-  });
+  document
+    .getElementById("restoreMergeBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await import("./import-export.js");
+      mod.confirmRestore("merge");
+    });
 
-  document.getElementById("restoreReplaceBtn")?.addEventListener("click", async () => {
-    const mod = await import("./import-export.js");
-    mod.confirmRestore("replace");
-  });
+  document
+    .getElementById("restoreReplaceBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await import("./import-export.js");
+      mod.confirmRestore("replace");
+    });
 
   document.getElementById("backupOverdueBtn")?.addEventListener("click", () => {
     performJsonBackup(false);

@@ -10,10 +10,16 @@ const MAX_ERRORS = 50;
 function logError(message, stack) {
   try {
     const log = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || "[]");
-    log.push({ timestamp: new Date().toISOString(), message, stack: stack || "" });
+    log.push({
+      timestamp: new Date().toISOString(),
+      message,
+      stack: stack || "",
+    });
     if (log.length > MAX_ERRORS) log.splice(0, log.length - MAX_ERRORS);
     localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
-  } catch (_) { /* localStorage full or unavailable — silently ignore */ }
+  } catch (_) {
+    /* localStorage full or unavailable — silently ignore */
+  }
 }
 
 window.onerror = (message, source, lineno, colno, error) => {
@@ -25,14 +31,17 @@ window.onerror = (message, source, lineno, colno, error) => {
 
 window.addEventListener("unhandledrejection", (event) => {
   const reason = event.reason;
-  logError(
-    reason?.message || String(reason),
-    reason?.stack || ""
-  );
+  logError(reason?.message || String(reason), reason?.stack || "");
 });
 
 import { state, currencies } from "./state.js";
-import { showMessage, generateId, sanitizeHTML, getErrorLog, clearErrorLog } from "./utils.js";
+import {
+  showMessage,
+  generateId,
+  sanitizeHTML,
+  getErrorLog,
+  clearErrorLog,
+} from "./utils.js";
 import {
   initDB,
   migrateFromLocalStorage,
@@ -45,7 +54,6 @@ import {
   updateCurrencyDisplay,
   toggleCurrencySelector,
   closeCurrencySelector,
-  getCurrency,
 } from "./currency.js";
 import { validateTransaction } from "./validation.js";
 import {
@@ -74,7 +82,14 @@ import {
   renderFormTagChips,
   renderTagPicker,
 } from "./ui.js";
-import { getAllTags, renameTag, deleteTag, cycleTagColor, ensureTagColor, initTagColors } from "./search.js";
+import {
+  getAllTags,
+  renameTag,
+  deleteTag,
+  cycleTagColor,
+  ensureTagColor,
+  initTagColors,
+} from "./search.js";
 import { renderTagManagement } from "./settings.js";
 import {
   toggleDarkMode,
@@ -92,7 +107,6 @@ import {
 import {
   loadRecurringIntoState,
   checkRecurringTransactions,
-  openRecurringModal,
   closeRecurringModal,
   saveRecurringTemplate,
   selectRecurringType,
@@ -103,7 +117,6 @@ import {
   renderBudgetList,
   renderBudgetAlerts,
   saveBudget,
-  deleteBudget,
   renderBudgetModal,
 } from "./budget.js";
 import {
@@ -157,11 +170,7 @@ import {
   renderSettlementDashboard,
   bindSettlementEvents,
 } from "./settlement.js";
-import {
-  initGoals,
-  renderGoalsDashboard,
-  bindGoalEvents,
-} from "./goals.js";
+import { initGoals, renderGoalsDashboard, bindGoalEvents } from "./goals.js";
 import { bindReconciliationEvents } from "./reconciliation.js";
 
 // ============================================================================
@@ -297,13 +306,17 @@ function bindStaticEvents() {
   });
 
   // ---- Reports tab: forecast horizon toggle ----
-  document.querySelector(".forecast-horizon-toggle").addEventListener("click", (e) => {
-    const btn = e.target.closest(".horizon-btn");
-    if (!btn) return;
-    document.querySelectorAll(".horizon-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-    renderForecast(parseInt(btn.dataset.days, 10));
-  });
+  document
+    .querySelector(".forecast-horizon-toggle")
+    .addEventListener("click", (e) => {
+      const btn = e.target.closest(".horizon-btn");
+      if (!btn) return;
+      document
+        .querySelectorAll(".horizon-btn")
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderForecast(parseInt(btn.dataset.days, 10));
+    });
 
   // ---- Settings toolbar buttons ----
   bindSettingsButtons();
@@ -483,7 +496,9 @@ function bindDelegatedEvents() {
     // Collapse toggle — ignore clicks on the Add button inside the header
     const toggleHeader = e.target.closest("[data-toggle-budget-collapse]");
     if (toggleHeader && !e.target.closest("#addBudgetBtn")) {
-      const body    = toggleHeader.closest(".card").querySelector(".budget-collapse-body");
+      const body = toggleHeader
+        .closest(".card")
+        .querySelector(".budget-collapse-body");
       const chevron = toggleHeader.querySelector(".budget-chevron");
       if (body) {
         body.hidden = !body.hidden;
@@ -521,77 +536,85 @@ function bindDelegatedEvents() {
   });
 
   // Tag management — rename / delete (v3.14.0)
-  document.getElementById("tagManagementContainer").addEventListener("click", async (e) => {
-    // Color dot click — cycle to next palette color
-    const colorDot = e.target.closest("[data-color-tag]");
-    if (colorDot) {
-      cycleTagColor(colorDot.dataset.colorTag);
-      renderTagManagement();
-      updateUI();
-      return;
-    }
-
-    const renameBtn = e.target.closest("[data-rename-tag]");
-    if (renameBtn) {
-      const oldName = renameBtn.dataset.renameTag;
-      const row = renameBtn.closest(".tag-manage-row");
-      const nameSpan = row.querySelector(".tag-manage-name");
-      const actionsDiv = row.querySelector(".tag-manage-actions");
-
-      // Inline rename input
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = oldName;
-      input.className = "search-input";
-      input.style.cssText = "padding: 4px 8px; font-size: 13px; width: 140px;";
-
-      const saveBtn = document.createElement("button");
-      saveBtn.className = "tag-manage-btn tag-manage-btn-rename";
-      saveBtn.textContent = "Save";
-
-      const cancelBtn = document.createElement("button");
-      cancelBtn.className = "tag-manage-btn";
-      cancelBtn.textContent = "Cancel";
-      cancelBtn.style.cssText = "background: var(--color-bg); border-color: var(--color-border);";
-
-      nameSpan.replaceWith(input);
-      actionsDiv.innerHTML = "";
-      actionsDiv.appendChild(saveBtn);
-      actionsDiv.appendChild(cancelBtn);
-      input.focus();
-      input.select();
-
-      const doSave = async () => {
-        const newName = input.value.trim().toLowerCase();
-        if (newName && newName !== oldName) {
-          await renameTag(oldName, newName);
-          // Update searchTags if the renamed tag is active
-          if (state.searchTags.includes(oldName)) {
-            state.searchTags = state.searchTags.map((t) => (t === oldName ? newName : t));
-          }
-        }
+  document
+    .getElementById("tagManagementContainer")
+    .addEventListener("click", async (e) => {
+      // Color dot click — cycle to next palette color
+      const colorDot = e.target.closest("[data-color-tag]");
+      if (colorDot) {
+        cycleTagColor(colorDot.dataset.colorTag);
         renderTagManagement();
         updateUI();
-      };
+        return;
+      }
 
-      saveBtn.addEventListener("click", doSave);
-      input.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter") doSave();
-        if (ev.key === "Escape") { renderTagManagement(); }
-      });
-      cancelBtn.addEventListener("click", () => renderTagManagement());
-      return;
-    }
+      const renameBtn = e.target.closest("[data-rename-tag]");
+      if (renameBtn) {
+        const oldName = renameBtn.dataset.renameTag;
+        const row = renameBtn.closest(".tag-manage-row");
+        const nameSpan = row.querySelector(".tag-manage-name");
+        const actionsDiv = row.querySelector(".tag-manage-actions");
 
-    const deleteBtn = e.target.closest("[data-delete-tag]");
-    if (deleteBtn) {
-      const tagName = deleteBtn.dataset.deleteTag;
-      await deleteTag(tagName);
-      state.searchTags = state.searchTags.filter((t) => t !== tagName);
-      renderTagManagement();
-      updateUI();
-    }
-  });
+        // Inline rename input
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = oldName;
+        input.className = "search-input";
+        input.style.cssText =
+          "padding: 4px 8px; font-size: 13px; width: 140px;";
+
+        const saveBtn = document.createElement("button");
+        saveBtn.className = "tag-manage-btn tag-manage-btn-rename";
+        saveBtn.textContent = "Save";
+
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "tag-manage-btn";
+        cancelBtn.textContent = "Cancel";
+        cancelBtn.style.cssText =
+          "background: var(--color-bg); border-color: var(--color-border);";
+
+        nameSpan.replaceWith(input);
+        actionsDiv.innerHTML = "";
+        actionsDiv.appendChild(saveBtn);
+        actionsDiv.appendChild(cancelBtn);
+        input.focus();
+        input.select();
+
+        const doSave = async () => {
+          const newName = input.value.trim().toLowerCase();
+          if (newName && newName !== oldName) {
+            await renameTag(oldName, newName);
+            // Update searchTags if the renamed tag is active
+            if (state.searchTags.includes(oldName)) {
+              state.searchTags = state.searchTags.map((t) =>
+                t === oldName ? newName : t,
+              );
+            }
+          }
+          renderTagManagement();
+          updateUI();
+        };
+
+        saveBtn.addEventListener("click", doSave);
+        input.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") doSave();
+          if (ev.key === "Escape") {
+            renderTagManagement();
+          }
+        });
+        cancelBtn.addEventListener("click", () => renderTagManagement());
+        return;
+      }
+
+      const deleteBtn = e.target.closest("[data-delete-tag]");
+      if (deleteBtn) {
+        const tagName = deleteBtn.dataset.deleteTag;
+        await deleteTag(tagName);
+        state.searchTags = state.searchTags.filter((t) => t !== tagName);
+        renderTagManagement();
+        updateUI();
+      }
+    });
 
   // FAQ sections & items (delegated from faqContainer) - Lazy-loaded
   document
@@ -636,8 +659,12 @@ function bindDelegatedEvents() {
       if (!btn) return;
       if (btn.dataset.action === "copyErrorLog") {
         const log = getErrorLog();
-        const text = log.map((e) => `[${e.timestamp}] ${e.message}\n${e.stack}`).join("\n---\n");
-        navigator.clipboard.writeText(text).then(() => showMessage("Error log copied"));
+        const text = log
+          .map((e) => `[${e.timestamp}] ${e.message}\n${e.stack}`)
+          .join("\n---\n");
+        navigator.clipboard
+          .writeText(text)
+          .then(() => showMessage("Error log copied"));
       }
       if (btn.dataset.action === "clearErrorLog") {
         clearErrorLog();
@@ -720,7 +747,10 @@ function bindTagInputEvents() {
     }
     suggestions.innerHTML = existing
       .slice(0, 8)
-      .map((t) => `<div class="tag-suggestion-item" data-suggestion="${sanitizeHTML(t)}">${sanitizeHTML(t)}</div>`)
+      .map(
+        (t) =>
+          `<div class="tag-suggestion-item" data-suggestion="${sanitizeHTML(t)}">${sanitizeHTML(t)}</div>`,
+      )
       .join("");
     suggestions.hidden = false;
   }
@@ -736,7 +766,11 @@ function bindTagInputEvents() {
         e.preventDefault();
         addTag(tagInput.value);
       }
-    } else if (e.key === "Backspace" && !tagInput.value && state.formTags.length > 0) {
+    } else if (
+      e.key === "Backspace" &&
+      !tagInput.value &&
+      state.formTags.length > 0
+    ) {
       state.formTags = state.formTags.slice(0, -1);
       renderFormTagChips();
     }
@@ -753,7 +787,10 @@ function bindTagInputEvents() {
 
   // Hide suggestions when focus leaves the tag input area
   document.addEventListener("click", (e) => {
-    if (!e.target.closest("#tagInputWrapper") && !e.target.closest("#tagSuggestions")) {
+    if (
+      !e.target.closest("#tagInputWrapper") &&
+      !e.target.closest("#tagSuggestions")
+    ) {
       hideSuggestions();
     }
   });
@@ -796,7 +833,9 @@ function bindFormSubmit() {
 
       const type = document.getElementById("type").value;
       const now = new Date().toISOString();
-      const existingTx = state.editingId ? state.transactions.find((t) => t.id === state.editingId) : null;
+      const existingTx = state.editingId
+        ? state.transactions.find((t) => t.id === state.editingId)
+        : null;
       const transaction = {
         id: state.editingId || generateId(),
         type,
@@ -805,7 +844,7 @@ function bindFormSubmit() {
         date: document.getElementById("date").value,
         notes: document.getElementById("notes").value,
         tags: [...state.formTags],
-        status: existingTx ? (existingTx.status || "cleared") : "cleared",
+        status: existingTx ? existingTx.status || "cleared" : "cleared",
         createdAt: existingTx ? existingTx.createdAt : now,
         updatedAt: now,
         ...(type === "transfer" ? getTransferFormData() : {}),
@@ -862,7 +901,9 @@ function bindFormSubmit() {
         setTimeout(() => {
           submitBtn.classList.remove("success");
           submitBtn.disabled = false;
-          submitBtn.textContent = state.editingId ? "Update Transaction" : "Save Transaction";
+          submitBtn.textContent = state.editingId
+            ? "Update Transaction"
+            : "Save Transaction";
           formCard.classList.remove("success-pulse");
 
           // If the user quickly opened a new edit session, don't reset the form
@@ -955,7 +996,8 @@ function registerServiceWorker() {
     window.location.reload();
   });
 
-  navigator.serviceWorker.register("./sw.js")
+  navigator.serviceWorker
+    .register("./sw.js")
     .then((registration) => {
       console.log("✅ Service Worker registered - App works offline!");
       registration.update();
@@ -963,7 +1005,10 @@ function registerServiceWorker() {
       // Check for SW updates on tab visibility (throttled to 5 min)
       let lastUpdateCheck = Date.now();
       document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible" && Date.now() - lastUpdateCheck > 5 * 60 * 1000) {
+        if (
+          document.visibilityState === "visible" &&
+          Date.now() - lastUpdateCheck > 5 * 60 * 1000
+        ) {
           lastUpdateCheck = Date.now();
           registration.update();
         }
@@ -999,7 +1044,7 @@ function openBudgetModal(budget = null) {
 
   // Inline duplicate warning — injected below the category select
   const categorySelect = modal.element.querySelector("#budgetCategory");
-  const confirmBtn     = modal.element.querySelector(".modal-btn-confirm");
+  const confirmBtn = modal.element.querySelector(".modal-btn-confirm");
 
   const dupWarning = document.createElement("p");
   dupWarning.className = "budget-dup-warning";
@@ -1009,7 +1054,7 @@ function openBudgetModal(budget = null) {
   function checkDuplicate() {
     const selected = categorySelect.value;
     const existing = state.budgets.find(
-      (b) => b.category === selected && b.id !== budget?.id
+      (b) => b.category === selected && b.id !== budget?.id,
     );
     if (existing) {
       dupWarning.textContent = `⚠ A budget for "${selected}" already exists. Edit it from the list instead.`;
@@ -1031,9 +1076,11 @@ function openBudgetModal(budget = null) {
   });
 
   // Cancel button
-  modal.element.querySelector(".modal-btn-cancel").addEventListener("click", () => {
-    modal.close();
-  });
+  modal.element
+    .querySelector(".modal-btn-cancel")
+    .addEventListener("click", () => {
+      modal.close();
+    });
 
   // Confirm button
   confirmBtn.addEventListener("click", async () => {

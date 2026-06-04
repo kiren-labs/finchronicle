@@ -38,7 +38,7 @@ export function buildForecast(
     let safety = 0;
     while (safety < 400) {
       safety++;
-      const d = new Date(`${dateStr  }T00:00:00`);
+      const d = new Date(`${dateStr}T00:00:00`);
       if (d > horizon) break;
       if (d >= today) {
         events.push({
@@ -53,7 +53,7 @@ export function buildForecast(
       }
       dateStr = computeNextDueDate(
         tmpl.frequency,
-        tmpl.dayOfMonth || new Date(`${dateStr  }T00:00:00`).getDate(),
+        tmpl.dayOfMonth || new Date(`${dateStr}T00:00:00`).getDate(),
         dateStr,
       );
     }
