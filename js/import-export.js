@@ -1021,10 +1021,7 @@ export async function handleRestoreFileInput(file) {
       showMessage(t("error.invalid_backup"));
     }
   } else if (name.endsWith(".csv")) {
-    showMessage(
-      "CSV restores transactions only. Use a .json backup for a full restore.",
-      "warning",
-    );
+    showMessage(t("error.csv_transactions_only"), "warning");
     handleCsvRestore(file);
   } else {
     showMessage(t("error.unrecognized_file"));
@@ -1037,14 +1034,14 @@ export function handleCsvRestore(file) {
     try {
       const backupData = parseBackupCSV(reader.result);
       if (!backupData.valid) {
-        showMessage(`Invalid backup file: ${backupData.error}`);
+        showMessage(t("error.invalid_backup"));
         return;
       }
       state.pendingRestoreData = backupData;
       showRestorePreview(backupData);
     } catch (err) {
       console.error("Backup parse error:", err);
-      showMessage("Failed to read backup file. Check the file format.");
+      showMessage(t("error.restore_failed"));
     }
   };
   reader.onerror = () => showMessage(t("error.import_failed"));
