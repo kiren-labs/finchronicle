@@ -13,6 +13,7 @@ import {
   formatDate,
   generateId,
 } from "./utils.js";
+import { t } from "./i18n.js";
 import { getCurrency } from "./currency.js";
 import {
   loadDataFromDB,
@@ -35,7 +36,7 @@ import { updateUI } from "./ui.js";
 
 export function exportToCSV() {
   if (state.transactions.length === 0) {
-    showMessage("No transactions to export.");
+    showMessage(t("error.no_transaction_data"));
     return;
   }
 
@@ -99,7 +100,7 @@ export function exportToCSV() {
   window.URL.revokeObjectURL(url);
 
   updateBackupTimestamp();
-  showMessage("Export successful and backup recorded.");
+  showMessage(t("message.export_success"));
 }
 
 // ---- Generate Backup Metadata ----
@@ -489,7 +490,7 @@ export function handleRestore(event) {
   };
 
   reader.onerror = () => {
-    showMessage("Failed to read file. Try again.");
+    showMessage(t("error.import_failed"));
   };
 
   reader.readAsText(file);
@@ -811,7 +812,7 @@ export async function confirmRestore(mode = "merge") {
   }
 
   closeRestorePreview();
-  showMessage("Restoring backup…");
+  showMessage(t("message.restoring_backup"));
 
   try {
     const CLEARABLE_STORES = [
@@ -923,7 +924,7 @@ export async function confirmRestore(mode = "merge") {
     showRestoreReport(stats);
   } catch (err) {
     console.error("Restore failed:", err);
-    showMessage("Restore failed. Your existing data is safe.");
+    showMessage(t("error.restore_failed"));
     try {
       await loadDataFromDB();
       updateUI();
@@ -1017,7 +1018,7 @@ export async function handleRestoreFileInput(file) {
       const data = JSON.parse(text);
       await processRestoredData(data);
     } catch {
-      showMessage("Invalid JSON backup file.");
+      showMessage(t("error.invalid_backup"));
     }
   } else if (name.endsWith(".csv")) {
     showMessage(
@@ -1026,7 +1027,7 @@ export async function handleRestoreFileInput(file) {
     );
     handleCsvRestore(file);
   } else {
-    showMessage("Unrecognised file. Use a backup file (.json or .enc) or a spreadsheet (.csv).");
+    showMessage(t("error.unrecognized_file"));
   }
 }
 
@@ -1046,6 +1047,6 @@ export function handleCsvRestore(file) {
       showMessage("Failed to read backup file. Check the file format.");
     }
   };
-  reader.onerror = () => showMessage("Failed to read file. Try again.");
+  reader.onerror = () => showMessage(t("error.import_failed"));
   reader.readAsText(file);
 }

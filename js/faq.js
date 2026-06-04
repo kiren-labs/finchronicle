@@ -2,67 +2,37 @@
 // FAQ Data and Rendering (v3.9.0)
 // ============================================================================
 
+import { t } from './i18n.js';
+
+// Build FAQ structure from i18n
 export const faqData = [
   {
-    category: "Data Backup & Recovery",
+    category: t('faq.category_backup'),
     icon: "ri-shield-check-line",
     questions: [
-      {
-        q: "Where is my data stored?",
-        a: "All your data is stored locally on your device using IndexedDB, a secure browser database. Nothing is sent to external servers or the cloud. Your financial data stays 100% private and under your control.",
-      },
-      {
-        q: "How do I backup my data?",
-        a: "Go to the <strong>Settings</strong> tab → <strong>Export</strong> section → Tap <strong>Export to CSV</strong>. Save this file to your cloud storage (Google Drive, iCloud, Dropbox) or email it to yourself. We recommend backing up monthly or after significant changes.",
-      },
-      {
-        q: "What happens if I lose my device or it breaks?",
-        a: "<strong>Your data will be lost</strong> if you haven't created a backup. FinChronicle is a privacy-first app—no cloud storage means no automatic recovery. Always keep regular CSV backups in a safe location.",
-      },
-      {
-        q: "How do I restore my data from a backup?",
-        a: "Go to <strong>Settings</strong> → <strong>Import</strong> section → Select your CSV backup file → Tap <strong>Import Transactions</strong>. All transactions from the backup will be restored. Duplicates are handled automatically.",
-      },
-      {
-        q: "How often should I backup?",
-        a: "We recommend backing up <strong>at least once a month</strong>, or after adding many transactions. The app will show a warning if you haven't backed up in 30+ days. Check the Backup Status card above for your current status.",
-      },
+      { q: t('faq.q_storage'), a: t('faq.a_storage') },
+      { q: t('faq.q_backup'), a: t('faq.a_backup') },
+      { q: t('faq.q_device_loss'), a: t('faq.a_device_loss') },
+      { q: t('faq.q_restore'), a: t('faq.a_restore') },
+      { q: t('faq.q_backup_frequency'), a: t('faq.a_backup_frequency') },
     ],
   },
   {
-    category: "Privacy & Security",
+    category: t('faq.category_privacy'),
     icon: "ri-lock-line",
     questions: [
-      {
-        q: "Is my data sent to any servers or the cloud?",
-        a: "Absolutely not. FinChronicle is 100% offline-first. Your transactions, categories, amounts—everything stays on your device. There's no backend server, no analytics, no tracking. We can't see your data because we never receive it.",
-      },
-      {
-        q: "Who can see my financial information?",
-        a: "Only you. Data is stored in your browser's IndexedDB, which is sandboxed per website and inaccessible to other sites or apps. Even if someone has physical access to your device, they'd need your device password to access the browser data.",
-      },
-      {
-        q: "Can the app creator access my data?",
-        a: "No. As developers, we have zero access to your transactions. The app runs entirely in your browser without any server communication. Your privacy is guaranteed by design, not by policy.",
-      },
+      { q: t('faq.q_privacy'), a: t('faq.a_privacy') },
+      { q: t('faq.q_access'), a: t('faq.a_access') },
+      { q: t('faq.q_creator_access'), a: t('faq.a_creator_access') },
     ],
   },
   {
-    category: "Usage & Features",
+    category: t('faq.category_usage'),
     icon: "ri-question-line",
     questions: [
-      {
-        q: "How do I import bank statements?",
-        a: "Download your bank statement as CSV. Open FinChronicle → <strong>Settings</strong> → <strong>Import</strong> section → Select CSV file. The app expects columns: <code>Date</code>, <code>Category</code>, <code>Amount</code>. You may need to adjust your CSV format to match.",
-      },
-      {
-        q: "How do I change currency?",
-        a: "Go to <strong>Settings</strong> → Tap the currency button (e.g., ₹ INR) → Select your preferred currency from the list. The currency symbol updates throughout the app. Note: Amounts are not converted—only the display symbol changes.",
-      },
-      {
-        q: "What are 'Insights' in the Groups tab?",
-        a: "Insights show your monthly financial overview: income, expenses, savings (net), and transaction count. They also display month-over-month trends (percentage change vs previous month) and your top 5 spending categories. Use the month dropdown to view insights for different months.",
-      },
+      { q: t('faq.q_import'), a: t('faq.a_import') },
+      { q: t('faq.q_currency'), a: t('faq.a_currency') },
+      { q: t('faq.q_insights'), a: t('faq.a_insights') },
     ],
   },
 ];

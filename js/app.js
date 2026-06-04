@@ -42,6 +42,7 @@ import {
   getErrorLog,
   clearErrorLog,
 } from "./utils.js";
+import { t } from "./i18n.js";
 import {
   initDB,
   migrateFromLocalStorage,
@@ -814,14 +815,14 @@ function bindFormSubmit() {
       const amount = parseFloat(amountInput);
 
       if (!amountInput) {
-        showMessage("Enter an amount.");
+        showMessage(t("validation.enter_amount"));
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         return;
       }
 
       if (!isNaN(amount) && !Number.isInteger(amount * 100)) {
-        showMessage("Amount can have at most 2 decimal places.");
+        showMessage(t("validation.amount_decimals"));
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         return;
@@ -891,10 +892,10 @@ function bindFormSubmit() {
           if (index !== -1) {
             state.transactions[index] = sanitizedTransaction;
           }
-          showMessage("Transaction updated.");
+          showMessage(t("message.transaction_updated"));
         } else {
           state.transactions.unshift(sanitizedTransaction);
-          showMessage("Transaction saved.");
+          showMessage(t("message.transaction_saved"));
         }
 
         const savedEditingId = state.editingId;
@@ -937,7 +938,7 @@ function bindFormSubmit() {
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         submitBtn.textContent = originalBtnText;
-        showMessage("Transaction wasn't saved. Try again.");
+        showMessage(t("error.transaction_save_failed"));
       }
     });
 }
@@ -955,11 +956,11 @@ async function handleMarkSettled(id) {
         state.transactions[idx] = updated;
       }
       updateUI();
-      showMessage("Marked as settled.");
+      showMessage(t("message.marked_settled"));
     }
   } catch (err) {
     console.error("Failed to mark transaction as settled:", err);
-    showMessage("Failed to mark as settled. Try again.");
+    showMessage(t("error.transaction_save_failed"));
   }
 }
 
@@ -1089,11 +1090,11 @@ function openBudgetModal(budget = null) {
 
       // Validation
       if (!formData.category) {
-        showMessage("Select a category.", "error");
+        showMessage(t("validation.select_category"), "error");
         return;
       }
       if (!formData.monthlyLimit || formData.monthlyLimit <= 0) {
-        showMessage("Monthly limit must be greater than 0.", "error");
+        showMessage(t("validation.budget_limit"), "error");
         return;
       }
 
@@ -1176,7 +1177,7 @@ async function init() {
     registerServiceWorker();
   } catch (err) {
     console.error("App initialization failed:", err);
-    showMessage("Your data didn't load. Try refreshing the page.");
+    showMessage(t("error.data_load_failed"));
   }
 }
 

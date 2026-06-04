@@ -4,6 +4,7 @@
 
 import { state, APP_VERSION } from "./state.js";
 import { showMessage } from "./utils.js";
+import { t } from "./i18n.js";
 import { getCurrency } from "./currency.js";
 import { updateBackupTimestamp } from "./settings.js";
 import {
@@ -393,7 +394,7 @@ export async function performJsonBackup(isAuto = false) {
     (state.savingsGoals || []).length > 0 ||
     (state.quickTemplates || []).length > 0;
   if (!hasData) {
-    if (!isAuto) showMessage("No data to back up.");
+    if (!isAuto) showMessage(t("error.no_data_backup"));
     return;
   }
 
@@ -411,12 +412,12 @@ export async function performJsonBackup(isAuto = false) {
   state.backupDue = false;
   updateAutoBackupUI();
 
-  if (!isAuto) showMessage("Backup saved.");
+  if (!isAuto) showMessage(t("message.backup_saved"));
 }
 
 export async function performCsvBackup(isAuto = false) {
   if (state.transactions.length === 0) {
-    if (!isAuto) showMessage("No transactions to back up.");
+    if (!isAuto) showMessage(t("error.no_transactions_backup"));
     return;
   }
 
@@ -432,9 +433,9 @@ export async function performCsvBackup(isAuto = false) {
   updateBackupTimestamp();
 
   if (isAuto) {
-    showMessage("Auto-backup saved to Downloads.");
+    showMessage(t("message.auto_backup_saved"));
   } else {
-    showMessage("Spreadsheet backup exported.");
+    showMessage(t("message.spreadsheet_exported"));
   }
 }
 
@@ -447,12 +448,12 @@ export async function performEncryptedBackup(passphrase) {
     (state.savingsGoals || []).length > 0 ||
     (state.quickTemplates || []).length > 0;
   if (!hasData) {
-    showMessage("No data to back up.");
+    showMessage(t("error.no_data_backup"));
     return;
   }
 
   if (!passphrase || passphrase.length < 12) {
-    showMessage("Password must be at least 12 characters.");
+    showMessage(t("validation.password_min"));
     return;
   }
 
@@ -470,16 +471,16 @@ export async function performEncryptedBackup(passphrase) {
     state.backupDue = false;
     updateAutoBackupUI();
 
-    showMessage("Encrypted backup saved.");
+    showMessage(t("message.encrypted_backup_saved"));
   } catch (e) {
     console.error("Encryption failed:", e);
-    showMessage("Backup protection failed. Try again.");
+    showMessage(t("error.encryption_failed"));
   }
 }
 
 export async function importEncryptedBackup(file, passphrase) {
   if (!passphrase || passphrase.length < 12) {
-    showMessage("Password must be at least 12 characters.");
+    showMessage(t("validation.password_min"));
     return null;
   }
 
@@ -489,14 +490,14 @@ export async function importEncryptedBackup(file, passphrase) {
     const data = JSON.parse(jsonStr);
 
     if (!data.transactions || !Array.isArray(data.transactions)) {
-      showMessage("Invalid backup file format.");
+      showMessage(t("error.invalid_backup"));
       return null;
     }
 
     return data;
   } catch (e) {
     console.error("Decryption failed:", e);
-    showMessage("Couldn't decrypt this file. The password may be wrong or the file may be damaged.");
+    showMessage(t("error.decrypt_failed"));
     return null;
   }
 }

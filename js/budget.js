@@ -5,6 +5,7 @@
 import { state, categories } from "./state.js";
 import { saveBudgetToDB, loadBudgetsFromDB, deleteBudgetFromDB } from "./db.js";
 import { showMessage, generateId } from "./utils.js";
+import { t } from "./i18n.js";
 import { formatCurrency } from "./currency.js";
 
 // Initialize budgets on app startup
@@ -15,7 +16,7 @@ export async function initBudgets() {
   } catch (error) {
     console.error("Error loading budgets:", error);
     state.budgets = [];
-    showMessage("Your budgets didn't load. Try refreshing.", "error");
+    showMessage(t("error.budgets_load_failed"), "error");
   }
 }
 
@@ -70,11 +71,11 @@ export async function saveBudget(budget) {
       state.budgets.push(budget);
     }
 
-    showMessage(`Budget for "${budget.category}" saved.`, "success");
+    showMessage(t("message.budget_saved", { category: budget.category }), "success");
     return budget;
   } catch (error) {
     console.error("Error saving budget:", error);
-    showMessage("Budget wasn't saved. Try again.", "error");
+    showMessage(t("error.budget_save_failed"), "error");
     throw error;
   }
 }
@@ -84,10 +85,10 @@ export async function deleteBudget(budgetId) {
   try {
     await deleteBudgetFromDB(budgetId);
     state.budgets = state.budgets.filter((b) => b.id !== budgetId);
-    showMessage("Budget deleted.", "success");
+    showMessage(t("message.budget_deleted"), "success");
   } catch (error) {
     console.error("Error deleting budget:", error);
-    showMessage("Budget wasn't deleted. Try again.", "error");
+    showMessage(t("error.budget_delete_failed"), "error");
     throw error;
   }
 }
