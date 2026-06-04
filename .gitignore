@@ -59,3 +59,4 @@ ehthumbs.db
 .claude/settings.local.json
 .claude/*
 docs/personal/*
+scripts/convert-to-fcledger-json.js
