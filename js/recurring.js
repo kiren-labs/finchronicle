@@ -2,7 +2,7 @@
 // Recurring Transactions (v3.11.0)
 // ============================================================================
 
-import { state, categories, getAllCategoryNames } from "./state.js";
+import { state, categories } from "./state.js";
 import { sanitizeHTML, formatDate, showMessage, generateId } from "./utils.js";
 import { formatCurrency } from "./currency.js";
 import { getAllTags, getTagColor, ensureTagColor } from "./search.js";

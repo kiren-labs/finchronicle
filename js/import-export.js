@@ -13,7 +13,7 @@ import {
   formatDate,
   generateId,
 } from "./utils.js";
-import { getCurrency, formatCurrency } from "./currency.js";
+import { getCurrency } from "./currency.js";
 import {
   loadDataFromDB,
   bulkSaveTransactionsToDB,

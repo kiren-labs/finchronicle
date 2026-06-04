@@ -20,7 +20,6 @@ import {
 // ---- Constants ----
 
 const BACKUP_SETTINGS_KEY = "autoBackupSettings";
-const STORAGE_HEALTH_KEY = "storageHealthLastCheck";
 
 const DEFAULT_SETTINGS = {
   autoBackupEnabled: true,

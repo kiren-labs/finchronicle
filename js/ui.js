@@ -12,7 +12,7 @@ import {
 } from "./state.js";
 import { filterTransactions, getAllTags, getTagColor } from "./search.js";
 import { sanitizeHTML, formatDate, formatMonth, showMessage } from "./utils.js";
-import { formatCurrency, getCurrency } from "./currency.js";
+import { formatCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
 import {

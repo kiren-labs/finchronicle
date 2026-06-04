@@ -4,7 +4,6 @@
 
 import { state } from "./state.js";
 import { formatCurrency } from "./currency.js";
-import { formatDate } from "./utils.js";
 import { getAccountBalance } from "./accounts.js";
 import { computeNextDueDate } from "./recurring.js";
 
@@ -177,7 +176,6 @@ export function renderForecast(horizonDays) {
 
     for (const ev of events) {
       const isNeg = ev.runningBalance < 0;
-      const amountClass = ev.amount < 0 ? "negative-amount" : "positive-amount";
       const rowClass = isNeg
         ? "forecast-event-row forecast-event-negative"
         : "forecast-event-row";
@@ -207,7 +205,6 @@ export function renderForecast(horizonDays) {
   container
     .querySelectorAll(".forecast-event-row[data-date]")
     .forEach((row) => {
-      const label = row.querySelector(".forecast-event-label") || row;
       const [dateEl, labelEl, amountEl, balEl] = [
         "forecast-event-date",
         "forecast-event-label",

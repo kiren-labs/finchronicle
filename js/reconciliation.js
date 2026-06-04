@@ -5,7 +5,7 @@
 import { state } from "./state.js";
 import { saveTransactionToDB } from "./db.js";
 import { formatCurrency } from "./currency.js";
-import { sanitizeHTML, formatDate, showMessage } from "./utils.js";
+import { formatDate, showMessage } from "./utils.js";
 import { updateUI } from "./ui.js";
 
 // Module-level reconciliation session — not on global state object

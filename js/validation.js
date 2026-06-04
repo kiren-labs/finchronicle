@@ -3,7 +3,6 @@
 // ============================================================================
 
 import {
-  categories,
   getAllCategoryNames,
   PAYMENT_METHODS,
   EXPENSE_TYPES,

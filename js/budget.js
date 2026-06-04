@@ -2,12 +2,11 @@
 // Budget Management (v3.13.0)
 // ============================================================================
 
-import { state, categories, getAllCategoryNames } from "./state.js";
+import { state, categories } from "./state.js";
 import {
   saveBudgetToDB,
   loadBudgetsFromDB,
   deleteBudgetFromDB,
-  getBudgetByCategory,
 } from "./db.js";
 import { showMessage, generateId } from "./utils.js";
 import { formatCurrency } from "./currency.js";

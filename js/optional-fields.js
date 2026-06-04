@@ -2,12 +2,7 @@
 // Optional Fields System (v3.16.0)
 // ============================================================================
 
-import {
-  state,
-  DEFAULT_APP_SETTINGS,
-  PAYMENT_METHODS,
-  EXPENSE_TYPES,
-} from "./state.js";
+import { state, DEFAULT_APP_SETTINGS } from "./state.js";
 import { loadAppSettings, saveAppSettings } from "./db.js";
 import { sanitizeHTML } from "./utils.js";
 
