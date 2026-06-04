@@ -255,7 +255,7 @@ export default {
     goal_milestone_25: '25% reached on "{name}".',
     goal_milestone_50: '50% reached. "{name}" is halfway there.',
     goal_milestone_75: '75% reached. "{name}" is close to the target.',
-    goal_milestone_100: 'Goal reached. "${name}" is fully funded.',
+    goal_milestone_100: 'Goal reached! "{name}" is fully funded.',
   },
   error: {
     transaction_save_failed: "Transaction wasn't saved. Try again.",
@@ -283,6 +283,8 @@ export default {
     encryption_failed: "Backup protection failed. Try again.",
     csv_transactions_only:
       "This file restores transactions only. Use a full backup file for everything else.",
+    import_read_failed: "Failed to read backup file. Check the file format.",
+    import_read_error: "Failed to read file. Try again.",
   },
   empty: {
     no_transactions: "No transactions yet.",
