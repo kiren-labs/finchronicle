@@ -489,7 +489,7 @@ export async function importEncryptedBackup(file, passphrase) {
     const data = JSON.parse(jsonStr);
 
     if (!data.transactions || !Array.isArray(data.transactions)) {
-      showMessage("Invalid backup file format");
+      showMessage("Invalid backup file format.");
       return null;
     }
 

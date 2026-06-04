@@ -916,10 +916,10 @@ export async function confirmDelete() {
         (t) => t.id !== state.deleteId,
       );
       updateUI();
-      showMessage("Transaction deleted!");
+      showMessage("Transaction deleted.");
     } catch (err) {
       console.error("Delete failed:", err);
-      showMessage("Failed to delete transaction");
+      showMessage("Failed to delete transaction.");
     }
     state.deleteId = null;
   }

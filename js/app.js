@@ -814,14 +814,14 @@ function bindFormSubmit() {
       const amount = parseFloat(amountInput);
 
       if (!amountInput) {
-        showMessage("⚠️ Enter an amount.");
+        showMessage("Enter an amount.");
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         return;
       }
 
       if (!isNaN(amount) && !Number.isInteger(amount * 100)) {
-        showMessage("⚠️ Amount can have at most 2 decimal places.");
+        showMessage("Amount can have at most 2 decimal places.");
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         return;
@@ -891,10 +891,10 @@ function bindFormSubmit() {
           if (index !== -1) {
             state.transactions[index] = sanitizedTransaction;
           }
-          showMessage("Transaction updated!");
+          showMessage("Transaction updated.");
         } else {
           state.transactions.unshift(sanitizedTransaction);
-          showMessage("Transaction saved!");
+          showMessage("Transaction saved.");
         }
 
         const savedEditingId = state.editingId;
@@ -955,7 +955,7 @@ async function handleMarkSettled(id) {
         state.transactions[idx] = updated;
       }
       updateUI();
-      showMessage("Marked as settled");
+      showMessage("Marked as settled.");
     }
   } catch (err) {
     console.error("Failed to mark transaction as settled:", err);

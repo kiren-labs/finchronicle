@@ -149,13 +149,13 @@ export function checkForUpdates() {
               showMessage("Update found. Preparing…");
               showUpdatePrompt();
             } else {
-              showMessage("You're on the latest version!");
+              showMessage("You're on the latest version.");
             }
           }, 1000);
         });
       } else {
         icon.style.animation = "";
-        showMessage("No service worker registered");
+        showMessage("No service worker registered.");
       }
     });
   } else {

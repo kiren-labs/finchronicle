@@ -193,7 +193,7 @@ export function cloneLast() {
     if (el) el.value = recent.location;
   }
 
-  showMessage("📋 Last transaction cloned — review and save.");
+  showMessage("Last transaction cloned. Review and save.");
 }
 
 // ============================================================================

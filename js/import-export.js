@@ -1046,6 +1046,6 @@ export function handleCsvRestore(file) {
       showMessage("Failed to read backup file. Check the file format.");
     }
   };
-  reader.onerror = () => showMessage("Failed to read file. Please try again.");
+  reader.onerror = () => showMessage("Failed to read file. Try again.");
   reader.readAsText(file);
 }
