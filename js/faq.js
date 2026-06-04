@@ -17,7 +17,7 @@ export const faqData = [
       },
       {
         q: "What happens if I lose my device or it breaks?",
-        a: "⚠️ <strong>Your data will be lost</strong> if you haven't created a backup. FinChronicle is a privacy-first app—no cloud storage means no automatic recovery. Always keep regular CSV backups in a safe location.",
+        a: "<strong>Your data will be lost</strong> if you haven't created a backup. FinChronicle is a privacy-first app—no cloud storage means no automatic recovery. Always keep regular CSV backups in a safe location.",
       },
       {
         q: "How do I restore my data from a backup?",

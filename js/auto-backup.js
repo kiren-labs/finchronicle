@@ -470,7 +470,7 @@ export async function performEncryptedBackup(passphrase) {
     state.backupDue = false;
     updateAutoBackupUI();
 
-    showMessage("🔒 Encrypted backup saved.");
+    showMessage("Encrypted backup saved.");
   } catch (e) {
     console.error("Encryption failed:", e);
     showMessage("Backup protection failed. Try again.");
@@ -543,8 +543,8 @@ export async function renderStorageHealth() {
       <div class="storage-health-info">
         <span><i class="${health.persisted === true ? "ri-shield-check-line" : health.persisted === false ? "ri-error-warning-line" : "ri-question-line"}" aria-hidden="true"></i> Storage protection: ${health.persisted === true ? "Protected" : health.persisted === false ? "Not guaranteed — browser may clear data" : "Unknown"}</span>
       </div>
-      ${health.persisted === false ? `<p class="storage-warning-text" role="alert">⚠️ Browser may delete your data under storage pressure. Add to Home Screen and export backups regularly.</p>` : ""}
-      ${health.usedPercent > 80 ? `<p class="storage-warning-text" role="alert">⚠️ Storage is getting full. Consider exporting and clearing old data.</p>` : ""}
+      ${health.persisted === false ? `<p class="storage-warning-text" role="alert">Browser may delete your data under storage pressure. Add to Home Screen and export backups regularly.</p>` : ""}
+      ${health.usedPercent > 80 ? `<p class="storage-warning-text" role="alert">Storage is getting full. Consider exporting and clearing old data.</p>` : ""}
     </div>
   `;
 }

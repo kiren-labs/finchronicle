@@ -95,7 +95,7 @@ function checkMilestone(goal, prevPercent, newPercent) {
       25: `25% reached on "${goal.name}".`,
       50: `50% reached. "${goal.name}" is halfway funded.`,
       75: `75% reached. "${goal.name}" is close to the target.`,
-      100: `🎉 Goal reached! "${goal.name}" is fully funded!`,
+      100: `Goal reached! "${goal.name}" is fully funded.`,
     };
     showMessage(messages[newLevel] || `Milestone: ${newLevel}%`);
   }

@@ -858,7 +858,7 @@ function bindFormSubmit() {
         const errorMessage = validation.errors
           .map((err) => err.message)
           .join(", ");
-        showMessage(`⚠️ ${errorMessage}`);
+        showMessage(errorMessage);
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
