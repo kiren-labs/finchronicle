@@ -84,7 +84,7 @@ function renderCandidateList() {
   const { candidates, checkedIds, accountName } = reconciliationState;
 
   if (candidates.length === 0) {
-    list.textContent = "No unreconciled transactions found up to this date.";
+    list.textContent = "No transactions to check up to this date.";
     return;
   }
 
@@ -104,7 +104,7 @@ function renderCandidateList() {
     checkbox.id = `recon-chk-${t.id}`;
     checkbox.dataset.reconId = t.id;
     checkbox.checked = checkedIds.has(t.id);
-    checkbox.setAttribute("aria-label", "Reconcile transaction");
+    checkbox.setAttribute("aria-label", "Mark as confirmed");
 
     const dateSpan = document.createElement("span");
     dateSpan.className = "recon-col recon-date";
@@ -154,7 +154,7 @@ export function openReconciliationModal(accountName) {
   if (!modal) return;
 
   const heading = document.getElementById("reconciliationAccountName");
-  if (heading) heading.textContent = `Reconcile: ${accountName}`;
+  if (heading) heading.textContent = `Check against statement: ${accountName}`;
 
   const balInput = document.getElementById("reconciliationStatementBalance");
   const dateInput = document.getElementById("reconciliationStatementDate");
@@ -280,7 +280,7 @@ export function renderReconciliationDifference() {
     diffEl.className = "reconciliation-difference reconciliation-mismatch";
     const hint = document.createElement("p");
     hint.className = "recon-hint";
-    hint.textContent = "Review unmatched transactions before finalising.";
+    hint.textContent = "Review unmatched transactions before finalizing.";
     diffEl.appendChild(hint);
   }
 }
@@ -329,7 +329,7 @@ export async function finaliseReconciliation(force = false) {
   }
 
   const count = toReconcile.length;
-  showMessage(`${count} transaction${count !== 1 ? "s" : ""} reconciled.`);
+  showMessage(`${count} transaction${count !== 1 ? "s" : ""} confirmed against your statement.`);
   closeReconciliationModal();
   updateUI();
 }

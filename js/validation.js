@@ -17,18 +17,18 @@ export function validateTransaction(transaction) {
 
   // 1. Type validation
   if (!["income", "expense", "transfer"].includes(transaction.type)) {
-    errors.push({ field: "type", message: "Invalid transaction type" });
+    errors.push({ field: "type", message: "Transaction type must be Income, Expense, or Transfer." });
   }
 
   // 2. Amount validation
   if (isNaN(transaction.amount) || transaction.amount <= 0) {
     errors.push({
       field: "amount",
-      message: "Amount must be a positive number",
+      message: "Amount must be a positive number.",
     });
   }
   if (transaction.amount > 999999999) {
-    errors.push({ field: "amount", message: "Amount exceeds maximum limit" });
+    errors.push({ field: "amount", message: "Amount exceeds maximum limit." });
   }
 
   // 3. Category validation
@@ -40,7 +40,7 @@ export function validateTransaction(transaction) {
     if (!validCategories.includes(transaction.category)) {
       errors.push({
         field: "category",
-        message: "Invalid category for transaction type",
+        message: "This category is not available for this transaction type.",
       });
     }
   }
@@ -52,19 +52,19 @@ export function validateTransaction(transaction) {
     if (!from) {
       errors.push({
         field: "fromAccount",
-        message: "Source account is required for transfers",
+        message: "Source account is required for transfers.",
       });
     }
     if (!to) {
       errors.push({
         field: "toAccount",
-        message: "Destination account is required for transfers",
+        message: "Destination account is required for transfers.",
       });
     }
     if (from && to && from.toLowerCase() === to.toLowerCase()) {
       errors.push({
         field: "toAccount",
-        message: "Source and destination cannot be the same",
+        message: "Source and destination accounts cannot be the same.",
       });
     }
     // Sanitize account names
@@ -107,7 +107,7 @@ export function validateTransaction(transaction) {
   if (transaction.notes && transaction.notes.length > 500) {
     errors.push({
       field: "notes",
-      message: "Notes too long (max 500 characters)",
+      message: "Notes too long (max 500 characters).",
     });
   }
   transaction.notes = sanitizeHTML(transaction.notes || "");
@@ -118,7 +118,7 @@ export function validateTransaction(transaction) {
     .map((tag) => sanitizeHTML(String(tag).trim()))
     .filter((tag) => tag.length > 0 && tag.length <= 30);
   if (sanitizedTags.length > 15) {
-    errors.push({ field: "tags", message: "Maximum 15 tags allowed" });
+    errors.push({ field: "tags", message: "Maximum 15 tags allowed." });
   }
   transaction.tags = sanitizedTags.slice(0, 15);
 
@@ -127,21 +127,21 @@ export function validateTransaction(transaction) {
     transaction.paymentMethod &&
     !PAYMENT_METHODS.includes(transaction.paymentMethod)
   ) {
-    errors.push({ field: "paymentMethod", message: "Invalid payment method" });
+    errors.push({ field: "paymentMethod", message: "Select a valid payment method." });
   }
 
   if (
     transaction.expenseType &&
     !EXPENSE_TYPES.includes(transaction.expenseType)
   ) {
-    errors.push({ field: "expenseType", message: "Invalid expense type" });
+    errors.push({ field: "expenseType", message: "Select a valid expense type." });
   }
 
   if (transaction.merchant) {
     if (transaction.merchant.length > 100) {
       errors.push({
         field: "merchant",
-        message: "Merchant name too long (max 100)",
+        message: "Merchant name is too long (max 100 characters).",
       });
     }
     transaction.merchant = sanitizeHTML(transaction.merchant);
@@ -151,7 +151,7 @@ export function validateTransaction(transaction) {
     if (transaction.attachedTo.length > 50) {
       errors.push({
         field: "attachedTo",
-        message: "Person name too long (max 50)",
+        message: "Person name is too long (max 50 characters).",
       });
     }
     transaction.attachedTo = sanitizeHTML(transaction.attachedTo);
@@ -161,7 +161,7 @@ export function validateTransaction(transaction) {
     if (transaction.referenceId.length > 100) {
       errors.push({
         field: "referenceId",
-        message: "Reference ID too long (max 100)",
+        message: "Reference ID is too long (max 100 characters).",
       });
     }
     transaction.referenceId = sanitizeHTML(transaction.referenceId);
@@ -171,7 +171,7 @@ export function validateTransaction(transaction) {
     if (transaction.location.length > 100) {
       errors.push({
         field: "location",
-        message: "Location too long (max 100)",
+        message: "Location is too long (max 100 characters).",
       });
     }
     transaction.location = sanitizeHTML(transaction.location);
@@ -196,7 +196,7 @@ export function validateTransaction(transaction) {
         errors.push({
           field: "exchangeRate",
           message:
-            "Exchange rate is required for foreign currency transactions",
+            "Enter the conversion rate for this foreign currency.",
         });
       }
     } else if (
@@ -206,7 +206,7 @@ export function validateTransaction(transaction) {
       if (isNaN(transaction.exchangeRate) || transaction.exchangeRate <= 0) {
         errors.push({
           field: "exchangeRate",
-          message: "Exchange rate must be a positive number",
+          message: "Conversion rate must be a positive number.",
         });
       }
     }

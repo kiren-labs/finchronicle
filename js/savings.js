@@ -202,12 +202,12 @@ export function renderSavingsDashboard() {
     <div class="savings-widgets">
       <div class="savings-widget-row">
         <div class="savings-widget">
-          <span class="savings-widget-label">Saved This Month</span>
+          <span class="savings-widget-label">Saved this month</span>
           <span class="savings-widget-value">${formatCurrency(monthSaved)}</span>
           <span class="savings-widget-sub">${monthIncome > 0 ? `of ${formatCurrency(monthIncome)} income` : "no income yet"}</span>
         </div>
         <div class="savings-widget highlight">
-          <span class="savings-widget-label">Savings Rate</span>
+          <span class="savings-widget-label">Savings rate</span>
           <span class="savings-widget-value ${monthIncome === 0 ? "" : rateClass}">${monthIncome === 0 ? "N/A" : `${rate.toFixed(1)}%`}</span>
           <span class="savings-widget-sub">${monthIncome === 0 ? "No income recorded" : rate >= 20 ? "On track" : rate >= 10 ? "Could improve" : "Below target"}</span>
         </div>
@@ -215,7 +215,7 @@ export function renderSavingsDashboard() {
 
   // 3-month trend bar chart
   html += `<div class="savings-trend">
-    <span class="savings-trend-title">3-Month Trend</span>
+    <span class="savings-trend-title">3-month trend</span>
     <div class="savings-trend-chart">`;
 
   const maxRate = Math.max(...trend.map((t) => t.rate), 1);
@@ -238,12 +238,12 @@ export function renderSavingsDashboard() {
   html += `
       <div class="savings-widget-row">
         <div class="savings-widget">
-          <span class="savings-widget-label">Annual Projection</span>
+          <span class="savings-widget-label">Annual projection</span>
           <span class="savings-widget-value${projection.avgMonthlySavings < 0 ? " is-negative" : ""}">${formatCurrency(Math.abs(projection.projectedAnnual))}</span>
           <span class="savings-widget-sub">${projection.avgMonthlySavings < 0 ? "Deficit trend" : `~${formatCurrency(projection.avgMonthlySavings)}/mo avg`}</span>
         </div>
         <div class="savings-widget">
-          <span class="savings-widget-label">Total Saved</span>
+          <span class="savings-widget-label">Total saved</span>
           <span class="savings-widget-value">${formatCurrency(cumulative)}</span>
           <span class="savings-widget-sub">All time</span>
         </div>

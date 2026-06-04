@@ -42,6 +42,7 @@ import {
   getErrorLog,
   clearErrorLog,
 } from "./utils.js";
+import { t } from "./i18n.js";
 import {
   initDB,
   migrateFromLocalStorage,
@@ -202,7 +203,7 @@ async function getImportExportModule() {
 function bindStaticEvents() {
   // ---- Header buttons ----
   document
-    .querySelector('.header-btn[aria-label="Send Feedback"]')
+    .querySelector('.header-btn[aria-label="Send feedback"]')
     .addEventListener("click", openFeedbackModal);
   document
     .querySelector('.header-btn[aria-label="Quick Add Transaction"]')
@@ -436,7 +437,7 @@ function bindSettingsButtons() {
     "Check for updates": checkForUpdates,
     "Change currency": toggleCurrencySelector,
     "Toggle dark mode": toggleDarkMode,
-    "Send Feedback": () => openFeedbackModal(),
+    "Send feedback": () => openFeedbackModal(),
   };
 
   document.querySelectorAll("#settingsTab .toolbar-btn").forEach((btn) => {
@@ -488,7 +489,7 @@ function bindDelegatedEvents() {
     updateCurrencyDisplay();
     updateUI();
     closeCurrencySelector();
-    showMessage(`Currency changed to ${currencies[code].name}`);
+    showMessage(`Currency changed to ${currencies[code].name}.`);
   });
 
   // Budget container: collapse toggle + edit / delete
@@ -664,12 +665,12 @@ function bindDelegatedEvents() {
           .join("\n---\n");
         navigator.clipboard
           .writeText(text)
-          .then(() => showMessage("Error log copied"));
+          .then(() => showMessage("Error log copied."));
       }
       if (btn.dataset.action === "clearErrorLog") {
         clearErrorLog();
         updateSettingsContent();
-        showMessage("Error log cleared");
+        showMessage("Error log cleared.");
       }
     });
   }
@@ -814,14 +815,14 @@ function bindFormSubmit() {
       const amount = parseFloat(amountInput);
 
       if (!amountInput) {
-        showMessage("⚠️ Please enter an amount");
+        showMessage(t("validation.enter_amount"));
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         return;
       }
 
       if (!isNaN(amount) && !Number.isInteger(amount * 100)) {
-        showMessage("⚠️ Amount can have at most 2 decimal places");
+        showMessage(t("validation.amount_decimals"));
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         return;
@@ -829,7 +830,7 @@ function bindFormSubmit() {
 
       submitBtn.classList.add("loading");
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="btn-spinner"></span> Saving...';
+      submitBtn.innerHTML = '<span class="btn-spinner"></span> Saving…';
 
       const type = document.getElementById("type").value;
       const now = new Date().toISOString();
@@ -858,7 +859,7 @@ function bindFormSubmit() {
         const errorMessage = validation.errors
           .map((err) => err.message)
           .join(", ");
-        showMessage(`⚠️ ${errorMessage}`);
+        showMessage(errorMessage);
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
@@ -891,10 +892,10 @@ function bindFormSubmit() {
           if (index !== -1) {
             state.transactions[index] = sanitizedTransaction;
           }
-          showMessage("Transaction updated!");
+          showMessage(t("message.transaction_updated"));
         } else {
           state.transactions.unshift(sanitizedTransaction);
-          showMessage("Transaction saved!");
+          showMessage(t("message.transaction_saved"));
         }
 
         const savedEditingId = state.editingId;
@@ -937,7 +938,7 @@ function bindFormSubmit() {
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         submitBtn.textContent = originalBtnText;
-        showMessage("Failed to save transaction");
+        showMessage(t("error.transaction_save_failed"));
       }
     });
 }
@@ -955,11 +956,11 @@ async function handleMarkSettled(id) {
         state.transactions[idx] = updated;
       }
       updateUI();
-      showMessage("Marked as settled");
+      showMessage(t("message.marked_settled"));
     }
   } catch (err) {
     console.error("Failed to mark transaction as settled:", err);
-    showMessage("Failed to mark as settled. Please try again.");
+    showMessage(t("error.transaction_save_failed"));
   }
 }
 
@@ -1089,11 +1090,11 @@ function openBudgetModal(budget = null) {
 
       // Validation
       if (!formData.category) {
-        showMessage("Please select a category", "error");
+        showMessage(t("validation.select_category"), "error");
         return;
       }
       if (!formData.monthlyLimit || formData.monthlyLimit <= 0) {
-        showMessage("Monthly limit must be greater than 0", "error");
+        showMessage(t("validation.budget_limit"), "error");
         return;
       }
 
@@ -1176,7 +1177,7 @@ async function init() {
     registerServiceWorker();
   } catch (err) {
     console.error("App initialization failed:", err);
-    showMessage("Failed to load data");
+    showMessage(t("error.data_load_failed"));
   }
 }
 

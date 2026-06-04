@@ -140,27 +140,27 @@ export function checkForUpdates() {
     navigator.serviceWorker.getRegistration().then((registration) => {
       if (registration) {
         console.log("🔍 Checking for updates...");
-        showMessage("Checking for updates...");
+        showMessage("Checking for updates…");
 
         registration.update().then(() => {
           setTimeout(() => {
             icon.style.animation = "";
             if (registration.waiting || registration.installing) {
-              showMessage("Update found! Preparing...");
+              showMessage("Update found. Preparing…");
               showUpdatePrompt();
             } else {
-              showMessage("You're on the latest version!");
+              showMessage("You're on the latest version.");
             }
           }, 1000);
         });
       } else {
         icon.style.animation = "";
-        showMessage("No service worker registered");
+        showMessage("App update check isn't available right now.");
       }
     });
   } else {
     icon.style.animation = "";
-    showMessage("Service Worker not supported");
+    showMessage("Your browser doesn't support offline updates.");
   }
 }
 
@@ -228,13 +228,12 @@ export function renderBackupStatus() {
     statusIcon = "ri-alert-line";
     statusLabel = "Never backed up";
     statusMessage =
-      "Your data is at risk! Export a backup now to protect your financial records.";
+      "Your data is not yet backed up. Export a backup now to protect your financial records.";
   } else if (days === 0) {
     statusClass = "backup-status-good";
     statusIcon = "ri-checkbox-circle-line";
     statusLabel = "Backed up today";
-    statusMessage =
-      "Your data is safe. Great job keeping your records protected!";
+    statusMessage = "Your records are protected.";
   } else if (days <= 7) {
     statusClass = "backup-status-good";
     statusIcon = "ri-checkbox-circle-line";
@@ -250,7 +249,7 @@ export function renderBackupStatus() {
     statusIcon = "ri-alert-line";
     statusLabel = `Last backup: ${days} days ago`;
     statusMessage =
-      "⚠️ Backup is outdated! Export now to protect your recent transactions.";
+      "Backup is outdated. Download a backup now to protect your recent transactions.";
   }
 
   return `
@@ -274,8 +273,8 @@ export function renderBackupStatus() {
             </p>
 
             <div class="backup-actions">
-                <button class="btn btn-primary" data-action="exportBackup" type="button" aria-label="Export all transactions to CSV backup file">
-                    <i class="ri-download-line" aria-hidden="true"></i> Export Backup Now
+                <button class="btn btn-primary" data-action="exportBackup" type="button" aria-label="Download full backup file">
+                  <i class="ri-download-line" aria-hidden="true"></i> Download backup
                 </button>
 
                 <button class="backup-faq-button" data-action="scrollToFAQ" type="button" aria-label="Jump to frequently asked questions about backups">
@@ -334,7 +333,7 @@ function renderErrorLogSection() {
   container.innerHTML = `
     <div class="card" style="margin-top: var(--space-4);">
       <h3 style="margin-bottom: var(--space-2);"><i class="ri-bug-line"></i> Error Log (${errors.length})</h3>
-      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: var(--space-2);">Local-only. Copy and paste into a GitHub issue to report bugs.</p>
+      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: var(--space-2);">Stored on this device only. Copy and share with the developer to report a bug.</p>
       <div class="error-log-list" style="max-height: 200px; overflow-y: auto; font-size: 0.8rem; font-family: monospace; background: var(--color-surface); padding: var(--space-2); border-radius: var(--radius-sm);">
         ${rows}
       </div>

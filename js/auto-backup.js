@@ -4,6 +4,7 @@
 
 import { state, APP_VERSION } from "./state.js";
 import { showMessage } from "./utils.js";
+import { t } from "./i18n.js";
 import { getCurrency } from "./currency.js";
 import { updateBackupTimestamp } from "./settings.js";
 import {
@@ -75,7 +76,7 @@ export async function requestStoragePersistence() {
     state.storagePersisted = granted;
     if (!granted) {
       console.warn(
-        "⚠️ Storage persistence denied. Data may be evicted by browser.",
+        "⚠️ Your browser may delete app data if storage runs low. Add this app to your home screen to help prevent this.",
       );
     }
     return granted;
@@ -393,7 +394,7 @@ export async function performJsonBackup(isAuto = false) {
     (state.savingsGoals || []).length > 0 ||
     (state.quickTemplates || []).length > 0;
   if (!hasData) {
-    if (!isAuto) showMessage("No data to back up!");
+    if (!isAuto) showMessage(t("error.no_data_backup"));
     return;
   }
 
@@ -411,12 +412,12 @@ export async function performJsonBackup(isAuto = false) {
   state.backupDue = false;
   updateAutoBackupUI();
 
-  if (!isAuto) showMessage("✅ Backup saved!");
+  if (!isAuto) showMessage(t("message.backup_saved"));
 }
 
 export async function performCsvBackup(isAuto = false) {
   if (state.transactions.length === 0) {
-    if (!isAuto) showMessage("No transactions to back up!");
+    if (!isAuto) showMessage(t("error.no_transactions_backup"));
     return;
   }
 
@@ -432,9 +433,9 @@ export async function performCsvBackup(isAuto = false) {
   updateBackupTimestamp();
 
   if (isAuto) {
-    showMessage("📦 Auto-backup saved to Downloads");
+    showMessage(t("message.auto_backup_saved"));
   } else {
-    showMessage("✅ CSV backup exported!");
+    showMessage(t("message.spreadsheet_exported"));
   }
 }
 
@@ -447,12 +448,12 @@ export async function performEncryptedBackup(passphrase) {
     (state.savingsGoals || []).length > 0 ||
     (state.quickTemplates || []).length > 0;
   if (!hasData) {
-    showMessage("No data to back up!");
+    showMessage(t("error.no_data_backup"));
     return;
   }
 
   if (!passphrase || passphrase.length < 12) {
-    showMessage("Passphrase must be at least 12 characters");
+    showMessage(t("validation.password_min"));
     return;
   }
 
@@ -470,16 +471,16 @@ export async function performEncryptedBackup(passphrase) {
     state.backupDue = false;
     updateAutoBackupUI();
 
-    showMessage("🔒 Encrypted backup saved!");
+    showMessage(t("message.encrypted_backup_saved"));
   } catch (e) {
     console.error("Encryption failed:", e);
-    showMessage("Encryption failed. Try again.");
+    showMessage(t("error.encryption_failed"));
   }
 }
 
 export async function importEncryptedBackup(file, passphrase) {
   if (!passphrase || passphrase.length < 12) {
-    showMessage("Passphrase must be at least 12 characters");
+    showMessage(t("validation.password_min"));
     return null;
   }
 
@@ -489,14 +490,14 @@ export async function importEncryptedBackup(file, passphrase) {
     const data = JSON.parse(jsonStr);
 
     if (!data.transactions || !Array.isArray(data.transactions)) {
-      showMessage("Invalid backup file format");
+      showMessage(t("error.invalid_backup"));
       return null;
     }
 
     return data;
   } catch (e) {
     console.error("Decryption failed:", e);
-    showMessage("Decryption failed — wrong passphrase or corrupted file");
+    showMessage(t("error.decrypt_failed"));
     return null;
   }
 }
@@ -541,10 +542,10 @@ export async function renderStorageHealth() {
         <span><i class="${statusIcon}" aria-hidden="true"></i> ${health.usedMB} MB used of ${health.quotaMB} MB (${health.usedPercent}%)</span>
       </div>
       <div class="storage-health-info">
-        <span><i class="${health.persisted === true ? "ri-shield-check-line" : health.persisted === false ? "ri-error-warning-line" : "ri-question-line"}" aria-hidden="true"></i> Persistent storage: ${health.persisted === true ? "Protected" : health.persisted === false ? "Not granted — data may be evicted" : "Unknown"}</span>
+        <span><i class="${health.persisted === true ? "ri-shield-check-line" : health.persisted === false ? "ri-error-warning-line" : "ri-question-line"}" aria-hidden="true"></i> Storage protection: ${health.persisted === true ? "Protected" : health.persisted === false ? "Not guaranteed — browser may clear data" : "Unknown"}</span>
       </div>
-      ${health.persisted === false ? `<p class="storage-warning-text" role="alert">⚠️ Browser may delete your data under storage pressure. Add to Home Screen and export backups regularly.</p>` : ""}
-      ${health.usedPercent > 80 ? `<p class="storage-warning-text" role="alert">⚠️ Storage is getting full. Consider exporting and clearing old data.</p>` : ""}
+      ${health.persisted === false ? `<p class="storage-warning-text" role="alert">Browser may delete your data under storage pressure. Add to Home Screen and export backups regularly.</p>` : ""}
+      ${health.usedPercent > 80 ? `<p class="storage-warning-text" role="alert">Storage is getting full. Consider exporting and clearing old data.</p>` : ""}
     </div>
   `;
 }
@@ -647,7 +648,7 @@ export function bindAutoBackupEvents() {
     .getElementById("encryptedBackupBtn2")
     ?.addEventListener("click", () => {
       const passphrase = prompt(
-        "Enter a passphrase (min 12 characters) to encrypt your backup:",
+        "Enter a password (min 12 characters) to encrypt your backup:",
       );
       if (passphrase) performEncryptedBackup(passphrase);
     });

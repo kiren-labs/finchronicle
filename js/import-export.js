@@ -13,6 +13,7 @@ import {
   formatDate,
   generateId,
 } from "./utils.js";
+import { t } from "./i18n.js";
 import { getCurrency } from "./currency.js";
 import {
   loadDataFromDB,
@@ -35,7 +36,7 @@ import { updateUI } from "./ui.js";
 
 export function exportToCSV() {
   if (state.transactions.length === 0) {
-    showMessage("No transactions to export!");
+    showMessage(t("error.no_transaction_data"));
     return;
   }
 
@@ -99,7 +100,7 @@ export function exportToCSV() {
   window.URL.revokeObjectURL(url);
 
   updateBackupTimestamp();
-  showMessage("✅ Export successful & backup recorded!");
+  showMessage(t("message.export_success"));
 }
 
 // ---- Generate Backup Metadata ----
@@ -132,7 +133,7 @@ function generateBackupMetadata() {
 
 export async function createBackup() {
   if (state.transactions.length === 0) {
-    showMessage("No transactions to backup!");
+    showMessage("No transactions to back up.");
     return;
   }
 
@@ -230,7 +231,7 @@ export async function createBackup() {
   a.click();
   window.URL.revokeObjectURL(url);
 
-  showMessage("Backup created successfully!");
+  showMessage("Backup created successfully.");
 }
 
 // ---- Import CSV ----
@@ -251,17 +252,19 @@ export function handleImport(event) {
     try {
       const result = await importFromCSV(reader.result);
       if (result.added === 0) {
-        showMessage("No valid rows to import.");
+        showMessage("No valid transactions found in this file.");
         return;
       }
       showMessage(
-        `Imported ${result.added} transaction(s)${
-          result.skipped ? ` • Skipped ${result.skipped}` : ""
+        `Imported ${result.added} transaction${result.added !== 1 ? "s" : ""}${
+          result.skipped
+            ? ` • Skipped ${result.skipped} row${result.skipped !== 1 ? "s" : ""}`
+            : ""
         }`,
       );
     } catch (err) {
       console.error("Import failed:", err);
-      showMessage("Import failed. Check the CSV format.");
+      showMessage("Import failed. Make sure the file is in the correct format.");
     }
   };
   reader.readAsText(file);
@@ -274,17 +277,19 @@ export function handleCsvImportFile(file) {
     try {
       const result = await importFromCSV(reader.result);
       if (result.added === 0) {
-        showMessage("No valid rows to import.");
+        showMessage("No valid transactions found in this file.");
         return;
       }
       showMessage(
-        `Imported ${result.added} transaction(s)${
-          result.skipped ? ` • Skipped ${result.skipped}` : ""
+        `Imported ${result.added} transaction${result.added !== 1 ? "s" : ""}${
+          result.skipped
+            ? ` • Skipped ${result.skipped} row${result.skipped !== 1 ? "s" : ""}`
+            : ""
         }`,
       );
     } catch (err) {
       console.error("Import failed:", err);
-      showMessage("Import failed. Check the CSV format.");
+      showMessage("Import failed. Make sure the file is in the correct format.");
     }
   };
   reader.readAsText(file);
@@ -480,12 +485,12 @@ export function handleRestore(event) {
       showRestorePreview(backupData);
     } catch (err) {
       console.error("Backup parse error:", err);
-      showMessage("Failed to read backup file. Please check the file format.");
+      showMessage("Failed to read backup file. Check the file format.");
     }
   };
 
   reader.onerror = () => {
-    showMessage("Failed to read file. Please try again.");
+    showMessage(t("error.import_failed"));
   };
 
   reader.readAsText(file);
@@ -527,7 +532,7 @@ export function parseBackupCSV(text) {
   if (!hasRequired) {
     return {
       valid: false,
-      error: "Missing required columns (Date, Type, Category, Amount)",
+      error: "File is missing required columns: Date, Type, Category, Amount.",
     };
   }
 
@@ -706,7 +711,7 @@ export function parseBackupCSV(text) {
   });
 
   if (parsedTransactions.length === 0) {
-    return { valid: false, error: "No valid transactions found in backup" };
+    return { valid: false, error: "This backup file doesn't contain any transactions." };
   }
 
   return { valid: true, metadata, transactions: parsedTransactions };
@@ -750,7 +755,7 @@ export function showRestorePreview(backupData) {
       integrityEl.style.color = "var(--color-income-text)";
     } else if (backupData.integrityOk === false) {
       integrityRow.style.display = "";
-      integrityEl.textContent = "⚠ Hash mismatch — file may be corrupted";
+      integrityEl.textContent = "⚠ File check failed — this backup may be damaged";
       integrityEl.style.color = "var(--color-expense-text)";
     } else {
       integrityRow.style.display = "none";
@@ -801,13 +806,13 @@ export async function confirmRestore(mode = "merge") {
 
   if (mode === "replace") {
     const confirmed = confirm(
-      `This will DELETE all current data and replace it with the backup (${backupData.transactions.length} transactions). This cannot be undone. Continue?`,
+      `Replace all your current data with ${backupData.transactions.length} transactions from this backup? You can't undo this.`,
     );
     if (!confirmed) return;
   }
 
   closeRestorePreview();
-  showMessage("Restoring backup...");
+  showMessage(t("message.restoring_backup"));
 
   try {
     const CLEARABLE_STORES = [
@@ -919,7 +924,7 @@ export async function confirmRestore(mode = "merge") {
     showRestoreReport(stats);
   } catch (err) {
     console.error("Restore failed:", err);
-    showMessage("Restore failed. Your existing data was preserved.");
+    showMessage(t("error.restore_failed"));
     try {
       await loadDataFromDB();
       updateUI();
@@ -1002,7 +1007,7 @@ export async function handleRestoreFileInput(file) {
 
   if (name.endsWith(".enc")) {
     const passphrase = prompt(
-      "Enter the passphrase used to encrypt this backup:",
+      "Enter the password you used to encrypt this backup:",
     );
     if (!passphrase) return;
     const data = await importEncryptedBackup(file, passphrase);
@@ -1013,16 +1018,13 @@ export async function handleRestoreFileInput(file) {
       const data = JSON.parse(text);
       await processRestoredData(data);
     } catch {
-      showMessage("Invalid JSON backup file.");
+      showMessage(t("error.invalid_backup"));
     }
   } else if (name.endsWith(".csv")) {
-    showMessage(
-      "CSV restores transactions only. Use a .json backup for full restore.",
-      "warning",
-    );
+    showMessage(t("error.csv_transactions_only"), "warning");
     handleCsvRestore(file);
   } else {
-    showMessage("Unsupported file format. Use .json, .enc, or .csv");
+    showMessage(t("error.unrecognized_file"));
   }
 }
 
@@ -1032,16 +1034,16 @@ export function handleCsvRestore(file) {
     try {
       const backupData = parseBackupCSV(reader.result);
       if (!backupData.valid) {
-        showMessage(`Invalid backup file: ${backupData.error}`);
+        showMessage(t("error.invalid_backup"));
         return;
       }
       state.pendingRestoreData = backupData;
       showRestorePreview(backupData);
     } catch (err) {
       console.error("Backup parse error:", err);
-      showMessage("Failed to read backup file. Please check the file format.");
+      showMessage(t("error.restore_failed"));
     }
   };
-  reader.onerror = () => showMessage("Failed to read file. Please try again.");
+  reader.onerror = () => showMessage(t("error.import_failed"));
   reader.readAsText(file);
 }

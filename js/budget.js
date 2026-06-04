@@ -5,6 +5,7 @@
 import { state, categories } from "./state.js";
 import { saveBudgetToDB, loadBudgetsFromDB, deleteBudgetFromDB } from "./db.js";
 import { showMessage, generateId } from "./utils.js";
+import { t } from "./i18n.js";
 import { formatCurrency } from "./currency.js";
 
 // Initialize budgets on app startup
@@ -15,7 +16,7 @@ export async function initBudgets() {
   } catch (error) {
     console.error("Error loading budgets:", error);
     state.budgets = [];
-    showMessage("Error loading budgets", "error");
+    showMessage(t("error.budgets_load_failed"), "error");
   }
 }
 
@@ -39,7 +40,7 @@ export async function saveBudget(budget) {
       budget.alertThreshold < 0 ||
       budget.alertThreshold > 100
     ) {
-      throw new Error("Alert threshold must be between 0 and 100");
+      throw new Error("Alert threshold must be between 0 and 100.");
     }
 
     // Block duplicate categories (only on new budgets, not edits)
@@ -70,11 +71,11 @@ export async function saveBudget(budget) {
       state.budgets.push(budget);
     }
 
-    showMessage(`Budget for "${budget.category}" saved`, "success");
+    showMessage(t("message.budget_saved", { category: budget.category }), "success");
     return budget;
   } catch (error) {
     console.error("Error saving budget:", error);
-    showMessage(`Error: ${error.message}`, "error");
+    showMessage(t("error.budget_save_failed"), "error");
     throw error;
   }
 }
@@ -84,10 +85,10 @@ export async function deleteBudget(budgetId) {
   try {
     await deleteBudgetFromDB(budgetId);
     state.budgets = state.budgets.filter((b) => b.id !== budgetId);
-    showMessage("Budget deleted", "success");
+    showMessage(t("message.budget_deleted"), "success");
   } catch (error) {
     console.error("Error deleting budget:", error);
-    showMessage("Error deleting budget", "error");
+    showMessage(t("error.budget_delete_failed"), "error");
     throw error;
   }
 }
@@ -298,7 +299,7 @@ export function renderBudgetList() {
 // Render budget modal
 export function renderBudgetModal(budget = null) {
   const isEdit = !!budget;
-  const title = isEdit ? "Edit Budget" : "Add Budget";
+  const title = isEdit ? "Edit budget" : "Add budget";
 
   const categoryOptions = Object.entries(categories.expense)
     .map(([parent, children]) => {
@@ -341,13 +342,13 @@ export function renderBudgetModal(budget = null) {
             <label for="budgetThreshold">Alert Threshold (%)</label>
             <input type="number" id="budgetThreshold" min="0" max="100" step="1"
               value="${budget?.alertThreshold || 80}">
-            <small>Alert triggers when spending reaches this percentage of the limit</small>
+            <small>You'll be alerted when spending reaches this percent of your budget.</small>
           </div>
 
           <div class="form-group checkbox">
             <input type="checkbox" id="budgetRollover"
               ${budget?.rolloverEnabled ? "checked" : ""}>
-            <label for="budgetRollover">Enable Budget Rollover (unused balance carries to next month)</label>
+            <label for="budgetRollover">Carry unused budget to next month</label>
           </div>
         </div>
 

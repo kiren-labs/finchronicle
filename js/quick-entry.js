@@ -51,7 +51,7 @@ export function renderQuickBar() {
 
   const cloneBtn =
     state.transactions.length > 0
-      ? `<button type="button" class="quick-pill quick-pill-clone" id="cloneLastBtn" title="Clone most recent transaction with today's date">
+      ? `<button type="button" class="quick-pill quick-pill-clone" id="cloneLastBtn" title="Copy your last transaction with today's date">
         <i class="ri-file-copy-line"></i> Clone Last
       </button>`
       : "";
@@ -119,7 +119,7 @@ export function prefillFromTemplate(templateId) {
     if (el) el.value = template.merchant;
   }
 
-  showMessage("✨ Template loaded — review and save");
+  showMessage("Template loaded. Review and save.");
 
   // Scroll to form and focus save button
   const submitBtn = document.getElementById("submitBtn");
@@ -137,7 +137,7 @@ export function cloneLast() {
     (t) => !t.deleted && t.type !== "transfer",
   );
   if (!recent) {
-    showMessage("No recent transaction to clone");
+    showMessage("No recent transaction to clone.");
     return;
   }
 
@@ -193,7 +193,7 @@ export function cloneLast() {
     if (el) el.value = recent.location;
   }
 
-  showMessage("📋 Last transaction cloned — review and save");
+  showMessage("Last transaction cloned. Review and save.");
 }
 
 // ============================================================================
@@ -210,7 +210,7 @@ export async function saveAsTemplate() {
 
   const type = document.getElementById("type").value;
   if (type === "transfer") {
-    showMessage("Transfers cannot be saved as templates");
+    showMessage("Transfers cannot be saved as templates.");
     return;
   }
 
@@ -218,7 +218,7 @@ export async function saveAsTemplate() {
   const category = document.getElementById("category").value;
 
   if (!amount || !category) {
-    showMessage("Fill in amount and category first");
+    showMessage("Fill in the amount and category first.");
     return;
   }
 
@@ -254,7 +254,7 @@ export async function saveAsTemplate() {
 
   renderQuickBar();
   renderTemplateManager();
-  showMessage("✅ Template saved!");
+  showMessage("Template saved.");
 }
 
 // ============================================================================
@@ -266,7 +266,7 @@ export function renderTemplateManager() {
   if (!container) return;
 
   if (state.quickTemplates.length === 0) {
-    container.innerHTML = `<div class="empty-state">No quick entry templates yet. Save a transaction as a template to get started.</div>`;
+    container.innerHTML = `<div class="empty-state">No quick entry templates yet. Save a transaction as a template.</div>`;
     return;
   }
 
@@ -302,7 +302,7 @@ export async function deleteTemplate(id) {
   }
   renderQuickBar();
   renderTemplateManager();
-  showMessage("Template deleted");
+  showMessage("Template deleted.");
 }
 
 export async function moveTemplate(id, direction) {

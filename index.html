@@ -38,7 +38,7 @@
     <div class="modal" id="deleteModal">
         <div class="modal-content">
             <div class="modal-title">Delete Transaction?</div>
-            <div class="modal-text">This action cannot be undone.</div>
+            <div class="modal-text">You can't undo this.</div>
             <div class="modal-actions">
                 <button class="modal-btn modal-btn-cancel">Cancel</button>
                 <button class="modal-btn modal-btn-confirm">Delete</button>
@@ -50,7 +50,7 @@
     <div class="modal" id="restorePreviewModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="ri-file-list-line"></i> Backup Preview</h3>
+                <h3><i class="ri-file-list-line"></i> Backup preview</h3>
                 <button class="close-btn" aria-label="Close">
                     <i class="ri-close-line"></i>
                 </button>
@@ -108,7 +108,7 @@
     <div class="modal" id="restoreReportModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="ri-file-check-line"></i> Restore Complete</h3>
+                <h3><i class="ri-file-check-line"></i> Restore complete</h3>
                 <button class="close-btn" aria-label="Close">
                     <i class="ri-close-line"></i>
                 </button>
@@ -157,7 +157,7 @@
     <div class="modal" id="recurringModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="ri-repeat-line"></i> Add Recurring</h3>
+                <h3><i class="ri-repeat-line"></i> Add recurring</h3>
                 <button class="close-btn" aria-label="Close recurring modal">
                     <i class="ri-close-line"></i>
                 </button>
@@ -242,7 +242,7 @@
     <div class="modal" id="feedbackModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="ri-feedback-line"></i> Send Feedback</h3>
+                <h3><i class="ri-feedback-line"></i> Send feedback</h3>
                 <button class="close-btn" aria-label="Close">
                     <i class="ri-close-line"></i>
                 </button>
@@ -308,7 +308,7 @@
                 <div class="header-meta">
                     <span class="status-inline"><span class="status-dot"></span> Offline</span>
                     <span class="version" id="appVersion">v3.7.1</span>
-                    <button class="header-btn" aria-label="Send Feedback" title="Send Feedback">
+                    <button class="header-btn" aria-label="Send feedback" title="Send feedback">
                         <i class="ri-feedback-line"></i>
                     </button>
                     <button class="header-btn" aria-label="Quick Add Transaction" title="Quick Add">
@@ -323,7 +323,7 @@
 
             <!-- Update Available Notification -->
             <div class="update-prompt" id="updatePrompt">
-                <h3><i class="ri-sparkling-line"></i> Update Available!</h3>
+                <h3><i class="ri-sparkling-line"></i> Update available</h3>
                 <p>A new version is available. Reload to get the latest features and improvements.</p>
                 <div class="update-actions">
                     <button class="update-btn-primary">Update Now</button>
@@ -333,9 +333,9 @@
 
             <!-- Install Prompt (iOS) -->
             <div class="install-prompt" id="installPrompt" style="display: none;">
-                <h3><i class="ri-smartphone-line"></i> Install App</h3>
-                <p>Tap Share → Add to Home Screen for best experience</p>
-                <button>Got it!</button>
+                <h3><i class="ri-smartphone-line"></i> Install app</h3>
+                <p>Tap Share → Add to Home Screen for the best experience.</p>
+                <button>Dismiss</button>
             </div>
 
             <!-- Summary Cards -->
@@ -599,7 +599,7 @@
                         <div id="optionalFieldsSection" class="optional-fields-section" hidden>
                             <button type="button" class="optional-fields-toggle" id="optionalFieldsToggle"
                                 aria-expanded="false" aria-controls="optionalFieldsContainer">
-                                <i class="ri-add-circle-line"></i> Additional Details
+                                <i class="ri-add-circle-line"></i> Additional details
                                 <i class="ri-arrow-down-s-line optional-fields-chevron"></i>
                             </button>
                             <div id="optionalFieldsContainer" class="optional-fields-container" hidden>
@@ -640,7 +640,7 @@
                                         <option value="">Select type</option>
                                         <option value="personal">Personal</option>
                                         <option value="business">Business</option>
-                                        <option value="reimbursable">Reimbursable</option>
+                                        <option value="reimbursable">Someone will pay me back</option>
                                     </select>
                                 </div>
                                 <div class="form-group" data-optional-field="attachedTo" hidden>
@@ -687,7 +687,7 @@
                         <button type="submit" class="primary" id="submitBtn">Save Transaction</button>
                         <div class="form-actions-row">
                             <button type="button" id="saveAsTemplateBtn" class="save-template-btn" aria-label="Save as quick entry template">
-                                <i class="ri-bookmark-line"></i> Save as Template
+                                <i class="ri-bookmark-line"></i> Save as template
                             </button>
                         </div>
                         <button type="button" class="primary" id="cancelEditBtn"
@@ -800,7 +800,7 @@
                         <button class="toolbar-btn" aria-label="Check for updates"
                             id="updateCheckBtn">
                             <i class="ri-refresh-line"></i>
-                            <span>Check Updates</span>
+                            <span>Check for updates</span>
                         </button>
                         <button class="toolbar-btn" aria-label="Change currency"
                             id="currencyBtn">
@@ -816,10 +816,10 @@
                             <i class="ri-contrast-2-line" id="darkModeIcon"></i>
                             <span>Dark Mode</span>
                         </button>
-                        <button class="toolbar-btn" aria-label="Send Feedback"
+                        <button class="toolbar-btn" aria-label="Send feedback"
                             id="feedbackBtn">
                             <i class="ri-feedback-line"></i>
-                            <span>Send Feedback</span>
+                            <span>Send feedback</span>
                         </button>
                     </div>
                 </div>
@@ -855,7 +855,7 @@
                             <h3><i class="ri-bank-line"></i> Accounts</h3>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span class="template-count" id="accountCount"></span>
-                                <button class="toolbar-btn" aria-label="Add Account" id="addAccountBtn">
+                                <button class="toolbar-btn" aria-label="Add account" id="addAccountBtn">
                                     <i class="ri-add-line"></i>
                                 </button>
                             </div>
@@ -868,7 +868,7 @@
                 <div id="accountFormModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="accountFormTitle">
                     <div class="modal-content modal-sm">
                         <div class="modal-header">
-                            <h3 id="accountFormTitle">Add Account</h3>
+                            <h3 id="accountFormTitle">Add account</h3>
                             <button class="close-btn account-form-close" aria-label="Close account form"><i class="ri-close-line"></i></button>
                         </div>
                         <div class="modal-body">
@@ -889,7 +889,7 @@
                                         <option value="mortgage">Mortgage</option>
                                         <option value="other">Other</option>
                                     </select>
-                                    <p id="accountTypeHint" class="sr-only">Choose the type of account to auto-select icon and default classification.</p>
+                                    <p id="accountTypeHint" class="sr-only">Choose the type of account to auto-select the icon and default classification.</p>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -902,10 +902,10 @@
                             </div>
                             <div class="account-form-divider" role="separator" aria-hidden="true"></div>
                             <div class="form-group toggle-row">
-                                <label for="accountClassificationSelect">Classification</label>
+                                <label for="accountClassificationSelect">Account type</label>
                                 <select id="accountClassificationSelect">
-                                    <option value="asset">Asset</option>
-                                    <option value="liability">Liability</option>
+                                    <option value="asset">I own this (savings, cash)</option>
+                                    <option value="liability">I owe this (loan, credit card)</option>
                                 </select>
                             </div>
                             <div class="form-group toggle-row">
@@ -939,7 +939,7 @@
                                 <div class="recon-explainer-icon"><i class="ri-scales-3-line"></i></div>
                                 <div>
                                     <p class="recon-explainer-title">What is reconciliation?</p>
-                                    <p class="recon-explainer-body">Reconciliation confirms that your FinChronicle records match your official bank statement. Tick off each transaction that appears on your statement — when the difference reaches zero, your books are accurate.</p>
+                                    <p class="recon-explainer-body">Reconciliation confirms that your records match your official bank statement. Check off each transaction that appears on your statement — when the difference reaches zero, your books are accurate.</p>
                                 </div>
                             </div>
 
@@ -950,7 +950,7 @@
                             </div>
                             <div class="reconciliation-inputs">
                                 <div class="form-group">
-                                    <label for="reconciliationStatementBalance">Closing Balance</label>
+                                    <label for="reconciliationStatementBalance">Bank statement balance</label>
                                     <input type="number" id="reconciliationStatementBalance" placeholder="0.00" step="0.01" inputmode="decimal">
                                 </div>
                                 <div class="form-group">
@@ -972,10 +972,10 @@
                             <!-- Difference indicator -->
                             <div id="reconciliationDifference" class="reconciliation-difference" aria-live="polite"></div>
 
-                            <!-- Step 3: Finalise -->
+                            <!-- Step 3: Finalize -->
                             <div class="reconciliation-actions">
                                 <button type="button" id="reconciliationFinaliseBtn" class="reconcile-action-btn reconcile-action-primary" hidden>
-                                    <i class="ri-check-double-line"></i> Finalise Reconciliation
+                                    <i class="ri-check-double-line"></i> Finalize reconciliation
                                 </button>
                                 <button type="button" id="reconciliationForceBtn" class="reconcile-action-btn reconcile-action-danger" hidden>
                                     <i class="ri-alert-line"></i> Reconcile Anyway
@@ -994,9 +994,9 @@
                     <div class="card">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                             <h3>Monthly Budgets</h3>
-                            <button class="toolbar-btn" aria-label="Add Budget" id="addBudgetBtn">
+                            <button class="toolbar-btn" aria-label="Add budget" id="addBudgetBtn">
                                 <i class="ri-add-line"></i>
-                                <span>Add Budget</span>
+                                <span>Add budget</span>
                             </button>
                         </div>
                         <div style="text-align: center; color: var(--text-secondary); padding: 20px 0;">
@@ -1042,7 +1042,7 @@
                             <i class="ri-alarm-warning-line" aria-hidden="true"></i>
                             <span id="backupOverdueMsg">Backup overdue — tap to save a copy now.</span>
                         </div>
-                        <button class="backup-overdue-btn" id="backupOverdueBtn" type="button">Back Up Now</button>
+                        <button class="backup-overdue-btn" id="backupOverdueBtn" type="button">Back up now</button>
                     </div>
 
                     <div class="data-backup-section">
@@ -1050,19 +1050,19 @@
                         <div class="data-backup-btn-group">
                             <button class="data-backup-btn" id="downloadBackupBtn" type="button">
                                 <i class="ri-save-line" aria-hidden="true"></i>
-                                <span>Download Backup</span>
+                                <span>Download backup</span>
                             </button>
-                            <p class="data-backup-hint">Full JSON — all data, all stores, lossless</p>
+                            <p class="data-backup-hint">Full backup — all your data, nothing left out.</p>
                             <button class="data-backup-btn" id="encryptedBackupBtn2" type="button">
                                 <i class="ri-lock-line" aria-hidden="true"></i>
-                                <span>Encrypted Backup</span>
+                                <span>Password-protected backup</span>
                             </button>
-                            <p class="data-backup-hint">AES-256 encrypted. Requires passphrase to restore.</p>
+                            <p class="data-backup-hint">Password-protected. You'll need your password to restore this backup.</p>
                             <button class="data-backup-btn" id="exportSpreadsheetBtn" type="button">
                                 <i class="ri-file-excel-line" aria-hidden="true"></i>
                                 <span>Export to Spreadsheet</span>
                             </button>
-                            <p class="data-backup-hint">CSV — transactions only, for spreadsheet use</p>
+                            <p class="data-backup-hint">Spreadsheet — transactions only, opens in Excel or Google Sheets.</p>
                         </div>
                     </div>
 
@@ -1073,7 +1073,7 @@
                                 <i class="ri-upload-cloud-line" aria-hidden="true"></i>
                                 <span>Restore from Backup</span>
                             </button>
-                            <p class="data-backup-hint">Accepts .json (full backup), .enc (encrypted), or .csv (transactions only)</p>
+                            <p class="data-backup-hint">Accepts .json (full backup), .enc (encrypted), or .csv (transactions only).</p>
                             <button class="data-backup-btn" id="importSpreadsheetBtn" type="button">
                                 <i class="ri-file-upload-line" aria-hidden="true"></i>
                                 <span>Import Spreadsheet</span>

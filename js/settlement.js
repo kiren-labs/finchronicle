@@ -180,7 +180,7 @@ function renderPersonCard(person) {
         person.outstanding > 0
           ? `
       <div class="settlement-detail settlement-outstanding">
-        <span class="settlement-detail-label"><i class="ri-time-line"></i> Outstanding</span>
+        <span class="settlement-detail-label"><i class="ri-time-line"></i> Still owed</span>
         <span class="settlement-detail-value outstanding">${formatCurrency(person.outstanding)}</span>
       </div>`
           : ""

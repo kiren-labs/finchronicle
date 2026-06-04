@@ -152,9 +152,9 @@ export async function checkRecurringTransactions() {
 const FREQ_LABELS = {
   daily: "Daily",
   weekly: "Weekly",
-  biweekly: "Every 2 Wks",
+  biweekly: "Every 2 weeks",
   monthly: "Monthly",
-  quarterly: "Quarterly",
+  quarterly: "Every 3 months",
   yearly: "Yearly",
 };
 
@@ -169,7 +169,7 @@ export function renderRecurringSection() {
       ? `<div class="recurring-empty">
                <i class="ri-repeat-line"></i>
                <p>No recurring transactions yet</p>
-               <p class="recurring-empty-sub">Add rent, salary, or subscriptions to auto-track them</p>
+               <p class="recurring-empty-sub">Add predictable recurring transactions to track them automatically.</p>
            </div>`
       : templates
           .map((t) => {
@@ -461,7 +461,7 @@ export function openRecurringModal(id = null) {
   if (id !== null) {
     const template = state.recurringTemplates.find((t) => t.id === id);
     if (template) {
-      modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Edit Recurring';
+      modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Edit recurring';
       selectRecurringType(template.type);
       document.getElementById("recurringAmount").value = template.amount;
       document.getElementById("recurringCategory").value = template.category;
@@ -480,7 +480,7 @@ export function openRecurringModal(id = null) {
         accountSel.value = template.toAccount;
     }
   } else {
-    modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Add Recurring';
+    modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Add recurring';
   }
 
   modal.style.display = "flex";
@@ -503,19 +503,19 @@ export async function saveRecurringTemplate() {
 
   const amount = parseFloat(amountRaw);
   if (!amountRaw || isNaN(amount) || amount <= 0) {
-    showMessage("Please enter a valid amount");
+    showMessage("Enter a valid amount.");
     return;
   }
   if (amount > 999999999) {
-    showMessage("Amount exceeds maximum limit");
+    showMessage("Amount exceeds maximum limit.");
     return;
   }
   if (!category) {
-    showMessage("Please select a category");
+    showMessage("Select a category.");
     return;
   }
   if (!startDate) {
-    showMessage("Please select a start date");
+    showMessage("Select a start date.");
     return;
   }
 
@@ -525,13 +525,13 @@ export async function saveRecurringTemplate() {
     dayOfMonth !== null &&
     (isNaN(dayOfMonth) || dayOfMonth < 1 || dayOfMonth > 28)
   ) {
-    showMessage("Day of month must be between 1 and 28");
+    showMessage("Day of month must be between 1 and 28.");
     return;
   }
 
   const sanitizedNotes = sanitizeHTML(notes);
   if (sanitizedNotes.length > 500) {
-    showMessage("Notes too long (max 500 characters)");
+    showMessage("Notes too long (max 500 characters).");
     return;
   }
 
@@ -584,7 +584,7 @@ export async function saveRecurringTemplate() {
 
   closeRecurringModal();
   renderRecurringSection();
-  showMessage(isEditing ? "Recurring updated" : "Recurring transaction added");
+  showMessage(isEditing ? "Recurring updated." : "Recurring transaction added.");
 }
 
 async function deleteRecurring(id) {
@@ -594,7 +594,7 @@ async function deleteRecurring(id) {
   const label = template.notes || template.category;
   if (
     !confirm(
-      `Delete "${label}"?\n\nAlready-created transactions will not be affected.`,
+      `Delete "${label}"?\n\nExisting transactions will not be affected.`,
     )
   )
     return;
@@ -604,7 +604,7 @@ async function deleteRecurring(id) {
     (t) => t.id !== id,
   );
   renderRecurringSection();
-  showMessage("Recurring transaction deleted");
+  showMessage("Recurring transaction deleted.");
 }
 
 async function toggleRecurring(id) {
@@ -613,5 +613,5 @@ async function toggleRecurring(id) {
   template.enabled = !template.enabled;
   await saveRecurringTemplateToDB(template);
   renderRecurringSection();
-  showMessage(template.enabled ? "Recurring resumed" : "Recurring paused");
+  showMessage(template.enabled ? "Recurring resumed." : "Recurring paused.");
 }
