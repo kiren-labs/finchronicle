@@ -754,7 +754,7 @@ export function showRestorePreview(backupData) {
       integrityEl.style.color = "var(--color-income-text)";
     } else if (backupData.integrityOk === false) {
       integrityRow.style.display = "";
-      integrityEl.textContent = "⚠ Hash mismatch — file may be corrupted";
+      integrityEl.textContent = "⚠ File check failed — this backup may be damaged";
       integrityEl.style.color = "var(--color-expense-text)";
     } else {
       integrityRow.style.display = "none";
@@ -1026,7 +1026,7 @@ export async function handleRestoreFileInput(file) {
     );
     handleCsvRestore(file);
   } else {
-    showMessage("Unsupported file format. Use .json, .enc, or .csv.");
+    showMessage("Unrecognised file. Use a backup file (.json or .enc) or a spreadsheet (.csv).");
   }
 }
 

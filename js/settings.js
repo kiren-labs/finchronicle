@@ -155,12 +155,12 @@ export function checkForUpdates() {
         });
       } else {
         icon.style.animation = "";
-        showMessage("No service worker registered.");
+        showMessage("App update check isn't available right now.");
       }
     });
   } else {
     icon.style.animation = "";
-    showMessage("Service worker not supported.");
+    showMessage("Your browser doesn't support offline updates.");
   }
 }
 

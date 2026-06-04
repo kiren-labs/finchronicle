@@ -196,7 +196,7 @@ export function validateTransaction(transaction) {
         errors.push({
           field: "exchangeRate",
           message:
-            "Exchange rate is required for foreign currency transactions.",
+            "Enter the conversion rate for this foreign currency.",
         });
       }
     } else if (
@@ -206,7 +206,7 @@ export function validateTransaction(transaction) {
       if (isNaN(transaction.exchangeRate) || transaction.exchangeRate <= 0) {
         errors.push({
           field: "exchangeRate",
-          message: "Exchange rate must be a positive number.",
+          message: "Conversion rate must be a positive number.",
         });
       }
     }

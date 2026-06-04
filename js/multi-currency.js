@@ -65,7 +65,7 @@ export function renderMultiCurrencyFields() {
   if (container.querySelector("#txCurrencySelect")) return;
 
   container.innerHTML = `
-    <label for="txCurrencySelect">Transaction Currency</label>
+    <label for="txCurrencySelect">Paid in a different currency?</label>
     <select id="txCurrencySelect">
       <option value="">Same as home (${homeCurrency})</option>
       ${Object.entries(currencies)
@@ -78,7 +78,7 @@ export function renderMultiCurrencyFields() {
     </select>
     <div id="exchangeRateGroup" class="exchange-rate-group" hidden>
       <div class="form-group" style="margin-top:8px; margin-bottom:0;">
-        <label for="exchangeRateInput">Exchange Rate <span class="form-hint-inline" id="rateHint"></span></label>
+        <label for="exchangeRateInput">Conversion rate <span class="form-hint-inline" id="rateHint"></span></label>
         <input type="number" id="exchangeRateInput" placeholder="e.g. 83.5" min="0.0001" step="any" inputmode="decimal">
         <div class="form-hint" id="homeAmountPreview"></div>
       </div>

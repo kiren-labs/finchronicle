@@ -434,7 +434,7 @@ export async function performCsvBackup(isAuto = false) {
   if (isAuto) {
     showMessage("Auto-backup saved to Downloads.");
   } else {
-    showMessage("CSV backup exported.");
+    showMessage("Spreadsheet backup exported.");
   }
 }
 
@@ -473,7 +473,7 @@ export async function performEncryptedBackup(passphrase) {
     showMessage("🔒 Encrypted backup saved.");
   } catch (e) {
     console.error("Encryption failed:", e);
-    showMessage("Encryption failed. Try again.");
+    showMessage("Backup protection failed. Try again.");
   }
 }
 
