@@ -17,7 +17,7 @@ function logError(message, stack) {
     });
     if (log.length > MAX_ERRORS) log.splice(0, log.length - MAX_ERRORS);
     localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
-  } catch (_) {
+  } catch {
     /* localStorage full or unavailable — silently ignore */
   }
 }

@@ -12,7 +12,7 @@ export function generateId() {
 export function getErrorLog() {
   try {
     return JSON.parse(localStorage.getItem("errorLog") || "[]");
-  } catch (_) {
+  } catch {
     return [];
   }
 }

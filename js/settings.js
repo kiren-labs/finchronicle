@@ -3,24 +3,11 @@
 // ============================================================================
 
 import { APP_VERSION, VERSION_KEY, state } from "./state.js";
-import {
-  formatDate,
-  showMessage,
-  sanitizeHTML,
-  getErrorLog,
-  clearErrorLog,
-} from "./utils.js";
-import { getCurrency } from "./currency.js";
+import { showMessage, sanitizeHTML, getErrorLog } from "./utils.js";
 import { renderFAQ } from "./faq.js";
 import { renderRecurringSection } from "./recurring.js";
 import { renderBudgetList } from "./budget.js";
-import {
-  getAllTags,
-  renameTag,
-  deleteTag,
-  getTagColor,
-  TAG_PALETTE,
-} from "./search.js";
+import { getAllTags, getTagColor } from "./search.js";
 
 // ---- Dark Mode ----
 

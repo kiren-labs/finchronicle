@@ -329,7 +329,7 @@ export async function importFromCSV(text) {
   const nowIso = new Date().toISOString();
   const newTransactions = [];
 
-  rows.slice(1).forEach((row, i) => {
+  rows.slice(1).forEach((row) => {
     const rawDate = (row[dateIndex] || "").trim();
     const normalizedDateVal = normalizeDate(rawDate);
     const rawAmount = (row[amountIndex] || "").replace(/,/g, "");
@@ -562,7 +562,7 @@ export function parseBackupCSV(text) {
   const parsedTransactions = [];
   const dataRows = rows.slice(1);
 
-  dataRows.forEach((row, i) => {
+  dataRows.forEach((row) => {
     const rawDate = (row[dateIndex] || "").trim();
     const rawAmount = (row[amountIndex] || "").replace(/,/g, "");
     const amount = parseFloat(rawAmount);

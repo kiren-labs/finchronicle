@@ -14,7 +14,6 @@ import {
   ACCOUNTS_STORE,
   GOALS_STORE,
   NET_WORTH_SNAPSHOTS_STORE,
-  DEFAULT_APP_SETTINGS,
 } from "./state.js";
 import { showMessage } from "./utils.js";
 

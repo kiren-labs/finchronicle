@@ -403,7 +403,6 @@ export function renderBudgetAlerts() {
   }
 
   const exceeded = alerts.filter((a) => a.isExceeded);
-  const warning = alerts.filter((a) => a.isWarning);
   const hasExceeded = exceeded.length > 0;
 
   // Build a compact summary: show first 2 names, then "+N more" if needed
