@@ -799,8 +799,8 @@ function bindFormSubmit() {
       const existingTx = state.editingId ? state.transactions.find((t) => t.id === state.editingId) : null;
       const transaction = {
         id: state.editingId || generateId(),
-        type: type,
-        amount: amount,
+        type,
+        amount,
         category: document.getElementById("category").value,
         date: document.getElementById("date").value,
         notes: document.getElementById("notes").value,

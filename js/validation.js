@@ -161,7 +161,7 @@ export function validateTransaction(transaction) {
 
   return {
     valid: errors.length === 0,
-    errors: errors,
+    errors,
     sanitized: transaction,
   };
 }

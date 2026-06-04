@@ -208,8 +208,8 @@ function renderPersonCard(person) {
  * Format a period label from start/end dates.
  */
 function formatPeriodLabel(start, end) {
-  const startDate = new Date(start + "T00:00:00");
-  const endDate = new Date(end + "T00:00:00");
+  const startDate = new Date(`${start  }T00:00:00`);
+  const endDate = new Date(`${end  }T00:00:00`);
 
   // If same month, show "May 2026" format
   if (start.slice(0, 7) === end.slice(0, 7)) {

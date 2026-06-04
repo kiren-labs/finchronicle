@@ -186,7 +186,7 @@ async function buildJsonBackup() {
     const hashHex = Array.from(new Uint8Array(hashBuffer))
       .map(b => b.toString(16).padStart(2, "0"))
       .join("");
-    payload.integrity = "sha256:" + hashHex;
+    payload.integrity = `sha256:${  hashHex}`;
   } catch {
     payload.integrity = "";
   }
@@ -255,7 +255,7 @@ function buildCsvBackup() {
     t.homeAmount || "",
   ]);
 
-  let csv = headers.join(",") + "\n";
+  let csv = `${headers.join(",")  }\n`;
   csv += rows
     .map((row) =>
       row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),

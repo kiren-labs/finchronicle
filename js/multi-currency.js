@@ -181,7 +181,7 @@ export function getMultiCurrencyFormData() {
   return {
     transactionCurrency: txCurrency,
     exchangeRate: rate,
-    homeAmount: homeAmount,
+    homeAmount,
   };
 }
 
@@ -243,7 +243,7 @@ export function formatMultiCurrency(transaction) {
 
   const foreignSymbol = currencies[transaction.transactionCurrency]
     ? currencies[transaction.transactionCurrency].symbol
-    : transaction.transactionCurrency + " ";
+    : `${transaction.transactionCurrency  } `;
 
   const homeSymbol = currencies[getCurrency()]
     ? currencies[getCurrency()].symbol

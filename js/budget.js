@@ -425,9 +425,9 @@ function _updateBudgetBadge(alerts, hasExceeded) {
     return;
   }
   badge.hidden = false;
-  badge.className = "budget-alert-badge " + (hasExceeded ? "badge-danger" : "badge-warn");
+  badge.className = `budget-alert-badge ${  hasExceeded ? "badge-danger" : "badge-warn"}`;
   const n = alerts.length;
   badge.textContent = hasExceeded
-    ? (n > 1 ? n + " budgets exceeded" : "Budget exceeded")
-    : (n > 1 ? n + " budget warnings" : "Budget warning");
+    ? (n > 1 ? `${n  } budgets exceeded` : "Budget exceeded")
+    : (n > 1 ? `${n  } budget warnings` : "Budget warning");
 }

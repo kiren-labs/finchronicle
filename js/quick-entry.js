@@ -214,9 +214,9 @@ export async function saveAsTemplate() {
   const template = {
     id: generateId(),
     label: sanitizeHTML(label),
-    type: type,
-    amount: amount,
-    category: category,
+    type,
+    amount,
+    category,
     notes: sanitizeHTML(notes),
     tags: [...state.formTags],
     sortOrder: state.quickTemplates.length,

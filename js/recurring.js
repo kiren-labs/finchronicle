@@ -363,7 +363,7 @@ function _updateRecurringCategoryOptions(type) {
       ${children.map((c) => `<option value="${c}">  ${c}</option>`).join("")}
     </optgroup>`;
   }).join("");
-  select.innerHTML = '<option value="" disabled selected>Select category</option>' + optionsHtml;
+  select.innerHTML = `<option value="" disabled selected>Select category</option>${  optionsHtml}`;
 }
 
 export function selectRecurringType(type) {

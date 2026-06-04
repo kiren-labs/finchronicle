@@ -359,7 +359,7 @@ async function renderNetWorthTrend() {
 }
 
 function formatMonthLabel(snapshotDate) {
-  const d = new Date(snapshotDate + "T00:00:00");
+  const d = new Date(`${snapshotDate  }T00:00:00`);
   return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
 

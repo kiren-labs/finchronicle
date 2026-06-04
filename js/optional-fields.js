@@ -205,13 +205,13 @@ function populateLinkedAccountSelect(selectedValue) {
   if (!el) return;
   const accounts = state.accounts || [];
   el.innerHTML =
-    '<option value="">None</option>' +
+    `<option value="">None</option>${ 
     accounts
       .map(
         (a) =>
           `<option value="${sanitizeHTML(a.name)}"${a.name === selectedValue ? " selected" : ""}>${sanitizeHTML(a.name)}</option>`
       )
-      .join("");
+      .join("")}`;
 }
 
 /**

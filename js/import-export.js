@@ -83,7 +83,7 @@ export function exportToCSV() {
     t.homeAmount || "",
   ]);
 
-  let csv = headers.join(",") + "\n";
+  let csv = `${headers.join(",")  }\n`;
   csv += rows
     .map((row) =>
       row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
@@ -208,8 +208,8 @@ export async function createBackup() {
     t.homeAmount || "",
   ]);
 
-  let csv = metadata + "\n";
-  csv += headers.join(",") + "\n";
+  let csv = `${metadata  }\n`;
+  csv += `${headers.join(",")  }\n`;
   csv += rows
     .map((row) =>
       row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
@@ -257,8 +257,8 @@ export function handleImport(event) {
         return;
       }
       showMessage(
-        `Imported ${result.added} transaction(s)` +
-          (result.skipped ? ` • Skipped ${result.skipped}` : ""),
+        `Imported ${result.added} transaction(s)${ 
+          result.skipped ? ` • Skipped ${result.skipped}` : ""}`,
       );
     } catch (err) {
       console.error("Import failed:", err);
@@ -279,8 +279,8 @@ export function handleCsvImportFile(file) {
         return;
       }
       showMessage(
-        `Imported ${result.added} transaction(s)` +
-          (result.skipped ? ` • Skipped ${result.skipped}` : ""),
+        `Imported ${result.added} transaction(s)${ 
+          result.skipped ? ` • Skipped ${result.skipped}` : ""}`,
       );
     } catch (err) {
       console.error("Import failed:", err);

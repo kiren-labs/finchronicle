@@ -86,11 +86,11 @@ function renderCandidateList() {
 
     const row = document.createElement("label");
     row.className = "reconciliation-row";
-    row.setAttribute("for", "recon-chk-" + t.id);
+    row.setAttribute("for", `recon-chk-${  t.id}`);
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.id = "recon-chk-" + t.id;
+    checkbox.id = `recon-chk-${  t.id}`;
     checkbox.dataset.reconId = t.id;
     checkbox.checked = checkedIds.has(t.id);
     checkbox.setAttribute("aria-label", "Reconcile transaction");
@@ -108,7 +108,7 @@ function renderCandidateList() {
     notesSpan.textContent = t.notes || "";
 
     const amtSpan = document.createElement("span");
-    amtSpan.className = "recon-col recon-amount " + (isCredit ? "recon-credit" : "recon-debit");
+    amtSpan.className = `recon-col recon-amount ${  isCredit ? "recon-credit" : "recon-debit"}`;
     amtSpan.textContent = (signed >= 0 ? "+" : "") + formatCurrency(signed);
 
     const statusSpan = document.createElement("span");
@@ -143,7 +143,7 @@ export function openReconciliationModal(accountName) {
   if (!modal) return;
 
   const heading = document.getElementById("reconciliationAccountName");
-  if (heading) heading.textContent = "Reconcile: " + accountName;
+  if (heading) heading.textContent = `Reconcile: ${  accountName}`;
 
   const balInput = document.getElementById("reconciliationStatementBalance");
   const dateInput = document.getElementById("reconciliationStatementDate");
@@ -291,7 +291,7 @@ export async function finaliseReconciliation(force = false) {
   }
 
   const count = toReconcile.length;
-  showMessage(count + " transaction" + (count !== 1 ? "s" : "") + " reconciled.");
+  showMessage(`${count  } transaction${  count !== 1 ? "s" : ""  } reconciled.`);
   closeReconciliationModal();
   updateUI();
 }

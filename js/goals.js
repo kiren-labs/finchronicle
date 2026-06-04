@@ -102,7 +102,7 @@ function checkMilestone(goal, prevPercent, newPercent) {
 function getDaysRemaining(deadline) {
   if (!deadline) return null;
   const now = new Date();
-  const end = new Date(deadline + "T23:59:59");
+  const end = new Date(`${deadline  }T23:59:59`);
   const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
   return diff;
 }
@@ -146,7 +146,7 @@ export function renderGoalsDashboard() {
       } else if (days !== null && days <= 30) {
         deadlineText = `<span class="goal-deadline-near">${days}d left</span>`;
       } else if (goal.deadline) {
-        deadlineText = `<span class="goal-deadline">${new Date(goal.deadline + "T00:00:00").toLocaleDateString("en", { month: "short", year: "numeric" })}</span>`;
+        deadlineText = `<span class="goal-deadline">${new Date(`${goal.deadline  }T00:00:00`).toLocaleDateString("en", { month: "short", year: "numeric" })}</span>`;
       }
     }
 
@@ -193,8 +193,8 @@ export function showGoalForm(goalId = null) {
 
   // Populate linked account options
   const accounts = getActiveAccountNames();
-  linkedSelect.innerHTML = '<option value="">None</option>' +
-    accounts.map((a) => `<option value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</option>`).join("");
+  linkedSelect.innerHTML = `<option value="">None</option>${ 
+    accounts.map((a) => `<option value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</option>`).join("")}`;
 
   if (goalId) {
     const goal = state.savingsGoals.find((g) => g.id === goalId);
