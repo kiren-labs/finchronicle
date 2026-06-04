@@ -341,13 +341,13 @@ export function renderBudgetModal(budget = null) {
             <label for="budgetThreshold">Alert Threshold (%)</label>
             <input type="number" id="budgetThreshold" min="0" max="100" step="1"
               value="${budget?.alertThreshold || 80}">
-            <small>Alert triggers when spending reaches this percentage of the limit.</small>
+            <small>You'll be alerted when spending reaches this percent of your budget.</small>
           </div>
 
           <div class="form-group checkbox">
             <input type="checkbox" id="budgetRollover"
               ${budget?.rolloverEnabled ? "checked" : ""}>
-            <label for="budgetRollover">Enable Budget Rollover (unused balance carries to next month)</label>
+            <label for="budgetRollover">Carry unused budget to next month</label>
           </div>
         </div>
 

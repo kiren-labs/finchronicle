@@ -251,7 +251,7 @@ export function handleImport(event) {
     try {
       const result = await importFromCSV(reader.result);
       if (result.added === 0) {
-        showMessage("No valid rows to import.");
+        showMessage("No valid transactions found in this file.");
         return;
       }
       showMessage(
@@ -263,7 +263,7 @@ export function handleImport(event) {
       );
     } catch (err) {
       console.error("Import failed:", err);
-      showMessage("Import failed. Check the CSV format.");
+      showMessage("Import failed. Make sure the file is in the correct format.");
     }
   };
   reader.readAsText(file);
@@ -276,7 +276,7 @@ export function handleCsvImportFile(file) {
     try {
       const result = await importFromCSV(reader.result);
       if (result.added === 0) {
-        showMessage("No valid rows to import.");
+        showMessage("No valid transactions found in this file.");
         return;
       }
       showMessage(
@@ -288,7 +288,7 @@ export function handleCsvImportFile(file) {
       );
     } catch (err) {
       console.error("Import failed:", err);
-      showMessage("Import failed. Check the CSV format.");
+      showMessage("Import failed. Make sure the file is in the correct format.");
     }
   };
   reader.readAsText(file);
@@ -531,7 +531,7 @@ export function parseBackupCSV(text) {
   if (!hasRequired) {
     return {
       valid: false,
-      error: "Missing required columns (Date, Type, Category, Amount)",
+      error: "File is missing required columns: Date, Type, Category, Amount.",
     };
   }
 
@@ -710,7 +710,7 @@ export function parseBackupCSV(text) {
   });
 
   if (parsedTransactions.length === 0) {
-    return { valid: false, error: "No valid transactions found in backup" };
+    return { valid: false, error: "This backup file doesn't contain any transactions." };
   }
 
   return { valid: true, metadata, transactions: parsedTransactions };
@@ -1006,7 +1006,7 @@ export async function handleRestoreFileInput(file) {
 
   if (name.endsWith(".enc")) {
     const passphrase = prompt(
-      "Enter the passphrase used to encrypt this backup:",
+      "Enter the password you used to encrypt this backup:",
     );
     if (!passphrase) return;
     const data = await importEncryptedBackup(file, passphrase);

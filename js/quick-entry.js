@@ -51,7 +51,7 @@ export function renderQuickBar() {
 
   const cloneBtn =
     state.transactions.length > 0
-      ? `<button type="button" class="quick-pill quick-pill-clone" id="cloneLastBtn" title="Clone most recent transaction with today's date">
+      ? `<button type="button" class="quick-pill quick-pill-clone" id="cloneLastBtn" title="Copy your last transaction with today's date">
         <i class="ri-file-copy-line"></i> Clone Last
       </button>`
       : "";

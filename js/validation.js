@@ -17,7 +17,7 @@ export function validateTransaction(transaction) {
 
   // 1. Type validation
   if (!["income", "expense", "transfer"].includes(transaction.type)) {
-    errors.push({ field: "type", message: "Invalid transaction type" });
+    errors.push({ field: "type", message: "Transaction type must be Income, Expense, or Transfer." });
   }
 
   // 2. Amount validation
@@ -40,7 +40,7 @@ export function validateTransaction(transaction) {
     if (!validCategories.includes(transaction.category)) {
       errors.push({
         field: "category",
-        message: "Invalid category for transaction type",
+        message: "This category is not available for this transaction type.",
       });
     }
   }
@@ -127,14 +127,14 @@ export function validateTransaction(transaction) {
     transaction.paymentMethod &&
     !PAYMENT_METHODS.includes(transaction.paymentMethod)
   ) {
-    errors.push({ field: "paymentMethod", message: "Invalid payment method" });
+    errors.push({ field: "paymentMethod", message: "Select a valid payment method." });
   }
 
   if (
     transaction.expenseType &&
     !EXPENSE_TYPES.includes(transaction.expenseType)
   ) {
-    errors.push({ field: "expenseType", message: "Invalid expense type" });
+    errors.push({ field: "expenseType", message: "Select a valid expense type." });
   }
 
   if (transaction.merchant) {

@@ -308,9 +308,9 @@ export function updateTransactionsList() {
     // Reconciliation status badge (v4.0.0) — only shown for non-default statuses
     let statusBadgeHtml = "";
     if (t.status === "pending") {
-      statusBadgeHtml = `<span class="tx-status-badge tx-status-pending" title="Pending — not yet cleared by bank"><i class="ri-time-line"></i> pending</span>`;
+      statusBadgeHtml = `<span class="tx-status-badge tx-status-pending" title="Pending — not yet confirmed by your bank"><i class="ri-time-line"></i> pending</span>`;
     } else if (t.status === "reconciled") {
-      statusBadgeHtml = `<span class="tx-status-badge tx-status-reconciled" title="Reconciled"><i class="ri-lock-line"></i></span>`;
+      statusBadgeHtml = `<span class="tx-status-badge tx-status-reconciled" title="Confirmed with bank statement"><i class="ri-lock-line"></i></span>`;
     }
 
     // Reimbursement status (v3.27.0)
@@ -1142,7 +1142,7 @@ export function calculateBudgetHealth(month) {
     status = "Caution";
     statusIcon = "alert-line";
   } else {
-    status = "Over pace";
+    status = "Spending fast";
     statusIcon = "close-circle-line";
   }
 
@@ -1268,7 +1268,7 @@ export function renderMonthlyInsights() {
                 </div>
                 <div class="budget-health-metrics">
                     <div class="budget-metric">
-                    <div class="metric-label">Daily pace</div>
+                    <div class="metric-label">Daily spending</div>
                         <div class="metric-value">${formatCurrency(budgetHealth.dailyPace)}</div>
                     </div>
                     <div class="budget-metric">
@@ -1276,7 +1276,7 @@ export function renderMonthlyInsights() {
                         <div class="metric-value">${budgetHealth.daysRemaining}d</div>
                     </div>
                     <div class="budget-metric">
-                        <div class="metric-label">Projected</div>
+                        <div class="metric-label">Month-end estimate</div>
                         <div class="metric-value">${formatCurrency(budgetHealth.projectedMonthEnd)}</div>
                     </div>
                 </div>

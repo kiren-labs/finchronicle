@@ -152,9 +152,9 @@ export async function checkRecurringTransactions() {
 const FREQ_LABELS = {
   daily: "Daily",
   weekly: "Weekly",
-  biweekly: "Every 2 Wks",
+  biweekly: "Every 2 weeks",
   monthly: "Monthly",
-  quarterly: "Quarterly",
+  quarterly: "Every 3 months",
   yearly: "Yearly",
 };
 

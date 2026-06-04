@@ -75,7 +75,7 @@ export async function requestStoragePersistence() {
     state.storagePersisted = granted;
     if (!granted) {
       console.warn(
-        "⚠️ Storage persistence denied. Data may be evicted by browser.",
+        "⚠️ Your browser may delete app data if storage runs low. Add this app to your home screen to help prevent this.",
       );
     }
     return granted;
@@ -452,7 +452,7 @@ export async function performEncryptedBackup(passphrase) {
   }
 
   if (!passphrase || passphrase.length < 12) {
-    showMessage("Passphrase must be at least 12 characters.");
+    showMessage("Password must be at least 12 characters.");
     return;
   }
 
@@ -479,7 +479,7 @@ export async function performEncryptedBackup(passphrase) {
 
 export async function importEncryptedBackup(file, passphrase) {
   if (!passphrase || passphrase.length < 12) {
-    showMessage("Passphrase must be at least 12 characters.");
+    showMessage("Password must be at least 12 characters.");
     return null;
   }
 
@@ -496,7 +496,7 @@ export async function importEncryptedBackup(file, passphrase) {
     return data;
   } catch (e) {
     console.error("Decryption failed:", e);
-    showMessage("Decryption failed — wrong passphrase or corrupted file.");
+    showMessage("Couldn't decrypt this file. The password may be wrong or the file may be damaged.");
     return null;
   }
 }
@@ -541,7 +541,7 @@ export async function renderStorageHealth() {
         <span><i class="${statusIcon}" aria-hidden="true"></i> ${health.usedMB} MB used of ${health.quotaMB} MB (${health.usedPercent}%)</span>
       </div>
       <div class="storage-health-info">
-        <span><i class="${health.persisted === true ? "ri-shield-check-line" : health.persisted === false ? "ri-error-warning-line" : "ri-question-line"}" aria-hidden="true"></i> Persistent storage: ${health.persisted === true ? "Protected" : health.persisted === false ? "Not granted — data may be evicted" : "Unknown"}</span>
+        <span><i class="${health.persisted === true ? "ri-shield-check-line" : health.persisted === false ? "ri-error-warning-line" : "ri-question-line"}" aria-hidden="true"></i> Storage protection: ${health.persisted === true ? "Protected" : health.persisted === false ? "Not guaranteed — browser may clear data" : "Unknown"}</span>
       </div>
       ${health.persisted === false ? `<p class="storage-warning-text" role="alert">⚠️ Browser may delete your data under storage pressure. Add to Home Screen and export backups regularly.</p>` : ""}
       ${health.usedPercent > 80 ? `<p class="storage-warning-text" role="alert">⚠️ Storage is getting full. Consider exporting and clearing old data.</p>` : ""}
@@ -647,7 +647,7 @@ export function bindAutoBackupEvents() {
     .getElementById("encryptedBackupBtn2")
     ?.addEventListener("click", () => {
       const passphrase = prompt(
-        "Enter a passphrase (min 12 characters) to encrypt your backup:",
+        "Enter a password (min 12 characters) to encrypt your backup:",
       );
       if (passphrase) performEncryptedBackup(passphrase);
     });

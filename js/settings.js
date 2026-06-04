@@ -333,7 +333,7 @@ function renderErrorLogSection() {
   container.innerHTML = `
     <div class="card" style="margin-top: var(--space-4);">
       <h3 style="margin-bottom: var(--space-2);"><i class="ri-bug-line"></i> Error Log (${errors.length})</h3>
-      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: var(--space-2);">Local-only. Copy and paste into a GitHub issue to report bugs.</p>
+      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: var(--space-2);">Stored on this device only. Copy and share with the developer to report a bug.</p>
       <div class="error-log-list" style="max-height: 200px; overflow-y: auto; font-size: 0.8rem; font-family: monospace; background: var(--color-surface); padding: var(--space-2); border-radius: var(--radius-sm);">
         ${rows}
       </div>
