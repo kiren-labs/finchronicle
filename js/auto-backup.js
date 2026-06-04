@@ -6,7 +6,16 @@ import { state, APP_VERSION } from "./state.js";
 import { showMessage } from "./utils.js";
 import { getCurrency } from "./currency.js";
 import { updateBackupTimestamp } from "./settings.js";
-import { loadAllTransactionsFromDB, getAllNetWorthSnapshots } from "./db.js";
+import {
+  loadAllTransactionsFromDB,
+  getAllNetWorthSnapshots,
+  loadRecurringTemplatesFromDB,
+  loadBudgetsFromDB,
+  loadAccounts,
+  loadGoals,
+  loadQuickTemplates,
+  loadAppSettings,
+} from "./db.js";
 
 // ---- Constants ----
 
@@ -126,20 +135,26 @@ export function runAutoBackupIfDue() {
 // ---- Backup Generation ----
 
 async function buildJsonBackup() {
-  // Use loadAllTransactionsFromDB to include soft-deleted records for full audit trail
-  let allTransactions;
-  try {
-    allTransactions = await loadAllTransactionsFromDB();
-  } catch {
-    allTransactions = state.transactions;
-  }
-
-  let netWorthSnapshots = [];
-  try {
-    netWorthSnapshots = await getAllNetWorthSnapshots();
-  } catch {
-    netWorthSnapshots = [];
-  }
+  // Read all stores directly from DB — do not rely on state which may be partially loaded
+  const [
+    allTransactions,
+    recurringTemplates,
+    budgets,
+    accounts,
+    savingsGoals,
+    quickTemplates,
+    appSettings,
+    netWorthSnapshots,
+  ] = await Promise.all([
+    loadAllTransactionsFromDB().catch(() => state.transactions),
+    loadRecurringTemplatesFromDB().catch(() => state.recurringTemplates || []),
+    loadBudgetsFromDB().catch(() => state.budgets || []),
+    loadAccounts().catch(() => state.accounts || []),
+    loadGoals().catch(() => state.savingsGoals || []),
+    loadQuickTemplates().catch(() => state.quickTemplates || []),
+    loadAppSettings().catch(() => state.appSettings || null),
+    getAllNetWorthSnapshots().catch(() => []),
+  ]);
 
   const payload = {
     version: APP_VERSION,
@@ -149,12 +164,12 @@ async function buildJsonBackup() {
     transactionCount: allTransactions.length,
     integrity: "",
     transactions: allTransactions,
-    recurringTemplates: state.recurringTemplates || [],
-    budgets: state.budgets || [],
-    accounts: state.accounts || [],
-    savingsGoals: state.savingsGoals || [],
-    quickTemplates: state.quickTemplates || [],
-    appSettings: state.appSettings || null,
+    recurringTemplates,
+    budgets,
+    accounts,
+    savingsGoals,
+    quickTemplates,
+    appSettings,
     netWorthSnapshots,
     localStorage: {
       exchangeRateHistory: JSON.parse(localStorage.getItem("exchangeRateHistory") || "null"),
@@ -348,8 +363,14 @@ function getBackupFilename(format, encrypted) {
 // ---- Public Backup Actions ----
 
 export async function performJsonBackup(isAuto = false) {
-  if (state.transactions.length === 0) {
-    if (!isAuto) showMessage("No transactions to back up!");
+  const hasData = state.transactions.length > 0 ||
+    (state.accounts || []).length > 0 ||
+    (state.budgets || []).length > 0 ||
+    (state.recurringTemplates || []).length > 0 ||
+    (state.savingsGoals || []).length > 0 ||
+    (state.quickTemplates || []).length > 0;
+  if (!hasData) {
+    if (!isAuto) showMessage("No data to back up!");
     return;
   }
 
@@ -395,8 +416,14 @@ export async function performCsvBackup(isAuto = false) {
 }
 
 export async function performEncryptedBackup(passphrase) {
-  if (state.transactions.length === 0) {
-    showMessage("No transactions to back up!");
+  const hasData = state.transactions.length > 0 ||
+    (state.accounts || []).length > 0 ||
+    (state.budgets || []).length > 0 ||
+    (state.recurringTemplates || []).length > 0 ||
+    (state.savingsGoals || []).length > 0 ||
+    (state.quickTemplates || []).length > 0;
+  if (!hasData) {
+    showMessage("No data to back up!");
     return;
   }
 

@@ -840,6 +840,10 @@ export async function confirmRestore(mode = "merge") {
         localStorage.setItem("tagColors", JSON.stringify(backupData.localStorage.tagColors));
       }
     }
+    // Restore currency — was backed up in payload but never written back
+    if (backupData.metadata && backupData.metadata["Currency"]) {
+      localStorage.setItem("currency", backupData.metadata["Currency"]);
+    }
 
     await loadDataFromDB();
 
