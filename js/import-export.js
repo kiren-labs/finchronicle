@@ -805,7 +805,7 @@ export async function confirmRestore(mode = "merge") {
 
   if (mode === "replace") {
     const confirmed = confirm(
-      `This will permanently delete all current data and replace it with ${backupData.transactions.length} transactions from the backup. This cannot be undone. Continue?`,
+      `Replace all your current data with ${backupData.transactions.length} transactions from this backup? You can't undo this.`,
     );
     if (!confirmed) return;
   }
@@ -923,7 +923,7 @@ export async function confirmRestore(mode = "merge") {
     showRestoreReport(stats);
   } catch (err) {
     console.error("Restore failed:", err);
-    showMessage("Restore failed. Your existing data was preserved.");
+    showMessage("Restore failed. Your existing data is safe.");
     try {
       await loadDataFromDB();
       updateUI();

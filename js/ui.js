@@ -919,7 +919,7 @@ export async function confirmDelete() {
       showMessage("Transaction deleted.");
     } catch (err) {
       console.error("Delete failed:", err);
-      showMessage("Failed to delete transaction.");
+      showMessage("Transaction wasn't deleted. Try again.");
     }
     state.deleteId = null;
   }

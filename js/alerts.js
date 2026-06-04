@@ -382,7 +382,7 @@ function checkSavingsRateTrend() {
   return {
     type: ALERT_TYPES.SAVINGS_RATE_TREND,
     category: "_health",
-    message: `Savings rate has been below 10% for 3 months (avg ${avg}%).`,
+    message: `Your savings rate has been below 10% for 3 months (avg ${avg}%).`,
     severity: "warning",
   };
 }

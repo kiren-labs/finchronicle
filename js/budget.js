@@ -15,7 +15,7 @@ export async function initBudgets() {
   } catch (error) {
     console.error("Error loading budgets:", error);
     state.budgets = [];
-    showMessage("Error loading budgets.", "error");
+    showMessage("Your budgets didn't load. Try refreshing.", "error");
   }
 }
 
@@ -70,11 +70,11 @@ export async function saveBudget(budget) {
       state.budgets.push(budget);
     }
 
-    showMessage(`Budget for "${budget.category}" saved`, "success");
+    showMessage(`Budget for "${budget.category}" saved.`, "success");
     return budget;
   } catch (error) {
     console.error("Error saving budget:", error);
-    showMessage(`Error: ${error.message}`, "error");
+    showMessage("Budget wasn't saved. Try again.", "error");
     throw error;
   }
 }
@@ -84,10 +84,10 @@ export async function deleteBudget(budgetId) {
   try {
     await deleteBudgetFromDB(budgetId);
     state.budgets = state.budgets.filter((b) => b.id !== budgetId);
-    showMessage("Budget deleted", "success");
+    showMessage("Budget deleted.", "success");
   } catch (error) {
     console.error("Error deleting budget:", error);
-    showMessage("Error deleting budget.", "error");
+    showMessage("Budget wasn't deleted. Try again.", "error");
     throw error;
   }
 }

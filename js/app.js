@@ -937,7 +937,7 @@ function bindFormSubmit() {
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         submitBtn.textContent = originalBtnText;
-        showMessage("Failed to save transaction.");
+        showMessage("Transaction wasn't saved. Try again.");
       }
     });
 }
@@ -1176,7 +1176,7 @@ async function init() {
     registerServiceWorker();
   } catch (err) {
     console.error("App initialization failed:", err);
-    showMessage("Failed to load data.");
+    showMessage("Your data didn't load. Try refreshing the page.");
   }
 }
 

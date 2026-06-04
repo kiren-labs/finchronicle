@@ -27,7 +27,7 @@ export async function initAccounts() {
   } catch (err) {
     console.error("Failed to load accounts:", err);
     state.accounts = [];
-    showMessage("Failed to load accounts. Some data may be unavailable.");
+    showMessage("Your accounts didn't load. Try refreshing the page.");
   }
 }
 
@@ -155,7 +155,7 @@ export async function addAccount(formData) {
     return true;
   } catch (err) {
     console.error("Failed to save account:", err);
-    showMessage("Failed to create account.");
+    showMessage("Account wasn't saved. Try again.");
     return false;
   }
 }
@@ -194,7 +194,7 @@ export async function updateAccount(id, updates) {
     return true;
   } catch (err) {
     console.error("Failed to update account:", err);
-    showMessage("Failed to update account.");
+    showMessage("Account changes weren't saved. Try again.");
     return false;
   }
 }
@@ -220,7 +220,7 @@ export async function removeAccount(id) {
     return true;
   } catch (err) {
     console.error("Failed to delete account:", err);
-    showMessage("Failed to delete account.");
+    showMessage("Account wasn't deleted. Try again.");
     return false;
   }
 }
