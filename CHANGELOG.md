@@ -9,6 +9,87 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.2.1] — 2026-06-04
+
+### Changed — Copy & Language Overhaul
+
+#### Plain-English rewrites
+- Replaced all `"Failed to X"` error patterns with active-voice equivalents: `"X wasn't saved. Try again."`, `"Your data didn't load. Try refreshing."` etc.
+- Removed `"Please"` from all validation and error messages — direct sentence case throughout
+- `"This action cannot be undone."` → `"You can't undo this."` (delete modal and restore confirm)
+- Restore confirm dialog: removed ALL-CAPS `DELETE`, rewrote as a plain question: `"Replace all your current data with N transactions from this backup? You can't undo this."`
+- `"Already-created transactions"` → `"Existing transactions"` (recurring delete confirm)
+- `"Great job keeping your records protected!"` → `"Your records are protected."` (backup status)
+- `"Your data is at risk!"` → `"Your data is not yet backed up."` (never-backed-up state)
+- `"Got it!"` (install prompt) → `"Dismiss"`
+- `"to get started"` filler removed from quick-entry empty state
+- `"Savings rate has been below…"` → `"Your savings rate has been below…"` (alert message)
+
+#### Jargon removed
+- `"Passphrase"` → `"Password"` across all prompts, messages, and validation errors
+- `"Encrypted Backup"` (button) → `"Password-protected backup"`
+- `"AES-256 encrypted. Requires passphrase to restore."` → `"Password-protected. You'll need your password to restore this backup."`
+- `"Encryption failed"` → `"Backup protection failed"`
+- `"Decryption failed — wrong passphrase or corrupted file"` → plain explanation
+- `"CSV"` replaced with `"Spreadsheet"` in all user-facing labels and toasts
+- `"Full JSON — all data, all stores, lossless"` → `"Full backup — all your data, nothing left out."`
+- `"Reimbursable"` (expense type option) → `"Someone will pay me back"`
+- `"Asset"` / `"Liability"` (account classification) → `"I own this (savings, cash)"` / `"I owe this (loan, credit card)"`
+- `"Classification"` label → `"Account type"`
+- `"Closing Balance"` (reconciliation) → `"Bank statement balance"`
+- `"Hash mismatch"` → `"File check failed — this backup may be damaged"`
+- `"No unreconciled transactions"` → `"No transactions to check"`
+- `"Reconcile transaction"` (aria-label) → `"Mark as confirmed"`
+- `"Reconcile: [account]"` heading → `"Check against statement: [account]"`
+- `"X transactions reconciled."` → `"X transactions confirmed against your statement."`
+- `"Outstanding"` (settlement) → `"Still owed"`
+- `"Transaction Currency"` label → `"Paid in a different currency?"`
+- `"Exchange Rate"` label → `"Conversion rate"`; validation errors updated to match
+- `"Service worker not supported"` / `"No service worker registered"` → user-readable equivalents
+- `"Persistent storage: Not granted — data may be evicted"` → `"Storage protection: Not guaranteed — browser may clear data"`
+- `"Local-only. Copy and paste into a GitHub issue"` → `"Stored on this device only. Copy and share with the developer to report a bug."`
+
+#### Capitalisation
+- All modal headings, button labels, and section titles converted to sentence case
+- `"Add Recurring"`, `"Edit Recurring"`, `"Add Budget"`, `"Edit Budget"`, `"Add Account"`, `"Add Goal"`, `"New Savings Goal"`, `"Edit Goal"`, `"Additional Details"`, `"Save as Template"`, `"Finalize Reconciliation"` → sentence case equivalents
+- `"Finalise"` (British) → `"Finalize"` (American English); `"Tick off"` → `"Check off"`
+
+#### Frequency labels
+- `"Every 2 Wks"` → `"Every 2 weeks"`
+- `"Quarterly"` → `"Every 3 months"`
+
+#### Budget & savings copy
+- `"Enable Budget Rollover (unused balance carries to next month)"` → `"Carry unused budget to next month"`
+- Alert threshold hint rewritten in active voice: `"You'll be alerted when spending reaches this percent of your budget."`
+- `"Over pace"` (budget health status) → `"Spending fast"`
+- `"Daily pace"` metric → `"Daily spending"`
+- `"Projected"` metric → `"Month-end estimate"`
+
+#### Reconciliation copy
+- Explainer text removes `"FinChronicle"` brand insertion; `"Tick off"` → `"Check off"`
+
+#### Tone fixes
+- `"Checking for updates..."` → `"Checking for updates…"` (Unicode ellipsis)
+- `"Update found! Preparing..."` → `"Update found. Preparing…"`
+- Milestone message `"🎯 25% — Great start on 'X'!"` → plain `"25% reached on 'X'."`
+- Backup toasts: removed `✅` emoji from utility confirmations
+- `"No transactions to export!"` → period; all empty-state `!` removed
+
+#### i18n foundation
+- Added `js/i18n.js` — `t(key, vars)` lookup function with `{variable}` interpolation
+- Added `js/lang/en.js` — single source of truth for all user-visible strings (450+ keys across 15 namespaces: `button`, `message`, `error`, `validation`, `empty`, `warning`, `hint`, `status`, `confirmation`, `modal`, `aria`, `backup_status`, `prompt`, `section`, `faq`)
+- Added `js/en.json` — reference copy of the same strings for external tooling / translation
+- `import-export.js`, `budget.js`, `auto-backup.js`, `app.js`, `faq.js` now import `t()` and resolve strings through `en.js`
+- `js/i18n.js` and `js/lang/en.js` added to `CACHE_URLS` in `sw.js`
+
+### Technical
+- `APP_VERSION` → `4.2.1` in `js/state.js`
+- `CACHE_NAME` → `finchronicle-v4.2.1` in `sw.js`
+- `version` → `4.2.1` in `manifest.json`
+- `js/i18n.js`, `js/lang/en.js` added to `CACHE_URLS`
+
+---
+
 ## [4.2.0] — 2026-05-24
 
 ### Changed — Backup & Restore Overhaul

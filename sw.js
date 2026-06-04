@@ -9,6 +9,8 @@ const CACHE_URLS = [
   "./",
   "./index.html",
   "./js/app.js",
+  "./js/i18n.js",
+  "./js/lang/en.js",
   "./js/state.js",
   "./js/utils.js",
   "./js/db.js",
