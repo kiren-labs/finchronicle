@@ -1073,7 +1073,7 @@
                                 <i class="ri-upload-cloud-line" aria-hidden="true"></i>
                                 <span>Restore from Backup</span>
                             </button>
-                            <p class="data-backup-hint">Accepts .json (full backup) or .enc (encrypted backup)</p>
+                            <p class="data-backup-hint">Accepts .json (full backup), .enc (encrypted), or .csv (transactions only)</p>
                             <button class="data-backup-btn" id="importSpreadsheetBtn" type="button">
                                 <i class="ri-file-upload-line" aria-hidden="true"></i>
                                 <span>Import Spreadsheet</span>
@@ -1107,7 +1107,7 @@
 
                 <!-- Hidden file inputs -->
                 <input type="file" id="spreadsheetImportFile" accept=".csv,text/csv" hidden aria-hidden="true">
-                <input type="file" id="dataRestoreFile" accept=".json,.enc" hidden aria-hidden="true">
+                <input type="file" id="dataRestoreFile" accept=".json,.enc,.csv" hidden aria-hidden="true">
 
                 <!-- Backup Status Card (v3.9.0) -->
                 <div id="backupStatusContainer"></div>

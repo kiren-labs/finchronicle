@@ -75,6 +75,7 @@ export const state = {
   accounts: [],
   savingsGoals: [],
   storagePersisted: null, // null = unknown, true = persisted, false = denied
+  backupDue: false,
 };
 
 // Default optional fields configuration

@@ -765,6 +765,24 @@ body.dark-mode .data-backup-btn:hover {
   background: var(--color-surface);
 }
 
+body.dark-mode .storage-health-inline {
+  border-top-color: var(--color-border);
+}
+
+body.dark-mode .storage-meter {
+  background: var(--color-bg);
+}
+
+body.dark-mode .storage-health-info {
+  color: var(--color-text-muted);
+}
+
+body.dark-mode .storage-warning-text {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border-left-color: var(--color-warning-border);
+}
+
 body.dark-mode #backupFrequency2 {
   background: var(--color-bg);
   border-color: var(--color-border);

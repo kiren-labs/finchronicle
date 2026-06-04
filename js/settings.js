@@ -303,6 +303,9 @@ export function updateSettingsContent() {
   if (faqContainer) {
     faqContainer.innerHTML = renderFAQ();
   }
+
+  // Refresh storage health each time settings tab is opened (deferred from init)
+  import("./auto-backup.js").then(mod => mod.renderStorageHealth());
 }
 
 // ---- Error Log (v3.29.0) ----

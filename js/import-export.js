@@ -770,8 +770,7 @@ export async function confirmRestore(mode = "merge") {
     ];
 
     if (mode === "replace") {
-      const storesToClear = CLEARABLE_STORES.filter(s => backupData[s] != null);
-      await clearAllStores(storesToClear);
+      await clearAllStores(CLEARABLE_STORES);
       await loadDataFromDB();
     } else {
       await loadDataFromDB();
@@ -840,8 +839,8 @@ export async function confirmRestore(mode = "merge") {
         localStorage.setItem("tagColors", JSON.stringify(backupData.localStorage.tagColors));
       }
     }
-    // Restore currency — was backed up in payload but never written back
-    if (backupData.metadata && backupData.metadata["Currency"]) {
+    // Restore currency only on full replace — don't overwrite active currency on merge
+    if (mode === "replace" && backupData.metadata && backupData.metadata["Currency"]) {
       localStorage.setItem("currency", backupData.metadata["Currency"]);
     }
 
@@ -877,8 +876,12 @@ async function verifyIntegrity(data) {
   if (!data.integrity || !data.integrity.startsWith("sha256:")) return null;
   const storedHash = data.integrity.slice(7);
   try {
-    const copy = { ...data, integrity: "" };
-    const jsonStr = JSON.stringify(copy, null, 2);
+    // Preserve original key order by zeroing integrity in-place, hashing, then restoring.
+    // Spread copies do not guarantee key order matches the serialized backup.
+    const original = data.integrity;
+    data.integrity = "";
+    const jsonStr = JSON.stringify(data, null, 2);
+    data.integrity = original;
     const hashBuffer = await crypto.subtle.digest(
       "SHA-256",
       new TextEncoder().encode(jsonStr),

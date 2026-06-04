@@ -27,7 +27,6 @@ const DEFAULT_SETTINGS = {
   backupFrequency: "weekly", // 'daily' | 'weekly' | 'monthly'
   lastAutoBackup: null,
   backupFormat: "json", // 'json' | 'csv'
-  keepBackupCount: 4,
 };
 
 // Frequency in milliseconds
@@ -401,7 +400,7 @@ export async function performCsvBackup(isAuto = false) {
   const blob = new Blob([data], { type: "text/csv" });
   const filename = getBackupFilename("csv", false);
 
-  downloadBlob(blob, filename);
+  await downloadBlob(blob, filename);
 
   const settings = getBackupSettings();
   settings.lastAutoBackup = new Date().toISOString();
@@ -475,86 +474,6 @@ export async function importEncryptedBackup(file, passphrase) {
     showMessage("Decryption failed — wrong passphrase or corrupted file");
     return null;
   }
-}
-
-// ---- Backup Verification ----
-
-export function verifyBackup(jsonStr) {
-  try {
-    const data = JSON.parse(jsonStr);
-    if (
-      !data.transactions ||
-      !Array.isArray(data.transactions) ||
-      data.transactionCount !== data.transactions.length
-    ) {
-      return { valid: false, error: "Transaction count mismatch" };
-    }
-    return { valid: true, count: data.transactions.length };
-  } catch (e) {
-    return { valid: false, error: "Invalid JSON" };
-  }
-}
-
-// ---- Render Auto-Backup Settings UI ----
-
-export function renderAutoBackupSettings() {
-  const settings = getBackupSettings();
-  const isEnabled = settings.autoBackupEnabled;
-  const lastBackup = settings.lastAutoBackup
-    ? new Date(settings.lastAutoBackup).toLocaleDateString()
-    : "Never";
-
-  return `
-    <div class="auto-backup-card">
-      <div class="auto-backup-header">
-        <i class="ri-refresh-line" aria-hidden="true"></i>
-        <h3>Auto-Backup</h3>
-      </div>
-
-      <div class="auto-backup-toggle-row">
-        <label for="autoBackupToggle" class="auto-backup-label">Enable automatic backups</label>
-        <button id="autoBackupToggle" class="toggle-switch ${isEnabled ? "active" : ""}"
-                role="switch" aria-checked="${isEnabled}" aria-label="Toggle auto-backup">
-          <span class="toggle-knob"></span>
-        </button>
-      </div>
-
-      <div class="auto-backup-options ${isEnabled ? "" : "disabled"}">
-        <div class="auto-backup-row">
-          <label for="backupFrequency">Frequency</label>
-          <select id="backupFrequency" ${isEnabled ? "" : "disabled"}>
-            <option value="daily" ${settings.backupFrequency === "daily" ? "selected" : ""}>Daily</option>
-            <option value="weekly" ${settings.backupFrequency === "weekly" ? "selected" : ""}>Weekly</option>
-            <option value="monthly" ${settings.backupFrequency === "monthly" ? "selected" : ""}>Monthly</option>
-          </select>
-        </div>
-
-        <div class="auto-backup-row">
-          <label for="backupFormat">Format</label>
-          <select id="backupFormat" ${isEnabled ? "" : "disabled"}>
-            <option value="json" ${settings.backupFormat === "json" ? "selected" : ""}>JSON (full, lossless)</option>
-            <option value="csv" ${settings.backupFormat === "csv" ? "selected" : ""}>CSV (portable)</option>
-          </select>
-        </div>
-
-        <div class="auto-backup-info">
-          <span class="auto-backup-last">Last auto-backup: <strong>${lastBackup}</strong></span>
-        </div>
-      </div>
-
-      <div class="auto-backup-actions">
-        <button class="btn btn-secondary" id="manualBackupBtn" type="button">
-          <i class="ri-download-2-line" aria-hidden="true"></i> Backup Now
-        </button>
-        <button class="btn btn-secondary" id="encryptedBackupBtn" type="button">
-          <i class="ri-lock-line" aria-hidden="true"></i> Encrypted Export
-        </button>
-        <button class="btn btn-secondary" id="importEncryptedBtn" type="button">
-          <i class="ri-lock-unlock-line" aria-hidden="true"></i> Import Encrypted
-        </button>
-      </div>
-    </div>
-  `;
 }
 
 // ---- Render Storage Health Widget ----
@@ -655,9 +574,16 @@ export async function initAutoBackup() {
   // Check due state (sets state.backupDue — no download)
   runAutoBackupIfDue();
 
+  // Update overdue message text
+  const settings2 = getBackupSettings();
+  if (settings2.lastAutoBackup) {
+    const days = Math.floor((Date.now() - new Date(settings2.lastAutoBackup).getTime()) / (1000 * 60 * 60 * 24));
+    const msg = document.getElementById("backupOverdueMsg");
+    if (msg && days > 0) msg.textContent = `Backup overdue — last backup was ${days} day${days === 1 ? "" : "s"} ago.`;
+  }
+
   // Update static UI (banner visibility driven by state.backupDue)
   updateAutoBackupUI();
-  await renderStorageHealth();
 }
 
 // ============================================================================
@@ -683,7 +609,7 @@ export function bindAutoBackupEvents() {
   });
 
   document.getElementById("encryptedBackupBtn2")?.addEventListener("click", () => {
-    const passphrase = prompt("Enter a passphrase (min 6 characters) to encrypt your backup:");
+    const passphrase = prompt("Enter a passphrase (min 12 characters) to encrypt your backup:");
     if (passphrase) performEncryptedBackup(passphrase);
   });
 
@@ -729,11 +655,4 @@ export function bindAutoBackupEvents() {
   document.getElementById("backupOverdueBtn")?.addEventListener("click", () => {
     performJsonBackup(false);
   });
-
-  const settings = getBackupSettings();
-  if (settings.lastAutoBackup) {
-    const days = Math.floor((Date.now() - new Date(settings.lastAutoBackup).getTime()) / (1000 * 60 * 60 * 24));
-    const msg = document.getElementById("backupOverdueMsg");
-    if (msg && days > 0) msg.textContent = `Backup overdue \u2014 last backup was ${days} day${days === 1 ? "" : "s"} ago.`;
-  }
 }
