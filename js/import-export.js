@@ -408,7 +408,7 @@ export async function importFromCSV(text) {
     // Tags
     if (tagsIndex !== -1) {
       const raw = (row[tagsIndex] || "").trim();
-      if (raw) txn.tags = raw.split(";").map(s => s.trim()).filter(Boolean);
+      if (raw) txn.tags = raw.split(";").map(s => sanitizeHTML(s.trim())).filter(Boolean);
     }
     // Status (v4.0.0)
     if (statusIndex !== -1) {
@@ -636,7 +636,7 @@ export function parseBackupCSV(text) {
     // Tags
     if (tagsIdx !== -1) {
       const raw = (row[tagsIdx] || "").trim();
-      if (raw) transaction.tags = raw.split(";").map(s => s.trim()).filter(Boolean);
+      if (raw) transaction.tags = raw.split(";").map(s => sanitizeHTML(s.trim())).filter(Boolean);
     }
     // Status (v4.0.0)
     if (statusIdx !== -1) {

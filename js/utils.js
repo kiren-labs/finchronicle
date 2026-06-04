@@ -24,7 +24,7 @@ export function sanitizeHTML(str) {
   if (!str) return "";
   const temp = document.createElement("div");
   temp.textContent = str;
-  return temp.innerHTML;
+  return temp.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 // Format number with commas

@@ -277,7 +277,7 @@ async function deriveKey(passphrase, salt) {
     ["deriveKey"],
   );
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    { name: "PBKDF2", salt, iterations: 210000, hash: "SHA-256" },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
     false,
@@ -427,8 +427,8 @@ export async function performEncryptedBackup(passphrase) {
     return;
   }
 
-  if (!passphrase || passphrase.length < 6) {
-    showMessage("Passphrase must be at least 6 characters");
+  if (!passphrase || passphrase.length < 12) {
+    showMessage("Passphrase must be at least 12 characters");
     return;
   }
 
@@ -454,8 +454,8 @@ export async function performEncryptedBackup(passphrase) {
 }
 
 export async function importEncryptedBackup(file, passphrase) {
-  if (!passphrase || passphrase.length < 6) {
-    showMessage("Passphrase must be at least 6 characters");
+  if (!passphrase || passphrase.length < 12) {
+    showMessage("Passphrase must be at least 12 characters");
     return null;
   }
 
