@@ -113,7 +113,7 @@ function generateBackupMetadata() {
     dates.length > 0 ? new Date(dates[0]).toISOString().slice(0, 10) : "";
   const newestDate =
     dates.length > 0
-      ? new Date(dates[dates.length - 1]).toISOString().slice(0, 10)
+      ? new Date(dates.at(-1)).toISOString().slice(0, 10)
       : "";
   const dateRange =
     dates.length > 0 ? `${oldestDate} to ${newestDate}` : "No transactions";
@@ -685,7 +685,7 @@ export function showRestorePreview(backupData) {
     dates.length > 0 ? formatDate(dates[0].toISOString().slice(0, 10)) : "-";
   const newestDate =
     dates.length > 0
-      ? formatDate(dates[dates.length - 1].toISOString().slice(0, 10))
+      ? formatDate(dates.at(-1).toISOString().slice(0, 10))
       : "-";
   document.getElementById("previewDateRange").textContent =
     `${oldestDate} to ${newestDate}`;

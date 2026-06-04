@@ -18,12 +18,12 @@ export async function initOptionalFields() {
   const isFirstRun = !settings;
 
   if (!settings) {
-    settings = JSON.parse(JSON.stringify(DEFAULT_APP_SETTINGS));
+    settings = structuredClone(DEFAULT_APP_SETTINGS);
   }
 
   // Merge any missing field keys (forward compatibility)
   for (const key of Object.keys(DEFAULT_APP_SETTINGS.enabledFields)) {
-    if (!(key in settings.enabledFields)) {
+    if (!Object.hasOwn(settings.enabledFields, key)) {
       settings.enabledFields[key] = false;
     }
   }

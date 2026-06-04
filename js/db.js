@@ -227,10 +227,8 @@ export function initDB() {
           getAllReq.onsuccess = () => {
             const liabilityTypes = ["credit-card", "loan", "mortgage"];
             getAllReq.result.forEach((account) => {
-              if (!account.classification) {
-                account.classification = liabilityTypes.includes(account.type) ? "liability" : "asset";
-                accStore.put(account);
-              }
+              account.classification ??= liabilityTypes.includes(account.type) ? "liability" : "asset";
+              accStore.put(account);
             });
           };
         }

@@ -30,7 +30,7 @@ function getTagColors() {
 // Return the color for a tag, auto-assigning one if none exists.
 export function getTagColor(tag) {
   const colors = getTagColors();
-  if (colors[tag]) return colors[tag];
+  if (Object.hasOwn(colors, tag)) return colors[tag];
   return autoAssignColor(tag, colors);
 }
 

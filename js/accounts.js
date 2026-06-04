@@ -334,8 +334,8 @@ async function renderNetWorthTrend() {
   }).join("");
 
   const labelFirst = formatMonthLabel(snapshots[0].snapshotDate);
-  const labelLast = formatMonthLabel(snapshots[snapshots.length - 1].snapshotDate);
-  const latestNetWorth = snapshots[snapshots.length - 1].netWorth;
+  const labelLast = formatMonthLabel(snapshots.at(-1).snapshotDate);
+  const latestNetWorth = snapshots.at(-1).netWorth;
   const prevNetWorth = snapshots[snapshots.length - 2].netWorth;
   const trendDiff = latestNetWorth - prevNetWorth;
   const trendClass = trendDiff >= 0 ? "positive" : "negative";
@@ -512,7 +512,7 @@ export async function handleAccountFormSubmit() {
     success = await addAccount({ name, type, openingBalance });
     // Set classification + isSavings if user overrode defaults
     if (success) {
-      const newAccount = state.accounts[state.accounts.length - 1];
+      const newAccount = state.accounts.at(-1);
       if (newAccount) {
         const updates = {};
         if (classification !== (ACCOUNT_CLASSIFICATION[type] || "asset")) updates.classification = classification;
