@@ -680,7 +680,7 @@ function bindTagInputEvents() {
 
   // Add a tag from the current input value
   function addTag(value) {
-    const tag = value.trim().toLowerCase().replace(/,/g, "");
+    const tag = value.trim().toLowerCase().replaceAll(",", "");
     if (!tag || tag.length > 30) return;
     if (state.formTags.includes(tag)) {
       tagInput.value = "";
@@ -808,23 +808,10 @@ function bindFormSubmit() {
         status: existingTx ? (existingTx.status || "cleared") : "cleared",
         createdAt: existingTx ? existingTx.createdAt : now,
         updatedAt: now,
+        ...(type === "transfer" ? getTransferFormData() : {}),
+        ...getOptionalFieldValues(),
+        ...getMultiCurrencyFormData(),
       };
-
-      // Add transfer-specific fields
-      if (type === "transfer") {
-        const transferData = getTransferFormData();
-        transaction.fromAccount = transferData.fromAccount;
-        transaction.toAccount = transferData.toAccount;
-        transaction.transferNote = transferData.transferNote;
-      }
-
-      // Add optional fields (v3.16.0)
-      const optionalValues = getOptionalFieldValues();
-      Object.assign(transaction, optionalValues);
-
-      // Add multi-currency fields (v3.24.0)
-      const multiCurrencyValues = getMultiCurrencyFormData();
-      Object.assign(transaction, multiCurrencyValues);
 
       const validation = validateTransaction(transaction);
 

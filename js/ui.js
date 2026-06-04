@@ -247,7 +247,7 @@ export function updateTransactionsList() {
 
     // Build optional field metadata line (v3.16.0)
     const metaParts = [];
-    const ef = state.appSettings ? state.appSettings.enabledFields : {};
+    const ef = state.appSettings?.enabledFields ?? {};
     if (ef.paymentMethod && t.paymentMethod) metaParts.push(`<span class="tx-meta-item"><i class="ri-bank-card-line"></i> ${sanitizeHTML(t.paymentMethod)}</span>`);
     if (ef.merchant && t.merchant) metaParts.push(`<span class="tx-meta-item"><i class="ri-store-2-line"></i> ${sanitizeHTML(t.merchant)}</span>`);
     if (ef.attachedTo && t.attachedTo) metaParts.push(`<span class="tx-meta-item"><i class="ri-user-line"></i> ${sanitizeHTML(t.attachedTo)}</span>`);

@@ -147,7 +147,7 @@ export function validateTransaction(transaction) {
     if (!currencies[transaction.transactionCurrency]) {
       errors.push({ field: "transactionCurrency", message: "Invalid transaction currency" });
     }
-    const homeCurrency = state.currency || localStorage.getItem("currency") || "USD";
+    const homeCurrency = state.currency ?? localStorage.getItem("currency") ?? "USD";
     if (transaction.transactionCurrency !== homeCurrency) {
       if (!transaction.exchangeRate || isNaN(transaction.exchangeRate) || transaction.exchangeRate <= 0) {
         errors.push({ field: "exchangeRate", message: "Exchange rate is required for foreign currency transactions" });
