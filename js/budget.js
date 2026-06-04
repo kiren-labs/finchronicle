@@ -298,7 +298,7 @@ export function renderBudgetList() {
 // Render budget modal
 export function renderBudgetModal(budget = null) {
   const isEdit = !!budget;
-  const title = isEdit ? "Edit Budget" : "Add Budget";
+  const title = isEdit ? "Edit budget" : "Add budget";
 
   const categoryOptions = Object.entries(categories.expense)
     .map(([parent, children]) => {
@@ -341,7 +341,7 @@ export function renderBudgetModal(budget = null) {
             <label for="budgetThreshold">Alert Threshold (%)</label>
             <input type="number" id="budgetThreshold" min="0" max="100" step="1"
               value="${budget?.alertThreshold || 80}">
-            <small>Alert triggers when spending reaches this percentage of the limit</small>
+            <small>Alert triggers when spending reaches this percentage of the limit.</small>
           </div>
 
           <div class="form-group checkbox">

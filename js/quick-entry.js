@@ -193,7 +193,7 @@ export function cloneLast() {
     if (el) el.value = recent.location;
   }
 
-  showMessage("📋 Last transaction cloned — review and save");
+  showMessage("📋 Last transaction cloned — review and save.");
 }
 
 // ============================================================================
@@ -254,7 +254,7 @@ export async function saveAsTemplate() {
 
   renderQuickBar();
   renderTemplateManager();
-  showMessage("✅ Template saved!");
+  showMessage("Template saved.");
 }
 
 // ============================================================================
@@ -302,7 +302,7 @@ export async function deleteTemplate(id) {
   }
   renderQuickBar();
   renderTemplateManager();
-  showMessage("Template deleted");
+  showMessage("Template deleted.");
 }
 
 export async function moveTemplate(id, direction) {

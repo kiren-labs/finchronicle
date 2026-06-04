@@ -24,11 +24,11 @@ export function validateTransaction(transaction) {
   if (isNaN(transaction.amount) || transaction.amount <= 0) {
     errors.push({
       field: "amount",
-      message: "Amount must be a positive number",
+      message: "Amount must be a positive number.",
     });
   }
   if (transaction.amount > 999999999) {
-    errors.push({ field: "amount", message: "Amount exceeds maximum limit" });
+    errors.push({ field: "amount", message: "Amount exceeds maximum limit." });
   }
 
   // 3. Category validation
@@ -52,13 +52,13 @@ export function validateTransaction(transaction) {
     if (!from) {
       errors.push({
         field: "fromAccount",
-        message: "Source account is required for transfers",
+        message: "Source account is required for transfers.",
       });
     }
     if (!to) {
       errors.push({
         field: "toAccount",
-        message: "Destination account is required for transfers",
+        message: "Destination account is required for transfers.",
       });
     }
     if (from && to && from.toLowerCase() === to.toLowerCase()) {
@@ -107,7 +107,7 @@ export function validateTransaction(transaction) {
   if (transaction.notes && transaction.notes.length > 500) {
     errors.push({
       field: "notes",
-      message: "Notes too long (max 500 characters)",
+      message: "Notes too long (max 500 characters).",
     });
   }
   transaction.notes = sanitizeHTML(transaction.notes || "");
@@ -118,7 +118,7 @@ export function validateTransaction(transaction) {
     .map((tag) => sanitizeHTML(String(tag).trim()))
     .filter((tag) => tag.length > 0 && tag.length <= 30);
   if (sanitizedTags.length > 15) {
-    errors.push({ field: "tags", message: "Maximum 15 tags allowed" });
+    errors.push({ field: "tags", message: "Maximum 15 tags allowed." });
   }
   transaction.tags = sanitizedTags.slice(0, 15);
 

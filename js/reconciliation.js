@@ -280,7 +280,7 @@ export function renderReconciliationDifference() {
     diffEl.className = "reconciliation-difference reconciliation-mismatch";
     const hint = document.createElement("p");
     hint.className = "recon-hint";
-    hint.textContent = "Review unmatched transactions before finalising.";
+    hint.textContent = "Review unmatched transactions before finalizing.";
     diffEl.appendChild(hint);
   }
 }

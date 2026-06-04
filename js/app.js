@@ -821,7 +821,7 @@ function bindFormSubmit() {
       }
 
       if (!isNaN(amount) && !Number.isInteger(amount * 100)) {
-        showMessage("⚠️ Amount can have at most 2 decimal places");
+        showMessage("⚠️ Amount can have at most 2 decimal places.");
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         return;
@@ -829,7 +829,7 @@ function bindFormSubmit() {
 
       submitBtn.classList.add("loading");
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="btn-spinner"></span> Saving...';
+      submitBtn.innerHTML = '<span class="btn-spinner"></span> Saving…';
 
       const type = document.getElementById("type").value;
       const now = new Date().toISOString();
@@ -959,7 +959,7 @@ async function handleMarkSettled(id) {
     }
   } catch (err) {
     console.error("Failed to mark transaction as settled:", err);
-    showMessage("Failed to mark as settled. Please try again.");
+    showMessage("Failed to mark as settled. Try again.");
   }
 }
 

@@ -474,7 +474,7 @@ export function showAddAccountForm() {
   const modal = document.getElementById("accountFormModal");
   if (!modal) return;
 
-  document.getElementById("accountFormTitle").textContent = "Add Account";
+  document.getElementById("accountFormTitle").textContent = "Add account";
   document.getElementById("accountNameInput").value = "";
   document.getElementById("accountTypeSelect").value = "checking";
   document.getElementById("accountBalanceInput").value = "";

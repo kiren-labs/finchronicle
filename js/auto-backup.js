@@ -393,7 +393,7 @@ export async function performJsonBackup(isAuto = false) {
     (state.savingsGoals || []).length > 0 ||
     (state.quickTemplates || []).length > 0;
   if (!hasData) {
-    if (!isAuto) showMessage("No data to back up!");
+    if (!isAuto) showMessage("No data to back up.");
     return;
   }
 
@@ -411,12 +411,12 @@ export async function performJsonBackup(isAuto = false) {
   state.backupDue = false;
   updateAutoBackupUI();
 
-  if (!isAuto) showMessage("✅ Backup saved!");
+  if (!isAuto) showMessage("Backup saved.");
 }
 
 export async function performCsvBackup(isAuto = false) {
   if (state.transactions.length === 0) {
-    if (!isAuto) showMessage("No transactions to back up!");
+    if (!isAuto) showMessage("No transactions to back up.");
     return;
   }
 
@@ -434,7 +434,7 @@ export async function performCsvBackup(isAuto = false) {
   if (isAuto) {
     showMessage("Auto-backup saved to Downloads.");
   } else {
-    showMessage("✅ CSV backup exported!");
+    showMessage("CSV backup exported.");
   }
 }
 
@@ -447,12 +447,12 @@ export async function performEncryptedBackup(passphrase) {
     (state.savingsGoals || []).length > 0 ||
     (state.quickTemplates || []).length > 0;
   if (!hasData) {
-    showMessage("No data to back up!");
+    showMessage("No data to back up.");
     return;
   }
 
   if (!passphrase || passphrase.length < 12) {
-    showMessage("Passphrase must be at least 12 characters");
+    showMessage("Passphrase must be at least 12 characters.");
     return;
   }
 
@@ -470,7 +470,7 @@ export async function performEncryptedBackup(passphrase) {
     state.backupDue = false;
     updateAutoBackupUI();
 
-    showMessage("🔒 Encrypted backup saved!");
+    showMessage("🔒 Encrypted backup saved.");
   } catch (e) {
     console.error("Encryption failed:", e);
     showMessage("Encryption failed. Try again.");
@@ -479,7 +479,7 @@ export async function performEncryptedBackup(passphrase) {
 
 export async function importEncryptedBackup(file, passphrase) {
   if (!passphrase || passphrase.length < 12) {
-    showMessage("Passphrase must be at least 12 characters");
+    showMessage("Passphrase must be at least 12 characters.");
     return null;
   }
 
@@ -496,7 +496,7 @@ export async function importEncryptedBackup(file, passphrase) {
     return data;
   } catch (e) {
     console.error("Decryption failed:", e);
-    showMessage("Decryption failed — wrong passphrase or corrupted file");
+    showMessage("Decryption failed — wrong passphrase or corrupted file.");
     return null;
   }
 }

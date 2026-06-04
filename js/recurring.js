@@ -461,7 +461,7 @@ export function openRecurringModal(id = null) {
   if (id !== null) {
     const template = state.recurringTemplates.find((t) => t.id === id);
     if (template) {
-      modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Edit Recurring';
+      modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Edit recurring';
       selectRecurringType(template.type);
       document.getElementById("recurringAmount").value = template.amount;
       document.getElementById("recurringCategory").value = template.category;
@@ -480,7 +480,7 @@ export function openRecurringModal(id = null) {
         accountSel.value = template.toAccount;
     }
   } else {
-    modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Add Recurring';
+    modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Add recurring';
   }
 
   modal.style.display = "flex";
@@ -525,13 +525,13 @@ export async function saveRecurringTemplate() {
     dayOfMonth !== null &&
     (isNaN(dayOfMonth) || dayOfMonth < 1 || dayOfMonth > 28)
   ) {
-    showMessage("Day of month must be between 1 and 28");
+    showMessage("Day of month must be between 1 and 28.");
     return;
   }
 
   const sanitizedNotes = sanitizeHTML(notes);
   if (sanitizedNotes.length > 500) {
-    showMessage("Notes too long (max 500 characters)");
+    showMessage("Notes too long (max 500 characters).");
     return;
   }
 
@@ -584,7 +584,7 @@ export async function saveRecurringTemplate() {
 
   closeRecurringModal();
   renderRecurringSection();
-  showMessage(isEditing ? "Recurring updated" : "Recurring transaction added");
+  showMessage(isEditing ? "Recurring updated." : "Recurring transaction added.");
 }
 
 async function deleteRecurring(id) {
@@ -604,7 +604,7 @@ async function deleteRecurring(id) {
     (t) => t.id !== id,
   );
   renderRecurringSection();
-  showMessage("Recurring transaction deleted");
+  showMessage("Recurring transaction deleted.");
 }
 
 async function toggleRecurring(id) {
@@ -613,5 +613,5 @@ async function toggleRecurring(id) {
   template.enabled = !template.enabled;
   await saveRecurringTemplateToDB(template);
   renderRecurringSection();
-  showMessage(template.enabled ? "Recurring resumed" : "Recurring paused");
+  showMessage(template.enabled ? "Recurring resumed." : "Recurring paused.");
 }

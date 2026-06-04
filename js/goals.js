@@ -28,7 +28,7 @@ export async function addGoal(formData) {
   };
 
   if (!goal.name || isNaN(goal.targetAmount) || goal.targetAmount <= 0) {
-    showMessage("Please enter a valid goal name and target amount.");
+    showMessage("Enter a valid goal name and target amount.");
     return false;
   }
 
@@ -92,7 +92,7 @@ function checkMilestone(goal, prevPercent, newPercent) {
 
   if (newLevel > prevLevel) {
     const messages = {
-      25: `🎯 25% — Great start on "${goal.name}"!`,
+      25: `25% reached on "${goal.name}".`,
       50: `50% reached. "${goal.name}" is halfway funded.`,
       75: `75% reached. "${goal.name}" is close to the target.`,
       100: `🎉 Goal reached! "${goal.name}" is fully funded!`,
@@ -210,14 +210,14 @@ export function showGoalForm(goalId = null) {
   if (goalId) {
     const goal = state.savingsGoals.find((g) => g.id === goalId);
     if (!goal) return;
-    title.textContent = "Edit Goal";
+    title.textContent = "Edit goal";
     nameInput.value = goal.name;
     targetInput.value = goal.targetAmount;
     deadlineInput.value = goal.deadline || "";
     linkedSelect.value = goal.linkedAccount || "";
     saveBtn.dataset.editId = goalId;
   } else {
-    title.textContent = "New Savings Goal";
+    title.textContent = "New savings goal";
     nameInput.value = "";
     targetInput.value = "";
     deadlineInput.value = "";
@@ -265,7 +265,7 @@ export async function handleGoalFormSubmit() {
     if (success) {
       closeGoalForm();
       renderGoalsDashboard();
-      showMessage("Goal created!");
+      showMessage("Goal created.");
     }
   }
 }

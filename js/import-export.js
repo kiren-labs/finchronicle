@@ -35,7 +35,7 @@ import { updateUI } from "./ui.js";
 
 export function exportToCSV() {
   if (state.transactions.length === 0) {
-    showMessage("No transactions to export!");
+    showMessage("No transactions to export.");
     return;
   }
 
@@ -484,12 +484,12 @@ export function handleRestore(event) {
       showRestorePreview(backupData);
     } catch (err) {
       console.error("Backup parse error:", err);
-      showMessage("Failed to read backup file. Please check the file format.");
+      showMessage("Failed to read backup file. Check the file format.");
     }
   };
 
   reader.onerror = () => {
-    showMessage("Failed to read file. Please try again.");
+    showMessage("Failed to read file. Try again.");
   };
 
   reader.readAsText(file);
@@ -811,7 +811,7 @@ export async function confirmRestore(mode = "merge") {
   }
 
   closeRestorePreview();
-  showMessage("Restoring backup...");
+  showMessage("Restoring backup…");
 
   try {
     const CLEARABLE_STORES = [
@@ -1026,7 +1026,7 @@ export async function handleRestoreFileInput(file) {
     );
     handleCsvRestore(file);
   } else {
-    showMessage("Unsupported file format. Use .json, .enc, or .csv");
+    showMessage("Unsupported file format. Use .json, .enc, or .csv.");
   }
 }
 
@@ -1043,7 +1043,7 @@ export function handleCsvRestore(file) {
       showRestorePreview(backupData);
     } catch (err) {
       console.error("Backup parse error:", err);
-      showMessage("Failed to read backup file. Please check the file format.");
+      showMessage("Failed to read backup file. Check the file format.");
     }
   };
   reader.onerror = () => showMessage("Failed to read file. Please try again.");
