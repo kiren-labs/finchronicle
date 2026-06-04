@@ -2,7 +2,7 @@
 // Recurring Transactions (v3.11.0)
 // ============================================================================
 
-import { state, categories, getAllCategoryNames } from "./state.js";
+import { state, categories } from "./state.js";
 import { sanitizeHTML, formatDate, showMessage, generateId } from "./utils.js";
 import { formatCurrency } from "./currency.js";
 import { getAllTags, getTagColor, ensureTagColor } from "./search.js";
@@ -98,7 +98,14 @@ export async function checkRecurringTransactions() {
     };
 
     // Copy optional fields from template (v3.16.0)
-    const optionalKeys = ["paymentMethod", "merchant", "expenseType", "attachedTo", "referenceId", "location"];
+    const optionalKeys = [
+      "paymentMethod",
+      "merchant",
+      "expenseType",
+      "attachedTo",
+      "referenceId",
+      "location",
+    ];
     for (const key of optionalKeys) {
       if (template[key]) transaction[key] = template[key];
     }
@@ -276,15 +283,20 @@ function renderRecurringTagPicker() {
   const row = document.getElementById("recurringTagPickerRow");
   if (!row) return;
   const allTags = getAllTags();
-  if (allTags.length === 0) { row.hidden = true; return; }
+  if (allTags.length === 0) {
+    row.hidden = true;
+    return;
+  }
   row.hidden = false;
-  row.innerHTML = allTags.map((tag) => {
-    const color = getTagColor(tag);
-    const isActive = _recurringFormTags.includes(tag);
-    return `<button type="button" class="tag-picker-chip${isActive ? " active" : ""}" data-recurring-pick-tag="${sanitizeHTML(tag)}" style="${isActive ? `background:${color};border-color:${color};color:#fff` : `--pick-dot:${color}`}">
+  row.innerHTML = allTags
+    .map((tag) => {
+      const color = getTagColor(tag);
+      const isActive = _recurringFormTags.includes(tag);
+      return `<button type="button" class="tag-picker-chip${isActive ? " active" : ""}" data-recurring-pick-tag="${sanitizeHTML(tag)}" style="${isActive ? `background:${color};border-color:${color};color:#fff` : `--pick-dot:${color}`}">
       <span class="tag-dot" style="background:${isActive ? "#ffffff99" : color}"></span>${sanitizeHTML(tag)}
     </button>`;
-  }).join("");
+    })
+    .join("");
 }
 
 export function initRecurringTagEvents() {
@@ -295,7 +307,13 @@ export function initRecurringTagEvents() {
 
   function addTag(value) {
     const tag = value.trim().toLowerCase().replace(/,/g, "");
-    if (!tag || tag.length > 30 || _recurringFormTags.includes(tag) || _recurringFormTags.length >= 15) return;
+    if (
+      !tag ||
+      tag.length > 30 ||
+      _recurringFormTags.includes(tag) ||
+      _recurringFormTags.length >= 15
+    )
+      return;
     ensureTagColor(tag);
     _recurringFormTags = [..._recurringFormTags, tag];
     renderRecurringTagChips();
@@ -304,12 +322,20 @@ export function initRecurringTagEvents() {
   }
 
   function showSuggestions(query) {
-    const existing = getAllTags().filter((t) => t.includes(query) && !_recurringFormTags.includes(t));
-    if (!query || existing.length === 0) { hideSuggestions(); return; }
+    const existing = getAllTags().filter(
+      (t) => t.includes(query) && !_recurringFormTags.includes(t),
+    );
+    if (!query || existing.length === 0) {
+      hideSuggestions();
+      return;
+    }
     suggestions.hidden = false;
-    suggestions.innerHTML = existing.map((t) =>
-      `<div class="tag-suggestion-item" data-suggestion="${sanitizeHTML(t)}">${sanitizeHTML(t)}</div>`
-    ).join("");
+    suggestions.innerHTML = existing
+      .map(
+        (t) =>
+          `<div class="tag-suggestion-item" data-suggestion="${sanitizeHTML(t)}">${sanitizeHTML(t)}</div>`,
+      )
+      .join("");
   }
 
   function hideSuggestions() {
@@ -319,8 +345,15 @@ export function initRecurringTagEvents() {
 
   tagInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
-      if (tagInput.value.trim()) { e.preventDefault(); addTag(tagInput.value); }
-    } else if (e.key === "Backspace" && !tagInput.value && _recurringFormTags.length > 0) {
+      if (tagInput.value.trim()) {
+        e.preventDefault();
+        addTag(tagInput.value);
+      }
+    } else if (
+      e.key === "Backspace" &&
+      !tagInput.value &&
+      _recurringFormTags.length > 0
+    ) {
       _recurringFormTags = _recurringFormTags.slice(0, -1);
       renderRecurringTagChips();
     }
@@ -332,7 +365,10 @@ export function initRecurringTagEvents() {
 
   suggestions.addEventListener("click", (e) => {
     const item = e.target.closest("[data-suggestion]");
-    if (item) { addTag(item.dataset.suggestion); tagInput.focus(); }
+    if (item) {
+      addTag(item.dataset.suggestion);
+      tagInput.focus();
+    }
   });
 
   pickerRow.addEventListener("click", (e) => {
@@ -348,7 +384,8 @@ export function initRecurringTagEvents() {
   });
 
   document.addEventListener("click", (e) => {
-    if (!tagInput.contains(e.target) && !suggestions.contains(e.target)) hideSuggestions();
+    if (!tagInput.contains(e.target) && !suggestions.contains(e.target))
+      hideSuggestions();
   });
 }
 
@@ -356,14 +393,17 @@ function _updateRecurringCategoryOptions(type) {
   const select = document.getElementById("recurringCategory");
   if (!select) return;
   const tree = categories[type] || {};
-  const optionsHtml = Object.entries(tree).map(([parent, children]) => {
-    if (children.length === 0) return `<option value="${parent}">${parent}</option>`;
-    return `<optgroup label="${parent}">
+  const optionsHtml = Object.entries(tree)
+    .map(([parent, children]) => {
+      if (children.length === 0)
+        return `<option value="${parent}">${parent}</option>`;
+      return `<optgroup label="${parent}">
       <option value="${parent}">${parent}</option>
       ${children.map((c) => `<option value="${c}">  ${c}</option>`).join("")}
     </optgroup>`;
-  }).join("");
-  select.innerHTML = '<option value="" disabled selected>Select category</option>' + optionsHtml;
+    })
+    .join("");
+  select.innerHTML = `<option value="" disabled selected>Select category</option>${optionsHtml}`;
 }
 
 export function selectRecurringType(type) {
@@ -434,8 +474,10 @@ export function openRecurringModal(id = null) {
         template.frequency === "monthly" ? "block" : "none";
       _recurringFormTags = [...(template.tags || [])];
       renderRecurringTagChips();
-      if (accountSel && template.fromAccount) accountSel.value = template.fromAccount;
-      else if (accountSel && template.toAccount) accountSel.value = template.toAccount;
+      if (accountSel && template.fromAccount)
+        accountSel.value = template.fromAccount;
+      else if (accountSel && template.toAccount)
+        accountSel.value = template.toAccount;
     }
   } else {
     modalTitle.innerHTML = '<i class="ri-repeat-line"></i> Add Recurring';
@@ -496,9 +538,11 @@ export async function saveRecurringTemplate() {
   const isEditing = _editingRecurringId !== null;
 
   const tags = [..._recurringFormTags];
-  const selectedAccount = (document.getElementById("recurringAccount")?.value) || "";
-  const fromAccount = type === "expense" || type === "transfer" ? (selectedAccount || null) : null;
-  const toAccount = type === "income" ? (selectedAccount || null) : null;
+  const selectedAccount =
+    document.getElementById("recurringAccount")?.value || "";
+  const fromAccount =
+    type === "expense" || type === "transfer" ? selectedAccount || null : null;
+  const toAccount = type === "income" ? selectedAccount || null : null;
 
   if (isEditing) {
     const template = state.recurringTemplates.find(

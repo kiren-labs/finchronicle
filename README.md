@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-4.1.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.2.0-blue.svg)](CHANGELOG.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -50,7 +50,7 @@
 - ✅ **Financial Health Alerts** - Inactivity, bill-due, savings rate trend, monthly pace alerts (v4.1.0)
 - ✅ **Cash-Flow Forecast** - 30/60/90-day account balance projection from recurring templates (v4.1.0)
 - ✅ **Annual Report** - Year scorecard with YoY comparison & CSV export (v3.21.0)
-- ✅ **Auto-Backup** - Scheduled encrypted backups (AES-GCM-256) + storage health (v3.22.0)
+- ✅ **Backup & Restore** - Unified Data & Backup card; full JSON, AES-256-GCM encrypted, and CSV export/restore; SHA-256 integrity verification (v4.2.0)
 - ✅ **Multi-Currency** - Per-transaction foreign currency + exchange rate entry (v3.24.0)
 - ✅ **Family Settlement** - Per-person balance from `attachedTo` tags (v3.26.0)
 - ✅ **Reimbursement Workflow** - Mark-as-settled flow + settlement dashboard (v3.27.0)

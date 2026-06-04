@@ -3,12 +3,11 @@
 // ============================================================================
 
 import { APP_VERSION, VERSION_KEY, state } from "./state.js";
-import { formatDate, showMessage, sanitizeHTML, getErrorLog, clearErrorLog } from "./utils.js";
-import { getCurrency } from "./currency.js";
+import { showMessage, sanitizeHTML, getErrorLog } from "./utils.js";
 import { renderFAQ } from "./faq.js";
 import { renderRecurringSection } from "./recurring.js";
 import { renderBudgetList } from "./budget.js";
-import { getAllTags, renameTag, deleteTag, getTagColor, TAG_PALETTE } from "./search.js";
+import { getAllTags, getTagColor } from "./search.js";
 
 // ---- Dark Mode ----
 
@@ -202,7 +201,9 @@ export function shouldShowBackupReminder() {
     const firstTransaction = sortedTransactions[0];
     const createdTime = firstTransaction.createdAt
       ? new Date(firstTransaction.createdAt).getTime()
-      : (typeof firstTransaction.id === "number" ? firstTransaction.id : Date.now());
+      : typeof firstTransaction.id === "number"
+        ? firstTransaction.id
+        : Date.now();
     const daysSinceFirst = Math.floor(
       (Date.now() - createdTime) / (1000 * 60 * 60 * 24),
     );
@@ -217,10 +218,10 @@ export function shouldShowBackupReminder() {
 export function renderBackupStatus() {
   const days = getDaysSinceBackup();
 
-  let statusClass = "";
-  let statusIcon = "";
-  let statusLabel = "";
-  let statusMessage = "";
+  let statusClass;
+  let statusIcon;
+  let statusLabel;
+  let statusMessage;
 
   if (days === null) {
     statusClass = "backup-status-danger";
@@ -303,6 +304,9 @@ export function updateSettingsContent() {
   if (faqContainer) {
     faqContainer.innerHTML = renderFAQ();
   }
+
+  // Refresh storage health each time settings tab is opened (deferred from init)
+  import("./auto-backup.js").then((mod) => mod.renderStorageHealth());
 }
 
 // ---- Error Log (v3.29.0) ----
@@ -355,7 +359,8 @@ export function renderTagManagement() {
   const tags = getAllTags();
 
   if (tags.length === 0) {
-    container.innerHTML = '<div style="text-align: center; color: var(--color-text-muted); padding: 20px 0;">No tags yet. Add tags to transactions to organize them.</div>';
+    container.innerHTML =
+      '<div style="text-align: center; color: var(--color-text-muted); padding: 20px 0;">No tags yet. Add tags to transactions to organize them.</div>';
     return;
   }
 

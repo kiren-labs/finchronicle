@@ -27,7 +27,12 @@ export function getAccountSuggestions() {
     .map((a) => a.name);
 
   // Merge defaults + store + history, deduplicate
-  const all = new Set([...DEFAULT_ACCOUNTS, ...state.savedAccounts, ...fromStore, ...fromHistory]);
+  const all = new Set([
+    ...DEFAULT_ACCOUNTS,
+    ...state.savedAccounts,
+    ...fromStore,
+    ...fromHistory,
+  ]);
   return [...all].sort();
 }
 
@@ -77,7 +82,10 @@ export function bindAccountAutocomplete(inputId, suggestionsId) {
     }
 
     suggestionsEl.innerHTML = matches
-      .map((a) => `<div class="account-suggestion" data-value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</div>`)
+      .map(
+        (a) =>
+          `<div class="account-suggestion" data-value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</div>`,
+      )
       .join("");
     suggestionsEl.hidden = false;
   });

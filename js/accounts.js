@@ -3,9 +3,18 @@
 // ============================================================================
 
 import { state, ACCOUNT_TYPES, ACCOUNT_CLASSIFICATION } from "./state.js";
-import { loadAccounts, saveAccount, deleteAccount, saveNetWorthSnapshot, loadNetWorthSnapshots, getNetWorthSnapshotByDate } from "./db.js";
+import {
+  loadAccounts,
+  saveAccount,
+  deleteAccount,
+  saveNetWorthSnapshot,
+  loadNetWorthSnapshots,
+  getNetWorthSnapshotByDate,
+} from "./db.js";
 import { formatCurrency } from "./currency.js";
 import { sanitizeHTML, showMessage, generateId } from "./utils.js";
+import { renderSavingsDashboard } from "./savings.js";
+import { openReconciliationModal } from "./reconciliation.js";
 
 // ---- Init ----
 
@@ -22,7 +31,7 @@ export async function initAccounts() {
   }
 }
 
-// ---- Balance Calculation ----
+// ---- Pure Computation ----
 
 /**
  * Compute derived balance for an account from opening balance + transactions.
@@ -70,7 +79,8 @@ export function getNetWorth() {
     });
 
   accountBalances.forEach((a) => {
-    const classification = a.classification || ACCOUNT_CLASSIFICATION[a.type] || "asset";
+    const classification =
+      a.classification || ACCOUNT_CLASSIFICATION[a.type] || "asset";
     if (classification === "liability") {
       totalLiabilities += Math.abs(a.balance);
     } else {
@@ -90,7 +100,14 @@ export function getNetWorth() {
   };
 }
 
-// ---- Account CRUD UI ----
+/**
+ * Get active account names for dropdowns.
+ */
+export function getActiveAccountNames() {
+  return state.accounts.filter((a) => a.isActive !== false).map((a) => a.name);
+}
+
+// ---- Account CRUD ----
 
 export async function addAccount(formData) {
   const { name, type, openingBalance } = formData;
@@ -103,7 +120,11 @@ export async function addAccount(formData) {
   const trimmedName = sanitizeHTML(name.trim());
 
   // Check for duplicate name
-  if (state.accounts.some((a) => a.name.toLowerCase() === trimmedName.toLowerCase())) {
+  if (
+    state.accounts.some(
+      (a) => a.name.toLowerCase() === trimmedName.toLowerCase(),
+    )
+  ) {
     showMessage("An account with that name already exists.");
     return false;
   }
@@ -148,14 +169,24 @@ export async function updateAccount(id, updates) {
   // If name changed, check for duplicates
   if (updates.name && updates.name !== account.name) {
     const trimmedName = sanitizeHTML(updates.name.trim());
-    if (state.accounts.some((a) => String(a.id) !== String(id) && a.name.toLowerCase() === trimmedName.toLowerCase())) {
+    if (
+      state.accounts.some(
+        (a) =>
+          String(a.id) !== String(id) &&
+          a.name.toLowerCase() === trimmedName.toLowerCase(),
+      )
+    ) {
       showMessage("An account with that name already exists.");
       return false;
     }
     updates.name = trimmedName;
   }
 
-  const updated = { ...account, ...updates, updatedAt: new Date().toISOString() };
+  const updated = {
+    ...account,
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
 
   try {
     await saveAccount(updated);
@@ -191,6 +222,28 @@ export async function removeAccount(id) {
     console.error("Failed to delete account:", err);
     showMessage("Failed to delete account.");
     return false;
+  }
+}
+
+// ---- Monthly Snapshot (v3.28.0) ----
+
+export async function captureMonthlySnapshot() {
+  try {
+    const now = new Date();
+    const snapshotDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+    const existing = await getNetWorthSnapshotByDate(snapshotDate);
+    if (existing) return; // already captured this month
+
+    const { assets, liabilities, netWorth } = getNetWorth();
+    await saveNetWorthSnapshot({
+      snapshotDate,
+      assets: Math.round(assets * 100) / 100,
+      liabilities: Math.round(liabilities * 100) / 100,
+      netWorth: Math.round(netWorth * 100) / 100,
+      capturedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("Failed to capture net worth snapshot:", err);
   }
 }
 
@@ -248,28 +301,6 @@ export function renderNetWorthDashboard() {
   renderNetWorthTrend();
 }
 
-// ---- Net Worth Trend: Snapshot Capture (v3.28.0) ----
-
-export async function captureMonthlySnapshot() {
-  try {
-    const now = new Date();
-    const snapshotDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-    const existing = await getNetWorthSnapshotByDate(snapshotDate);
-    if (existing) return; // already captured this month
-
-    const { assets, liabilities, netWorth } = getNetWorth();
-    await saveNetWorthSnapshot({
-      snapshotDate,
-      assets: Math.round(assets * 100) / 100,
-      liabilities: Math.round(liabilities * 100) / 100,
-      netWorth: Math.round(netWorth * 100) / 100,
-      capturedAt: new Date().toISOString(),
-    });
-  } catch (err) {
-    console.error("Failed to capture net worth snapshot:", err);
-  }
-}
-
 // ---- Net Worth Trend: Chart Rendering (v3.28.0) ----
 
 async function renderNetWorthTrend() {
@@ -317,14 +348,16 @@ async function renderNetWorthTrend() {
 
   const polylinePoints = points.map((p) => `${p.x},${p.y}`).join(" ");
 
-  const dotSVG = points.map((p, i) => {
-    const isLast = i === points.length - 1;
-    return `<circle cx="${p.x}" cy="${p.y}" r="${isLast ? 4 : 3}" class="nw-trend-dot${isLast ? " nw-trend-dot-last" : ""}" data-value="${p.snapshot.netWorth}" data-date="${p.snapshot.snapshotDate}" />`;
-  }).join("");
+  const dotSVG = points
+    .map((p, i) => {
+      const isLast = i === points.length - 1;
+      return `<circle cx="${p.x}" cy="${p.y}" r="${isLast ? 4 : 3}" class="nw-trend-dot${isLast ? " nw-trend-dot-last" : ""}" data-value="${p.snapshot.netWorth}" data-date="${p.snapshot.snapshotDate}" />`;
+    })
+    .join("");
 
   const labelFirst = formatMonthLabel(snapshots[0].snapshotDate);
-  const labelLast = formatMonthLabel(snapshots[snapshots.length - 1].snapshotDate);
-  const latestNetWorth = snapshots[snapshots.length - 1].netWorth;
+  const labelLast = formatMonthLabel(snapshots.at(-1).snapshotDate);
+  const latestNetWorth = snapshots.at(-1).netWorth;
   const prevNetWorth = snapshots[snapshots.length - 2].netWorth;
   const trendDiff = latestNetWorth - prevNetWorth;
   const trendClass = trendDiff >= 0 ? "positive" : "negative";
@@ -348,7 +381,7 @@ async function renderNetWorthTrend() {
 }
 
 function formatMonthLabel(snapshotDate) {
-  const d = new Date(snapshotDate + "T00:00:00");
+  const d = new Date(`${snapshotDate}T00:00:00`);
   return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
 
@@ -372,9 +405,15 @@ export function renderAccountManager() {
     const balClass = balance >= 0 ? "positive" : "negative";
     const typeLabel = account.type.replace("-", " ");
     const inactive = account.isActive === false ? " inactive" : "";
-    const savingsBadge = account.isSavings ? `<span class="savings-badge" aria-label="Savings account">savings</span>` : "";
-    const classification = account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
-    const classificationBadge = classification === "liability" ? `<span class="liability-badge" aria-label="Liability account">liability</span>` : "";
+    const savingsBadge = account.isSavings
+      ? `<span class="savings-badge" aria-label="Savings account">savings</span>`
+      : "";
+    const classification =
+      account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
+    const classificationBadge =
+      classification === "liability"
+        ? `<span class="liability-badge" aria-label="Liability account">liability</span>`
+        : "";
 
     html += `
     <div class="account-item${inactive}" data-id="${account.id}">
@@ -462,9 +501,12 @@ export function showEditAccountForm(id) {
   document.getElementById("accountFormTitle").textContent = "Edit Account";
   document.getElementById("accountNameInput").value = account.name;
   document.getElementById("accountTypeSelect").value = account.type;
-  document.getElementById("accountBalanceInput").value = account.openingBalance || "";
-  document.getElementById("accountClassificationSelect").value = account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
-  document.getElementById("accountSavingsToggle").checked = account.isSavings || false;
+  document.getElementById("accountBalanceInput").value =
+    account.openingBalance || "";
+  document.getElementById("accountClassificationSelect").value =
+    account.classification || ACCOUNT_CLASSIFICATION[account.type] || "asset";
+  document.getElementById("accountSavingsToggle").checked =
+    account.isSavings || false;
   modal.dataset.editId = String(id);
 
   updateAccountTypeIcon(account.type);
@@ -491,22 +533,32 @@ export async function handleAccountFormSubmit() {
   const name = document.getElementById("accountNameInput").value;
   const type = document.getElementById("accountTypeSelect").value;
   const openingBalance = document.getElementById("accountBalanceInput").value;
-  const classification = document.getElementById("accountClassificationSelect").value;
+  const classification = document.getElementById(
+    "accountClassificationSelect",
+  ).value;
   const isSavings = document.getElementById("accountSavingsToggle").checked;
 
   let success;
   if (editId) {
-    success = await updateAccount(editId, { name: name.trim(), type, classification, openingBalance: parseFloat(openingBalance) || 0, isSavings });
+    success = await updateAccount(editId, {
+      name: name.trim(),
+      type,
+      classification,
+      openingBalance: parseFloat(openingBalance) || 0,
+      isSavings,
+    });
   } else {
     success = await addAccount({ name, type, openingBalance });
     // Set classification + isSavings if user overrode defaults
     if (success) {
-      const newAccount = state.accounts[state.accounts.length - 1];
+      const newAccount = state.accounts.at(-1);
       if (newAccount) {
         const updates = {};
-        if (classification !== (ACCOUNT_CLASSIFICATION[type] || "asset")) updates.classification = classification;
+        if (classification !== (ACCOUNT_CLASSIFICATION[type] || "asset"))
+          updates.classification = classification;
         if (isSavings && !newAccount.isSavings) updates.isSavings = true;
-        if (Object.keys(updates).length > 0) await updateAccount(newAccount.id, updates);
+        if (Object.keys(updates).length > 0)
+          await updateAccount(newAccount.id, updates);
       }
     }
   }
@@ -518,11 +570,69 @@ export async function handleAccountFormSubmit() {
   }
 }
 
-/**
- * Get active account names for dropdowns (replaces free-text savedAccounts).
- */
-export function getActiveAccountNames() {
-  return state.accounts
-    .filter((a) => a.isActive !== false)
-    .map((a) => a.name);
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindAccountEvents() {
+  const addBtn = document.getElementById("addAccountBtn");
+  if (addBtn) addBtn.addEventListener("click", showAddAccountForm);
+
+  const saveBtn = document.getElementById("accountFormSaveBtn");
+  if (saveBtn) saveBtn.addEventListener("click", handleAccountFormSubmit);
+
+  const closeBtn = document.querySelector(".account-form-close");
+  if (closeBtn) closeBtn.addEventListener("click", closeAccountForm);
+
+  const reconcileBtn = document.getElementById("accountReconcileBtn");
+  if (reconcileBtn) {
+    reconcileBtn.addEventListener("click", () => {
+      const name = reconcileBtn.dataset.accountName;
+      if (!name) return;
+      closeAccountForm();
+      openReconciliationModal(name);
+    });
+  }
+
+  const modal = document.getElementById("accountFormModal");
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeAccountForm();
+    });
+  }
+
+  const typeSelect = document.getElementById("accountTypeSelect");
+  if (typeSelect) {
+    typeSelect.addEventListener("change", () => {
+      const classSelect = document.getElementById(
+        "accountClassificationSelect",
+      );
+      if (classSelect) {
+        classSelect.value = ACCOUNT_CLASSIFICATION[typeSelect.value] || "asset";
+      }
+      updateAccountTypeIcon(typeSelect.value);
+    });
+  }
+
+  const accountsList = document.getElementById("accountsList");
+  if (accountsList) {
+    accountsList.addEventListener("click", async (e) => {
+      const editBtn = e.target.closest(".account-edit-btn");
+      if (editBtn) {
+        showEditAccountForm(editBtn.dataset.id);
+        return;
+      }
+      const deleteBtn = e.target.closest(".account-delete-btn");
+      if (deleteBtn) {
+        const id = deleteBtn.dataset.id;
+        const account = state.accounts.find((a) => String(a.id) === id);
+        if (account && confirm(`Delete account "${account.name}"?`)) {
+          await removeAccount(id);
+          renderAccountManager();
+          renderNetWorthDashboard();
+          renderSavingsDashboard();
+        }
+      }
+    });
+  }
 }

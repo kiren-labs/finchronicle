@@ -6,18 +6,26 @@ import { state, APP_VERSION } from "./state.js";
 import { showMessage } from "./utils.js";
 import { getCurrency } from "./currency.js";
 import { updateBackupTimestamp } from "./settings.js";
+import {
+  loadAllTransactionsFromDB,
+  getAllNetWorthSnapshots,
+  loadRecurringTemplatesFromDB,
+  loadBudgetsFromDB,
+  loadAccounts,
+  loadGoals,
+  loadQuickTemplates,
+  loadAppSettings,
+} from "./db.js";
 
 // ---- Constants ----
 
 const BACKUP_SETTINGS_KEY = "autoBackupSettings";
-const STORAGE_HEALTH_KEY = "storageHealthLastCheck";
 
 const DEFAULT_SETTINGS = {
   autoBackupEnabled: true,
   backupFrequency: "weekly", // 'daily' | 'weekly' | 'monthly'
   lastAutoBackup: null,
   backupFormat: "json", // 'json' | 'csv'
-  keepBackupCount: 4,
 };
 
 // Frequency in milliseconds
@@ -62,11 +70,13 @@ export async function requestStoragePersistence() {
     // Request persistence (timeout guards against browsers that hang on this prompt)
     const granted = await Promise.race([
       navigator.storage.persist(),
-      new Promise(resolve => setTimeout(() => resolve(false), 3000)),
+      new Promise((resolve) => setTimeout(() => resolve(false), 3000)),
     ]);
     state.storagePersisted = granted;
     if (!granted) {
-      console.warn("⚠️ Storage persistence denied. Data may be evicted by browser.");
+      console.warn(
+        "⚠️ Storage persistence denied. Data may be evicted by browser.",
+      );
     }
     return granted;
   } catch (e) {
@@ -80,21 +90,38 @@ export async function requestStoragePersistence() {
 
 export async function checkStorageHealth() {
   if (!navigator.storage || !navigator.storage.estimate) {
-    return { supported: false, usedPercent: 0, usedMB: 0, quotaMB: 0, persisted: state.storagePersisted };
+    return {
+      supported: false,
+      usedPercent: 0,
+      usedMB: 0,
+      quotaMB: 0,
+      persisted: state.storagePersisted,
+    };
   }
 
   try {
     const estimate = await navigator.storage.estimate();
     const usedMB = Math.round((estimate.usage / (1024 * 1024)) * 10) / 10;
-    const quotaMB =
-      Math.round((estimate.quota / (1024 * 1024)) * 10) / 10;
+    const quotaMB = Math.round((estimate.quota / (1024 * 1024)) * 10) / 10;
     const usedPercent =
       Math.round((estimate.usage / estimate.quota) * 1000) / 10;
 
-    return { supported: true, usedPercent, usedMB, quotaMB, persisted: state.storagePersisted };
+    return {
+      supported: true,
+      usedPercent,
+      usedMB,
+      quotaMB,
+      persisted: state.storagePersisted,
+    };
   } catch (e) {
     console.warn("Storage estimate failed:", e);
-    return { supported: false, usedPercent: 0, usedMB: 0, quotaMB: 0, persisted: state.storagePersisted };
+    return {
+      supported: false,
+      usedPercent: 0,
+      usedMB: 0,
+      quotaMB: 0,
+      persisted: state.storagePersisted,
+    };
   }
 }
 
@@ -108,48 +135,84 @@ export function isBackupDue() {
   if (!lastBackup) return true;
 
   const elapsed = Date.now() - new Date(lastBackup).getTime();
-  const threshold = FREQUENCY_MS[settings.backupFrequency] || FREQUENCY_MS.weekly;
+  const threshold =
+    FREQUENCY_MS[settings.backupFrequency] || FREQUENCY_MS.weekly;
 
   return elapsed >= threshold;
 }
 
-export async function runAutoBackupIfDue() {
-  if (!isBackupDue()) return false;
-
-  const settings = getBackupSettings();
-  try {
-    if (settings.backupFormat === "json") {
-      await performJsonBackup(true);
-    } else {
-      await performCsvBackup(true);
-    }
-    return true;
-  } catch (e) {
-    console.warn("Auto-backup failed:", e);
+export function runAutoBackupIfDue() {
+  if (!isBackupDue()) {
+    state.backupDue = false;
     return false;
   }
+  state.backupDue = true;
+  return true;
 }
 
 // ---- Backup Generation ----
 
-function buildJsonBackup() {
-  return JSON.stringify(
-    {
-      version: APP_VERSION,
-      exportDate: new Date().toISOString(),
-      currency: getCurrency(),
-      transactionCount: state.transactions.length,
-      transactions: state.transactions,
-      recurringTemplates: state.recurringTemplates || [],
-      budgets: state.budgets || [],
-      accounts: state.accounts || [],
-      savingsGoals: state.savingsGoals || [],
-      quickTemplates: state.quickTemplates || [],
-      appSettings: state.appSettings || null,
+async function buildJsonBackup() {
+  // Read all stores directly from DB — do not rely on state which may be partially loaded
+  const [
+    allTransactions,
+    recurringTemplates,
+    budgets,
+    accounts,
+    savingsGoals,
+    quickTemplates,
+    appSettings,
+    netWorthSnapshots,
+  ] = await Promise.all([
+    loadAllTransactionsFromDB().catch(() => state.transactions),
+    loadRecurringTemplatesFromDB().catch(() => state.recurringTemplates || []),
+    loadBudgetsFromDB().catch(() => state.budgets || []),
+    loadAccounts().catch(() => state.accounts || []),
+    loadGoals().catch(() => state.savingsGoals || []),
+    loadQuickTemplates().catch(() => state.quickTemplates || []),
+    loadAppSettings().catch(() => state.appSettings || null),
+    getAllNetWorthSnapshots().catch(() => []),
+  ]);
+
+  const payload = {
+    version: APP_VERSION,
+    backupSchemaVersion: 1,
+    exportDate: new Date().toISOString(),
+    currency: getCurrency(),
+    transactionCount: allTransactions.length,
+    integrity: "",
+    transactions: allTransactions,
+    recurringTemplates,
+    budgets,
+    accounts,
+    savingsGoals,
+    quickTemplates,
+    appSettings,
+    netWorthSnapshots,
+    localStorage: {
+      exchangeRateHistory: JSON.parse(
+        localStorage.getItem("exchangeRateHistory") || "null",
+      ),
+      tagColors: JSON.parse(localStorage.getItem("tagColors") || "null"),
     },
-    null,
-    2,
-  );
+  };
+
+  // Compute SHA-256 integrity over JSON with integrity field empty
+  const jsonForHash = JSON.stringify(payload, null, 2);
+  try {
+    const hashBuffer = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(jsonForHash),
+    );
+    const hashHex = Array.from(new Uint8Array(hashBuffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    payload.integrity = `sha256:${hashHex}`;
+  } catch {
+    payload.integrity = "";
+  }
+
+  return JSON.stringify(payload, null, 2);
 }
 
 function buildCsvBackup() {
@@ -213,7 +276,7 @@ function buildCsvBackup() {
     t.homeAmount || "",
   ]);
 
-  let csv = headers.join(",") + "\n";
+  let csv = `${headers.join(",")}\n`;
   csv += rows
     .map((row) =>
       row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
@@ -234,7 +297,7 @@ async function deriveKey(passphrase, salt) {
     ["deriveKey"],
   );
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    { name: "PBKDF2", salt, iterations: 210000, hash: "SHA-256" },
     keyMaterial,
     { name: "AES-GCM", length: 256 },
     false,
@@ -243,7 +306,7 @@ async function deriveKey(passphrase, salt) {
 }
 
 export async function encryptBackup(passphrase) {
-  const data = buildJsonBackup();
+  const data = await buildJsonBackup();
   const enc = new TextEncoder();
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -256,7 +319,9 @@ export async function encryptBackup(passphrase) {
   );
 
   // Pack salt + iv + ciphertext into one ArrayBuffer
-  const packed = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
+  const packed = new Uint8Array(
+    salt.length + iv.length + ciphertext.byteLength,
+  );
   packed.set(salt, 0);
   packed.set(iv, salt.length);
   packed.set(new Uint8Array(ciphertext), salt.length + iv.length);
@@ -284,7 +349,21 @@ export async function decryptBackup(passphrase, arrayBuffer) {
 
 // ---- File Download Helpers ----
 
-function downloadBlob(blob, filename) {
+async function downloadBlob(blob, filename) {
+  // iOS Safari: programmatic downloads open a blank tab — use Web Share API instead
+  if (navigator.share && navigator.canShare) {
+    const file = new File([blob], filename, { type: blob.type });
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: "FinChronicle Backup" });
+        return;
+      } catch (e) {
+        // User cancelled share — not an error
+        if (e.name === "AbortError") return;
+        // Other error: fall through to blob download
+      }
+    }
+  }
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -306,28 +385,33 @@ function getBackupFilename(format, encrypted) {
 // ---- Public Backup Actions ----
 
 export async function performJsonBackup(isAuto = false) {
-  if (state.transactions.length === 0) {
-    if (!isAuto) showMessage("No transactions to back up!");
+  const hasData =
+    state.transactions.length > 0 ||
+    (state.accounts || []).length > 0 ||
+    (state.budgets || []).length > 0 ||
+    (state.recurringTemplates || []).length > 0 ||
+    (state.savingsGoals || []).length > 0 ||
+    (state.quickTemplates || []).length > 0;
+  if (!hasData) {
+    if (!isAuto) showMessage("No data to back up!");
     return;
   }
 
-  const data = buildJsonBackup();
+  const data = await buildJsonBackup();
   const blob = new Blob([data], { type: "application/json" });
   const filename = getBackupFilename("json", false);
 
-  downloadBlob(blob, filename);
+  await downloadBlob(blob, filename);
 
   // Update timestamps
   const settings = getBackupSettings();
   settings.lastAutoBackup = new Date().toISOString();
   saveBackupSettings(settings);
   updateBackupTimestamp();
+  state.backupDue = false;
+  updateAutoBackupUI();
 
-  if (isAuto) {
-    showMessage("📦 Auto-backup saved to Downloads");
-  } else {
-    showMessage("✅ JSON backup exported!");
-  }
+  if (!isAuto) showMessage("✅ Backup saved!");
 }
 
 export async function performCsvBackup(isAuto = false) {
@@ -340,7 +424,7 @@ export async function performCsvBackup(isAuto = false) {
   const blob = new Blob([data], { type: "text/csv" });
   const filename = getBackupFilename("csv", false);
 
-  downloadBlob(blob, filename);
+  await downloadBlob(blob, filename);
 
   const settings = getBackupSettings();
   settings.lastAutoBackup = new Date().toISOString();
@@ -355,13 +439,20 @@ export async function performCsvBackup(isAuto = false) {
 }
 
 export async function performEncryptedBackup(passphrase) {
-  if (state.transactions.length === 0) {
-    showMessage("No transactions to back up!");
+  const hasData =
+    state.transactions.length > 0 ||
+    (state.accounts || []).length > 0 ||
+    (state.budgets || []).length > 0 ||
+    (state.recurringTemplates || []).length > 0 ||
+    (state.savingsGoals || []).length > 0 ||
+    (state.quickTemplates || []).length > 0;
+  if (!hasData) {
+    showMessage("No data to back up!");
     return;
   }
 
-  if (!passphrase || passphrase.length < 6) {
-    showMessage("Passphrase must be at least 6 characters");
+  if (!passphrase || passphrase.length < 12) {
+    showMessage("Passphrase must be at least 12 characters");
     return;
   }
 
@@ -370,14 +461,16 @@ export async function performEncryptedBackup(passphrase) {
     const blob = new Blob([encrypted], { type: "application/octet-stream" });
     const filename = getBackupFilename("json", true);
 
-    downloadBlob(blob, filename);
+    await downloadBlob(blob, filename);
 
     const settings = getBackupSettings();
     settings.lastAutoBackup = new Date().toISOString();
     saveBackupSettings(settings);
     updateBackupTimestamp();
+    state.backupDue = false;
+    updateAutoBackupUI();
 
-    showMessage("🔒 Encrypted backup exported!");
+    showMessage("🔒 Encrypted backup saved!");
   } catch (e) {
     console.error("Encryption failed:", e);
     showMessage("Encryption failed. Try again.");
@@ -385,8 +478,8 @@ export async function performEncryptedBackup(passphrase) {
 }
 
 export async function importEncryptedBackup(file, passphrase) {
-  if (!passphrase || passphrase.length < 6) {
-    showMessage("Passphrase must be at least 6 characters");
+  if (!passphrase || passphrase.length < 12) {
+    showMessage("Passphrase must be at least 12 characters");
     return null;
   }
 
@@ -408,86 +501,6 @@ export async function importEncryptedBackup(file, passphrase) {
   }
 }
 
-// ---- Backup Verification ----
-
-export function verifyBackup(jsonStr) {
-  try {
-    const data = JSON.parse(jsonStr);
-    if (
-      !data.transactions ||
-      !Array.isArray(data.transactions) ||
-      data.transactionCount !== data.transactions.length
-    ) {
-      return { valid: false, error: "Transaction count mismatch" };
-    }
-    return { valid: true, count: data.transactions.length };
-  } catch (e) {
-    return { valid: false, error: "Invalid JSON" };
-  }
-}
-
-// ---- Render Auto-Backup Settings UI ----
-
-export function renderAutoBackupSettings() {
-  const settings = getBackupSettings();
-  const isEnabled = settings.autoBackupEnabled;
-  const lastBackup = settings.lastAutoBackup
-    ? new Date(settings.lastAutoBackup).toLocaleDateString()
-    : "Never";
-
-  return `
-    <div class="auto-backup-card">
-      <div class="auto-backup-header">
-        <i class="ri-refresh-line" aria-hidden="true"></i>
-        <h3>Auto-Backup</h3>
-      </div>
-
-      <div class="auto-backup-toggle-row">
-        <label for="autoBackupToggle" class="auto-backup-label">Enable automatic backups</label>
-        <button id="autoBackupToggle" class="toggle-switch ${isEnabled ? "active" : ""}"
-                role="switch" aria-checked="${isEnabled}" aria-label="Toggle auto-backup">
-          <span class="toggle-knob"></span>
-        </button>
-      </div>
-
-      <div class="auto-backup-options ${isEnabled ? "" : "disabled"}">
-        <div class="auto-backup-row">
-          <label for="backupFrequency">Frequency</label>
-          <select id="backupFrequency" ${isEnabled ? "" : "disabled"}>
-            <option value="daily" ${settings.backupFrequency === "daily" ? "selected" : ""}>Daily</option>
-            <option value="weekly" ${settings.backupFrequency === "weekly" ? "selected" : ""}>Weekly</option>
-            <option value="monthly" ${settings.backupFrequency === "monthly" ? "selected" : ""}>Monthly</option>
-          </select>
-        </div>
-
-        <div class="auto-backup-row">
-          <label for="backupFormat">Format</label>
-          <select id="backupFormat" ${isEnabled ? "" : "disabled"}>
-            <option value="json" ${settings.backupFormat === "json" ? "selected" : ""}>JSON (full, lossless)</option>
-            <option value="csv" ${settings.backupFormat === "csv" ? "selected" : ""}>CSV (portable)</option>
-          </select>
-        </div>
-
-        <div class="auto-backup-info">
-          <span class="auto-backup-last">Last auto-backup: <strong>${lastBackup}</strong></span>
-        </div>
-      </div>
-
-      <div class="auto-backup-actions">
-        <button class="btn btn-secondary" id="manualBackupBtn" type="button">
-          <i class="ri-download-2-line" aria-hidden="true"></i> Backup Now
-        </button>
-        <button class="btn btn-secondary" id="encryptedBackupBtn" type="button">
-          <i class="ri-lock-line" aria-hidden="true"></i> Encrypted Export
-        </button>
-        <button class="btn btn-secondary" id="importEncryptedBtn" type="button">
-          <i class="ri-lock-unlock-line" aria-hidden="true"></i> Import Encrypted
-        </button>
-      </div>
-    </div>
-  `;
-}
-
 // ---- Render Storage Health Widget ----
 
 export async function renderStorageHealth() {
@@ -497,11 +510,7 @@ export async function renderStorageHealth() {
 
   if (!health.supported) {
     container.innerHTML = `
-      <div class="storage-health-card">
-        <div class="storage-health-header">
-          <i class="ri-hard-drive-2-line" aria-hidden="true"></i>
-          <h4>Storage</h4>
-        </div>
+      <div class="storage-health-inline">
         <p class="storage-unsupported">Storage estimation not available in this browser.</p>
       </div>
     `;
@@ -520,7 +529,7 @@ export async function renderStorageHealth() {
   }
 
   container.innerHTML = `
-    <div class="storage-health-card">
+    <div class="storage-health-inline">
       <div class="storage-health-header">
         <i class="ri-hard-drive-2-line" aria-hidden="true"></i>
         <h4>Storage Health</h4>
@@ -540,22 +549,163 @@ export async function renderStorageHealth() {
   `;
 }
 
+// ---- Update static auto-backup UI (v4.2.0) ----
+
+export function updateAutoBackupUI() {
+  const settings = getBackupSettings();
+
+  const toggle = document.getElementById("autoBackupToggle2");
+  if (toggle) {
+    toggle.classList.toggle("active", settings.autoBackupEnabled);
+    toggle.setAttribute("aria-checked", String(settings.autoBackupEnabled));
+  }
+
+  const freqSelect = document.getElementById("backupFrequency2");
+  if (freqSelect) {
+    freqSelect.value = settings.backupFrequency || "weekly";
+    freqSelect.disabled = !settings.autoBackupEnabled;
+  }
+
+  const freqRow = document.getElementById("autoBackupFreqRow");
+  if (freqRow) {
+    freqRow.classList.toggle("disabled", !settings.autoBackupEnabled);
+  }
+
+  const hint = document.getElementById("lastBackupHint");
+  if (hint) {
+    const last = settings.lastAutoBackup
+      ? new Date(settings.lastAutoBackup).toLocaleDateString()
+      : "Never";
+    hint.textContent = `Last backup: ${last}`;
+  }
+
+  // Show overdue banner if backup is due
+  const banner = document.getElementById("backupOverdueBanner");
+  if (banner) {
+    banner.hidden = !state.backupDue;
+  }
+}
+
 // ---- Init (called from app.js) ----
 
 export async function initAutoBackup() {
-  // Render the UI
-  const container = document.getElementById("autoBackupContainer");
-  if (container) {
-    container.innerHTML = renderAutoBackupSettings();
+  // One-shot migration: CSV auto-backup is lossy — migrate to JSON
+  const settings = getBackupSettings();
+  if (settings.backupFormat === "csv") {
+    settings.backupFormat = "json";
+    saveBackupSettings(settings);
   }
-  await renderStorageHealth();
 
-  // Check if auto-backup is due (non-blocking, after UI renders)
-  const didBackup = await runAutoBackupIfDue();
-  if (didBackup) {
-    // Re-render to update "last backup" display
-    if (container) {
-      container.innerHTML = renderAutoBackupSettings();
-    }
+  // Check due state (sets state.backupDue — no download)
+  runAutoBackupIfDue();
+
+  // Update overdue message text
+  const settings2 = getBackupSettings();
+  if (settings2.lastAutoBackup) {
+    const days = Math.floor(
+      (Date.now() - new Date(settings2.lastAutoBackup).getTime()) /
+        (1000 * 60 * 60 * 24),
+    );
+    const msg = document.getElementById("backupOverdueMsg");
+    if (msg && days > 0)
+      msg.textContent = `Backup overdue — last backup was ${days} day${days === 1 ? "" : "s"} ago.`;
   }
+
+  // Update static UI (banner visibility driven by state.backupDue)
+  updateAutoBackupUI();
+}
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindAutoBackupEvents() {
+  document
+    .getElementById("autoBackupToggle2")
+    ?.addEventListener("click", () => {
+      const settings = getBackupSettings();
+      settings.autoBackupEnabled = !settings.autoBackupEnabled;
+      saveBackupSettings(settings);
+      updateAutoBackupUI();
+    });
+
+  document
+    .getElementById("backupFrequency2")
+    ?.addEventListener("change", (e) => {
+      const settings = getBackupSettings();
+      settings.backupFrequency = e.target.value;
+      saveBackupSettings(settings);
+    });
+
+  document
+    .getElementById("downloadBackupBtn")
+    ?.addEventListener("click", () => {
+      performJsonBackup(false);
+    });
+
+  document
+    .getElementById("encryptedBackupBtn2")
+    ?.addEventListener("click", () => {
+      const passphrase = prompt(
+        "Enter a passphrase (min 12 characters) to encrypt your backup:",
+      );
+      if (passphrase) performEncryptedBackup(passphrase);
+    });
+
+  document
+    .getElementById("exportSpreadsheetBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await import("./import-export.js");
+      mod.exportToCSV();
+    });
+
+  document
+    .getElementById("restoreBackupBtn2")
+    ?.addEventListener("click", () => {
+      document.getElementById("dataRestoreFile").click();
+    });
+
+  document
+    .getElementById("dataRestoreFile")
+    ?.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const mod = await import("./import-export.js");
+      await mod.handleRestoreFileInput(file);
+      e.target.value = "";
+    });
+
+  document
+    .getElementById("importSpreadsheetBtn")
+    ?.addEventListener("click", () => {
+      document.getElementById("spreadsheetImportFile").click();
+    });
+
+  document
+    .getElementById("spreadsheetImportFile")
+    ?.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const mod = await import("./import-export.js");
+      mod.handleCsvImportFile(file);
+      e.target.value = "";
+    });
+
+  document
+    .getElementById("restoreMergeBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await import("./import-export.js");
+      mod.confirmRestore("merge");
+    });
+
+  document
+    .getElementById("restoreReplaceBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await import("./import-export.js");
+      mod.confirmRestore("replace");
+    });
+
+  document.getElementById("backupOverdueBtn")?.addEventListener("click", () => {
+    performJsonBackup(false);
+  });
 }

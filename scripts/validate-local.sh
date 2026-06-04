@@ -92,10 +92,10 @@ echo ""
 # ============================================================================
 echo "⚙️  Checking service worker registration..."
 
-if grep -q "navigator.serviceWorker.register" app.js; then
-    echo -e "${GREEN}✓ Service worker registration found in app.js${NC}"
+if grep -q "\.register(\"./sw.js\")" js/app.js; then
+    echo -e "${GREEN}✓ Service worker registration found in js/app.js${NC}"
 else
-    echo -e "${RED}✗ Service worker registration not found in app.js${NC}"
+    echo -e "${RED}✗ Service worker registration not found in js/app.js${NC}"
     VALIDATION_PASSED=false
 fi
 
@@ -107,7 +107,7 @@ echo ""
 echo "🔢 Checking version consistency..."
 
 # Extract versions
-APP_VERSION=$(grep -m 1 "const APP_VERSION = " app.js | sed "s/.*'\(.*\)'.*/\1/")
+APP_VERSION=$(grep -m 1 "const APP_VERSION = " js/state.js | sed "s/.*\"\(.*\)\".*/\1/")
 SW_VERSION=$(grep -m 1 "// Version:" sw.js | sed 's/.*: //')
 MANIFEST_VERSION=$(grep -m 1 '"version"' manifest.json | sed 's/.*: *"\(.*\)".*/\1/')
 
@@ -130,13 +130,13 @@ echo ""
 echo "🔍 Running additional checks..."
 
 # Check for console.log (optional - warn only)
-if grep -r "console.log" app.js > /dev/null 2>&1; then
-    echo -e "${YELLOW}⚠ Warning: console.log statements found in app.js${NC}"
+if grep -r "console.log" js/app.js > /dev/null 2>&1; then
+    echo -e "${YELLOW}⚠ Warning: console.log statements found in js/app.js${NC}"
 fi
 
 # Check for debugger statements
-if grep -r "debugger" app.js > /dev/null 2>&1; then
-    echo -e "${RED}✗ Debugger statements found in app.js${NC}"
+if grep -r "debugger" js/app.js > /dev/null 2>&1; then
+    echo -e "${RED}✗ Debugger statements found in js/app.js${NC}"
     VALIDATION_PASSED=false
 fi
 

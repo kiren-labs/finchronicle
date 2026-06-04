@@ -11,17 +11,14 @@
     <meta name="apple-mobile-web-app-title" content="FinChronicle">
     <meta name="theme-color" content="#0051D5">
     <meta http-equiv="Content-Security-Policy"
-          content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' data: blob:; script-src 'self'; connect-src 'self';">
+          content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; script-src 'self'; connect-src 'self';">
     <title>FinChronicle - Track Your Financial Journey</title>
 
     <!-- PWA Icons -->
     <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
     <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet"
-        integrity="sha384-RwhG+8423fpoSoUMjpibFzMxLQeaO7oBV45/+IxuLaxxiUOFL9R+OzbK5rBpSazc" crossorigin="anonymous">
+    <link href="./fonts/remixicon.css" rel="stylesheet">
 
     <!-- External Stylesheets -->
     <link rel="stylesheet" href="./css/tokens.css">
@@ -76,20 +73,32 @@
                     <span class="preview-label">Currency:</span>
                     <span class="preview-value" id="previewCurrency">-</span>
                 </div>
+                <div class="preview-item" id="previewIntegrityRow" style="display:none;">
+                    <span class="preview-label">Integrity:</span>
+                    <span class="preview-value" id="previewIntegrity">-</span>
+                </div>
             </div>
 
-            <div class="modal-info">
-                <i class="ri-information-line"></i>
-                <strong>Merge Mode:</strong> Your existing transactions will be preserved.
-                New transactions from the backup will be added, and duplicates will be automatically skipped.
+            <div class="restore-mode-info">
+                <div class="restore-mode-option">
+                    <span class="restore-mode-badge restore-mode-badge-merge">Merge</span>
+                    <span class="restore-mode-desc">Adds missing records, keeps your existing data intact.</span>
+                </div>
+                <div class="restore-mode-option">
+                    <span class="restore-mode-badge restore-mode-badge-replace">Replace All</span>
+                    <span class="restore-mode-desc">Wipes all current data and writes the backup. Cannot be undone.</span>
+                </div>
             </div>
 
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-cancel">
+            <div class="modal-actions restore-mode-actions">
+                <button class="modal-btn modal-btn-cancel" id="restoreCancelBtn">
                     Cancel
                 </button>
-                <button class="modal-btn modal-btn-confirm">
-                    Restore Backup
+                <button class="modal-btn modal-btn-primary" id="restoreMergeBtn">
+                    Merge
+                </button>
+                <button class="modal-btn modal-btn-danger" id="restoreReplaceBtn">
+                    Replace All
                 </button>
             </div>
         </div>
@@ -788,26 +797,6 @@
                 <div class="card">
                     <h2 style="font-size: 20px; margin-bottom: 16px;">Settings</h2>
                     <div class="settings-actions">
-                        <button class="toolbar-btn" aria-label="Export CSV">
-                            <i class="ri-download-2-line"></i>
-                            <span>Export CSV</span>
-                        </button>
-                        <button class="toolbar-btn" aria-label="Import CSV">
-                            <i class="ri-upload-2-line"></i>
-                            <span>Import CSV</span>
-                        </button>
-                        <input type="file" id="importFile" accept=".csv,text/csv" style="display: none;"
-                            aria-label="Select CSV file to import">
-                        <button class="toolbar-btn" aria-label="Create Backup">
-                            <i class="ri-save-line"></i>
-                            <span>Create Backup</span>
-                        </button>
-                        <button class="toolbar-btn" aria-label="Restore from Backup">
-                            <i class="ri-upload-cloud-line"></i>
-                            <span>Restore Backup</span>
-                        </button>
-                        <input type="file" id="restoreFile" accept=".csv,text/csv" style="display: none;"
-                            aria-label="Select backup file to restore">
                         <button class="toolbar-btn" aria-label="Check for updates"
                             id="updateCheckBtn">
                             <i class="ri-refresh-line"></i>
@@ -1043,12 +1032,82 @@
                     </div>
                 </div>
 
-                <!-- Auto-Backup & Data Safety (v3.22.0) -->
-                <div id="autoBackupContainer"></div>
-                <div id="storageHealthWidget"></div>
+                <!-- Data & Backup (v4.2.0) -->
+                <div class="card" id="dataBackupCard">
+                    <h3 style="margin-bottom: 16px;"><i class="ri-database-2-line" aria-hidden="true"></i> Data &amp; Backup</h3>
 
-                <!-- Encrypted Backup file input (hidden) -->
-                <input type="file" id="encryptedRestoreFile" accept=".enc" hidden aria-hidden="true">
+                    <!-- Overdue banner — shown by updateAutoBackupUI() when backup is due -->
+                    <div id="backupOverdueBanner" class="backup-overdue-banner" hidden>
+                        <div class="backup-overdue-text">
+                            <i class="ri-alarm-warning-line" aria-hidden="true"></i>
+                            <span id="backupOverdueMsg">Backup overdue — tap to save a copy now.</span>
+                        </div>
+                        <button class="backup-overdue-btn" id="backupOverdueBtn" type="button">Back Up Now</button>
+                    </div>
+
+                    <div class="data-backup-section">
+                        <span class="data-backup-section-label">Export</span>
+                        <div class="data-backup-btn-group">
+                            <button class="data-backup-btn" id="downloadBackupBtn" type="button">
+                                <i class="ri-save-line" aria-hidden="true"></i>
+                                <span>Download Backup</span>
+                            </button>
+                            <p class="data-backup-hint">Full JSON — all data, all stores, lossless</p>
+                            <button class="data-backup-btn" id="encryptedBackupBtn2" type="button">
+                                <i class="ri-lock-line" aria-hidden="true"></i>
+                                <span>Encrypted Backup</span>
+                            </button>
+                            <p class="data-backup-hint">AES-256 encrypted. Requires passphrase to restore.</p>
+                            <button class="data-backup-btn" id="exportSpreadsheetBtn" type="button">
+                                <i class="ri-file-excel-line" aria-hidden="true"></i>
+                                <span>Export to Spreadsheet</span>
+                            </button>
+                            <p class="data-backup-hint">CSV — transactions only, for spreadsheet use</p>
+                        </div>
+                    </div>
+
+                    <div class="data-backup-section">
+                        <span class="data-backup-section-label">Restore</span>
+                        <div class="data-backup-btn-group">
+                            <button class="data-backup-btn" id="restoreBackupBtn2" type="button">
+                                <i class="ri-upload-cloud-line" aria-hidden="true"></i>
+                                <span>Restore from Backup</span>
+                            </button>
+                            <p class="data-backup-hint">Accepts .json (full backup), .enc (encrypted), or .csv (transactions only)</p>
+                            <button class="data-backup-btn" id="importSpreadsheetBtn" type="button">
+                                <i class="ri-file-upload-line" aria-hidden="true"></i>
+                                <span>Import Spreadsheet</span>
+                            </button>
+                            <p class="data-backup-hint">CSV import — adds transactions only</p>
+                        </div>
+                    </div>
+
+                    <div class="data-backup-section">
+                        <span class="data-backup-section-label">Auto-Backup</span>
+                        <div class="auto-backup-toggle-row">
+                            <label for="autoBackupToggle2" class="auto-backup-label">Enable automatic backups</label>
+                            <button id="autoBackupToggle2" class="toggle-switch"
+                                    role="switch" aria-checked="false" aria-label="Toggle auto-backup" type="button">
+                                <span class="toggle-knob"></span>
+                            </button>
+                        </div>
+                        <div id="autoBackupFreqRow" class="auto-backup-row disabled">
+                            <label for="backupFrequency2">Frequency</label>
+                            <select id="backupFrequency2" disabled>
+                                <option value="daily">Daily</option>
+                                <option value="weekly" selected>Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <p class="data-backup-hint" id="lastBackupHint">Last backup: Never</p>
+                    </div>
+
+                    <div id="storageHealthWidget"></div>
+                </div>
+
+                <!-- Hidden file inputs -->
+                <input type="file" id="spreadsheetImportFile" accept=".csv,text/csv" hidden aria-hidden="true">
+                <input type="file" id="dataRestoreFile" accept=".json,.enc,.csv" hidden aria-hidden="true">
 
                 <!-- Backup Status Card (v3.9.0) -->
                 <div id="backupStatusContainer"></div>

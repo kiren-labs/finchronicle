@@ -14,11 +14,139 @@ import {
   ACCOUNTS_STORE,
   GOALS_STORE,
   NET_WORTH_SNAPSHOTS_STORE,
-  DEFAULT_APP_SETTINGS,
 } from "./state.js";
 import { showMessage } from "./utils.js";
 
-// Initialize IndexedDB
+// ============================================================================
+// Generic IDB Helpers — eliminates repetitive promise/transaction boilerplate
+// ============================================================================
+
+function assertDB() {
+  if (!state.db) throw new Error("Database not initialized");
+}
+
+function hasStore(storeName) {
+  return state.db && state.db.objectStoreNames.contains(storeName);
+}
+
+/** Promisify a single IDBRequest */
+function reqToPromise(request) {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+/** Promisify an IDBTransaction (resolves on complete) */
+function txToPromise(tx) {
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+/** Get all records from a store. Returns [] if DB not ready or store missing. */
+function idbGetAll(storeName, fallback = []) {
+  if (!state.db || !hasStore(storeName)) return Promise.resolve(fallback);
+  const store = state.db
+    .transaction([storeName], "readonly")
+    .objectStore(storeName);
+  return reqToPromise(store.getAll()).then((r) => r || fallback);
+}
+
+/** Get all records via an index. */
+function idbGetAllByIndex(storeName, indexName, fallback = []) {
+  if (!state.db || !hasStore(storeName)) return Promise.resolve(fallback);
+  const store = state.db
+    .transaction([storeName], "readonly")
+    .objectStore(storeName);
+  return reqToPromise(store.index(indexName).getAll()).then(
+    (r) => r || fallback,
+  );
+}
+
+/** Get a single record by key. Returns fallback if not found. */
+function idbGet(storeName, key, fallback = null) {
+  if (!state.db || !hasStore(storeName)) return Promise.resolve(fallback);
+  const store = state.db
+    .transaction([storeName], "readonly")
+    .objectStore(storeName);
+  return reqToPromise(store.get(key)).then((r) => r ?? fallback);
+}
+
+/** Get a single record by index key. */
+function idbGetByIndex(storeName, indexName, key, fallback = null) {
+  if (!state.db || !hasStore(storeName)) return Promise.resolve(fallback);
+  const store = state.db
+    .transaction([storeName], "readonly")
+    .objectStore(storeName);
+  return reqToPromise(store.index(indexName).get(key)).then(
+    (r) => r ?? fallback,
+  );
+}
+
+/** Put (insert or update) a record. Returns the key. */
+function idbPut(storeName, record) {
+  assertDB();
+  const store = state.db
+    .transaction([storeName], "readwrite")
+    .objectStore(storeName);
+  return reqToPromise(store.put(record));
+}
+
+/** Delete a record by key. */
+function idbDelete(storeName, key) {
+  assertDB();
+  const store = state.db
+    .transaction([storeName], "readwrite")
+    .objectStore(storeName);
+  return reqToPromise(store.delete(key));
+}
+
+/** Clear all records from a store. */
+function idbClear(storeName) {
+  assertDB();
+  const store = state.db
+    .transaction([storeName], "readwrite")
+    .objectStore(storeName);
+  return reqToPromise(store.clear());
+}
+
+/** Put many records in one transaction. */
+function idbBulkPut(storeName, records) {
+  assertDB();
+  const tx = state.db.transaction([storeName], "readwrite");
+  const store = tx.objectStore(storeName);
+  records.forEach((r) => store.put(r));
+  return txToPromise(tx);
+}
+
+/** Get-then-modify pattern: read a record, apply mutator, put it back. */
+function idbModify(storeName, key, mutator) {
+  assertDB();
+  return new Promise((resolve, reject) => {
+    const tx = state.db.transaction([storeName], "readwrite");
+    const store = tx.objectStore(storeName);
+    const getReq = store.get(key);
+    getReq.onsuccess = () => {
+      const record = getReq.result;
+      if (!record) {
+        resolve(null);
+        return;
+      }
+      const updated = mutator(record);
+      const putReq = store.put(updated);
+      putReq.onsuccess = () => resolve(updated);
+      putReq.onerror = () => reject(putReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+
+// ============================================================================
+// Database Initialisation & Schema Migrations
+// ============================================================================
+
 export function initDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -61,9 +189,7 @@ export function initDB() {
           const budgetsStore = database.createObjectStore(BUDGETS_STORE, {
             keyPath: "id",
           });
-          budgetsStore.createIndex("category", "category", {
-            unique: false,
-          });
+          budgetsStore.createIndex("category", "category", { unique: false });
         }
       }
 
@@ -71,15 +197,16 @@ export function initDB() {
       if (oldVersion < 4) {
         const txStore = event.target.transaction.objectStore(STORE_NAME);
         if (!txStore.indexNames.contains("tags")) {
-          txStore.createIndex("tags", "tags", { unique: false, multiEntry: true });
+          txStore.createIndex("tags", "tags", {
+            unique: false,
+            multiEntry: true,
+          });
         }
       }
 
       // v5: Transfer transaction type support (schema-only, no new stores)
-      // New nullable fields: fromAccount, toAccount, transferNote
-      // No index needed — transfers filtered in-memory via type field
       if (oldVersion < 5) {
-        // No structural changes needed — existing type index handles 'transfer'
+        /* existing type index handles 'transfer' */
       }
 
       // v6: App settings store for optional fields configuration
@@ -92,7 +219,9 @@ export function initDB() {
       // v7: Quick templates store for Quick Entry (v3.17.0)
       if (oldVersion < 7) {
         if (!database.objectStoreNames.contains(QUICK_TEMPLATES_STORE)) {
-          const qtStore = database.createObjectStore(QUICK_TEMPLATES_STORE, { keyPath: "id" });
+          const qtStore = database.createObjectStore(QUICK_TEMPLATES_STORE, {
+            keyPath: "id",
+          });
           qtStore.createIndex("sortOrder", "sortOrder", { unique: false });
         }
       }
@@ -100,7 +229,9 @@ export function initDB() {
       // v8: Accounts store for Accounts & Net Worth (v3.18.0)
       if (oldVersion < 8) {
         if (!database.objectStoreNames.contains(ACCOUNTS_STORE)) {
-          const accStore = database.createObjectStore(ACCOUNTS_STORE, { keyPath: "id" });
+          const accStore = database.createObjectStore(ACCOUNTS_STORE, {
+            keyPath: "id",
+          });
           accStore.createIndex("name", "name", { unique: true });
           accStore.createIndex("type", "type", { unique: false });
           accStore.createIndex("sortOrder", "sortOrder", { unique: false });
@@ -110,7 +241,9 @@ export function initDB() {
       // v9: Savings Goals store (v3.20.0)
       if (oldVersion < 9) {
         if (!database.objectStoreNames.contains(GOALS_STORE)) {
-          const goalsStore = database.createObjectStore(GOALS_STORE, { keyPath: "id" });
+          const goalsStore = database.createObjectStore(GOALS_STORE, {
+            keyPath: "id",
+          });
           goalsStore.createIndex("deadline", "deadline", { unique: false });
         }
       }
@@ -118,8 +251,13 @@ export function initDB() {
       // v10: Net Worth Snapshots store (v3.28.0)
       if (oldVersion < 10) {
         if (!database.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
-          const snapshotsStore = database.createObjectStore(NET_WORTH_SNAPSHOTS_STORE, { keyPath: "id", autoIncrement: true });
-          snapshotsStore.createIndex("snapshotDate", "snapshotDate", { unique: true });
+          const snapshotsStore = database.createObjectStore(
+            NET_WORTH_SNAPSHOTS_STORE,
+            { keyPath: "id", autoIncrement: true },
+          );
+          snapshotsStore.createIndex("snapshotDate", "snapshotDate", {
+            unique: true,
+          });
         }
       }
 
@@ -131,10 +269,10 @@ export function initDB() {
           getAllReq.onsuccess = () => {
             const liabilityTypes = ["credit-card", "loan", "mortgage"];
             getAllReq.result.forEach((account) => {
-              if (!account.classification) {
-                account.classification = liabilityTypes.includes(account.type) ? "liability" : "asset";
-                accStore.put(account);
-              }
+              account.classification ??= liabilityTypes.includes(account.type)
+                ? "liability"
+                : "asset";
+              accStore.put(account);
             });
           };
         }
@@ -159,283 +297,103 @@ export function initDB() {
   });
 }
 
-// Load all transactions from IndexedDB
-export function loadDataFromDB() {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
+// ============================================================================
+// Transactions
+// ============================================================================
 
-    const transaction = state.db.transaction([STORE_NAME], "readonly");
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.getAll();
-
-    request.onsuccess = () => {
-      const all = request.result || [];
-      // Filter out soft-deleted records (kept in DB for audit trail)
-      state.transactions = all.filter((t) => !t.deleted);
-      // Cache timestamps for fast numeric sorting
-      state.transactions.forEach((t) => {
-        t.dateTs = new Date(t.date).getTime();
-      });
-      state.transactions.sort((a, b) => b.dateTs - a.dateTs);
-      resolve(state.transactions);
-    };
-
-    request.onerror = () => reject(request.error);
+export async function loadDataFromDB() {
+  assertDB();
+  const all = await idbGetAll(STORE_NAME);
+  state.transactions = all.filter((t) => !t.deleted);
+  state.transactions.forEach((t) => {
+    t.dateTs = new Date(t.date).getTime();
   });
+  state.transactions.sort((a, b) => b.dateTs - a.dateTs);
+  return state.transactions;
 }
 
-// Load ALL transactions including soft-deleted (for audit backup)
-export function loadAllTransactionsFromDB() {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-
-    const transaction = state.db.transaction([STORE_NAME], "readonly");
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.getAll();
-
-    request.onsuccess = () => {
-      const all = request.result || [];
-      all.forEach((t) => {
-        t.dateTs = new Date(t.date).getTime();
-      });
-      all.sort((a, b) => b.dateTs - a.dateTs);
-      resolve(all);
-    };
-
-    request.onerror = () => reject(request.error);
+export async function loadAllTransactionsFromDB() {
+  assertDB();
+  const all = await idbGetAll(STORE_NAME);
+  all.forEach((t) => {
+    t.dateTs = new Date(t.date).getTime();
   });
+  all.sort((a, b) => b.dateTs - a.dateTs);
+  return all;
 }
 
-// Save single transaction to IndexedDB
 export function saveTransactionToDB(transaction) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-
-    const tx = state.db.transaction([STORE_NAME], "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.put(transaction);
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+  return idbPut(STORE_NAME, transaction);
 }
 
-// Soft-delete transaction (preserves record for audit trail)
 export function deleteTransactionFromDB(id) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-
-    const tx = state.db.transaction([STORE_NAME], "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const getRequest = store.get(id);
-
-    getRequest.onsuccess = () => {
-      const record = getRequest.result;
-      if (!record) {
-        resolve();
-        return;
-      }
-      record.deleted = true;
-      record.deletedAt = new Date().toISOString();
-      const putRequest = store.put(record);
-      putRequest.onsuccess = () => resolve();
-      putRequest.onerror = () => reject(putRequest.error);
-    };
-
-    getRequest.onerror = () => reject(getRequest.error);
+  return idbModify(STORE_NAME, id, (record) => {
+    record.deleted = true;
+    record.deletedAt = new Date().toISOString();
+    return record;
   });
 }
 
-// Mark a reimbursable transaction as settled (v3.27.0)
 export function markTransactionSettled(id, settledBy = null) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-
-    const tx = state.db.transaction([STORE_NAME], "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const getRequest = store.get(id);
-
-    getRequest.onsuccess = () => {
-      const record = getRequest.result;
-      if (!record) {
-        resolve();
-        return;
-      }
-      record.settled = true;
-      record.settledAt = new Date().toISOString();
-      record.settledBy = settledBy || null;
-      record.updatedAt = new Date().toISOString();
-      const putRequest = store.put(record);
-      putRequest.onsuccess = () => resolve(record);
-      putRequest.onerror = () => reject(putRequest.error);
-    };
-
-    getRequest.onerror = () => reject(getRequest.error);
+  return idbModify(STORE_NAME, id, (record) => {
+    record.settled = true;
+    record.settledAt = new Date().toISOString();
+    record.settledBy = settledBy || null;
+    record.updatedAt = new Date().toISOString();
+    return record;
   });
 }
 
-// Clear all transactions from IndexedDB (for restore)
 export function clearAllTransactions() {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-
-    const tx = state.db.transaction([STORE_NAME], "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.clear();
-
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
+  return idbClear(STORE_NAME);
 }
 
-// Bulk save transactions to IndexedDB (for import)
 export function bulkSaveTransactionsToDB(transactionsArray) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-
-    const tx = state.db.transaction([STORE_NAME], "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-
-    transactionsArray.forEach((transaction) => {
-      store.put(transaction);
-    });
-
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
+  return idbBulkPut(STORE_NAME, transactionsArray);
 }
 
-// ---- Recurring Templates ----
+// ============================================================================
+// Recurring Templates
+// ============================================================================
 
 export function loadRecurringTemplatesFromDB() {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      resolve([]);
-      return;
-    }
-    const tx = state.db.transaction([RECURRING_STORE], "readonly");
-    const store = tx.objectStore(RECURRING_STORE);
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
-  });
+  return idbGetAll(RECURRING_STORE);
 }
 
 export function saveRecurringTemplateToDB(template) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([RECURRING_STORE], "readwrite");
-    const store = tx.objectStore(RECURRING_STORE);
-    const request = store.put(template);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+  return idbPut(RECURRING_STORE, template);
 }
 
 export function deleteRecurringTemplateFromDB(id) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([RECURRING_STORE], "readwrite");
-    const store = tx.objectStore(RECURRING_STORE);
-    const request = store.delete(id);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
+  return idbDelete(RECURRING_STORE, id);
 }
 
-// ---- Budgets ----
+// ============================================================================
+// Budgets
+// ============================================================================
 
 export function loadBudgetsFromDB() {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      resolve([]);
-      return;
-    }
-    const tx = state.db.transaction([BUDGETS_STORE], "readonly");
-    const store = tx.objectStore(BUDGETS_STORE);
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
-  });
+  return idbGetAll(BUDGETS_STORE);
 }
 
 export function saveBudgetToDB(budget) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([BUDGETS_STORE], "readwrite");
-    const store = tx.objectStore(BUDGETS_STORE);
-    const request = store.put(budget);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+  return idbPut(BUDGETS_STORE, budget);
 }
 
 export function deleteBudgetFromDB(id) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([BUDGETS_STORE], "readwrite");
-    const store = tx.objectStore(BUDGETS_STORE);
-    const request = store.delete(id);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
+  return idbDelete(BUDGETS_STORE, id);
 }
 
 export function getBudgetByCategory(category) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      resolve(null);
-      return;
-    }
-    const tx = state.db.transaction([BUDGETS_STORE], "readonly");
-    const store = tx.objectStore(BUDGETS_STORE);
-    const index = store.index("category");
-    const request = index.get(category);
-    request.onsuccess = () => resolve(request.result || null);
-    request.onerror = () => reject(request.error);
-  });
+  return idbGetByIndex(BUDGETS_STORE, "category", category);
 }
 
-// Migrate localStorage data to IndexedDB (one-time)
-export async function migrateFromLocalStorage() {
-  const migrationFlag = localStorage.getItem("idb_migrated");
+// ============================================================================
+// Migration
+// ============================================================================
 
-  if (migrationFlag === "true") {
-    return;
-  }
+export async function migrateFromLocalStorage() {
+  if (localStorage.getItem("idb_migrated") === "true") return;
 
   const stored = localStorage.getItem("transactions");
   if (stored) {
@@ -450,7 +408,9 @@ export async function migrateFromLocalStorage() {
       localStorage.removeItem("transactions");
     } catch (err) {
       console.error("Migration failed:", err);
-      showMessage("Data migration failed. Your existing transactions may not have loaded.");
+      showMessage(
+        "Data migration failed. Your existing transactions may not have loaded.",
+      );
       return;
     }
   }
@@ -458,252 +418,138 @@ export async function migrateFromLocalStorage() {
   localStorage.setItem("idb_migrated", "true");
 }
 
-// ---- App Settings (v3.16.0) ----
+// ============================================================================
+// App Settings (v3.16.0)
+// ============================================================================
 
 export function loadAppSettings() {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      resolve(null);
-      return;
-    }
-    if (!state.db.objectStoreNames.contains(APP_SETTINGS_STORE)) {
-      resolve(null);
-      return;
-    }
-    const tx = state.db.transaction([APP_SETTINGS_STORE], "readonly");
-    const store = tx.objectStore(APP_SETTINGS_STORE);
-    const request = store.get("config");
-    request.onsuccess = () => {
-      const result = request.result || null;
-      resolve(result);
-    };
-    request.onerror = () => reject(request.error);
-  });
+  return idbGet(APP_SETTINGS_STORE, "config");
 }
 
 export function saveAppSettings(settings) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    settings.id = "config";
-    settings.lastUpdated = new Date().toISOString();
-    const tx = state.db.transaction([APP_SETTINGS_STORE], "readwrite");
-    const store = tx.objectStore(APP_SETTINGS_STORE);
-    const request = store.put(settings);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+  settings.id = "config";
+  settings.lastUpdated = new Date().toISOString();
+  return idbPut(APP_SETTINGS_STORE, settings);
 }
 
-// ---- Quick Templates (v3.17.0) ----
+// ============================================================================
+// Quick Templates (v3.17.0)
+// ============================================================================
 
-export function loadQuickTemplates() {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      resolve([]);
-      return;
-    }
-    if (!state.db.objectStoreNames.contains(QUICK_TEMPLATES_STORE)) {
-      resolve([]);
-      return;
-    }
-    const tx = state.db.transaction([QUICK_TEMPLATES_STORE], "readonly");
-    const store = tx.objectStore(QUICK_TEMPLATES_STORE);
-    const request = store.getAll();
-    request.onsuccess = () => {
-      const templates = request.result || [];
-      templates.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-      resolve(templates);
-    };
-    request.onerror = () => reject(request.error);
-  });
+export async function loadQuickTemplates() {
+  const templates = await idbGetAll(QUICK_TEMPLATES_STORE);
+  templates.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  return templates;
 }
 
 export function saveQuickTemplate(template) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([QUICK_TEMPLATES_STORE], "readwrite");
-    const store = tx.objectStore(QUICK_TEMPLATES_STORE);
-    const request = store.put(template);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+  return idbPut(QUICK_TEMPLATES_STORE, template);
 }
 
 export function deleteQuickTemplate(id) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([QUICK_TEMPLATES_STORE], "readwrite");
-    const store = tx.objectStore(QUICK_TEMPLATES_STORE);
-    const request = store.delete(id);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
+  return idbDelete(QUICK_TEMPLATES_STORE, id);
 }
 
-export function bulkSaveQuickTemplates(templates) {
+export async function bulkSaveQuickTemplates(templates) {
+  assertDB();
+  const tx = state.db.transaction([QUICK_TEMPLATES_STORE], "readwrite");
+  const store = tx.objectStore(QUICK_TEMPLATES_STORE);
+  store.clear();
+  templates.forEach((t) => store.put(t));
+  return txToPromise(tx);
+}
+
+// ============================================================================
+// Accounts (v3.18.0)
+// ============================================================================
+
+export async function loadAccounts() {
+  assertDB();
+  const all = await idbGetAll(ACCOUNTS_STORE);
+  state.accounts = all.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  return state.accounts;
+}
+
+export function saveAccount(account) {
+  return idbPut(ACCOUNTS_STORE, account).then(() => account);
+}
+
+export function deleteAccount(id) {
+  return idbDelete(ACCOUNTS_STORE, id);
+}
+
+// ============================================================================
+// Savings Goals (v3.20.0)
+// ============================================================================
+
+export async function loadGoals() {
+  assertDB();
+  state.savingsGoals = await idbGetAll(GOALS_STORE);
+  return state.savingsGoals;
+}
+
+export function saveGoal(goal) {
+  return idbPut(GOALS_STORE, goal);
+}
+
+export function deleteGoal(id) {
+  return idbDelete(GOALS_STORE, id);
+}
+
+// ============================================================================
+// Net Worth Snapshots (v3.28.0)
+// ============================================================================
+
+export function saveNetWorthSnapshot(snapshot) {
+  if (!state.db || !hasStore(NET_WORTH_SNAPSHOTS_STORE))
+    return Promise.resolve(null);
+  return idbPut(NET_WORTH_SNAPSHOTS_STORE, snapshot);
+}
+
+export function loadNetWorthSnapshots() {
+  return idbGetAllByIndex(NET_WORTH_SNAPSHOTS_STORE, "snapshotDate");
+}
+
+export function getNetWorthSnapshotByDate(snapshotDate) {
+  return idbGetByIndex(NET_WORTH_SNAPSHOTS_STORE, "snapshotDate", snapshotDate);
+}
+
+export function getAllNetWorthSnapshots() {
+  return idbGetAll(NET_WORTH_SNAPSHOTS_STORE);
+}
+
+export function bulkSaveNetWorthSnapshots(snapshots) {
+  if (!state.db || !hasStore(NET_WORTH_SNAPSHOTS_STORE))
+    return Promise.resolve();
+  if (snapshots.length === 0) return Promise.resolve();
+
   return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([QUICK_TEMPLATES_STORE], "readwrite");
-    const store = tx.objectStore(QUICK_TEMPLATES_STORE);
-    store.clear();
-    templates.forEach((t) => store.put(t));
-    tx.oncomplete = () => resolve();
+    const tx = state.db.transaction([NET_WORTH_SNAPSHOTS_STORE], "readwrite");
+    const store = tx.objectStore(NET_WORTH_SNAPSHOTS_STORE);
+    const index = store.index("snapshotDate");
+    let pending = snapshots.length;
+    snapshots.forEach((snapshot) => {
+      const check = index.get(snapshot.snapshotDate);
+      check.onsuccess = () => {
+        if (!check.result) store.put(snapshot);
+        pending--;
+        if (pending === 0) resolve();
+      };
+      check.onerror = () => {
+        pending--;
+        if (pending === 0) resolve();
+      };
+    });
     tx.onerror = () => reject(tx.error);
   });
 }
 
-// ---- Accounts CRUD (v3.18.0) ----
+export function clearAllStores(storeNames) {
+  if (!state.db) return Promise.resolve();
+  const validStores = storeNames.filter((name) => hasStore(name));
+  if (validStores.length === 0) return Promise.resolve();
 
-export function loadAccounts() {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([ACCOUNTS_STORE], "readonly");
-    const store = tx.objectStore(ACCOUNTS_STORE);
-    const request = store.getAll();
-    request.onsuccess = () => {
-      state.accounts = (request.result || []).sort(
-        (a, b) => (a.sortOrder || 0) - (b.sortOrder || 0),
-      );
-      resolve(state.accounts);
-    };
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export function saveAccount(account) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([ACCOUNTS_STORE], "readwrite");
-    const store = tx.objectStore(ACCOUNTS_STORE);
-    const request = store.put(account);
-    request.onsuccess = () => resolve(account);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export function deleteAccount(id) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([ACCOUNTS_STORE], "readwrite");
-    const store = tx.objectStore(ACCOUNTS_STORE);
-    const request = store.delete(id);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
-}
-
-// ============================================================================
-// Savings Goals CRUD (v3.20.0)
-// ============================================================================
-
-export function loadGoals() {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([GOALS_STORE], "readonly");
-    const store = tx.objectStore(GOALS_STORE);
-    const request = store.getAll();
-    request.onsuccess = () => {
-      state.savingsGoals = request.result || [];
-      resolve(state.savingsGoals);
-    };
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export function saveGoal(goal) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([GOALS_STORE], "readwrite");
-    const store = tx.objectStore(GOALS_STORE);
-    const request = store.put(goal);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export function deleteGoal(id) {
-  return new Promise((resolve, reject) => {
-    if (!state.db) {
-      reject(new Error("Database not initialized"));
-      return;
-    }
-    const tx = state.db.transaction([GOALS_STORE], "readwrite");
-    const store = tx.objectStore(GOALS_STORE);
-    const request = store.delete(id);
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
-}
-
-// ---- Net Worth Snapshots (v3.28.0) ----
-
-export function saveNetWorthSnapshot(snapshot) {
-  return new Promise((resolve, reject) => {
-    if (!state.db || !state.db.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
-      resolve(null);
-      return;
-    }
-    const tx = state.db.transaction([NET_WORTH_SNAPSHOTS_STORE], "readwrite");
-    const store = tx.objectStore(NET_WORTH_SNAPSHOTS_STORE);
-    const request = store.put(snapshot);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export function loadNetWorthSnapshots() {
-  return new Promise((resolve, reject) => {
-    if (!state.db || !state.db.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
-      resolve([]);
-      return;
-    }
-    const tx = state.db.transaction([NET_WORTH_SNAPSHOTS_STORE], "readonly");
-    const store = tx.objectStore(NET_WORTH_SNAPSHOTS_STORE);
-    const index = store.index("snapshotDate");
-    const request = index.getAll();
-    request.onsuccess = () => resolve(request.result || []);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export function getNetWorthSnapshotByDate(snapshotDate) {
-  return new Promise((resolve, reject) => {
-    if (!state.db || !state.db.objectStoreNames.contains(NET_WORTH_SNAPSHOTS_STORE)) {
-      resolve(null);
-      return;
-    }
-    const tx = state.db.transaction([NET_WORTH_SNAPSHOTS_STORE], "readonly");
-    const store = tx.objectStore(NET_WORTH_SNAPSHOTS_STORE);
-    const index = store.index("snapshotDate");
-    const request = index.get(snapshotDate);
-    request.onsuccess = () => resolve(request.result || null);
-    request.onerror = () => reject(request.error);
-  });
+  const tx = state.db.transaction(validStores, "readwrite");
+  validStores.forEach((name) => tx.objectStore(name).clear());
+  return txToPromise(tx);
 }

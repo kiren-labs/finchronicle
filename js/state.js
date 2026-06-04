@@ -3,7 +3,7 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "4.1.1";
+export const APP_VERSION = "4.2.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
@@ -33,14 +33,14 @@ export const ACCOUNT_TYPES = [
 
 // Default classification per account type (v4.0.0)
 export const ACCOUNT_CLASSIFICATION = {
-  "checking": "asset",
-  "savings": "asset",
+  checking: "asset",
+  savings: "asset",
   "credit-card": "liability",
-  "cash": "asset",
-  "investment": "asset",
-  "loan": "liability",
-  "mortgage": "liability",
-  "other": "asset",
+  cash: "asset",
+  investment: "asset",
+  loan: "liability",
+  mortgage: "liability",
+  other: "asset",
 };
 
 // Pagination
@@ -75,6 +75,7 @@ export const state = {
   accounts: [],
   savingsGoals: [],
   storagePersisted: null, // null = unknown, true = persisted, false = denied
+  backupDue: false,
 };
 
 // Default optional fields configuration
@@ -114,34 +115,38 @@ export const EXPENSE_TYPES = ["personal", "business", "reimbursable"];
 // Existing flat category names are preserved as parents for backwards compatibility.
 export const categories = {
   income: {
-    "Salary":            [],
-    "Business":          ["Consulting", "Sales", "Services"],
-    "Investment":        ["Dividends", "Capital Gains", "Interest"],
-    "Rental Income":     [],
-    "Freelance":         [],
-    "Bonus":             [],
-    "Gifts/Refunds":     ["Gift Received", "Refund", "Cashback"],
-    "Other Income":      [],
+    Salary: [],
+    Business: ["Consulting", "Sales", "Services"],
+    Investment: ["Dividends", "Capital Gains", "Interest"],
+    "Rental Income": [],
+    Freelance: [],
+    Bonus: [],
+    "Gifts/Refunds": ["Gift Received", "Refund", "Cashback"],
+    "Other Income": [],
   },
   transfer: {
-    "Transfer": [],
+    Transfer: [],
   },
   expense: {
-    "Food":              ["Groceries", "Restaurants", "Coffee/Tea", "Delivery"],
-    "Transport":         ["Fuel", "Public Transit", "Taxi/Cab", "Vehicle Maintenance"],
-    "Utilities/Bills":   ["Electricity", "Water", "Internet", "Phone", "Gas"],
-    "Healthcare":        ["Doctor", "Medicine", "Insurance", "Gym"],
-    "Housing":           ["Rent", "Mortgage", "Maintenance", "Furnishings"],
-    "Kids/School":       ["Tuition", "Supplies", "Activities"],
+    Food: ["Groceries", "Restaurants", "Coffee/Tea", "Delivery"],
+    Transport: ["Fuel", "Public Transit", "Taxi/Cab", "Vehicle Maintenance"],
+    "Utilities/Bills": ["Electricity", "Water", "Internet", "Phone", "Gas"],
+    Healthcare: ["Doctor", "Medicine", "Insurance", "Gym"],
+    Housing: ["Rent", "Mortgage", "Maintenance", "Furnishings"],
+    "Kids/School": ["Tuition", "Supplies", "Activities"],
     "Personal/Shopping": ["Clothing", "Electronics", "Beauty", "Subscriptions"],
-    "Savings/Investments": ["Emergency Fund", "Retirement", "Stocks/Mutual Funds"],
-    "Debt/Loans":        ["EMI", "Credit Card", "Personal Loan"],
-    "Insurance/Taxes":   ["Life Insurance", "Vehicle Insurance", "Income Tax"],
-    "Charity/Gifts":     ["Donation", "Gift Given"],
-    "Fees/Docs":         [],
-    "Household":         [],
-    "Misc/Buffer":       [],
-    "Other Expense":     [],
+    "Savings/Investments": [
+      "Emergency Fund",
+      "Retirement",
+      "Stocks/Mutual Funds",
+    ],
+    "Debt/Loans": ["EMI", "Credit Card", "Personal Loan"],
+    "Insurance/Taxes": ["Life Insurance", "Vehicle Insurance", "Income Tax"],
+    "Charity/Gifts": ["Donation", "Gift Given"],
+    "Fees/Docs": [],
+    Household: [],
+    "Misc/Buffer": [],
+    "Other Expense": [],
   },
 };
 

@@ -12,7 +12,9 @@ export function generateId() {
 export function getErrorLog() {
   try {
     return JSON.parse(localStorage.getItem("errorLog") || "[]");
-  } catch (_) { return []; }
+  } catch {
+    return [];
+  }
 }
 
 export function clearErrorLog() {
@@ -24,7 +26,7 @@ export function sanitizeHTML(str) {
   if (!str) return "";
   const temp = document.createElement("div");
   temp.textContent = str;
-  return temp.innerHTML;
+  return temp.innerHTML.replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
 
 // Format number with commas
@@ -36,7 +38,7 @@ export function formatNumber(num) {
 
 // Format date string to locale display
 export function formatDate(dateStr) {
-  const date = new Date(dateStr + "T00:00:00");
+  const date = new Date(`${dateStr}T00:00:00`);
   return date.toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",

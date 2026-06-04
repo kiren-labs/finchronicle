@@ -2,13 +2,8 @@
 // Budget Management (v3.13.0)
 // ============================================================================
 
-import { state, categories, getAllCategoryNames } from "./state.js";
-import {
-  saveBudgetToDB,
-  loadBudgetsFromDB,
-  deleteBudgetFromDB,
-  getBudgetByCategory,
-} from "./db.js";
+import { state, categories } from "./state.js";
+import { saveBudgetToDB, loadBudgetsFromDB, deleteBudgetFromDB } from "./db.js";
 import { showMessage, generateId } from "./utils.js";
 import { formatCurrency } from "./currency.js";
 
@@ -39,17 +34,21 @@ export async function saveBudget(budget) {
     if (!isFinite(budget.monthlyLimit) || budget.monthlyLimit <= 0) {
       throw new Error("Monthly limit must be a valid number greater than 0");
     }
-    if (!isFinite(budget.alertThreshold) || budget.alertThreshold < 0 || budget.alertThreshold > 100) {
+    if (
+      !isFinite(budget.alertThreshold) ||
+      budget.alertThreshold < 0 ||
+      budget.alertThreshold > 100
+    ) {
       throw new Error("Alert threshold must be between 0 and 100");
     }
 
     // Block duplicate categories (only on new budgets, not edits)
     if (!budget.id) {
-      const exists = state.budgets.find(
-        (b) => b.category === budget.category
-      );
+      const exists = state.budgets.find((b) => b.category === budget.category);
       if (exists) {
-        throw new Error(`A budget for "${budget.category}" already exists. Edit it instead.`);
+        throw new Error(
+          `A budget for "${budget.category}" already exists. Edit it instead.`,
+        );
       }
     }
 
@@ -157,10 +156,7 @@ export function getActiveBudgetAlerts() {
 
   state.budgets.forEach((budget) => {
     const spent = getCategorySpending(budget.category, today);
-    const { isWarning, isExceeded } = checkBudgetAlert(
-      budget.category,
-      spent
-    );
+    const { isWarning, isExceeded } = checkBudgetAlert(budget.category, spent);
 
     if (isWarning || isExceeded) {
       alerts.push({
@@ -209,37 +205,46 @@ export function renderBudgetList() {
   const budgetsWithStatus = state.budgets.map((budget) => {
     const spent = getCategorySpending(budget.category, today);
     const { isWarning, isExceeded } = checkBudgetAlert(budget.category, spent);
-    const pct = budget.monthlyLimit > 0
-      ? Math.min(100, Math.round((spent / budget.monthlyLimit) * 100))
-      : 0;
+    const pct =
+      budget.monthlyLimit > 0
+        ? Math.min(100, Math.round((spent / budget.monthlyLimit) * 100))
+        : 0;
     return { budget, spent, isWarning, isExceeded, pct };
   });
 
   // Build summary line showing worst alert
   const exceeded = budgetsWithStatus.filter((b) => b.isExceeded);
-  const warning  = budgetsWithStatus.filter((b) => b.isWarning);
+  const warning = budgetsWithStatus.filter((b) => b.isWarning);
   const count = state.budgets.length;
-  let summaryText  = `${count} budget${count !== 1 ? "s" : ""} active`;
+  let summaryText = `${count} budget${count !== 1 ? "s" : ""} active`;
   let summaryClass = "";
   if (exceeded.length > 0) {
-    summaryText  += ` · ⚠ ${exceeded[0].budget.category} exceeded`;
-    summaryClass  = "budget-summary-danger";
+    summaryText += ` · ⚠ ${exceeded[0].budget.category} exceeded`;
+    summaryClass = "budget-summary-danger";
   } else if (warning.length > 0) {
-    summaryText  += ` · ⚠ ${warning[0].budget.category} at ${warning[0].pct}%`;
-    summaryClass  = "budget-summary-warn";
+    summaryText += ` · ⚠ ${warning[0].budget.category} at ${warning[0].pct}%`;
+    summaryClass = "budget-summary-warn";
   } else {
     summaryText += " · All on track";
   }
 
   const rowsHTML = budgetsWithStatus
     .map(({ budget, spent, isWarning, isExceeded, pct }) => {
-      const dotClass  = isExceeded ? "budget-dot-danger" : isWarning ? "budget-dot-warn" : "budget-dot-ok";
-      const fillClass = isExceeded ? "budget-fill-danger" : isWarning ? "budget-fill-warn" : "";
-      const pctStyle  = isExceeded
+      const dotClass = isExceeded
+        ? "budget-dot-danger"
+        : isWarning
+          ? "budget-dot-warn"
+          : "budget-dot-ok";
+      const fillClass = isExceeded
+        ? "budget-fill-danger"
+        : isWarning
+          ? "budget-fill-warn"
+          : "";
+      const pctStyle = isExceeded
         ? "color:var(--color-danger-strong)"
         : isWarning
-        ? "color:var(--color-warning-text)"
-        : "color:var(--color-text-muted)";
+          ? "color:var(--color-warning-text)"
+          : "color:var(--color-text-muted)";
       const spentStr = formatCurrency(spent);
       const limitStr = formatCurrency(budget.monthlyLimit);
       return `
@@ -295,15 +300,17 @@ export function renderBudgetModal(budget = null) {
   const isEdit = !!budget;
   const title = isEdit ? "Edit Budget" : "Add Budget";
 
-  const categoryOptions = Object.entries(categories.expense).map(([parent, children]) => {
-    if (children.length === 0) {
-      return `<option value="${parent}" ${budget?.category === parent ? "selected" : ""}>${parent}</option>`;
-    }
-    return `<optgroup label="${parent}">
+  const categoryOptions = Object.entries(categories.expense)
+    .map(([parent, children]) => {
+      if (children.length === 0) {
+        return `<option value="${parent}" ${budget?.category === parent ? "selected" : ""}>${parent}</option>`;
+      }
+      return `<optgroup label="${parent}">
       <option value="${parent}" ${budget?.category === parent ? "selected" : ""}>${parent}</option>
       ${children.map((c) => `<option value="${c}" ${budget?.category === c ? "selected" : ""}>  ${c}</option>`).join("")}
     </optgroup>`;
-  }).join("");
+    })
+    .join("");
 
   const html = `
     <div class="modal" id="budgetModal">
@@ -366,7 +373,9 @@ export function renderBudgetModal(budget = null) {
         id: budget?.id,
         category: document.getElementById("budgetCategory").value,
         monthlyLimit: parseFloat(document.getElementById("budgetLimit").value),
-        alertThreshold: parseInt(document.getElementById("budgetThreshold").value),
+        alertThreshold: parseInt(
+          document.getElementById("budgetThreshold").value,
+        ),
         rolloverEnabled: document.getElementById("budgetRollover").checked,
       };
     },
@@ -390,7 +399,6 @@ export function renderBudgetAlerts() {
   }
 
   const exceeded = alerts.filter((a) => a.isExceeded);
-  const warning  = alerts.filter((a) => a.isWarning);
   const hasExceeded = exceeded.length > 0;
 
   // Build a compact summary: show first 2 names, then "+N more" if needed
@@ -401,8 +409,8 @@ export function renderBudgetAlerts() {
   if (alerts.length > 2) named.push(`+${alerts.length - 2} more`);
 
   const summaryText = named.join(" · ");
-  const className   = hasExceeded ? "alert-danger" : "alert-warning";
-  const icon        = hasExceeded ? "ri-alert-fill" : "ri-error-warning-line";
+  const className = hasExceeded ? "alert-danger" : "alert-warning";
+  const icon = hasExceeded ? "ri-alert-fill" : "ri-error-warning-line";
 
   container.innerHTML = `
     <div class="budget-alert ${className}">
@@ -425,9 +433,13 @@ function _updateBudgetBadge(alerts, hasExceeded) {
     return;
   }
   badge.hidden = false;
-  badge.className = "budget-alert-badge " + (hasExceeded ? "badge-danger" : "badge-warn");
+  badge.className = `budget-alert-badge ${hasExceeded ? "badge-danger" : "badge-warn"}`;
   const n = alerts.length;
   badge.textContent = hasExceeded
-    ? (n > 1 ? n + " budgets exceeded" : "Budget exceeded")
-    : (n > 1 ? n + " budget warnings" : "Budget warning");
+    ? n > 1
+      ? `${n} budgets exceeded`
+      : "Budget exceeded"
+    : n > 1
+      ? `${n} budget warnings`
+      : "Budget warning";
 }

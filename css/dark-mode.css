@@ -139,6 +139,18 @@ body.dark-mode .modal-btn-cancel {
     color: var(--color-on-primary);
 }
 
+body.dark-mode .restore-mode-option {
+    background: var(--color-surface);
+}
+
+body.dark-mode .restore-mode-badge-merge {
+    background: rgba(0, 81, 213, 0.2);
+}
+
+body.dark-mode .restore-mode-badge-replace {
+    background: rgba(220, 53, 69, 0.2);
+}
+
 body.dark-mode .close-btn:hover {
     background: var(--color-toggle-bg);
 }
@@ -735,6 +747,46 @@ body.dark-mode .auto-backup-actions button {
 
 body.dark-mode .auto-backup-actions button:hover {
   background: var(--color-surface);
+}
+
+/* Data & Backup — overdue banner */
+body.dark-mode .backup-overdue-banner {
+  background: rgba(255, 159, 10, 0.12);
+  border-color: rgba(255, 159, 10, 0.4);
+}
+
+/* Data & Backup (v4.2.0) */
+body.dark-mode .data-backup-btn {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .data-backup-btn:hover {
+  background: var(--color-surface);
+}
+
+body.dark-mode .storage-health-inline {
+  border-top-color: var(--color-border);
+}
+
+body.dark-mode .storage-meter {
+  background: var(--color-bg);
+}
+
+body.dark-mode .storage-health-info {
+  color: var(--color-text-muted);
+}
+
+body.dark-mode .storage-warning-text {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border-left-color: var(--color-warning-border);
+}
+
+body.dark-mode #backupFrequency2 {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+  color: var(--color-text);
 }
 
 /* Settlement (v3.26.0) */

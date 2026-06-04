@@ -2,7 +2,7 @@
 // Optional Fields System (v3.16.0)
 // ============================================================================
 
-import { state, DEFAULT_APP_SETTINGS, PAYMENT_METHODS, EXPENSE_TYPES } from "./state.js";
+import { state, DEFAULT_APP_SETTINGS } from "./state.js";
 import { loadAppSettings, saveAppSettings } from "./db.js";
 import { sanitizeHTML } from "./utils.js";
 
@@ -18,12 +18,12 @@ export async function initOptionalFields() {
   const isFirstRun = !settings;
 
   if (!settings) {
-    settings = JSON.parse(JSON.stringify(DEFAULT_APP_SETTINGS));
+    settings = structuredClone(DEFAULT_APP_SETTINGS);
   }
 
   // Merge any missing field keys (forward compatibility)
   for (const key of Object.keys(DEFAULT_APP_SETTINGS.enabledFields)) {
-    if (!(key in settings.enabledFields)) {
+    if (!Object.hasOwn(settings.enabledFields, key)) {
       settings.enabledFields[key] = false;
     }
   }
@@ -70,7 +70,9 @@ export async function initOptionalFields() {
 function buildSmartKeywords() {
   const cutoff = Date.now() - 90 * 24 * 60 * 60 * 1000;
   const recent = state.transactions.filter(
-    (t) => t.type !== "transfer" && (t.dateTs || new Date(t.date).getTime()) >= cutoff
+    (t) =>
+      t.type !== "transfer" &&
+      (t.dateTs || new Date(t.date).getTime()) >= cutoff,
   );
 
   const keywordMap = {}; // { keyword: { category: count } }
@@ -204,14 +206,12 @@ function populateLinkedAccountSelect(selectedValue) {
   const el = document.getElementById("linkedAccount");
   if (!el) return;
   const accounts = state.accounts || [];
-  el.innerHTML =
-    '<option value="">None</option>' +
-    accounts
-      .map(
-        (a) =>
-          `<option value="${sanitizeHTML(a.name)}"${a.name === selectedValue ? " selected" : ""}>${sanitizeHTML(a.name)}</option>`
-      )
-      .join("");
+  el.innerHTML = `<option value="">None</option>${accounts
+    .map(
+      (a) =>
+        `<option value="${sanitizeHTML(a.name)}"${a.name === selectedValue ? " selected" : ""}>${sanitizeHTML(a.name)}</option>`,
+    )
+    .join("")}`;
 }
 
 /**
@@ -296,9 +296,7 @@ export function setOptionalFieldValues(transaction) {
 export function clearOptionalFields() {
   const container = document.getElementById("optionalFieldsContainer");
   if (!container) return;
-  container
-    .querySelectorAll("input, select")
-    .forEach((el) => (el.value = ""));
+  container.querySelectorAll("input, select").forEach((el) => (el.value = ""));
 }
 
 // ============================================================================
@@ -345,7 +343,7 @@ export function bindFieldAutocomplete(inputId, suggestionsId, fieldName) {
       .slice(0, 8)
       .map(
         (a) =>
-          `<div class="account-suggestion" data-value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</div>`
+          `<div class="account-suggestion" data-value="${sanitizeHTML(a)}">${sanitizeHTML(a)}</div>`,
       )
       .join("");
     suggestionsEl.hidden = false;
@@ -405,7 +403,7 @@ export function renderFieldToggles() {
         <input type="checkbox" class="field-toggle-checkbox"
                data-field-toggle="${key}" ${enabled[key] ? "checked" : ""}>
         <span class="field-toggle-switch"></span>
-      </label>`
+      </label>`,
     )
     .join("");
 }
@@ -479,4 +477,49 @@ export function acceptCategorySuggestion() {
 export function dismissCategorySuggestion() {
   const banner = document.getElementById("categorySuggestion");
   if (banner) banner.hidden = true;
+}
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindOptionalFieldsEvents() {
+  const toggle = document.getElementById("optionalFieldsToggle");
+  const container = document.getElementById("optionalFieldsContainer");
+  if (toggle && container) {
+    toggle.addEventListener("click", () => {
+      const expanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!expanded));
+      container.hidden = expanded;
+      toggle
+        .querySelector(".optional-fields-chevron")
+        .classList.toggle("expanded", !expanded);
+      if (!expanded) renderOptionalFieldsForm();
+    });
+  }
+
+  const notesInput = document.getElementById("notes");
+  if (notesInput) {
+    notesInput.addEventListener("input", () => {
+      handleNoteInput(notesInput.value);
+    });
+  }
+
+  const suggestionBanner = document.getElementById("categorySuggestion");
+  if (suggestionBanner) {
+    suggestionBanner
+      .querySelector(".suggestion-accept")
+      .addEventListener("click", acceptCategorySuggestion);
+    suggestionBanner
+      .querySelector(".suggestion-dismiss")
+      .addEventListener("click", dismissCategorySuggestion);
+  }
+
+  document
+    .getElementById("optionalFieldToggles")
+    .addEventListener("change", (e) => {
+      const checkbox = e.target.closest("[data-field-toggle]");
+      if (!checkbox) return;
+      handleFieldToggle(checkbox.dataset.fieldToggle, checkbox.checked);
+    });
 }

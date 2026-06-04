@@ -36,8 +36,12 @@ export function initAlerts() {
   if (stored) {
     try {
       const data = JSON.parse(stored);
-      alertHistory = Array.isArray(data.history) ? data.history.slice(0, ALERT_HISTORY_MAX) : [];
-      dismissedAlerts = new Set(Array.isArray(data.dismissed) ? data.dismissed : []);
+      alertHistory = Array.isArray(data.history)
+        ? data.history.slice(0, ALERT_HISTORY_MAX)
+        : [];
+      dismissedAlerts = new Set(
+        Array.isArray(data.dismissed) ? data.dismissed : [],
+      );
     } catch {
       alertHistory = [];
       dismissedAlerts = new Set();
@@ -51,7 +55,7 @@ function persistAlerts() {
     JSON.stringify({
       history: alertHistory.slice(0, ALERT_HISTORY_MAX),
       dismissed: [...dismissedAlerts].slice(0, 100),
-    })
+    }),
   );
 }
 
@@ -163,7 +167,14 @@ function getThisMonthByCategory() {
 function getLastMonthByCategory() {
   const now = new Date();
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+  const lastMonthEnd = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    0,
+    23,
+    59,
+    59,
+  );
   const expenses = getExpenses(lastMonthStart, lastMonthEnd);
 
   const result = {};
@@ -234,7 +245,11 @@ function checkVelocity(thisMonthTotals) {
 
   const now = new Date();
   const dayOfMonth = now.getDate();
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysInMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+  ).getDate();
 
   // Only check after day 5 to avoid false positives
   if (dayOfMonth < 5) return [];
@@ -246,7 +261,9 @@ function checkVelocity(thisMonthTotals) {
     const projectedTotal = (spent / dayOfMonth) * daysInMonth;
     if (projectedTotal > budget.monthlyLimit) {
       const exceedDay = Math.round((budget.monthlyLimit / spent) * dayOfMonth);
-      const pctOver = Math.round(((projectedTotal - budget.monthlyLimit) / budget.monthlyLimit) * 100);
+      const pctOver = Math.round(
+        ((projectedTotal - budget.monthlyLimit) / budget.monthlyLimit) * 100,
+      );
       alerts.push({
         type: ALERT_TYPES.VELOCITY_WARNING,
         category: budget.category,
@@ -289,7 +306,7 @@ function checkCategoryDrift(thisMonth, lastMonth) {
 function checkInactivity() {
   if (state.transactions.length === 0) return null;
   const sorted = [...state.transactions].sort(
-    (a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date)
+    (a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date),
   );
   const latest = new Date(sorted[0].createdAt || sorted[0].date);
   const today = new Date();
@@ -306,13 +323,20 @@ function checkInactivity() {
 }
 
 function checkBillDue() {
-  if (!state.recurringTemplates || state.recurringTemplates.length === 0) return [];
+  if (!state.recurringTemplates || state.recurringTemplates.length === 0)
+    return [];
   const alerts = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   for (const tmpl of state.recurringTemplates) {
-    if (!tmpl.enabled || tmpl.type !== "expense" || !tmpl.fromAccount || !tmpl.nextDueDate) continue;
+    if (
+      !tmpl.enabled ||
+      tmpl.type !== "expense" ||
+      !tmpl.fromAccount ||
+      !tmpl.nextDueDate
+    )
+      continue;
     const due = new Date(tmpl.nextDueDate);
     due.setHours(0, 0, 0, 0);
     const daysUntil = Math.round((due - today) / (1000 * 60 * 60 * 24));
@@ -320,7 +344,12 @@ function checkBillDue() {
 
     const balance = getAccountBalance(tmpl.fromAccount);
     if (balance < tmpl.amount * 1.2) {
-      const dayLabel = daysUntil === 0 ? "today" : daysUntil === 1 ? "tomorrow" : `in ${daysUntil} days`;
+      const dayLabel =
+        daysUntil === 0
+          ? "today"
+          : daysUntil === 1
+            ? "tomorrow"
+            : `in ${daysUntil} days`;
       alerts.push({
         type: ALERT_TYPES.BILL_DUE,
         category: tmpl.category || "_health",
@@ -339,13 +368,17 @@ function checkSavingsRateTrend() {
   const months = [];
   for (let i = 1; i <= 3; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    months.push(
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+    );
   }
   const rates = months.map((m) => getSavingsRate(m));
   const allBelowThreshold = rates.every((r) => r !== null && r < 10);
   if (!allBelowThreshold) return null;
   const validRates = rates.filter((r) => r !== null);
-  const avg = (validRates.reduce((s, r) => s + r, 0) / validRates.length).toFixed(1);
+  const avg = (
+    validRates.reduce((s, r) => s + r, 0) / validRates.length
+  ).toFixed(1);
   return {
     type: ALERT_TYPES.SAVINGS_RATE_TREND,
     category: "_health",
@@ -360,7 +393,11 @@ function checkMonthlyPace() {
   const now = new Date();
   const dayOfMonth = now.getDate();
   if (dayOfMonth < 5) return [];
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysInMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+  ).getDate();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const expenses = getExpenses(monthStart, now);
 
@@ -405,7 +442,7 @@ function runHealthAlertChecks() {
   return newAlerts;
 }
 
-// ---- Public: Run all alert checks ----
+// ---- Alert Engine (computation) ----
 
 /**
  * Run the full alert detection engine.
@@ -449,7 +486,8 @@ export function runAlertChecks(newTransaction = null) {
   const seen = new Set();
 
   for (const alert of newAlerts) {
-    const window = alert.type === ALERT_TYPES.SAVINGS_RATE_TREND ? quarter : today;
+    const window =
+      alert.type === ALERT_TYPES.SAVINGS_RATE_TREND ? quarter : today;
     const key = `${alert.type}:${alert.category}:${window}`;
     if (seen.has(key) || dismissedAlerts.has(key)) continue;
     seen.add(key);
@@ -503,7 +541,7 @@ export function clearAlertHistory() {
   persistAlerts();
 }
 
-// ---- Public: Render alert banners ----
+// ---- Rendering ----
 
 export function renderAlertBanners(alerts) {
   const container = document.getElementById("smartAlerts");
@@ -531,9 +569,15 @@ export function renderAlertBanners(alerts) {
   // Collapse to summary chip when > 2 alerts
   const expanded = localStorage.getItem("alertsExpanded") === "true";
   const dangerCount = sorted.filter((a) => a.severity === "danger").length;
-  const chipClass = dangerCount > 0 ? "alert-summary-chip danger" : "alert-summary-chip warning";
-  const icon = dangerCount > 0 ? "ri-alarm-warning-fill" : "ri-error-warning-line";
-  const bannerList = expanded ? sorted.map((a) => renderAlertBanner(a)).join("") : "";
+  const chipClass =
+    dangerCount > 0
+      ? "alert-summary-chip danger"
+      : "alert-summary-chip warning";
+  const icon =
+    dangerCount > 0 ? "ri-alarm-warning-fill" : "ri-error-warning-line";
+  const bannerList = expanded
+    ? sorted.map((a) => renderAlertBanner(a)).join("")
+    : "";
 
   container.innerHTML = `
     <div class="${chipClass}" id="alertSummaryChip">
@@ -578,7 +622,7 @@ export function renderAlertHistory() {
       </div>
       <span class="alert-history-date">${alert.date}</span>
     </div>
-  `
+  `,
     )
     .join("");
 }
@@ -603,5 +647,47 @@ function getAlertTypeLabel(type) {
       return "Monthly Pace";
     default:
       return "Alert";
+  }
+}
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindAlertEvents() {
+  const alertsContainer = document.getElementById("smartAlerts");
+  if (alertsContainer) {
+    alertsContainer.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-dismiss]");
+      if (btn) {
+        dismissAlert(btn.dataset.dismiss);
+        const banner = btn.closest(".smart-alert");
+        if (banner) banner.remove();
+        if (!alertsContainer.querySelector(".smart-alert")) {
+          alertsContainer.hidden = true;
+        }
+        return;
+      }
+      if (e.target.closest("#alertSummaryToggle")) {
+        const expanded = localStorage.getItem("alertsExpanded") === "true";
+        localStorage.setItem("alertsExpanded", expanded ? "false" : "true");
+        renderAlertBanners(runAlertChecks());
+        return;
+      }
+      if (e.target.closest("#alertDismissAll")) {
+        const alerts = runAlertChecks();
+        dismissAllAlerts(alerts);
+        localStorage.removeItem("alertsExpanded");
+        renderAlertBanners([]);
+      }
+    });
+  }
+
+  const clearBtn = document.getElementById("clearAlertsBtn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      clearAlertHistory();
+      renderAlertHistory();
+    });
   }
 }

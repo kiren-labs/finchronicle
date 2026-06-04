@@ -3,9 +3,14 @@
 // ============================================================================
 
 import { state, MAX_QUICK_TEMPLATES } from "./state.js";
-import { loadQuickTemplates, saveQuickTemplate, deleteQuickTemplate } from "./db.js";
+import {
+  loadQuickTemplates,
+  saveQuickTemplate,
+  deleteQuickTemplate,
+} from "./db.js";
 import { formatCurrency } from "./currency.js";
 import { sanitizeHTML, showMessage, generateId } from "./utils.js";
+import { updateCategoryOptions, selectType, renderFormTagChips } from "./ui.js";
 
 // ============================================================================
 // Initialisation
@@ -33,20 +38,23 @@ export function renderQuickBar() {
 
   bar.hidden = false;
 
-  const pills = templates.map(
-    (t) =>
-      `<button type="button" class="quick-pill" data-template-id="${t.id}" title="${sanitizeHTML(t.label)} — ${sanitizeHTML(t.category)}">
+  const pills = templates
+    .map(
+      (t) =>
+        `<button type="button" class="quick-pill" data-template-id="${t.id}" title="${sanitizeHTML(t.label)} — ${sanitizeHTML(t.category)}">
         <span class="quick-pill-icon">${t.type === "income" ? "↑" : "↓"}</span>
         <span class="quick-pill-label">${sanitizeHTML(t.label)}</span>
         <span class="quick-pill-amount">${formatCurrency(t.amount)}</span>
-      </button>`
-  ).join("");
+      </button>`,
+    )
+    .join("");
 
-  const cloneBtn = state.transactions.length > 0
-    ? `<button type="button" class="quick-pill quick-pill-clone" id="cloneLastBtn" title="Clone most recent transaction with today's date">
+  const cloneBtn =
+    state.transactions.length > 0
+      ? `<button type="button" class="quick-pill quick-pill-clone" id="cloneLastBtn" title="Clone most recent transaction with today's date">
         <i class="ri-file-copy-line"></i> Clone Last
       </button>`
-    : "";
+      : "";
 
   bar.innerHTML = `
     <div class="quick-bar-scroll">
@@ -115,7 +123,8 @@ export function prefillFromTemplate(templateId) {
 
   // Scroll to form and focus save button
   const submitBtn = document.getElementById("submitBtn");
-  if (submitBtn) submitBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (submitBtn)
+    submitBtn.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 // ============================================================================
@@ -125,7 +134,7 @@ export function prefillFromTemplate(templateId) {
 export function cloneLast() {
   // Find the most recent non-deleted, non-transfer transaction
   const recent = state.transactions.find(
-    (t) => !t.deleted && t.type !== "transfer"
+    (t) => !t.deleted && t.type !== "transfer",
   );
   if (!recent) {
     showMessage("No recent transaction to clone");
@@ -164,10 +173,18 @@ export function cloneLast() {
   document.dispatchEvent(event2);
 
   // Copy optional fields
-  const optionalKeys = ["paymentMethod", "merchant", "expenseType", "attachedTo", "referenceId"];
+  const optionalKeys = [
+    "paymentMethod",
+    "merchant",
+    "expenseType",
+    "attachedTo",
+    "referenceId",
+  ];
   for (const key of optionalKeys) {
     if (recent[key]) {
-      const el = document.getElementById(key === "location" ? "locationField" : key);
+      const el = document.getElementById(
+        key === "location" ? "locationField" : key,
+      );
       if (el) el.value = recent[key];
     }
   }
@@ -185,7 +202,9 @@ export function cloneLast() {
 
 export async function saveAsTemplate() {
   if (state.quickTemplates.length >= MAX_QUICK_TEMPLATES) {
-    showMessage(`Maximum ${MAX_QUICK_TEMPLATES} templates reached. Delete one first.`);
+    showMessage(
+      `Maximum ${MAX_QUICK_TEMPLATES} templates reached. Delete one first.`,
+    );
     return;
   }
 
@@ -213,9 +232,9 @@ export async function saveAsTemplate() {
   const template = {
     id: generateId(),
     label: sanitizeHTML(label),
-    type: type,
-    amount: amount,
-    category: category,
+    type,
+    amount,
+    category,
     notes: sanitizeHTML(notes),
     tags: [...state.formTags],
     sortOrder: state.quickTemplates.length,
@@ -224,9 +243,11 @@ export async function saveAsTemplate() {
 
   // Copy optional fields if they have values
   const paymentMethod = document.getElementById("paymentMethod");
-  if (paymentMethod && paymentMethod.value) template.paymentMethod = paymentMethod.value;
+  if (paymentMethod && paymentMethod.value)
+    template.paymentMethod = paymentMethod.value;
   const merchant = document.getElementById("merchant");
-  if (merchant && merchant.value.trim()) template.merchant = sanitizeHTML(merchant.value.trim());
+  if (merchant && merchant.value.trim())
+    template.merchant = sanitizeHTML(merchant.value.trim());
 
   await saveQuickTemplate(template);
   state.quickTemplates.push(template);
@@ -265,7 +286,7 @@ export function renderTemplateManager() {
           ${i < state.quickTemplates.length - 1 ? `<button type="button" class="template-action-btn" data-move="down" data-id="${t.id}" aria-label="Move down"><i class="ri-arrow-down-s-line"></i></button>` : ""}
           <button type="button" class="template-action-btn template-delete-btn" data-delete="${t.id}" aria-label="Delete template"><i class="ri-delete-bin-line"></i></button>
         </div>
-      </div>`
+      </div>`,
     )
     .join("");
 }
@@ -315,4 +336,80 @@ export async function editTemplateLabel(id, newLabel) {
   await saveQuickTemplate(template);
   renderQuickBar();
   renderTemplateManager();
+}
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindQuickEntryEvents() {
+  const bar = document.getElementById("quickEntryBar");
+  if (bar) {
+    bar.addEventListener("click", (e) => {
+      const pill = e.target.closest("[data-template-id]");
+      if (pill) {
+        prefillFromTemplate(Number(pill.dataset.templateId));
+        return;
+      }
+      if (e.target.closest("#cloneLastBtn")) {
+        cloneLast();
+      }
+    });
+  }
+
+  const saveTemplateBtn = document.getElementById("saveAsTemplateBtn");
+  if (saveTemplateBtn)
+    saveTemplateBtn.addEventListener("click", saveAsTemplate);
+
+  document.addEventListener("quick-entry-type", (e) => {
+    updateCategoryOptions(e.detail);
+    selectType(e.detail);
+  });
+
+  document.addEventListener("quick-entry-tags", () => {
+    renderFormTagChips();
+  });
+
+  const templatesList = document.getElementById("quickTemplatesList");
+  if (templatesList) {
+    templatesList.addEventListener("click", (e) => {
+      const deleteBtn = e.target.closest("[data-delete]");
+      if (deleteBtn) {
+        deleteTemplate(Number(deleteBtn.dataset.delete));
+        return;
+      }
+      const moveBtn = e.target.closest("[data-move]");
+      if (moveBtn) {
+        moveTemplate(Number(moveBtn.dataset.id), moveBtn.dataset.move);
+        return;
+      }
+      const label = e.target.closest(".template-item-label");
+      if (label) {
+        const item = label.closest(".template-item");
+        if (!item) return;
+        const id = Number(item.dataset.templateId);
+        const currentLabel = label.textContent;
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = currentLabel;
+        input.maxLength = 30;
+        input.className = "template-edit-input";
+        label.replaceWith(input);
+        input.focus();
+        input.select();
+        const commit = () => {
+          const newVal = input.value.trim() || currentLabel;
+          editTemplateLabel(id, newVal);
+        };
+        input.addEventListener("blur", commit);
+        input.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") input.blur();
+          if (ev.key === "Escape") {
+            input.value = currentLabel;
+            input.blur();
+          }
+        });
+      }
+    });
+  }
 }

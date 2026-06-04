@@ -30,7 +30,7 @@ function getTagColors() {
 // Return the color for a tag, auto-assigning one if none exists.
 export function getTagColor(tag) {
   const colors = getTagColors();
-  if (colors[tag]) return colors[tag];
+  if (Object.hasOwn(colors, tag)) return colors[tag];
   return autoAssignColor(tag, colors);
 }
 
@@ -77,21 +77,26 @@ export function filterTransactions(transactions) {
       if (String(t.amount).includes(query)) return true;
       if (t.category.toLowerCase().includes(query)) return true;
       if (t.notes && t.notes.toLowerCase().includes(query)) return true;
-      if ((t.tags || []).some((tag) => tag.toLowerCase().includes(query))) return true;
+      if ((t.tags || []).some((tag) => tag.toLowerCase().includes(query)))
+        return true;
       // Optional fields (v3.16.0)
       if (t.merchant && t.merchant.toLowerCase().includes(query)) return true;
-      if (t.attachedTo && t.attachedTo.toLowerCase().includes(query)) return true;
+      if (t.attachedTo && t.attachedTo.toLowerCase().includes(query))
+        return true;
       if (t.location && t.location.toLowerCase().includes(query)) return true;
-      if (t.referenceId && t.referenceId.toLowerCase().includes(query)) return true;
-      if (t.paymentMethod && t.paymentMethod.toLowerCase().includes(query)) return true;
-      if (t.expenseType && t.expenseType.toLowerCase().includes(query)) return true;
+      if (t.referenceId && t.referenceId.toLowerCase().includes(query))
+        return true;
+      if (t.paymentMethod && t.paymentMethod.toLowerCase().includes(query))
+        return true;
+      if (t.expenseType && t.expenseType.toLowerCase().includes(query))
+        return true;
       return false;
     });
   }
 
   if (state.searchTags.length > 0) {
     result = result.filter((t) =>
-      state.searchTags.every((tag) => (t.tags || []).includes(tag))
+      state.searchTags.every((tag) => (t.tags || []).includes(tag)),
     );
   }
 
@@ -124,7 +129,9 @@ export async function renameTag(oldName, newName) {
     localStorage.setItem("tagColors", JSON.stringify(colors));
   }
 
-  const affected = state.transactions.filter((t) => (t.tags || []).includes(oldName));
+  const affected = state.transactions.filter((t) =>
+    (t.tags || []).includes(oldName),
+  );
   for (const t of affected) {
     t.tags = t.tags.map((tag) => (tag === oldName ? trimmed : tag));
     await saveTransactionToDB(t);
@@ -137,7 +144,9 @@ export async function deleteTag(name) {
   delete colors[name];
   localStorage.setItem("tagColors", JSON.stringify(colors));
 
-  const affected = state.transactions.filter((t) => (t.tags || []).includes(name));
+  const affected = state.transactions.filter((t) =>
+    (t.tags || []).includes(name),
+  );
   for (const t of affected) {
     t.tags = t.tags.filter((tag) => tag !== name);
     await saveTransactionToDB(t);

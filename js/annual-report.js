@@ -75,8 +75,14 @@ function getYoYComparison(currentYear) {
     .reduce((s, t) => s + t.amount, 0);
 
   return {
-    expenseChange: prevExpense > 0 ? Math.round(((currExpense - prevExpense) / prevExpense) * 100) : null,
-    incomeChange: prevIncome > 0 ? Math.round(((currIncome - prevIncome) / prevIncome) * 100) : null,
+    expenseChange:
+      prevExpense > 0
+        ? Math.round(((currExpense - prevExpense) / prevExpense) * 100)
+        : null,
+    incomeChange:
+      prevIncome > 0
+        ? Math.round(((currIncome - prevIncome) / prevIncome) * 100)
+        : null,
     prevYear,
   };
 }
@@ -101,7 +107,7 @@ export function renderAnnualReport(year = null) {
       ${years
         .map(
           (y) =>
-            `<button class="range-pill ${y === selectedYear ? "active" : ""}" data-annual-year="${y}">${y}</button>`
+            `<button class="range-pill ${y === selectedYear ? "active" : ""}" data-annual-year="${y}">${y}</button>`,
         )
         .join("")}
     </div>
@@ -167,7 +173,7 @@ export function renderAnnualReport(year = null) {
               <span class="annual-top-amount">${formatCurrency(t.amount)}</span>
               <span class="annual-top-date">${t.date}</span>
             </div>
-          `
+          `,
             )
             .join("")}
         </div>
@@ -219,4 +225,25 @@ export function exportAnnualCSV(year) {
   a.download = `finchronicle-annual-${year}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ============================================================================
+// Event Bindings
+// ============================================================================
+
+export function bindAnnualReportEvents() {
+  const container = document.getElementById("annualReportContent");
+  if (!container) return;
+
+  container.addEventListener("click", (e) => {
+    const yearBtn = e.target.closest("[data-annual-year]");
+    if (yearBtn) {
+      renderAnnualReport(yearBtn.dataset.annualYear);
+      return;
+    }
+    const exportBtn = e.target.closest("[data-annual-export]");
+    if (exportBtn) {
+      exportAnnualCSV(exportBtn.dataset.annualExport);
+    }
+  });
 }

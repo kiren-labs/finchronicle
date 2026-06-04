@@ -10,10 +10,16 @@ const MAX_ERRORS = 50;
 function logError(message, stack) {
   try {
     const log = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || "[]");
-    log.push({ timestamp: new Date().toISOString(), message, stack: stack || "" });
+    log.push({
+      timestamp: new Date().toISOString(),
+      message,
+      stack: stack || "",
+    });
     if (log.length > MAX_ERRORS) log.splice(0, log.length - MAX_ERRORS);
     localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
-  } catch (_) { /* localStorage full or unavailable — silently ignore */ }
+  } catch {
+    /* localStorage full or unavailable — silently ignore */
+  }
 }
 
 window.onerror = (message, source, lineno, colno, error) => {
@@ -25,14 +31,17 @@ window.onerror = (message, source, lineno, colno, error) => {
 
 window.addEventListener("unhandledrejection", (event) => {
   const reason = event.reason;
-  logError(
-    reason?.message || String(reason),
-    reason?.stack || ""
-  );
+  logError(reason?.message || String(reason), reason?.stack || "");
 });
 
-import { state, currencies, ACCOUNT_CLASSIFICATION } from "./state.js";
-import { showMessage, generateId, sanitizeHTML, getErrorLog, clearErrorLog } from "./utils.js";
+import { state, currencies } from "./state.js";
+import {
+  showMessage,
+  generateId,
+  sanitizeHTML,
+  getErrorLog,
+  clearErrorLog,
+} from "./utils.js";
 import {
   initDB,
   migrateFromLocalStorage,
@@ -45,7 +54,6 @@ import {
   updateCurrencyDisplay,
   toggleCurrencySelector,
   closeCurrencySelector,
-  getCurrency,
 } from "./currency.js";
 import { validateTransaction } from "./validation.js";
 import {
@@ -74,7 +82,14 @@ import {
   renderFormTagChips,
   renderTagPicker,
 } from "./ui.js";
-import { getAllTags, renameTag, deleteTag, cycleTagColor, ensureTagColor, initTagColors } from "./search.js";
+import {
+  getAllTags,
+  renameTag,
+  deleteTag,
+  cycleTagColor,
+  ensureTagColor,
+  initTagColors,
+} from "./search.js";
 import { renderTagManagement } from "./settings.js";
 import {
   toggleDarkMode,
@@ -92,7 +107,6 @@ import {
 import {
   loadRecurringIntoState,
   checkRecurringTransactions,
-  openRecurringModal,
   closeRecurringModal,
   saveRecurringTemplate,
   selectRecurringType,
@@ -103,105 +117,61 @@ import {
   renderBudgetList,
   renderBudgetAlerts,
   saveBudget,
-  deleteBudget,
   renderBudgetModal,
 } from "./budget.js";
 import {
-  toggleTransferFields,
   bindAccountAutocomplete,
   getTransferFormData,
   clearTransferFields,
 } from "./transfer.js";
 import {
   initOptionalFields,
-  renderOptionalFieldsForm,
   getOptionalFieldValues,
-  setOptionalFieldValues,
   clearOptionalFields,
   bindFieldAutocomplete,
   renderFieldToggles,
-  handleFieldToggle,
-  handleNoteInput,
-  acceptCategorySuggestion,
   dismissCategorySuggestion,
-  rebuildSmartKeywords,
+  bindOptionalFieldsEvents,
 } from "./optional-fields.js";
 import {
   initQuickEntry,
   renderQuickBar,
-  prefillFromTemplate,
-  cloneLast,
-  saveAsTemplate,
   renderTemplateManager,
-  deleteTemplate,
-  moveTemplate,
-  editTemplateLabel,
+  bindQuickEntryEvents,
 } from "./quick-entry.js";
 import {
   initAccounts,
   renderNetWorthDashboard,
   renderAccountManager,
-  showAddAccountForm,
-  showEditAccountForm,
-  closeAccountForm,
-  handleAccountFormSubmit,
-  removeAccount,
-  updateAccountTypeIcon,
+  bindAccountEvents,
 } from "./accounts.js";
 import { renderSavingsDashboard } from "./savings.js";
 import {
   initAlerts,
   runAlertChecks,
   renderAlertBanners,
-  dismissAlert,
-  dismissAllAlerts,
   renderAlertHistory,
-  clearAlertHistory,
+  bindAlertEvents,
 } from "./alerts.js";
-import { renderAnnualReport, exportAnnualCSV } from "./annual-report.js";
+import { renderAnnualReport, bindAnnualReportEvents } from "./annual-report.js";
 import { renderForecast } from "./forecast.js";
 import {
   initAutoBackup,
-  getBackupSettings,
-  saveBackupSettings,
-  performJsonBackup,
-  performCsvBackup,
-  performEncryptedBackup,
-  importEncryptedBackup,
-  renderAutoBackupSettings,
-  renderStorageHealth,
   requestStoragePersistence,
+  bindAutoBackupEvents,
 } from "./auto-backup.js";
 import {
   renderMultiCurrencyFields,
   getMultiCurrencyFormData,
-  setMultiCurrencyFormData,
   clearMultiCurrencyFields,
+  bindMultiCurrencyEvents,
 } from "./multi-currency.js";
 import {
   renderSettlementDashboard,
-  navigateSettlementPeriod,
-  copySettlementSummary,
+  bindSettlementEvents,
 } from "./settlement.js";
-import {
-  initGoals,
-  renderGoalsDashboard,
-  showGoalForm,
-  closeGoalForm,
-  handleGoalFormSubmit,
-  showContributionForm,
-  closeContributionForm,
-  handleContributionSubmit,
-  removeGoal,
-} from "./goals.js";
-
-import {
-  openReconciliationModal,
-  closeReconciliationModal,
-  loadReconciliationTransactions,
-  toggleReconciliationItem,
-  finaliseReconciliation,
-} from "./reconciliation.js";
+import { initGoals, renderGoalsDashboard, bindGoalEvents } from "./goals.js";
+import { bindReconciliationEvents } from "./reconciliation.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -336,13 +306,17 @@ function bindStaticEvents() {
   });
 
   // ---- Reports tab: forecast horizon toggle ----
-  document.querySelector(".forecast-horizon-toggle").addEventListener("click", (e) => {
-    const btn = e.target.closest(".horizon-btn");
-    if (!btn) return;
-    document.querySelectorAll(".horizon-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-    renderForecast(parseInt(btn.dataset.days, 10));
-  });
+  document
+    .querySelector(".forecast-horizon-toggle")
+    .addEventListener("click", (e) => {
+      const btn = e.target.closest(".horizon-btn");
+      if (!btn) return;
+      document
+        .querySelectorAll(".horizon-btn")
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderForecast(parseInt(btn.dataset.days, 10));
+    });
 
   // ---- Settings toolbar buttons ----
   bindSettingsButtons();
@@ -357,18 +331,16 @@ function bindStaticEvents() {
 
   // ---- Restore Preview modal buttons ----
   document
-    .querySelectorAll("#restorePreviewModal .modal-btn-cancel")
-    .forEach((btn) =>
-      btn.addEventListener("click", async () => {
-        const mod = await getImportExportModule();
-        mod.closeRestorePreview();
-      }),
-    );
-  document
-    .querySelector("#restorePreviewModal .modal-btn-confirm")
-    .addEventListener("click", async () => {
+    .querySelector("#restoreCancelBtn")
+    ?.addEventListener("click", async () => {
       const mod = await getImportExportModule();
-      mod.confirmRestore();
+      mod.closeRestorePreview();
+    });
+  document
+    .querySelector("#restorePreviewModal .close-btn")
+    ?.addEventListener("click", async () => {
+      const mod = await getImportExportModule();
+      mod.closeRestorePreview();
     });
 
   // ---- Restore Report modal ----
@@ -421,28 +393,6 @@ function bindStaticEvents() {
     if (e.target.closest("#addBudgetBtn")) openBudgetModal();
   });
 
-  // ---- Restore Preview modal close (X button) ----
-  document
-    .querySelector("#restorePreviewModal .close-btn")
-    .addEventListener("click", async () => {
-      const mod = await getImportExportModule();
-      mod.closeRestorePreview();
-    });
-
-  // ---- Hidden file inputs ----
-  document
-    .getElementById("importFile")
-    .addEventListener("change", async (e) => {
-      const mod = await getImportExportModule();
-      mod.handleImport(e);
-    });
-  document
-    .getElementById("restoreFile")
-    .addEventListener("change", async (e) => {
-      const mod = await getImportExportModule();
-      mod.handleRestore(e);
-    });
-
   // ---- Search bar (v3.14.0) ----
   bindSearchEvents();
 
@@ -483,22 +433,6 @@ function bindStaticEvents() {
 
 function bindSettingsButtons() {
   const actions = {
-    "Export CSV": async () => {
-      const mod = await getImportExportModule();
-      mod.exportToCSV();
-    },
-    "Import CSV": async () => {
-      const mod = await getImportExportModule();
-      mod.triggerImport();
-    },
-    "Create Backup": async () => {
-      const mod = await getImportExportModule();
-      await mod.createBackup();
-    },
-    "Restore from Backup": async () => {
-      const mod = await getImportExportModule();
-      mod.triggerRestore();
-    },
     "Check for updates": checkForUpdates,
     "Change currency": toggleCurrencySelector,
     "Toggle dark mode": toggleDarkMode,
@@ -562,7 +496,9 @@ function bindDelegatedEvents() {
     // Collapse toggle — ignore clicks on the Add button inside the header
     const toggleHeader = e.target.closest("[data-toggle-budget-collapse]");
     if (toggleHeader && !e.target.closest("#addBudgetBtn")) {
-      const body    = toggleHeader.closest(".card").querySelector(".budget-collapse-body");
+      const body = toggleHeader
+        .closest(".card")
+        .querySelector(".budget-collapse-body");
       const chevron = toggleHeader.querySelector(".budget-chevron");
       if (body) {
         body.hidden = !body.hidden;
@@ -600,77 +536,85 @@ function bindDelegatedEvents() {
   });
 
   // Tag management — rename / delete (v3.14.0)
-  document.getElementById("tagManagementContainer").addEventListener("click", async (e) => {
-    // Color dot click — cycle to next palette color
-    const colorDot = e.target.closest("[data-color-tag]");
-    if (colorDot) {
-      cycleTagColor(colorDot.dataset.colorTag);
-      renderTagManagement();
-      updateUI();
-      return;
-    }
-
-    const renameBtn = e.target.closest("[data-rename-tag]");
-    if (renameBtn) {
-      const oldName = renameBtn.dataset.renameTag;
-      const row = renameBtn.closest(".tag-manage-row");
-      const nameSpan = row.querySelector(".tag-manage-name");
-      const actionsDiv = row.querySelector(".tag-manage-actions");
-
-      // Inline rename input
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = oldName;
-      input.className = "search-input";
-      input.style.cssText = "padding: 4px 8px; font-size: 13px; width: 140px;";
-
-      const saveBtn = document.createElement("button");
-      saveBtn.className = "tag-manage-btn tag-manage-btn-rename";
-      saveBtn.textContent = "Save";
-
-      const cancelBtn = document.createElement("button");
-      cancelBtn.className = "tag-manage-btn";
-      cancelBtn.textContent = "Cancel";
-      cancelBtn.style.cssText = "background: var(--color-bg); border-color: var(--color-border);";
-
-      nameSpan.replaceWith(input);
-      actionsDiv.innerHTML = "";
-      actionsDiv.appendChild(saveBtn);
-      actionsDiv.appendChild(cancelBtn);
-      input.focus();
-      input.select();
-
-      const doSave = async () => {
-        const newName = input.value.trim().toLowerCase();
-        if (newName && newName !== oldName) {
-          await renameTag(oldName, newName);
-          // Update searchTags if the renamed tag is active
-          if (state.searchTags.includes(oldName)) {
-            state.searchTags = state.searchTags.map((t) => (t === oldName ? newName : t));
-          }
-        }
+  document
+    .getElementById("tagManagementContainer")
+    .addEventListener("click", async (e) => {
+      // Color dot click — cycle to next palette color
+      const colorDot = e.target.closest("[data-color-tag]");
+      if (colorDot) {
+        cycleTagColor(colorDot.dataset.colorTag);
         renderTagManagement();
         updateUI();
-      };
+        return;
+      }
 
-      saveBtn.addEventListener("click", doSave);
-      input.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter") doSave();
-        if (ev.key === "Escape") { renderTagManagement(); }
-      });
-      cancelBtn.addEventListener("click", () => renderTagManagement());
-      return;
-    }
+      const renameBtn = e.target.closest("[data-rename-tag]");
+      if (renameBtn) {
+        const oldName = renameBtn.dataset.renameTag;
+        const row = renameBtn.closest(".tag-manage-row");
+        const nameSpan = row.querySelector(".tag-manage-name");
+        const actionsDiv = row.querySelector(".tag-manage-actions");
 
-    const deleteBtn = e.target.closest("[data-delete-tag]");
-    if (deleteBtn) {
-      const tagName = deleteBtn.dataset.deleteTag;
-      await deleteTag(tagName);
-      state.searchTags = state.searchTags.filter((t) => t !== tagName);
-      renderTagManagement();
-      updateUI();
-    }
-  });
+        // Inline rename input
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = oldName;
+        input.className = "search-input";
+        input.style.cssText =
+          "padding: 4px 8px; font-size: 13px; width: 140px;";
+
+        const saveBtn = document.createElement("button");
+        saveBtn.className = "tag-manage-btn tag-manage-btn-rename";
+        saveBtn.textContent = "Save";
+
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "tag-manage-btn";
+        cancelBtn.textContent = "Cancel";
+        cancelBtn.style.cssText =
+          "background: var(--color-bg); border-color: var(--color-border);";
+
+        nameSpan.replaceWith(input);
+        actionsDiv.innerHTML = "";
+        actionsDiv.appendChild(saveBtn);
+        actionsDiv.appendChild(cancelBtn);
+        input.focus();
+        input.select();
+
+        const doSave = async () => {
+          const newName = input.value.trim().toLowerCase();
+          if (newName && newName !== oldName) {
+            await renameTag(oldName, newName);
+            // Update searchTags if the renamed tag is active
+            if (state.searchTags.includes(oldName)) {
+              state.searchTags = state.searchTags.map((t) =>
+                t === oldName ? newName : t,
+              );
+            }
+          }
+          renderTagManagement();
+          updateUI();
+        };
+
+        saveBtn.addEventListener("click", doSave);
+        input.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter") doSave();
+          if (ev.key === "Escape") {
+            renderTagManagement();
+          }
+        });
+        cancelBtn.addEventListener("click", () => renderTagManagement());
+        return;
+      }
+
+      const deleteBtn = e.target.closest("[data-delete-tag]");
+      if (deleteBtn) {
+        const tagName = deleteBtn.dataset.deleteTag;
+        await deleteTag(tagName);
+        state.searchTags = state.searchTags.filter((t) => t !== tagName);
+        renderTagManagement();
+        updateUI();
+      }
+    });
 
   // FAQ sections & items (delegated from faqContainer) - Lazy-loaded
   document
@@ -715,8 +659,12 @@ function bindDelegatedEvents() {
       if (!btn) return;
       if (btn.dataset.action === "copyErrorLog") {
         const log = getErrorLog();
-        const text = log.map((e) => `[${e.timestamp}] ${e.message}\n${e.stack}`).join("\n---\n");
-        navigator.clipboard.writeText(text).then(() => showMessage("Error log copied"));
+        const text = log
+          .map((e) => `[${e.timestamp}] ${e.message}\n${e.stack}`)
+          .join("\n---\n");
+        navigator.clipboard
+          .writeText(text)
+          .then(() => showMessage("Error log copied"));
       }
       if (btn.dataset.action === "clearErrorLog") {
         clearErrorLog();
@@ -759,7 +707,7 @@ function bindTagInputEvents() {
 
   // Add a tag from the current input value
   function addTag(value) {
-    const tag = value.trim().toLowerCase().replace(/,/g, "");
+    const tag = value.trim().toLowerCase().replaceAll(",", "");
     if (!tag || tag.length > 30) return;
     if (state.formTags.includes(tag)) {
       tagInput.value = "";
@@ -799,7 +747,10 @@ function bindTagInputEvents() {
     }
     suggestions.innerHTML = existing
       .slice(0, 8)
-      .map((t) => `<div class="tag-suggestion-item" data-suggestion="${sanitizeHTML(t)}">${sanitizeHTML(t)}</div>`)
+      .map(
+        (t) =>
+          `<div class="tag-suggestion-item" data-suggestion="${sanitizeHTML(t)}">${sanitizeHTML(t)}</div>`,
+      )
       .join("");
     suggestions.hidden = false;
   }
@@ -815,7 +766,11 @@ function bindTagInputEvents() {
         e.preventDefault();
         addTag(tagInput.value);
       }
-    } else if (e.key === "Backspace" && !tagInput.value && state.formTags.length > 0) {
+    } else if (
+      e.key === "Backspace" &&
+      !tagInput.value &&
+      state.formTags.length > 0
+    ) {
       state.formTags = state.formTags.slice(0, -1);
       renderFormTagChips();
     }
@@ -832,521 +787,11 @@ function bindTagInputEvents() {
 
   // Hide suggestions when focus leaves the tag input area
   document.addEventListener("click", (e) => {
-    if (!e.target.closest("#tagInputWrapper") && !e.target.closest("#tagSuggestions")) {
+    if (
+      !e.target.closest("#tagInputWrapper") &&
+      !e.target.closest("#tagSuggestions")
+    ) {
       hideSuggestions();
-    }
-  });
-}
-
-// ============================================================================
-// Optional Fields Events (v3.16.0)
-// ============================================================================
-
-function bindOptionalFieldsEvents() {
-  // Collapsible "Additional Details" toggle
-  const toggle = document.getElementById("optionalFieldsToggle");
-  const container = document.getElementById("optionalFieldsContainer");
-  if (toggle && container) {
-    toggle.addEventListener("click", () => {
-      const expanded = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", String(!expanded));
-      container.hidden = expanded;
-      toggle.querySelector(".optional-fields-chevron").classList.toggle("expanded", !expanded);
-      // Re-populate account dropdown each time section opens (accounts may have changed)
-      if (!expanded) renderOptionalFieldsForm();
-    });
-  }
-
-  // Notes input → smart category suggestion
-  const notesInput = document.getElementById("notes");
-  if (notesInput) {
-    notesInput.addEventListener("input", () => {
-      handleNoteInput(notesInput.value);
-    });
-  }
-
-  // Category suggestion accept/dismiss
-  const suggestionBanner = document.getElementById("categorySuggestion");
-  if (suggestionBanner) {
-    suggestionBanner.querySelector(".suggestion-accept").addEventListener("click", acceptCategorySuggestion);
-    suggestionBanner.querySelector(".suggestion-dismiss").addEventListener("click", dismissCategorySuggestion);
-  }
-
-  // Field toggle switches in Settings
-  document.getElementById("optionalFieldToggles").addEventListener("change", (e) => {
-    const checkbox = e.target.closest("[data-field-toggle]");
-    if (!checkbox) return;
-    handleFieldToggle(checkbox.dataset.fieldToggle, checkbox.checked);
-  });
-}
-
-// ============================================================================
-// Quick Entry Events (v3.17.0)
-// ============================================================================
-
-function bindQuickEntryEvents() {
-  // Quick bar pill clicks
-  const bar = document.getElementById("quickEntryBar");
-  if (bar) {
-    bar.addEventListener("click", (e) => {
-      const pill = e.target.closest("[data-template-id]");
-      if (pill) {
-        prefillFromTemplate(Number(pill.dataset.templateId));
-        return;
-      }
-      if (e.target.closest("#cloneLastBtn")) {
-        cloneLast();
-      }
-    });
-  }
-
-  // "Save as Template" button
-  const saveTemplateBtn = document.getElementById("saveAsTemplateBtn");
-  if (saveTemplateBtn) {
-    saveTemplateBtn.addEventListener("click", saveAsTemplate);
-  }
-
-  // Custom event: quick-entry-type → update category options + transfer fields
-  document.addEventListener("quick-entry-type", (e) => {
-    updateCategoryOptions(e.detail);
-    selectType(e.detail);
-  });
-
-  // Custom event: quick-entry-tags → re-render form tag chips
-  document.addEventListener("quick-entry-tags", () => {
-    renderFormTagChips();
-  });
-
-  // Template manager delegated events (Settings)
-  const templatesList = document.getElementById("quickTemplatesList");
-  if (templatesList) {
-    templatesList.addEventListener("click", (e) => {
-      const deleteBtn = e.target.closest("[data-delete]");
-      if (deleteBtn) {
-        deleteTemplate(Number(deleteBtn.dataset.delete));
-        return;
-      }
-      const moveBtn = e.target.closest("[data-move]");
-      if (moveBtn) {
-        moveTemplate(Number(moveBtn.dataset.id), moveBtn.dataset.move);
-        return;
-      }
-      // Double-click to edit label
-      const label = e.target.closest(".template-item-label");
-      if (label) {
-        const item = label.closest(".template-item");
-        if (!item) return;
-        const id = Number(item.dataset.templateId);
-        const currentLabel = label.textContent;
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = currentLabel;
-        input.maxLength = 30;
-        input.className = "template-edit-input";
-        label.replaceWith(input);
-        input.focus();
-        input.select();
-        const commit = () => {
-          const newVal = input.value.trim() || currentLabel;
-          editTemplateLabel(id, newVal);
-        };
-        input.addEventListener("blur", commit);
-        input.addEventListener("keydown", (ev) => {
-          if (ev.key === "Enter") input.blur();
-          if (ev.key === "Escape") { input.value = currentLabel; input.blur(); }
-        });
-      }
-    });
-  }
-}
-
-// ============================================================================
-// Account Events (v3.18.0)
-// ============================================================================
-
-function bindAccountEvents() {
-  // Add account button
-  const addBtn = document.getElementById("addAccountBtn");
-  if (addBtn) {
-    addBtn.addEventListener("click", showAddAccountForm);
-  }
-
-  // Account form save
-  const saveBtn = document.getElementById("accountFormSaveBtn");
-  if (saveBtn) {
-    saveBtn.addEventListener("click", handleAccountFormSubmit);
-  }
-
-  // Account form close
-  const closeBtn = document.querySelector(".account-form-close");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", closeAccountForm);
-  }
-
-  // Reconcile button inside edit-account modal
-  const reconcileBtn = document.getElementById("accountReconcileBtn");
-  if (reconcileBtn) {
-    reconcileBtn.addEventListener("click", () => {
-      const name = reconcileBtn.dataset.accountName;
-      if (!name) return;
-      closeAccountForm();
-      openReconciliationModal(name);
-    });
-  }
-
-  // Close modal on backdrop click
-  const modal = document.getElementById("accountFormModal");
-  if (modal) {
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeAccountForm();
-    });
-  }
-
-  // Auto-select classification + update icon preview when account type changes (v4.0.0)
-  const typeSelect = document.getElementById("accountTypeSelect");
-  if (typeSelect) {
-    typeSelect.addEventListener("change", () => {
-      const classSelect = document.getElementById("accountClassificationSelect");
-      if (classSelect) {
-        classSelect.value = ACCOUNT_CLASSIFICATION[typeSelect.value] || "asset";
-      }
-      updateAccountTypeIcon(typeSelect.value);
-    });
-  }
-
-  // Account list delegated events (edit, delete)
-  const accountsList = document.getElementById("accountsList");
-  if (accountsList) {
-    accountsList.addEventListener("click", async (e) => {
-      const editBtn = e.target.closest(".account-edit-btn");
-      if (editBtn) {
-        showEditAccountForm(editBtn.dataset.id);
-        return;
-      }
-      const deleteBtn = e.target.closest(".account-delete-btn");
-      if (deleteBtn) {
-        const id = deleteBtn.dataset.id;
-        const account = state.accounts.find((a) => String(a.id) === id);
-        if (account && confirm(`Delete account "${account.name}"?`)) {
-          await removeAccount(id);
-          renderAccountManager();
-          renderNetWorthDashboard();
-          renderSavingsDashboard();
-        }
-      }
-    });
-  }
-}
-
-// ============================================================================
-// Reconciliation Events (v4.0.0)
-// ============================================================================
-
-function bindReconciliationEvents() {
-  const modal = document.getElementById("reconciliationModal");
-  if (!modal) return;
-
-  // Close button
-  modal.querySelector(".reconciliation-close")?.addEventListener("click", closeReconciliationModal);
-
-  // Close on backdrop click
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeReconciliationModal();
-  });
-
-  // Load transactions button
-  document.getElementById("reconciliationLoadBtn")?.addEventListener("click", loadReconciliationTransactions);
-
-  // Finalise button
-  document.getElementById("reconciliationFinaliseBtn")?.addEventListener("click", () => finaliseReconciliation(false));
-
-  // Force reconcile button
-  document.getElementById("reconciliationForceBtn")?.addEventListener("click", () => finaliseReconciliation(true));
-
-  // Checklist delegation — change events on checkboxes
-  document.getElementById("reconciliationList")?.addEventListener("change", (e) => {
-    const chk = e.target.closest("[data-recon-id]");
-    if (chk) toggleReconciliationItem(chk.dataset.reconId);
-  });
-}
-
-// ============================================================================
-// Goal Events (v3.20.0)
-// ============================================================================
-
-function bindGoalEvents() {
-  // Add goal button
-  const addBtn = document.getElementById("addGoalBtn");
-  if (addBtn) {
-    addBtn.addEventListener("click", () => showGoalForm());
-  }
-
-  // Goal form save
-  const saveBtn = document.getElementById("goalFormSaveBtn");
-  if (saveBtn) {
-    saveBtn.addEventListener("click", handleGoalFormSubmit);
-  }
-
-  // Goal form close
-  const closeBtn = document.getElementById("goalFormCloseBtn");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", closeGoalForm);
-  }
-
-  // Goal form modal backdrop
-  const goalModal = document.getElementById("goalFormModal");
-  if (goalModal) {
-    goalModal.addEventListener("click", (e) => {
-      if (e.target === goalModal) closeGoalForm();
-    });
-  }
-
-  // Contribution modal save
-  const contribSaveBtn = document.getElementById("contributionSaveBtn");
-  if (contribSaveBtn) {
-    contribSaveBtn.addEventListener("click", handleContributionSubmit);
-  }
-
-  // Contribution modal close
-  const contribCloseBtn = document.getElementById("contributionCloseBtn");
-  if (contribCloseBtn) {
-    contribCloseBtn.addEventListener("click", closeContributionForm);
-  }
-
-  // Contribution modal backdrop
-  const contribModal = document.getElementById("contributionModal");
-  if (contribModal) {
-    contribModal.addEventListener("click", (e) => {
-      if (e.target === contribModal) closeContributionForm();
-    });
-  }
-
-  // Goals dashboard delegated events (contribute, edit, delete)
-  const goalsDashboard = document.getElementById("goalsDashboard");
-  if (goalsDashboard) {
-    goalsDashboard.addEventListener("click", async (e) => {
-      const contributeBtn = e.target.closest(".goal-contribute-btn");
-      if (contributeBtn) {
-        showContributionForm(Number(contributeBtn.dataset.id));
-        return;
-      }
-      const editBtn = e.target.closest(".goal-edit-btn");
-      if (editBtn) {
-        showGoalForm(Number(editBtn.dataset.id));
-        return;
-      }
-      const deleteBtn = e.target.closest(".goal-delete-btn");
-      if (deleteBtn) {
-        const id = Number(deleteBtn.dataset.id);
-        const goal = state.savingsGoals.find((g) => g.id === id);
-        if (goal && confirm(`Delete goal "${goal.name}"?`)) {
-          await removeGoal(id);
-          renderGoalsDashboard();
-        }
-      }
-    });
-  }
-}
-
-// ============================================================================
-// Alert Events (v3.21.0)
-// ============================================================================
-
-function bindAlertEvents() {
-  // Dismiss alert banners
-  const alertsContainer = document.getElementById("smartAlerts");
-  if (alertsContainer) {
-    alertsContainer.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-dismiss]");
-      if (!btn) return;
-      const alertId = btn.dataset.dismiss;
-      dismissAlert(alertId);
-      const banner = btn.closest(".smart-alert");
-      if (banner) banner.remove();
-      // Hide container if empty
-      if (!alertsContainer.querySelector(".smart-alert")) {
-        alertsContainer.hidden = true;
-      }
-    });
-  }
-
-  // Alert summary chip toggle (collapse/expand when > 2 alerts)
-  if (alertsContainer) {
-    alertsContainer.addEventListener("click", (e) => {
-      if (e.target.closest("#alertSummaryToggle")) {
-        const expanded = localStorage.getItem("alertsExpanded") === "true";
-        localStorage.setItem("alertsExpanded", expanded ? "false" : "true");
-        renderAlertBanners(runAlertChecks());
-        return;
-      }
-      if (e.target.closest("#alertDismissAll")) {
-        const alerts = runAlertChecks();
-        dismissAllAlerts(alerts);
-        localStorage.removeItem("alertsExpanded");
-        renderAlertBanners([]);
-        return;
-      }
-    });
-  }
-
-  // Clear alert history button
-  const clearBtn = document.getElementById("clearAlertsBtn");
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      clearAlertHistory();
-      renderAlertHistory();
-    });
-  }
-}
-
-// ============================================================================
-// Annual Report Events (v3.21.0)
-// ============================================================================
-
-function bindAnnualReportEvents() {
-  const container = document.getElementById("annualReportContent");
-  if (!container) return;
-
-  container.addEventListener("click", (e) => {
-    // Year selector pills
-    const yearBtn = e.target.closest("[data-annual-year]");
-    if (yearBtn) {
-      renderAnnualReport(yearBtn.dataset.annualYear);
-      return;
-    }
-    // Export CSV button
-    const exportBtn = e.target.closest("[data-annual-export]");
-    if (exportBtn) {
-      exportAnnualCSV(exportBtn.dataset.annualExport);
-    }
-  });
-}
-
-function bindAutoBackupEvents() {
-  // Use event delegation on the auto-backup container
-  const container = document.getElementById("autoBackupContainer");
-  if (!container) return;
-
-  container.addEventListener("click", (e) => {
-    // Toggle auto-backup on/off
-    const toggle = e.target.closest("#autoBackupToggle");
-    if (toggle) {
-      const settings = getBackupSettings();
-      settings.autoBackupEnabled = !settings.autoBackupEnabled;
-      saveBackupSettings(settings);
-      container.innerHTML = renderAutoBackupSettings();
-      return;
-    }
-
-    // Manual backup now
-    const manualBtn = e.target.closest("#manualBackupBtn");
-    if (manualBtn) {
-      const settings = getBackupSettings();
-      if (settings.backupFormat === "json") {
-        performJsonBackup(false);
-      } else {
-        performCsvBackup(false);
-      }
-      return;
-    }
-
-    // Encrypted backup
-    const encBtn = e.target.closest("#encryptedBackupBtn");
-    if (encBtn) {
-      const passphrase = prompt(
-        "Enter a passphrase (min 6 characters) to encrypt your backup:",
-      );
-      if (passphrase) {
-        performEncryptedBackup(passphrase);
-      }
-      return;
-    }
-
-    // Import encrypted
-    const impBtn = e.target.closest("#importEncryptedBtn");
-    if (impBtn) {
-      document.getElementById("encryptedRestoreFile").click();
-      return;
-    }
-  });
-
-  container.addEventListener("change", (e) => {
-    // Frequency select
-    if (e.target.id === "backupFrequency") {
-      const settings = getBackupSettings();
-      settings.backupFrequency = e.target.value;
-      saveBackupSettings(settings);
-    }
-    // Format select
-    if (e.target.id === "backupFormat") {
-      const settings = getBackupSettings();
-      settings.backupFormat = e.target.value;
-      saveBackupSettings(settings);
-    }
-  });
-
-  // Encrypted file input handler
-  document
-    .getElementById("encryptedRestoreFile")
-    .addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const passphrase = prompt(
-        "Enter the passphrase used to encrypt this backup:",
-      );
-      if (!passphrase) return;
-
-      const data = await importEncryptedBackup(file, passphrase);
-      if (data) {
-        // Hand off to import-export module's restore flow
-        const mod = await getImportExportModule();
-        mod.processRestoredData(data);
-      }
-      e.target.value = "";
-    });
-}
-
-// ============================================================================
-// Multi-Currency Events (v3.24.0)
-// ============================================================================
-
-function bindMultiCurrencyEvents() {
-  // The multi-currency fields are rendered inside the optional fields container.
-  // renderMultiCurrencyFields() handles its own event binding.
-  // We just need to re-render when optional field toggles change.
-  document.getElementById("optionalFieldToggles").addEventListener("change", (e) => {
-    const checkbox = e.target.closest("[data-field-toggle]");
-    if (checkbox && checkbox.dataset.fieldToggle === "transactionCurrency") {
-      setTimeout(() => renderMultiCurrencyFields(), 50);
-    }
-  });
-}
-
-// ============================================================================
-// Settlement Events (v3.26.0)
-// ============================================================================
-
-function bindSettlementEvents() {
-  const container = document.getElementById("settlementDashboard");
-  if (!container) return;
-
-  container.addEventListener("click", async (e) => {
-    // Period navigation
-    const periodBtn = e.target.closest("[data-settlement-period]");
-    if (periodBtn) {
-      navigateSettlementPeriod(periodBtn.dataset.settlementPeriod);
-      return;
-    }
-
-    // Copy summary
-    const exportBtn = e.target.closest("[data-settlement-export]");
-    if (exportBtn) {
-      const ok = await copySettlementSummary();
-      if (ok) {
-        const { showMessage: msg } = await import("./utils.js");
-        msg("Summary copied to clipboard!");
-      }
-      return;
     }
   });
 }
@@ -1388,35 +833,24 @@ function bindFormSubmit() {
 
       const type = document.getElementById("type").value;
       const now = new Date().toISOString();
-      const existingTx = state.editingId ? state.transactions.find((t) => t.id === state.editingId) : null;
+      const existingTx = state.editingId
+        ? state.transactions.find((t) => t.id === state.editingId)
+        : null;
       const transaction = {
         id: state.editingId || generateId(),
-        type: type,
-        amount: amount,
+        type,
+        amount,
         category: document.getElementById("category").value,
         date: document.getElementById("date").value,
         notes: document.getElementById("notes").value,
         tags: [...state.formTags],
-        status: existingTx ? (existingTx.status || "cleared") : "cleared",
+        status: existingTx ? existingTx.status || "cleared" : "cleared",
         createdAt: existingTx ? existingTx.createdAt : now,
         updatedAt: now,
+        ...(type === "transfer" ? getTransferFormData() : {}),
+        ...getOptionalFieldValues(),
+        ...getMultiCurrencyFormData(),
       };
-
-      // Add transfer-specific fields
-      if (type === "transfer") {
-        const transferData = getTransferFormData();
-        transaction.fromAccount = transferData.fromAccount;
-        transaction.toAccount = transferData.toAccount;
-        transaction.transferNote = transferData.transferNote;
-      }
-
-      // Add optional fields (v3.16.0)
-      const optionalValues = getOptionalFieldValues();
-      Object.assign(transaction, optionalValues);
-
-      // Add multi-currency fields (v3.24.0)
-      const multiCurrencyValues = getMultiCurrencyFormData();
-      Object.assign(transaction, multiCurrencyValues);
 
       const validation = validateTransaction(transaction);
 
@@ -1467,7 +901,9 @@ function bindFormSubmit() {
         setTimeout(() => {
           submitBtn.classList.remove("success");
           submitBtn.disabled = false;
-          submitBtn.textContent = state.editingId ? "Update Transaction" : "Save Transaction";
+          submitBtn.textContent = state.editingId
+            ? "Update Transaction"
+            : "Save Transaction";
           formCard.classList.remove("success-pulse");
 
           // If the user quickly opened a new edit session, don't reset the form
@@ -1560,7 +996,8 @@ function registerServiceWorker() {
     window.location.reload();
   });
 
-  navigator.serviceWorker.register("./sw.js")
+  navigator.serviceWorker
+    .register("./sw.js")
     .then((registration) => {
       console.log("✅ Service Worker registered - App works offline!");
       registration.update();
@@ -1568,7 +1005,10 @@ function registerServiceWorker() {
       // Check for SW updates on tab visibility (throttled to 5 min)
       let lastUpdateCheck = Date.now();
       document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible" && Date.now() - lastUpdateCheck > 5 * 60 * 1000) {
+        if (
+          document.visibilityState === "visible" &&
+          Date.now() - lastUpdateCheck > 5 * 60 * 1000
+        ) {
           lastUpdateCheck = Date.now();
           registration.update();
         }
@@ -1604,7 +1044,7 @@ function openBudgetModal(budget = null) {
 
   // Inline duplicate warning — injected below the category select
   const categorySelect = modal.element.querySelector("#budgetCategory");
-  const confirmBtn     = modal.element.querySelector(".modal-btn-confirm");
+  const confirmBtn = modal.element.querySelector(".modal-btn-confirm");
 
   const dupWarning = document.createElement("p");
   dupWarning.className = "budget-dup-warning";
@@ -1614,7 +1054,7 @@ function openBudgetModal(budget = null) {
   function checkDuplicate() {
     const selected = categorySelect.value;
     const existing = state.budgets.find(
-      (b) => b.category === selected && b.id !== budget?.id
+      (b) => b.category === selected && b.id !== budget?.id,
     );
     if (existing) {
       dupWarning.textContent = `⚠ A budget for "${selected}" already exists. Edit it from the list instead.`;
@@ -1636,9 +1076,11 @@ function openBudgetModal(budget = null) {
   });
 
   // Cancel button
-  modal.element.querySelector(".modal-btn-cancel").addEventListener("click", () => {
-    modal.close();
-  });
+  modal.element
+    .querySelector(".modal-btn-cancel")
+    .addEventListener("click", () => {
+      modal.close();
+    });
 
   // Confirm button
   confirmBtn.addEventListener("click", async () => {

@@ -13,7 +13,7 @@ import {
   formatDate,
   generateId,
 } from "./utils.js";
-import { getCurrency, formatCurrency } from "./currency.js";
+import { getCurrency } from "./currency.js";
 import {
   loadDataFromDB,
   bulkSaveTransactionsToDB,
@@ -23,7 +23,11 @@ import {
   saveAccount,
   saveGoal,
   bulkSaveQuickTemplates,
+  saveAppSettings,
+  bulkSaveNetWorthSnapshots,
+  clearAllStores,
 } from "./db.js";
+import { importEncryptedBackup } from "./auto-backup.js";
 import { updateBackupTimestamp } from "./settings.js";
 import { updateUI } from "./ui.js";
 
@@ -79,7 +83,7 @@ export function exportToCSV() {
     t.homeAmount || "",
   ]);
 
-  let csv = headers.join(",") + "\n";
+  let csv = `${headers.join(",")}\n`;
   csv += rows
     .map((row) =>
       row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
@@ -108,9 +112,7 @@ function generateBackupMetadata() {
   const oldestDate =
     dates.length > 0 ? new Date(dates[0]).toISOString().slice(0, 10) : "";
   const newestDate =
-    dates.length > 0
-      ? new Date(dates[dates.length - 1]).toISOString().slice(0, 10)
-      : "";
+    dates.length > 0 ? new Date(dates.at(-1)).toISOString().slice(0, 10) : "";
   const dateRange =
     dates.length > 0 ? `${oldestDate} to ${newestDate}` : "No transactions";
   const backupDate = new Date().toISOString();
@@ -204,8 +206,8 @@ export async function createBackup() {
     t.homeAmount || "",
   ]);
 
-  let csv = metadata + "\n";
-  csv += headers.join(",") + "\n";
+  let csv = `${metadata}\n`;
+  csv += `${headers.join(",")}\n`;
   csv += rows
     .map((row) =>
       row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
@@ -234,7 +236,8 @@ export async function createBackup() {
 // ---- Import CSV ----
 
 export function triggerImport() {
-  const input = document.getElementById("importFile");
+  const input = document.getElementById("spreadsheetImportFile");
+  if (!input) return;
   input.value = "";
   input.click();
 }
@@ -252,8 +255,32 @@ export function handleImport(event) {
         return;
       }
       showMessage(
-        `Imported ${result.added} transaction(s)` +
-          (result.skipped ? ` • Skipped ${result.skipped}` : ""),
+        `Imported ${result.added} transaction(s)${
+          result.skipped ? ` • Skipped ${result.skipped}` : ""
+        }`,
+      );
+    } catch (err) {
+      console.error("Import failed:", err);
+      showMessage("Import failed. Check the CSV format.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+export function handleCsvImportFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      const result = await importFromCSV(reader.result);
+      if (result.added === 0) {
+        showMessage("No valid rows to import.");
+        return;
+      }
+      showMessage(
+        `Imported ${result.added} transaction(s)${
+          result.skipped ? ` • Skipped ${result.skipped}` : ""
+        }`,
       );
     } catch (err) {
       console.error("Import failed:", err);
@@ -302,7 +329,7 @@ export async function importFromCSV(text) {
   const nowIso = new Date().toISOString();
   const newTransactions = [];
 
-  rows.slice(1).forEach((row, i) => {
+  rows.slice(1).forEach((row) => {
     const rawDate = (row[dateIndex] || "").trim();
     const normalizedDateVal = normalizeDate(rawDate);
     const rawAmount = (row[amountIndex] || "").replace(/,/g, "");
@@ -317,10 +344,18 @@ export async function importFromCSV(text) {
       typeIndex !== -1
         ? (row[typeIndex] || "").trim().toLowerCase()
         : "expense";
-    const type = rawType === "income" ? "income" : rawType === "transfer" ? "transfer" : "expense";
+    const type =
+      rawType === "income"
+        ? "income"
+        : rawType === "transfer"
+          ? "transfer"
+          : "expense";
     const baseCategory = (row[categoryIndex] || "").trim();
     const rawNotes = notesIndex !== -1 ? (row[notesIndex] || "").trim() : "";
-    const category = type === "transfer" ? "Transfer" : normalizeImportedCategory(baseCategory, rawNotes, type);
+    const category =
+      type === "transfer"
+        ? "Transfer"
+        : normalizeImportedCategory(baseCategory, rawNotes, type);
 
     const txn = {
       id: generateId(),
@@ -335,15 +370,22 @@ export async function importFromCSV(text) {
 
     // Add transfer fields if present
     if (type === "transfer") {
-      txn.fromAccount = fromAccountIndex !== -1 ? sanitizeHTML((row[fromAccountIndex] || "").trim()) : null;
-      txn.toAccount = toAccountIndex !== -1 ? sanitizeHTML((row[toAccountIndex] || "").trim()) : null;
+      txn.fromAccount =
+        fromAccountIndex !== -1
+          ? sanitizeHTML((row[fromAccountIndex] || "").trim())
+          : null;
+      txn.toAccount =
+        toAccountIndex !== -1
+          ? sanitizeHTML((row[toAccountIndex] || "").trim())
+          : null;
       txn.transferNote = null;
     }
 
     // Add optional fields if present (v3.16.0)
     if (paymentMethodIndex !== -1) {
       const val = (row[paymentMethodIndex] || "").trim();
-      if (val && PAYMENT_METHODS.includes(val)) txn.paymentMethod = sanitizeHTML(val);
+      if (val && PAYMENT_METHODS.includes(val))
+        txn.paymentMethod = sanitizeHTML(val);
     }
     if (merchantIndex !== -1) {
       const val = (row[merchantIndex] || "").trim();
@@ -351,7 +393,8 @@ export async function importFromCSV(text) {
     }
     if (expenseTypeIndex !== -1) {
       const val = (row[expenseTypeIndex] || "").trim();
-      if (val && EXPENSE_TYPES.includes(val)) txn.expenseType = sanitizeHTML(val);
+      if (val && EXPENSE_TYPES.includes(val))
+        txn.expenseType = sanitizeHTML(val);
     }
     if (attachedToIndex !== -1) {
       const val = (row[attachedToIndex] || "").trim();
@@ -381,7 +424,11 @@ export async function importFromCSV(text) {
     // Tags
     if (tagsIndex !== -1) {
       const raw = (row[tagsIndex] || "").trim();
-      if (raw) txn.tags = raw.split(";").map(s => s.trim()).filter(Boolean);
+      if (raw)
+        txn.tags = raw
+          .split(";")
+          .map((s) => sanitizeHTML(s.trim()))
+          .filter(Boolean);
     }
     // Status (v4.0.0)
     if (statusIndex !== -1) {
@@ -395,7 +442,9 @@ export async function importFromCSV(text) {
 
   if (newTransactions.length > 0) {
     await bulkSaveTransactionsToDB(newTransactions);
-    newTransactions.forEach(t => { t.dateTs = new Date(t.date).getTime(); });
+    newTransactions.forEach((t) => {
+      t.dateTs = new Date(t.date).getTime();
+    });
     state.transactions.push(...newTransactions);
     state.transactions.sort((a, b) => b.dateTs - a.dateTs);
     updateUI();
@@ -407,7 +456,8 @@ export async function importFromCSV(text) {
 // ---- Restore Backup ----
 
 export function triggerRestore() {
-  const input = document.getElementById("restoreFile");
+  const input = document.getElementById("dataRestoreFile");
+  if (!input) return;
   input.value = "";
   input.click();
 }
@@ -512,7 +562,7 @@ export function parseBackupCSV(text) {
   const parsedTransactions = [];
   const dataRows = rows.slice(1);
 
-  dataRows.forEach((row, i) => {
+  dataRows.forEach((row) => {
     const rawDate = (row[dateIndex] || "").trim();
     const rawAmount = (row[amountIndex] || "").replace(/,/g, "");
     const amount = parseFloat(rawAmount);
@@ -550,7 +600,10 @@ export function parseBackupCSV(text) {
     };
 
     // Restore soft-delete state from backup
-    if (deletedIndex !== -1 && (row[deletedIndex] || "").trim().toLowerCase() === "yes") {
+    if (
+      deletedIndex !== -1 &&
+      (row[deletedIndex] || "").trim().toLowerCase() === "yes"
+    ) {
       transaction.deleted = true;
       transaction.deletedAt =
         deletedAtIndex !== -1 && row[deletedAtIndex]
@@ -560,17 +613,27 @@ export function parseBackupCSV(text) {
 
     if (transaction.type === "transfer") {
       transaction.category = "Transfer";
-      transaction.fromAccount = fromAccountIndex !== -1 ? sanitizeHTML((row[fromAccountIndex] || "").trim()) : null;
-      transaction.toAccount = toAccountIndex !== -1 ? sanitizeHTML((row[toAccountIndex] || "").trim()) : null;
+      transaction.fromAccount =
+        fromAccountIndex !== -1
+          ? sanitizeHTML((row[fromAccountIndex] || "").trim())
+          : null;
+      transaction.toAccount =
+        toAccountIndex !== -1
+          ? sanitizeHTML((row[toAccountIndex] || "").trim())
+          : null;
       transaction.transferNote = null;
-    } else if (transaction.type !== "income" && transaction.type !== "expense") {
+    } else if (
+      transaction.type !== "income" &&
+      transaction.type !== "expense"
+    ) {
       transaction.type = "expense";
     }
 
     // Restore optional fields (v3.16.0)
     if (paymentMethodIdx !== -1) {
       const val = (row[paymentMethodIdx] || "").trim();
-      if (val && PAYMENT_METHODS.includes(val)) transaction.paymentMethod = sanitizeHTML(val);
+      if (val && PAYMENT_METHODS.includes(val))
+        transaction.paymentMethod = sanitizeHTML(val);
     }
     if (merchantIdx !== -1) {
       const val = (row[merchantIdx] || "").trim();
@@ -578,7 +641,8 @@ export function parseBackupCSV(text) {
     }
     if (expenseTypeIdx !== -1) {
       const val = (row[expenseTypeIdx] || "").trim();
-      if (val && EXPENSE_TYPES.includes(val)) transaction.expenseType = sanitizeHTML(val);
+      if (val && EXPENSE_TYPES.includes(val))
+        transaction.expenseType = sanitizeHTML(val);
     }
     if (attachedToIdx !== -1) {
       const val = (row[attachedToIdx] || "").trim();
@@ -608,7 +672,11 @@ export function parseBackupCSV(text) {
     // Tags
     if (tagsIdx !== -1) {
       const raw = (row[tagsIdx] || "").trim();
-      if (raw) transaction.tags = raw.split(";").map(s => s.trim()).filter(Boolean);
+      if (raw)
+        transaction.tags = raw
+          .split(";")
+          .map((s) => sanitizeHTML(s.trim()))
+          .filter(Boolean);
     }
     // Status (v4.0.0)
     if (statusIdx !== -1) {
@@ -621,10 +689,17 @@ export function parseBackupCSV(text) {
       if (val) transaction.recurringId = val;
     }
     // Settlement fields (v3.27.0)
-    if (settledIdx !== -1 && (row[settledIdx] || "").trim().toLowerCase() === "yes") {
+    if (
+      settledIdx !== -1 &&
+      (row[settledIdx] || "").trim().toLowerCase() === "yes"
+    ) {
       transaction.settled = true;
-      transaction.settledAt = settledAtIdx !== -1 && row[settledAtIdx] ? row[settledAtIdx].trim() : new Date().toISOString();
-      transaction.settledBy = settledByIdx !== -1 ? (row[settledByIdx] || "").trim() || null : null;
+      transaction.settledAt =
+        settledAtIdx !== -1 && row[settledAtIdx]
+          ? row[settledAtIdx].trim()
+          : new Date().toISOString();
+      transaction.settledBy =
+        settledByIdx !== -1 ? (row[settledByIdx] || "").trim() || null : null;
     }
 
     parsedTransactions.push(transaction);
@@ -657,13 +732,30 @@ export function showRestorePreview(backupData) {
     dates.length > 0 ? formatDate(dates[0].toISOString().slice(0, 10)) : "-";
   const newestDate =
     dates.length > 0
-      ? formatDate(dates[dates.length - 1].toISOString().slice(0, 10))
+      ? formatDate(dates.at(-1).toISOString().slice(0, 10))
       : "-";
   document.getElementById("previewDateRange").textContent =
     `${oldestDate} to ${newestDate}`;
 
   document.getElementById("previewCurrency").textContent =
     backupData.metadata["Currency"] || getCurrency();
+
+  // Integrity indicator
+  const integrityRow = document.getElementById("previewIntegrityRow");
+  const integrityEl = document.getElementById("previewIntegrity");
+  if (integrityRow && integrityEl) {
+    if (backupData.integrityOk === true) {
+      integrityRow.style.display = "";
+      integrityEl.textContent = "Verified ✓";
+      integrityEl.style.color = "var(--color-income-text)";
+    } else if (backupData.integrityOk === false) {
+      integrityRow.style.display = "";
+      integrityEl.textContent = "⚠ Hash mismatch — file may be corrupted";
+      integrityEl.style.color = "var(--color-expense-text)";
+    } else {
+      integrityRow.style.display = "none";
+    }
+  }
 
   modal.classList.add("show");
 }
@@ -703,15 +795,38 @@ function showRestoreReport(stats) {
   modal.classList.add("show");
 }
 
-export async function confirmRestore() {
+export async function confirmRestore(mode = "merge") {
   const backupData = state.pendingRestoreData;
   if (!backupData) return;
+
+  if (mode === "replace") {
+    const confirmed = confirm(
+      `This will DELETE all current data and replace it with the backup (${backupData.transactions.length} transactions). This cannot be undone. Continue?`,
+    );
+    if (!confirmed) return;
+  }
 
   closeRestorePreview();
   showMessage("Restoring backup...");
 
   try {
-    await loadDataFromDB();
+    const CLEARABLE_STORES = [
+      "transactions",
+      "recurringTemplates",
+      "budgets",
+      "accounts",
+      "savingsGoals",
+      "quickTemplates",
+      "appSettings",
+      "netWorthSnapshots",
+    ];
+
+    if (mode === "replace") {
+      await clearAllStores(CLEARABLE_STORES);
+      await loadDataFromDB();
+    } else {
+      await loadDataFromDB();
+    }
 
     const stats = {
       backupTotal: backupData.transactions.length,
@@ -721,9 +836,11 @@ export async function confirmRestore() {
     };
 
     const newTransactions = [];
-
     backupData.transactions.forEach((backupTxn) => {
-      if (isDuplicateTransaction(backupTxn, state.transactions)) {
+      if (
+        mode === "merge" &&
+        isDuplicateTransaction(backupTxn, state.transactions)
+      ) {
         stats.duplicates++;
       } else {
         newTransactions.push(backupTxn);
@@ -740,7 +857,6 @@ export async function confirmRestore() {
       state.transactions.sort((a, b) => b.dateTs - a.dateTs);
     }
 
-    // Restore other stores from JSON backup if present
     if (backupData.recurringTemplates) {
       for (const tmpl of backupData.recurringTemplates) {
         await saveRecurringTemplateToDB(tmpl);
@@ -764,8 +880,38 @@ export async function confirmRestore() {
     if (backupData.quickTemplates && backupData.quickTemplates.length > 0) {
       await bulkSaveQuickTemplates(backupData.quickTemplates);
     }
+    if (backupData.appSettings) {
+      await saveAppSettings(backupData.appSettings);
+    }
+    if (
+      backupData.netWorthSnapshots &&
+      backupData.netWorthSnapshots.length > 0
+    ) {
+      await bulkSaveNetWorthSnapshots(backupData.netWorthSnapshots);
+    }
+    if (backupData.localStorage) {
+      if (backupData.localStorage.exchangeRateHistory) {
+        localStorage.setItem(
+          "exchangeRateHistory",
+          JSON.stringify(backupData.localStorage.exchangeRateHistory),
+        );
+      }
+      if (backupData.localStorage.tagColors) {
+        localStorage.setItem(
+          "tagColors",
+          JSON.stringify(backupData.localStorage.tagColors),
+        );
+      }
+    }
+    // Restore currency only on full replace — don't overwrite active currency on merge
+    if (
+      mode === "replace" &&
+      backupData.metadata &&
+      backupData.metadata["Currency"]
+    ) {
+      localStorage.setItem("currency", backupData.metadata["Currency"]);
+    }
 
-    // Reload all state from DB to pick up restored stores
     await loadDataFromDB();
 
     stats.currentTotal = state.transactions.length;
@@ -774,7 +920,6 @@ export async function confirmRestore() {
   } catch (err) {
     console.error("Restore failed:", err);
     showMessage("Restore failed. Your existing data was preserved.");
-
     try {
       await loadDataFromDB();
       updateUI();
@@ -784,25 +929,119 @@ export async function confirmRestore() {
   }
 }
 
+// ---- Backup Schema Migration ----
+
+function migrateBackupPayload(data) {
+  if (!data.backupSchemaVersion) {
+    data.backupSchemaVersion = 0;
+    data.netWorthSnapshots = data.netWorthSnapshots || [];
+    data.localStorage = data.localStorage || {};
+  }
+  return data;
+}
+
+async function verifyIntegrity(data) {
+  if (!data.integrity || !data.integrity.startsWith("sha256:")) return null;
+  const storedHash = data.integrity.slice(7);
+  try {
+    // Preserve original key order by zeroing integrity in-place, hashing, then restoring.
+    // Spread copies do not guarantee key order matches the serialized backup.
+    const original = data.integrity;
+    data.integrity = "";
+    const jsonStr = JSON.stringify(data, null, 2);
+    data.integrity = original;
+    const hashBuffer = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(jsonStr),
+    );
+    const computedHash = Array.from(new Uint8Array(hashBuffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return computedHash === storedHash;
+  } catch {
+    return null;
+  }
+}
+
 // ---- Process Restored Data from Encrypted Backup (v3.22.0) ----
 
-export function processRestoredData(data) {
+export async function processRestoredData(data) {
+  migrateBackupPayload(data);
+
+  const integrityOk = await verifyIntegrity(data);
+
   const backupData = {
     valid: true,
+    integrityOk,
     metadata: {
       "Backup Date": data.exportDate || new Date().toISOString(),
       "App Version": data.version || "unknown",
       Currency: data.currency || "INR",
+      "Schema Version": data.backupSchemaVersion ?? 0,
     },
     transactions: data.transactions || [],
-    // Preserve all other stores from JSON backup
     recurringTemplates: data.recurringTemplates || null,
     budgets: data.budgets || null,
     accounts: data.accounts || null,
     savingsGoals: data.savingsGoals || null,
     quickTemplates: data.quickTemplates || null,
+    appSettings: data.appSettings || null,
+    netWorthSnapshots: data.netWorthSnapshots || null,
+    localStorage: data.localStorage || null,
   };
 
   state.pendingRestoreData = backupData;
   showRestorePreview(backupData);
+}
+
+// ---- Unified Restore File Handler (v4.2.0) ----
+
+export async function handleRestoreFileInput(file) {
+  if (!file) return;
+  const name = file.name.toLowerCase();
+
+  if (name.endsWith(".enc")) {
+    const passphrase = prompt(
+      "Enter the passphrase used to encrypt this backup:",
+    );
+    if (!passphrase) return;
+    const data = await importEncryptedBackup(file, passphrase);
+    if (data) await processRestoredData(data);
+  } else if (name.endsWith(".json")) {
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      await processRestoredData(data);
+    } catch {
+      showMessage("Invalid JSON backup file.");
+    }
+  } else if (name.endsWith(".csv")) {
+    showMessage(
+      "CSV restores transactions only. Use a .json backup for full restore.",
+      "warning",
+    );
+    handleCsvRestore(file);
+  } else {
+    showMessage("Unsupported file format. Use .json, .enc, or .csv");
+  }
+}
+
+export function handleCsvRestore(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const backupData = parseBackupCSV(reader.result);
+      if (!backupData.valid) {
+        showMessage(`Invalid backup file: ${backupData.error}`);
+        return;
+      }
+      state.pendingRestoreData = backupData;
+      showRestorePreview(backupData);
+    } catch (err) {
+      console.error("Backup parse error:", err);
+      showMessage("Failed to read backup file. Please check the file format.");
+    }
+  };
+  reader.onerror = () => showMessage("Failed to read file. Please try again.");
+  reader.readAsText(file);
 }

@@ -162,9 +162,9 @@ Transient network failures when the Service Worker tries to fetch `sw.js` (backg
 
 ---
 
-## What Comes Next — Proposed Roadmap v4.2–v4.13
+## What Comes Next — Proposed Roadmap v4.2–v4.14
 
-> **Roadmap revised 2026-05-23** — Aligned to v4.1.0. Forecast and health alerts shipped in v4.1.0. Remaining items reordered by daily impact.
+> **Roadmap revised 2026-05-23** — Backup & Restore Overhaul inserted as v4.2.0 (data safety priority). Actionable Spending Insights moves to v4.3.0. All subsequent versions shift by one.
 
 ### Priority Framework
 
@@ -174,7 +174,50 @@ Transient network failures when the Service Worker tries to fetch `sw.js` (backg
 
 ---
 
-### v4.2.0 — Actionable Spending Insights
+### v4.2.0 — Backup & Restore Overhaul
+**Priority: HIGH**
+**Full plan:** `docs/backup-restore-plan-v4.2.md`
+**No new modules — extends `js/auto-backup.js`, `js/import-export.js`, `js/db.js`**
+
+Fixes silent data loss in the existing backup/restore system and consolidates the scattered backup UI into one card. A user relying on "Create Backup" today loses accounts, budgets, recurring templates, goals, and net worth history on restore.
+
+**Three phases:**
+
+**Phase 1 — Data completeness (no UI change)**
+- `buildJsonBackup()` made async; includes all 8 IDB stores (`netWorthSnapshots` added via explicit IDB read) + `exchangeRateHistory` + `tagColors` from localStorage
+- `confirmRestore()` saves all stores back: `appSettings`, `netWorthSnapshots`, localStorage keys
+- `backupSchemaVersion: 1` added to envelope
+- SHA-256 integrity field — two-pass serialization, verified on restore (warn on mismatch, don't block)
+- One-shot migration: stored `backupFormat: 'csv'` → `'json'` on init
+- `migrateBackupPayload()` — handles schema 0 (no `backupSchemaVersion`) → 1 up-conversion
+
+**Phase 2 — UI consolidation**
+- Remove 4 scattered Settings toolbar buttons (Export CSV, Import CSV, Create Backup, Restore Backup)
+- Add single static "Data & Backup" card in `index.html` with four sections: Export, Backup, Auto-Backup, Restore
+- Remove CSV format option from auto-backup (always JSON)
+- Unified file input `accept=".json,.enc,.csv"` with explicit format routing in handler
+- Auto-backup card becomes static HTML; JS only updates last-backup date and toggle state
+
+**Phase 3 — Hardening**
+- Merge vs Replace restore modes: merge = append missing records; replace = `clearAllStores(storesToClear)` then write
+- Replace mode: red button + extra confirmation step, only clears stores present in backup payload
+- `migrateBackupPayload()` extended for future schema versions
+
+**What a verified restore guarantees after v4.2.0:**
+All 8 IDB stores + `exchangeRateHistory` + `tagColors`. Not restored: `currency`, `darkMode`, UI prefs (device preferences, not data).
+
+**Files to modify:**
+- `js/auto-backup.js` — async `buildJsonBackup()`, full envelope, remove `renderAutoBackupSettings()`, add `updateAutoBackupUI()`
+- `js/import-export.js` — `confirmRestore()` all stores, `handleRestoreFileInput()` format routing, `migrateBackupPayload()`, merge/replace modes
+- `js/db.js` — add `getAllNetWorthSnapshots()`, `bulkSaveNetWorthSnapshots()`, `clearAllStores()`, confirm `saveAppSettings()`
+- `js/app.js` — one-shot CSV setting migration, rebind events for new unified buttons
+- `index.html` — remove old toolbar buttons, add static "Data & Backup" card
+- `css/styles.css`, `css/dark-mode.css` — Data & Backup card section styles
+- Version: bump to 4.2.0
+
+---
+
+### v4.3.0 — Actionable Spending Insights
 **Priority: HIGH**
 **No new module — extends `js/alerts.js`**
 
@@ -232,11 +275,11 @@ alerts.push({
 - `js/alerts.js` — add `suggestion` field computation in each `check*` function
 - `css/styles.css`, `css/dark-mode.css` — `.smart-alert-suggestion` muted sub-text style
 - `index.html` — render suggestion in `renderAlertBanner()` template
-- Version: bump to 4.2.0
+- Version: bump to 4.3.0
 
 ---
 
-### v4.3.0 — Budget vs Actual Report
+### v4.4.0 — Budget vs Actual Report
 **Priority: HIGH**
 **No new module — extends `js/budget.js`**
 
@@ -264,11 +307,11 @@ Total         ฿16,000  ฿16,550    -฿550        103%
 - `js/annual-report.js` — reuse for year-level budget vs actual
 - `index.html` — budget table in Summary tab
 - `css/styles.css`, `css/dark-mode.css` — table + variance column coloring
-- Version: bump to 4.3.0
+- Version: bump to 4.4.0
 
 ---
 
-### v4.4.0 — Financial Health Ratios
+### v4.5.0 — Financial Health Ratios
 **Priority: HIGH**
 **No new module — extends `js/savings.js`**
 
@@ -290,11 +333,11 @@ Beyond savings rate, no diagnostic ratios exist. Four KPIs computed entirely fro
 - `js/ui.js` — render ratio cards
 - `index.html` — health ratio grid in Summary tab
 - `css/styles.css`, `css/dark-mode.css` — ratio card styles
-- Version: bump to 4.4.0
+- Version: bump to 4.5.0
 
 ---
 
-### v4.5.0 — Subscription Tracker
+### v4.6.0 — Subscription Tracker
 **Priority: MEDIUM**
 **No new module — extends `js/recurring.js`**
 
@@ -320,11 +363,11 @@ Active Subscriptions                          ฿2,340/month
 - `js/recurring.js` — `getSubscriptions()` helper, total calculation
 - `index.html` — subscription section in Recurring tab
 - `css/styles.css`, `css/dark-mode.css` — subscription list styles
-- Version: bump to 4.5.0
+- Version: bump to 4.6.0
 
 ---
 
-### v4.6.0 — Duplicate Transaction Detection
+### v4.7.0 — Duplicate Transaction Detection
 **Priority: MEDIUM**
 **No new module — extends `js/validation.js`**
 
@@ -350,11 +393,11 @@ function detectDuplicate(candidate, existingTransactions) {
 - `js/app.js` — call in save handler, show inline warning
 - `index.html` — duplicate warning slot in form
 - `css/styles.css` — warning banner style
-- Version: bump to 4.6.0
+- Version: bump to 4.7.0
 
 ---
 
-### v4.7.0 — Bank Statement CSV Importer
+### v4.8.0 — Bank Statement CSV Importer
 **Priority: MEDIUM**
 **Extends `js/import-export.js` (lazy-loaded)**
 
@@ -365,7 +408,7 @@ Generic column mapper that accepts any bank's CSV export — no fixed format ass
 2. Column mapper UI — user maps Date/Amount/Description to schema fields
 3. Date format selector (autodetected where possible)
 4. Preview table (first 10 rows)
-5. Import with duplicate detection (v4.5) on every row
+5. Import with duplicate detection (v4.7) on every row
 6. Summary: "Imported 45 transactions. 3 duplicates skipped."
 
 **Saved mappings:** Store column mapping per bank name in `appSettings` IDB store (up to 5). Auto-applied on next import from same bank.
@@ -380,13 +423,13 @@ Generic column mapper that accepts any bank's CSV export — no fixed format ass
 - `js/import-export.js` — `importFromBankCSV()`, column mapper UI, saved mappings
 - `index.html` — bank import section in Settings
 - `css/styles.css`, `css/dark-mode.css` — column mapper, preview table
-- Version: bump to 4.7.0
+- Version: bump to 4.8.0
 
 **Note:** Saved column mappings stored in `appSettings` IDB store (not localStorage) to maintain the pattern of "localStorage only for small settings."
 
 ---
 
-### v4.8.0 — Local Notifications
+### v4.9.0 — Local Notifications
 **Priority: HIGH**
 **New file: `js/notifications.js`**
 
@@ -409,13 +452,13 @@ Budget warnings and recurring due-date reminders exist as in-app alerts but go u
 - `sw.js` — `notificationclick` handler + add to `CACHE_URLS`
 - `index.html` — notification settings section
 - `css/styles.css`, `css/dark-mode.css` — preference toggle styles
-- Version: bump to 4.8.0
+- Version: bump to 4.9.0
 
 **Note:** Quiet hours use local `Date` object — no explicit timezone handling needed since all data is device-local.
 
 ---
 
-### v4.9.0 — Bulk Transaction Operations
+### v4.10.0 — Bulk Transaction Operations
 **Priority: MEDIUM**
 
 No way to recategorize or re-tag multiple transactions at once. Primary friction when cleaning up historical data or after a bank statement import.
@@ -433,11 +476,11 @@ No way to recategorize or re-tag multiple transactions at once. Primary friction
 - `js/app.js` — bulk operation handlers
 - `js/db.js` — extend `bulkSaveTransactionsToDB` for bulk soft-delete
 - `css/styles.css`, `css/dark-mode.css` — selection styles, bulk action bar
-- Version: bump to 4.9.0
+- Version: bump to 4.10.0
 
 ---
 
-### v4.10.0 — Category Management
+### v4.11.0 — Category Management
 **Priority: MEDIUM**
 
 No mechanism to rename a category across all transactions or merge two categories. Real-usage audit found "Shopping" / "Personal/Shopping" used interchangeably.
@@ -456,13 +499,13 @@ No mechanism to rename a category across all transactions or merge two categorie
 - `js/app.js` — wire events
 - `index.html` — category management in Settings
 - `css/styles.css`, `css/dark-mode.css` — manager styles
-- Version: bump to 4.10.0
+- Version: bump to 4.11.0
 
 **Note:** Category Management is a soft prerequisite for Bank CSV Import — clean categories make auto-categorization more accurate. Can ship independently but benefits from being available first.
 
 ---
 
-### v4.11.0 — Business & Tax Export
+### v4.12.0 — Business & Tax Export
 **Priority: MEDIUM**
 
 `expenseType: "business"` and `referenceId` (receipt/invoice) exist since v3.16 but there's no business-only export for tax filing.
@@ -480,11 +523,11 @@ No mechanism to rename a category across all transactions or merge two categorie
 - `js/state.js` — add `taxYearStartMonth` to default appSettings
 - `index.html` — tax year setting, tax export tab
 - `css/styles.css`, `css/dark-mode.css` — tab styles
-- Version: bump to 4.11.0
+- Version: bump to 4.12.0
 
 ---
 
-### v4.12.0 — Loan / EMI Tracker
+### v4.13.0 — Loan / EMI Tracker
 **Priority: MEDIUM**
 **New file: `js/loans.js`**
 
@@ -518,11 +561,11 @@ Currently EMIs are logged as recurring expenses — no view of outstanding princ
 - `index.html` — loan section
 - `css/styles.css`, `css/dark-mode.css`
 - `sw.js` — add to CACHE_URLS
-- Version: bump to 4.12.0
+- Version: bump to 4.13.0
 
 ---
 
-### v4.13.0 — Receipt Photos
+### v4.14.0 — Receipt Photos
 **Priority: LOW**
 **New file: `js/receipts.js`**
 
@@ -545,7 +588,7 @@ Last significant data-capture gap. Storage-first constraints apply.
 - `index.html` — file input in form, receipts settings
 - `css/styles.css`, `css/dark-mode.css`
 - `sw.js` — add to CACHE_URLS, exclude blobs from cache
-- Version: bump to 4.13.0
+- Version: bump to 4.14.0
 
 ---
 
@@ -555,18 +598,19 @@ Last significant data-capture gap. Storage-first constraints apply.
 |---------|---------|-----------|---------|--------|
 | v4.1.0 | Cash-Flow Forecast (30/60/90d) + Financial Health Alerts | 12 | HIGH | ✅ Shipped |
 | v4.1.1 | Accessibility, data integrity & alert quality patch | 12 | HIGH | ✅ Shipped |
-| v4.2.0 | Actionable Spending Insights — `suggestion` field on every alert | 12 | HIGH | Planned |
-| v4.3.0 | Budget vs Actual Report — consolidated variance table | 12 | HIGH | Planned |
-| v4.4.0 | Financial Health Ratios (emergency fund, debt-to-income, housing cost) | 12 | HIGH | Planned |
-| v4.5.0 | Subscription Tracker | 12 | MEDIUM | Planned |
-| v4.6.0 | Duplicate Transaction Detection | 12 | MEDIUM | Planned |
-| v4.7.0 | Bank Statement CSV Importer | 12 | MEDIUM | Planned |
-| v4.8.0 | Local Notifications | 12 | HIGH | Planned |
-| v4.9.0 | Bulk Transaction Operations | 12 | MEDIUM | Planned |
-| v4.10.0 | Category Management (rename, merge, cleanup) | 12 | MEDIUM | Planned |
-| v4.11.0 | Business & Tax Export | 12 | MEDIUM | Planned |
-| v4.12.0 | Loan / EMI Tracker with amortization schedule | 13 | MEDIUM | Planned |
-| v4.13.0 | Receipt Photos | 14 | LOW | Planned |
+| v4.2.0 | Backup & Restore Overhaul — full envelope, UI consolidation, merge/replace | 12 | HIGH | Planned |
+| v4.3.0 | Actionable Spending Insights — `suggestion` field on every alert | 12 | HIGH | Planned |
+| v4.4.0 | Budget vs Actual Report — consolidated variance table | 12 | HIGH | Planned |
+| v4.5.0 | Financial Health Ratios (emergency fund, debt-to-income, housing cost) | 12 | HIGH | Planned |
+| v4.6.0 | Subscription Tracker | 12 | MEDIUM | Planned |
+| v4.7.0 | Duplicate Transaction Detection | 12 | MEDIUM | Planned |
+| v4.8.0 | Bank Statement CSV Importer | 12 | MEDIUM | Planned |
+| v4.9.0 | Local Notifications | 12 | HIGH | Planned |
+| v4.10.0 | Bulk Transaction Operations | 12 | MEDIUM | Planned |
+| v4.11.0 | Category Management (rename, merge, cleanup) | 12 | MEDIUM | Planned |
+| v4.12.0 | Business & Tax Export | 12 | MEDIUM | Planned |
+| v4.13.0 | Loan / EMI Tracker with amortization schedule | 13 | MEDIUM | Planned |
+| v4.14.0 | Receipt Photos | 14 | LOW | Planned |
 
 ---
 
@@ -586,8 +630,8 @@ Last significant data-capture gap. Storage-first constraints apply.
 | 10 | v3.28.0 | + `netWorthSnapshots` store |
 | 11 | v4.0.0 | `accounts` + `classification` field; `transactions` + `status` field; `dateType` composite index |
 | 12 | v4.0.0 | (same migration block) reconciliation indexes |
-| 13 | v4.12.0 | + `loans` store (planned) |
-| 14 | v4.13.0 | + `receipts` store (planned) |
+| 13 | v4.13.0 (Loan / EMI Tracker) | + `loans` store (planned) |
+| 14 | v4.14.0 (Receipt Photos) | + `receipts` store (planned) |
 
 ---
 
