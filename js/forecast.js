@@ -10,7 +10,12 @@ import { computeNextDueDate } from "./recurring.js";
 
 // ---- Pure forecast engine ----
 
-export function buildForecast(accounts, transactions, recurringTemplates, horizonDays = 90) {
+export function buildForecast(
+  accounts,
+  transactions,
+  recurringTemplates,
+  horizonDays = 90,
+) {
   if (!recurringTemplates || recurringTemplates.length === 0) {
     return { accountForecasts: {}, warnings: [] };
   }
@@ -49,7 +54,7 @@ export function buildForecast(accounts, transactions, recurringTemplates, horizo
       dateStr = computeNextDueDate(
         tmpl.frequency,
         tmpl.dayOfMonth || new Date(dateStr + "T00:00:00").getDate(),
-        dateStr
+        dateStr,
       );
     }
   }
@@ -135,7 +140,7 @@ export function renderForecast(horizonDays) {
     state.accounts,
     state.transactions,
     state.recurringTemplates,
-    activeHorizon
+    activeHorizon,
   );
 
   const accountNames = Object.keys(accountForecasts);
@@ -150,17 +155,7 @@ export function renderForecast(horizonDays) {
   // Warning banners
   if (warnings.length > 0) {
     const unique = [...new Map(warnings.map((w) => [w.account, w])).values()];
-    html += `<div class="forecast-warnings">`;
-    for (const w of unique) {
-      html += `<div class="forecast-warning"><i class="ri-alarm-warning-fill"></i><span></span></div>`;
-      // message injected via textContent below — build as node reference trick:
-      // We'll use a data attribute and set textContent after insertion
-    }
-    html += `</div>`;
-    // Simpler: inline with sanitized data attributes (no user input in warnings — all computed)
-    html = `<div class="forecast-warnings">` +
-      unique.map(w => `<div class="forecast-warning"><i class="ri-alarm-warning-fill"></i><span data-msg="${w.account} goes negative on ${w.date} (${formatCurrency(w.balance)})">&nbsp;</span></div>`).join("") +
-      `</div>`;
+    html += `<div class="forecast-warnings">${unique.map((w) => `<div class="forecast-warning"><i class="ri-alarm-warning-fill"></i><span data-msg="${w.account} goes negative on ${w.date} (${formatCurrency(w.balance)})"> </span></div>`).join("")}</div>`;
   }
 
   // Account cards
@@ -183,7 +178,9 @@ export function renderForecast(horizonDays) {
     for (const ev of events) {
       const isNeg = ev.runningBalance < 0;
       const amountClass = ev.amount < 0 ? "negative-amount" : "positive-amount";
-      const rowClass = isNeg ? "forecast-event-row forecast-event-negative" : "forecast-event-row";
+      const rowClass = isNeg
+        ? "forecast-event-row forecast-event-negative"
+        : "forecast-event-row";
       const amountStr = (ev.amount >= 0 ? "+" : "") + formatCurrency(ev.amount);
       const balStr = formatCurrency(ev.runningBalance);
       html += `<div class="${rowClass}" data-label="${ev.label}" data-date="${ev.date}" data-amount="${amountStr}" data-bal="${balStr}" data-neg="${isNeg}"></div>`;
@@ -195,9 +192,11 @@ export function renderForecast(horizonDays) {
   container.innerHTML = html;
 
   // Set text content safely (no innerHTML with user data)
-  container.querySelectorAll(".forecast-warning span[data-msg]").forEach((el) => {
-    el.textContent = el.dataset.msg;
-  });
+  container
+    .querySelectorAll(".forecast-warning span[data-msg]")
+    .forEach((el) => {
+      el.textContent = el.dataset.msg;
+    });
 
   container.querySelectorAll(".forecast-account-card").forEach((card, i) => {
     const name = accountNames[i];
@@ -205,23 +204,32 @@ export function renderForecast(horizonDays) {
     if (nameEl) nameEl.textContent = name;
   });
 
-  container.querySelectorAll(".forecast-event-row[data-date]").forEach((row) => {
-    const label = row.querySelector(".forecast-event-label") || row;
-    const [dateEl, labelEl, amountEl, balEl] = ["forecast-event-date", "forecast-event-label", "forecast-event-amount", "forecast-event-balance"].map(
-      (cls) => {
+  container
+    .querySelectorAll(".forecast-event-row[data-date]")
+    .forEach((row) => {
+      const label = row.querySelector(".forecast-event-label") || row;
+      const [dateEl, labelEl, amountEl, balEl] = [
+        "forecast-event-date",
+        "forecast-event-label",
+        "forecast-event-amount",
+        "forecast-event-balance",
+      ].map((cls) => {
         const el = document.createElement("span");
         el.className = cls;
         return el;
-      }
-    );
-    dateEl.textContent = row.dataset.date;
-    labelEl.textContent = row.dataset.label;
-    amountEl.textContent = row.dataset.amount;
-    amountEl.classList.add(row.dataset.amount.startsWith("+") ? "positive-amount" : "negative-amount");
-    balEl.textContent = row.dataset.bal;
-    if (row.dataset.neg === "true") balEl.classList.add("balance-negative");
+      });
+      dateEl.textContent = row.dataset.date;
+      labelEl.textContent = row.dataset.label;
+      amountEl.textContent = row.dataset.amount;
+      amountEl.classList.add(
+        row.dataset.amount.startsWith("+")
+          ? "positive-amount"
+          : "negative-amount",
+      );
+      balEl.textContent = row.dataset.bal;
+      if (row.dataset.neg === "true") balEl.classList.add("balance-negative");
 
-    row.innerHTML = "";
-    row.append(dateEl, labelEl, amountEl, balEl);
-  });
+      row.innerHTML = "";
+      row.append(dateEl, labelEl, amountEl, balEl);
+    });
 }

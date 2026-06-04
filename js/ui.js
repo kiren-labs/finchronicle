@@ -2,15 +2,33 @@
 // UI Rendering: Summary, Transactions, Groups, Insights, Tabs, Filters
 // ============================================================================
 
-import { state, getDOM, categories, getAllCategoryNames, getCategoryParent, ITEMS_PER_PAGE } from "./state.js";
+import {
+  state,
+  getDOM,
+  categories,
+  getAllCategoryNames,
+  getCategoryParent,
+  ITEMS_PER_PAGE,
+} from "./state.js";
 import { filterTransactions, getAllTags, getTagColor } from "./search.js";
 import { sanitizeHTML, formatDate, formatMonth, showMessage } from "./utils.js";
 import { formatCurrency, getCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
 import { updateSettingsContent } from "./settings.js";
-import { renderBudgetAlerts, renderBudgetList, deleteBudget } from "./budget.js";
-import { setOptionalFieldValues, clearOptionalFields, renderOptionalFieldsForm } from "./optional-fields.js";
-import { formatMultiCurrency, setMultiCurrencyFormData } from "./multi-currency.js";
+import {
+  renderBudgetAlerts,
+  renderBudgetList,
+  deleteBudget,
+} from "./budget.js";
+import {
+  setOptionalFieldValues,
+  clearOptionalFields,
+  renderOptionalFieldsForm,
+} from "./optional-fields.js";
+import {
+  formatMultiCurrency,
+  setMultiCurrencyFormData,
+} from "./multi-currency.js";
 import {
   renderCategoryPieChart,
   buildCategoryData,
@@ -54,7 +72,8 @@ export function updateUI() {
 
 export function updateSummary() {
   const currentMonth = new Date().toISOString().slice(0, 7);
-  const activeMonth = state.selectedMonth === "all" ? currentMonth : state.selectedMonth;
+  const activeMonth =
+    state.selectedMonth === "all" ? currentMonth : state.selectedMonth;
 
   // Update section title: selected month or "All Time"
   const monthLabel = document.getElementById("summaryMonthLabel");
@@ -63,7 +82,10 @@ export function updateSummary() {
       monthLabel.textContent = "All Time";
     } else {
       const [y, m] = state.selectedMonth.split("-");
-      monthLabel.textContent = new Date(y, parseInt(m) - 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      monthLabel.textContent = new Date(y, parseInt(m) - 1).toLocaleDateString(
+        "en-US",
+        { month: "long", year: "numeric" },
+      );
     }
   }
 
@@ -74,7 +96,10 @@ export function updateSummary() {
       thisMonthLabel.textContent = "This Month";
     } else {
       const [y, m] = state.selectedMonth.split("-");
-      const label = new Date(y, parseInt(m) - 1).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+      const label = new Date(y, parseInt(m) - 1).toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      });
       thisMonthLabel.textContent = label;
     }
   }
@@ -119,12 +144,17 @@ export function updateSummary() {
   }
 
   // Update Income trend — suppress arrow when both current and previous are ฿0
-  if (incomeDelta && incomeDelta.pct !== null && !(income === 0 && prevTotals.income === 0)) {
+  if (
+    incomeDelta &&
+    incomeDelta.pct !== null &&
+    !(income === 0 && prevTotals.income === 0)
+  ) {
     const sign = incomeDelta.abs >= 0 ? "+" : "";
     $.monthIncomeTrend.innerHTML = `<i class="ri-arrow-${incomeDelta.direction === "up" ? "up" : incomeDelta.direction === "down" ? "down" : "right"}-line"></i> ${sign}${Math.abs(incomeDelta.pct).toFixed(1)}% vs last month`;
     $.monthIncomeTrend.className = `summary-trend ${incomeDelta.direction === "up" ? "positive" : incomeDelta.direction === "down" ? "negative" : "neutral"}`;
   } else {
-    $.monthIncomeTrend.textContent = income === 0 && prevTotals.income === 0 ? "—" : "";
+    $.monthIncomeTrend.textContent =
+      income === 0 && prevTotals.income === 0 ? "—" : "";
   }
 
   // Update Expenses meta
@@ -158,7 +188,10 @@ export function updateTransactionsList() {
     // If selected value is a parent category, also match its children
     const expenseTree = categories.expense || {};
     const incomeTree = categories.income || {};
-    const children = (expenseTree[state.selectedCategory] || incomeTree[state.selectedCategory] || []);
+    const children =
+      expenseTree[state.selectedCategory] ||
+      incomeTree[state.selectedCategory] ||
+      [];
     if (children.length > 0) {
       const matchSet = new Set([state.selectedCategory, ...children]);
       filtered = filtered.filter((t) => matchSet.has(t.category));
@@ -216,7 +249,11 @@ export function updateTransactionsList() {
   paginatedTransactions.forEach((t) => {
     const isIncome = t.type === "income";
     const isTransfer = t.type === "transfer";
-    const amountClass = isTransfer ? "transfer" : isIncome ? "positive" : "negative";
+    const amountClass = isTransfer
+      ? "transfer"
+      : isIncome
+        ? "positive"
+        : "negative";
     const sign = isTransfer ? "" : isIncome ? "+" : "-";
 
     const item = document.createElement("div");
@@ -248,11 +285,26 @@ export function updateTransactionsList() {
     // Build optional field metadata line (v3.16.0)
     const metaParts = [];
     const ef = state.appSettings?.enabledFields ?? {};
-    if (ef.paymentMethod && t.paymentMethod) metaParts.push(`<span class="tx-meta-item"><i class="ri-bank-card-line"></i> ${sanitizeHTML(t.paymentMethod)}</span>`);
-    if (ef.merchant && t.merchant) metaParts.push(`<span class="tx-meta-item"><i class="ri-store-2-line"></i> ${sanitizeHTML(t.merchant)}</span>`);
-    if (ef.attachedTo && t.attachedTo) metaParts.push(`<span class="tx-meta-item"><i class="ri-user-line"></i> ${sanitizeHTML(t.attachedTo)}</span>`);
-    if (ef.location && t.location) metaParts.push(`<span class="tx-meta-item"><i class="ri-map-pin-line"></i> ${sanitizeHTML(t.location)}</span>`);
-    const metaHtml = metaParts.length > 0 ? `<div class="tx-meta">${metaParts.join("")}</div>` : "";
+    if (ef.paymentMethod && t.paymentMethod)
+      metaParts.push(
+        `<span class="tx-meta-item"><i class="ri-bank-card-line"></i> ${sanitizeHTML(t.paymentMethod)}</span>`,
+      );
+    if (ef.merchant && t.merchant)
+      metaParts.push(
+        `<span class="tx-meta-item"><i class="ri-store-2-line"></i> ${sanitizeHTML(t.merchant)}</span>`,
+      );
+    if (ef.attachedTo && t.attachedTo)
+      metaParts.push(
+        `<span class="tx-meta-item"><i class="ri-user-line"></i> ${sanitizeHTML(t.attachedTo)}</span>`,
+      );
+    if (ef.location && t.location)
+      metaParts.push(
+        `<span class="tx-meta-item"><i class="ri-map-pin-line"></i> ${sanitizeHTML(t.location)}</span>`,
+      );
+    const metaHtml =
+      metaParts.length > 0
+        ? `<div class="tx-meta">${metaParts.join("")}</div>`
+        : "";
 
     // Reconciliation status badge (v4.0.0) — only shown for non-default statuses
     let statusBadgeHtml = "";
@@ -285,7 +337,14 @@ export function updateTransactionsList() {
             </div>
             <div class="transaction-amount ${amountClass}">
                 ${sign}${formatCurrency(t.homeAmount || t.amount)}
-                ${t.transactionCurrency && t.homeAmount ? `<div class="tx-foreign-amount">${(() => { const mc = formatMultiCurrency(t); return mc ? mc.foreign : ""; })()}</div>` : ""}
+                ${
+                  t.transactionCurrency && t.homeAmount
+                    ? `<div class="tx-foreign-amount">${(() => {
+                        const mc = formatMultiCurrency(t);
+                        return mc ? mc.foreign : "";
+                      })()}</div>`
+                    : ""
+                }
             </div>
             <div class="transaction-actions">
                 <button class="action-btn edit-btn" data-action="edit" data-id="${t.id}" aria-label="Edit transaction"><i class="ri-edit-line"></i></button>
@@ -343,7 +402,8 @@ export function updateCategoryFilter() {
   const ungrouped = [];
 
   for (const cat of usedCats) {
-    const parent = getCategoryParent(cat, "expense") || getCategoryParent(cat, "income");
+    const parent =
+      getCategoryParent(cat, "expense") || getCategoryParent(cat, "income");
     if (!parent || parent === cat) {
       ungrouped.push(cat);
     } else {
@@ -494,7 +554,12 @@ export function updateReportsView() {
   // Range date span — show exact from–to dates
   const rangeSpan = document.getElementById("rangeSpan");
   if (rangeSpan) {
-    const fmt = (d) => d.toLocaleString("default", { month: "short", day: "numeric", year: "numeric" });
+    const fmt = (d) =>
+      d.toLocaleString("default", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
     const today = new Date();
     let fromDate;
     if (range === "all") {
@@ -588,7 +653,12 @@ function groupByCategory() {
   return cats
     .map((category) => {
       const data = grouped[category];
-      const colorClass = data.type === "transfer" ? "transfer" : data.type === "income" ? "positive" : "negative";
+      const colorClass =
+        data.type === "transfer"
+          ? "transfer"
+          : data.type === "income"
+            ? "positive"
+            : "negative";
 
       return `
             <div class="card">
@@ -771,7 +841,8 @@ export function editTransaction(id) {
 
   // Populate transfer fields if editing a transfer
   if (transaction.type === "transfer") {
-    document.getElementById("fromAccount").value = transaction.fromAccount || "";
+    document.getElementById("fromAccount").value =
+      transaction.fromAccount || "";
     document.getElementById("toAccount").value = transaction.toAccount || "";
   }
 
@@ -815,14 +886,16 @@ export function cancelEdit() {
 export function deleteTransaction(id) {
   state.deleteId = id;
   state.deleteBudgetId = null;
-  document.querySelector("#deleteModal .modal-title").textContent = "Delete Transaction?";
+  document.querySelector("#deleteModal .modal-title").textContent =
+    "Delete Transaction?";
   document.getElementById("deleteModal").classList.add("show");
 }
 
 export function deleteBudgetConfirm(budgetId) {
   state.deleteBudgetId = budgetId;
   state.deleteId = null;
-  document.querySelector("#deleteModal .modal-title").textContent = "Delete Budget?";
+  document.querySelector("#deleteModal .modal-title").textContent =
+    "Delete Budget?";
   document.getElementById("deleteModal").classList.add("show");
 }
 
@@ -913,15 +986,17 @@ export function updateCategoryOptions(type) {
  * Parents with no children are plain <option> entries.
  */
 function renderCategoryOptions(tree) {
-  return Object.entries(tree).map(([parent, children]) => {
-    if (children.length === 0) {
-      return `<option value="${parent}">${parent}</option>`;
-    }
-    return `<optgroup label="${parent}">
+  return Object.entries(tree)
+    .map(([parent, children]) => {
+      if (children.length === 0) {
+        return `<option value="${parent}">${parent}</option>`;
+      }
+      return `<optgroup label="${parent}">
       <option value="${parent}">${parent}</option>
-      ${children.map((c) => `<option value="${c}">  ${c}</option>`).join("")}
+      ${children.map((c) => `<option value="${c}">  ${c}</option>`).join("")}
     </optgroup>`;
-  }).join("");
+    })
+    .join("");
 }
 
 // ---- Trend / Helpers ----

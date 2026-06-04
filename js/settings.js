@@ -217,10 +217,10 @@ export function shouldShowBackupReminder() {
 export function renderBackupStatus() {
   const days = getDaysSinceBackup();
 
-  let statusClass = "";
-  let statusIcon = "";
-  let statusLabel = "";
-  let statusMessage = "";
+  let statusClass;
+  let statusIcon;
+  let statusLabel;
+  let statusMessage;
 
   if (days === null) {
     statusClass = "backup-status-danger";
