@@ -3,11 +3,7 @@
 // ============================================================================
 
 import { state, categories } from "./state.js";
-import {
-  saveBudgetToDB,
-  loadBudgetsFromDB,
-  deleteBudgetFromDB,
-} from "./db.js";
+import { saveBudgetToDB, loadBudgetsFromDB, deleteBudgetFromDB } from "./db.js";
 import { showMessage, generateId } from "./utils.js";
 import { formatCurrency } from "./currency.js";
 
