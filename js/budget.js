@@ -15,7 +15,7 @@ export async function initBudgets() {
   } catch (error) {
     console.error("Error loading budgets:", error);
     state.budgets = [];
-    showMessage("Error loading budgets", "error");
+    showMessage("Error loading budgets.", "error");
   }
 }
 
@@ -39,7 +39,7 @@ export async function saveBudget(budget) {
       budget.alertThreshold < 0 ||
       budget.alertThreshold > 100
     ) {
-      throw new Error("Alert threshold must be between 0 and 100");
+      throw new Error("Alert threshold must be between 0 and 100.");
     }
 
     // Block duplicate categories (only on new budgets, not edits)
@@ -87,7 +87,7 @@ export async function deleteBudget(budgetId) {
     showMessage("Budget deleted", "success");
   } catch (error) {
     console.error("Error deleting budget:", error);
-    showMessage("Error deleting budget", "error");
+    showMessage("Error deleting budget.", "error");
     throw error;
   }
 }

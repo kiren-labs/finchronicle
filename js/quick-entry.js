@@ -119,7 +119,7 @@ export function prefillFromTemplate(templateId) {
     if (el) el.value = template.merchant;
   }
 
-  showMessage("✨ Template loaded — review and save");
+  showMessage("Template loaded. Review and save.");
 
   // Scroll to form and focus save button
   const submitBtn = document.getElementById("submitBtn");
@@ -137,7 +137,7 @@ export function cloneLast() {
     (t) => !t.deleted && t.type !== "transfer",
   );
   if (!recent) {
-    showMessage("No recent transaction to clone");
+    showMessage("No recent transaction to clone.");
     return;
   }
 
@@ -210,7 +210,7 @@ export async function saveAsTemplate() {
 
   const type = document.getElementById("type").value;
   if (type === "transfer") {
-    showMessage("Transfers cannot be saved as templates");
+    showMessage("Transfers cannot be saved as templates.");
     return;
   }
 
@@ -218,7 +218,7 @@ export async function saveAsTemplate() {
   const category = document.getElementById("category").value;
 
   if (!amount || !category) {
-    showMessage("Fill in amount and category first");
+    showMessage("Fill in the amount and category first.");
     return;
   }
 
@@ -266,7 +266,7 @@ export function renderTemplateManager() {
   if (!container) return;
 
   if (state.quickTemplates.length === 0) {
-    container.innerHTML = `<div class="empty-state">No quick entry templates yet. Save a transaction as a template to get started.</div>`;
+    container.innerHTML = `<div class="empty-state">No quick entry templates yet. Save a transaction as a template.</div>`;
     return;
   }
 

@@ -169,7 +169,7 @@ export function renderRecurringSection() {
       ? `<div class="recurring-empty">
                <i class="ri-repeat-line"></i>
                <p>No recurring transactions yet</p>
-               <p class="recurring-empty-sub">Add rent, salary, or subscriptions to auto-track them</p>
+               <p class="recurring-empty-sub">Add predictable recurring transactions to track them automatically.</p>
            </div>`
       : templates
           .map((t) => {
@@ -503,19 +503,19 @@ export async function saveRecurringTemplate() {
 
   const amount = parseFloat(amountRaw);
   if (!amountRaw || isNaN(amount) || amount <= 0) {
-    showMessage("Please enter a valid amount");
+    showMessage("Enter a valid amount.");
     return;
   }
   if (amount > 999999999) {
-    showMessage("Amount exceeds maximum limit");
+    showMessage("Amount exceeds maximum limit.");
     return;
   }
   if (!category) {
-    showMessage("Please select a category");
+    showMessage("Select a category.");
     return;
   }
   if (!startDate) {
-    showMessage("Please select a start date");
+    showMessage("Select a start date.");
     return;
   }
 
@@ -594,7 +594,7 @@ async function deleteRecurring(id) {
   const label = template.notes || template.category;
   if (
     !confirm(
-      `Delete "${label}"?\n\nAlready-created transactions will not be affected.`,
+      `Delete "${label}"?\n\nExisting transactions will not be affected.`,
     )
   )
     return;

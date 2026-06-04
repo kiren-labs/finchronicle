@@ -64,7 +64,7 @@ export function validateTransaction(transaction) {
     if (from && to && from.toLowerCase() === to.toLowerCase()) {
       errors.push({
         field: "toAccount",
-        message: "Source and destination cannot be the same",
+        message: "Source and destination accounts cannot be the same.",
       });
     }
     // Sanitize account names
@@ -141,7 +141,7 @@ export function validateTransaction(transaction) {
     if (transaction.merchant.length > 100) {
       errors.push({
         field: "merchant",
-        message: "Merchant name too long (max 100)",
+        message: "Merchant name is too long (max 100 characters).",
       });
     }
     transaction.merchant = sanitizeHTML(transaction.merchant);
@@ -151,7 +151,7 @@ export function validateTransaction(transaction) {
     if (transaction.attachedTo.length > 50) {
       errors.push({
         field: "attachedTo",
-        message: "Person name too long (max 50)",
+        message: "Person name is too long (max 50 characters).",
       });
     }
     transaction.attachedTo = sanitizeHTML(transaction.attachedTo);
@@ -161,7 +161,7 @@ export function validateTransaction(transaction) {
     if (transaction.referenceId.length > 100) {
       errors.push({
         field: "referenceId",
-        message: "Reference ID too long (max 100)",
+        message: "Reference ID is too long (max 100 characters).",
       });
     }
     transaction.referenceId = sanitizeHTML(transaction.referenceId);
@@ -171,7 +171,7 @@ export function validateTransaction(transaction) {
     if (transaction.location.length > 100) {
       errors.push({
         field: "location",
-        message: "Location too long (max 100)",
+        message: "Location is too long (max 100 characters).",
       });
     }
     transaction.location = sanitizeHTML(transaction.location);
@@ -196,7 +196,7 @@ export function validateTransaction(transaction) {
         errors.push({
           field: "exchangeRate",
           message:
-            "Exchange rate is required for foreign currency transactions",
+            "Exchange rate is required for foreign currency transactions.",
         });
       }
     } else if (
@@ -206,7 +206,7 @@ export function validateTransaction(transaction) {
       if (isNaN(transaction.exchangeRate) || transaction.exchangeRate <= 0) {
         errors.push({
           field: "exchangeRate",
-          message: "Exchange rate must be a positive number",
+          message: "Exchange rate must be a positive number.",
         });
       }
     }

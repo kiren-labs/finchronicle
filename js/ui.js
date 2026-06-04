@@ -1136,13 +1136,13 @@ export function calculateBudgetHealth(month) {
 
   let status, statusIcon;
   if (variancePercent < 20) {
-    status = "On Track";
+    status = "On track";
     statusIcon = "check-line";
   } else if (variancePercent < 50) {
     status = "Caution";
     statusIcon = "alert-line";
   } else {
-    status = "Over Pace";
+    status = "Over pace";
     statusIcon = "close-circle-line";
   }
 
@@ -1196,7 +1196,7 @@ export function renderMonthlyInsights() {
   const summaryHTML = `
         <div class="insights-section">
             <div class="insights-header">
-                <h3 id="insightsOverviewLabel">Monthly Overview</h3>
+          <h3 id="insightsOverviewLabel">Monthly overview</h3>
                 <label for="insightsMonthSelector" class="sr-only">Select month for insights</label>
                 <select id="insightsMonthSelector" class="insights-month-selector" aria-labelledby="insightsOverviewLabel" aria-label="Select month to view financial insights">
                     ${monthOptions}
@@ -1248,7 +1248,7 @@ export function renderMonthlyInsights() {
   let budgetHealthHTML = "";
   if (budgetHealth && insights.expense > 0) {
     const statusClass =
-      budgetHealth.status === "On Track"
+      budgetHealth.status === "On track"
         ? "on-track"
         : budgetHealth.status === "Caution"
           ? "caution"
@@ -1259,7 +1259,7 @@ export function renderMonthlyInsights() {
                 <div class="budget-health-header">
                     <div class="budget-health-title">
                         <i class="ri-pulse-line"></i>
-                        <h3>Budget Health</h3>
+                    <h3>Budget health</h3>
                     </div>
                     <div class="budget-health-status ${statusClass}">
                         <i class="ri-${budgetHealth.statusIcon}"></i>
@@ -1268,11 +1268,11 @@ export function renderMonthlyInsights() {
                 </div>
                 <div class="budget-health-metrics">
                     <div class="budget-metric">
-                        <div class="metric-label">Daily Pace</div>
+                    <div class="metric-label">Daily pace</div>
                         <div class="metric-value">${formatCurrency(budgetHealth.dailyPace)}</div>
                     </div>
                     <div class="budget-metric">
-                        <div class="metric-label">Days Left</div>
+                    <div class="metric-label">Days left</div>
                         <div class="metric-value">${budgetHealth.daysRemaining}d</div>
                     </div>
                     <div class="budget-metric">
@@ -1307,7 +1307,7 @@ export function renderMonthlyInsights() {
     categoriesHTML = `
             <div class="top-categories-section">
                 <div class="section-header">
-                    <h3>Top Spending Categories</h3>
+            <h3>Top spending categories</h3>
                 </div>
                 <div class="category-list">
                     ${categoryRows}

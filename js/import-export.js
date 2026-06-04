@@ -99,7 +99,7 @@ export function exportToCSV() {
   window.URL.revokeObjectURL(url);
 
   updateBackupTimestamp();
-  showMessage("✅ Export successful & backup recorded!");
+  showMessage("Export successful and backup recorded.");
 }
 
 // ---- Generate Backup Metadata ----
@@ -132,7 +132,7 @@ function generateBackupMetadata() {
 
 export async function createBackup() {
   if (state.transactions.length === 0) {
-    showMessage("No transactions to backup!");
+    showMessage("No transactions to back up.");
     return;
   }
 
@@ -230,7 +230,7 @@ export async function createBackup() {
   a.click();
   window.URL.revokeObjectURL(url);
 
-  showMessage("Backup created successfully!");
+  showMessage("Backup created successfully.");
 }
 
 // ---- Import CSV ----
@@ -255,8 +255,10 @@ export function handleImport(event) {
         return;
       }
       showMessage(
-        `Imported ${result.added} transaction(s)${
-          result.skipped ? ` • Skipped ${result.skipped}` : ""
+        `Imported ${result.added} transaction${result.added !== 1 ? "s" : ""}${
+          result.skipped
+            ? ` • Skipped ${result.skipped} row${result.skipped !== 1 ? "s" : ""}`
+            : ""
         }`,
       );
     } catch (err) {
@@ -278,8 +280,10 @@ export function handleCsvImportFile(file) {
         return;
       }
       showMessage(
-        `Imported ${result.added} transaction(s)${
-          result.skipped ? ` • Skipped ${result.skipped}` : ""
+        `Imported ${result.added} transaction${result.added !== 1 ? "s" : ""}${
+          result.skipped
+            ? ` • Skipped ${result.skipped} row${result.skipped !== 1 ? "s" : ""}`
+            : ""
         }`,
       );
     } catch (err) {
@@ -801,7 +805,7 @@ export async function confirmRestore(mode = "merge") {
 
   if (mode === "replace") {
     const confirmed = confirm(
-      `This will DELETE all current data and replace it with the backup (${backupData.transactions.length} transactions). This cannot be undone. Continue?`,
+      `This will permanently delete all current data and replace it with ${backupData.transactions.length} transactions from the backup. This cannot be undone. Continue?`,
     );
     if (!confirmed) return;
   }
@@ -1017,7 +1021,7 @@ export async function handleRestoreFileInput(file) {
     }
   } else if (name.endsWith(".csv")) {
     showMessage(
-      "CSV restores transactions only. Use a .json backup for full restore.",
+      "CSV restores transactions only. Use a .json backup for a full restore.",
       "warning",
     );
     handleCsvRestore(file);

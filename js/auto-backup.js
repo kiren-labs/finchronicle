@@ -432,7 +432,7 @@ export async function performCsvBackup(isAuto = false) {
   updateBackupTimestamp();
 
   if (isAuto) {
-    showMessage("📦 Auto-backup saved to Downloads");
+    showMessage("Auto-backup saved to Downloads.");
   } else {
     showMessage("✅ CSV backup exported!");
   }

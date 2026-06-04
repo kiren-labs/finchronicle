@@ -93,8 +93,8 @@ function checkMilestone(goal, prevPercent, newPercent) {
   if (newLevel > prevLevel) {
     const messages = {
       25: `🎯 25% — Great start on "${goal.name}"!`,
-      50: `🔥 Halfway there! "${goal.name}" is 50% funded.`,
-      75: `🚀 75%! "${goal.name}" is almost done!`,
+      50: `50% reached. "${goal.name}" is halfway funded.`,
+      75: `75% reached. "${goal.name}" is close to the target.`,
       100: `🎉 Goal reached! "${goal.name}" is fully funded!`,
     };
     showMessage(messages[newLevel] || `Milestone: ${newLevel}%`);

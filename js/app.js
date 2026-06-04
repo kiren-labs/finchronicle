@@ -202,7 +202,7 @@ async function getImportExportModule() {
 function bindStaticEvents() {
   // ---- Header buttons ----
   document
-    .querySelector('.header-btn[aria-label="Send Feedback"]')
+    .querySelector('.header-btn[aria-label="Send feedback"]')
     .addEventListener("click", openFeedbackModal);
   document
     .querySelector('.header-btn[aria-label="Quick Add Transaction"]')
@@ -436,7 +436,7 @@ function bindSettingsButtons() {
     "Check for updates": checkForUpdates,
     "Change currency": toggleCurrencySelector,
     "Toggle dark mode": toggleDarkMode,
-    "Send Feedback": () => openFeedbackModal(),
+    "Send feedback": () => openFeedbackModal(),
   };
 
   document.querySelectorAll("#settingsTab .toolbar-btn").forEach((btn) => {
@@ -488,7 +488,7 @@ function bindDelegatedEvents() {
     updateCurrencyDisplay();
     updateUI();
     closeCurrencySelector();
-    showMessage(`Currency changed to ${currencies[code].name}`);
+    showMessage(`Currency changed to ${currencies[code].name}.`);
   });
 
   // Budget container: collapse toggle + edit / delete
@@ -664,12 +664,12 @@ function bindDelegatedEvents() {
           .join("\n---\n");
         navigator.clipboard
           .writeText(text)
-          .then(() => showMessage("Error log copied"));
+          .then(() => showMessage("Error log copied."));
       }
       if (btn.dataset.action === "clearErrorLog") {
         clearErrorLog();
         updateSettingsContent();
-        showMessage("Error log cleared");
+        showMessage("Error log cleared.");
       }
     });
   }
@@ -814,7 +814,7 @@ function bindFormSubmit() {
       const amount = parseFloat(amountInput);
 
       if (!amountInput) {
-        showMessage("⚠️ Please enter an amount");
+        showMessage("⚠️ Enter an amount.");
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         return;
@@ -937,7 +937,7 @@ function bindFormSubmit() {
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
         submitBtn.textContent = originalBtnText;
-        showMessage("Failed to save transaction");
+        showMessage("Failed to save transaction.");
       }
     });
 }
@@ -1089,11 +1089,11 @@ function openBudgetModal(budget = null) {
 
       // Validation
       if (!formData.category) {
-        showMessage("Please select a category", "error");
+        showMessage("Select a category.", "error");
         return;
       }
       if (!formData.monthlyLimit || formData.monthlyLimit <= 0) {
-        showMessage("Monthly limit must be greater than 0", "error");
+        showMessage("Monthly limit must be greater than 0.", "error");
         return;
       }
 
@@ -1176,7 +1176,7 @@ async function init() {
     registerServiceWorker();
   } catch (err) {
     console.error("App initialization failed:", err);
-    showMessage("Failed to load data");
+    showMessage("Failed to load data.");
   }
 }
 

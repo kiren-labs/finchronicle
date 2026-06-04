@@ -126,11 +126,11 @@ export function renderAnnualReport(year = null) {
   const summaryCards = `
     <div class="annual-summary-row">
       <div class="annual-stat">
-        <span class="annual-stat-label">Total Income</span>
+        <span class="annual-stat-label">Total income</span>
         <span class="annual-stat-value positive">${formatCurrency(totalIncome)}</span>
       </div>
       <div class="annual-stat">
-        <span class="annual-stat-label">Total Expenses</span>
+        <span class="annual-stat-label">Total expenses</span>
         <span class="annual-stat-value negative">${formatCurrency(totalExpense)}</span>
       </div>
       <div class="annual-stat">
@@ -138,7 +138,7 @@ export function renderAnnualReport(year = null) {
         <span class="annual-stat-value ${net >= 0 ? "positive" : "negative"}">${net >= 0 ? "" : "-"}${formatCurrency(Math.abs(net))}</span>
       </div>
       <div class="annual-stat">
-        <span class="annual-stat-label">Savings Rate</span>
+        <span class="annual-stat-label">Savings rate</span>
         <span class="annual-stat-value ${savingsRate >= 20 ? "positive" : savingsRate >= 0 ? "" : "negative"}">${savingsRate}%</span>
       </div>
     </div>
@@ -163,7 +163,7 @@ export function renderAnnualReport(year = null) {
   if (topExpenses.length > 0) {
     topSection = `
       <div class="annual-section">
-        <h4>Top 5 Largest Expenses</h4>
+        <h4>Top 5 largest expenses</h4>
         <div class="annual-top-list">
           ${topExpenses
             .map(
