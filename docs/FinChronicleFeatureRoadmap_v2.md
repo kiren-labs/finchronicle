@@ -165,7 +165,7 @@ Transient network failures when the Service Worker tries to fetch `sw.js` (backg
 
 ---
 
-## What Comes Next — Proposed Roadmap v4.2–v4.14
+## What Comes Next — Proposed Roadmap v4.4–v4.15
 
 > **Roadmap revised 2026-05-23** — Backup & Restore Overhaul inserted as v4.2.0 (data safety priority). Actionable Spending Insights moves to v4.3.0. All subsequent versions shift by one.
 
@@ -635,8 +635,8 @@ Last significant data-capture gap. Storage-first constraints apply.
 | 10 | v3.28.0 | + `netWorthSnapshots` store |
 | 11 | v4.0.0 | `accounts` + `classification` field; `transactions` + `status` field; `dateType` composite index |
 | 12 | v4.0.0 | (same migration block) reconciliation indexes |
-| 13 | v4.13.0 (Loan / EMI Tracker) | + `loans` store (planned) |
-| 14 | v4.14.0 (Receipt Photos) | + `receipts` store (planned) |
+| 13 | v4.14.0 (Loan / EMI Tracker) | + `loans` store (planned) |
+| 14 | v4.15.0 (Receipt Photos) | + `receipts` store (planned) |
 
 ---
 
