@@ -264,7 +264,9 @@ export function handleImport(event) {
       );
     } catch (err) {
       console.error("Import failed:", err);
-      showMessage("Import failed. Make sure the file is in the correct format.");
+      showMessage(
+        "Import failed. Make sure the file is in the correct format.",
+      );
     }
   };
   reader.readAsText(file);
@@ -289,7 +291,9 @@ export function handleCsvImportFile(file) {
       );
     } catch (err) {
       console.error("Import failed:", err);
-      showMessage("Import failed. Make sure the file is in the correct format.");
+      showMessage(
+        "Import failed. Make sure the file is in the correct format.",
+      );
     }
   };
   reader.readAsText(file);
@@ -711,7 +715,10 @@ export function parseBackupCSV(text) {
   });
 
   if (parsedTransactions.length === 0) {
-    return { valid: false, error: "This backup file doesn't contain any transactions." };
+    return {
+      valid: false,
+      error: "This backup file doesn't contain any transactions.",
+    };
   }
 
   return { valid: true, metadata, transactions: parsedTransactions };
@@ -755,7 +762,8 @@ export function showRestorePreview(backupData) {
       integrityEl.style.color = "var(--color-income-text)";
     } else if (backupData.integrityOk === false) {
       integrityRow.style.display = "";
-      integrityEl.textContent = "⚠ File check failed — this backup may be damaged";
+      integrityEl.textContent =
+        "⚠ File check failed — this backup may be damaged";
       integrityEl.style.color = "var(--color-expense-text)";
     } else {
       integrityRow.style.display = "none";

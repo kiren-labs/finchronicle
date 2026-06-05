@@ -584,7 +584,9 @@ export async function saveRecurringTemplate() {
 
   closeRecurringModal();
   renderRecurringSection();
-  showMessage(isEditing ? "Recurring updated." : "Recurring transaction added.");
+  showMessage(
+    isEditing ? "Recurring updated." : "Recurring transaction added.",
+  );
 }
 
 async function deleteRecurring(id) {

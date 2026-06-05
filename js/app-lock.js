@@ -4,11 +4,11 @@
 // surfing and "someone picks up my phone" threat. Not a crypto barrier.
 // ============================================================================
 
-const LS_ENABLED   = 'appLock_enabled';
-const LS_PIN_HASH  = 'appLock_pin_hash';
-const LS_SALT      = 'appLock_salt';
-const LS_TIMEOUT   = 'appLock_timeout';    // minutes; 0 = never
-const LS_CRED_ID   = 'appLock_cred_id';   // base64 WebAuthn credential ID
+const LS_ENABLED = "appLock_enabled";
+const LS_PIN_HASH = "appLock_pin_hash";
+const LS_SALT = "appLock_salt";
+const LS_TIMEOUT = "appLock_timeout"; // minutes; 0 = never
+const LS_CRED_ID = "appLock_cred_id"; // base64 WebAuthn credential ID
 
 const DEFAULT_TIMEOUT_MINS = 1;
 
@@ -24,16 +24,16 @@ function resetInactivityTimer() {
 }
 
 function startInactivityTimer() {
-  ['click', 'keydown', 'touchstart', 'mousemove'].forEach(evt =>
-    document.addEventListener(evt, resetInactivityTimer, { passive: true })
+  ["click", "keydown", "touchstart", "mousemove"].forEach((evt) =>
+    document.addEventListener(evt, resetInactivityTimer, { passive: true }),
   );
   resetInactivityTimer();
 }
 
 function stopInactivityTimer() {
   clearTimeout(_lockTimer);
-  ['click', 'keydown', 'touchstart', 'mousemove'].forEach(evt =>
-    document.removeEventListener(evt, resetInactivityTimer)
+  ["click", "keydown", "touchstart", "mousemove"].forEach((evt) =>
+    document.removeEventListener(evt, resetInactivityTimer),
   );
 }
 
@@ -41,24 +41,37 @@ function stopInactivityTimer() {
 
 async function generateSalt() {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 async function hashPIN(pin, saltHex) {
-  const saltBytes = new Uint8Array(saltHex.match(/.{2}/g).map(h => parseInt(h, 16)));
-  const pinBytes = new TextEncoder().encode(pin);
-  const keyMaterial = await crypto.subtle.importKey('raw', pinBytes, 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt: saltBytes, iterations: 100000, hash: 'SHA-256' },
-    keyMaterial, 256
+  const saltBytes = new Uint8Array(
+    saltHex.match(/.{2}/g).map((h) => parseInt(h, 16)),
   );
-  return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
+  const pinBytes = new TextEncoder().encode(pin);
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    pinBytes,
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: saltBytes, iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    256,
+  );
+  return Array.from(new Uint8Array(bits))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 // ---- Getters / setters ----
 
 export function isLockEnabled() {
-  return localStorage.getItem(LS_ENABLED) === 'true';
+  return localStorage.getItem(LS_ENABLED) === "true";
 }
 
 export function getLockTimeout() {
@@ -74,7 +87,7 @@ function getCredentialId() {
   const b64 = localStorage.getItem(LS_CRED_ID);
   if (!b64) return null;
   const bin = atob(b64);
-  return Uint8Array.from(bin, c => c.charCodeAt(0));
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
 }
 
 function setCredentialId(idBytes) {
@@ -99,15 +112,19 @@ export function lock() {
   if (!isLockEnabled()) return;
   _locked = true;
   stopInactivityTimer();
-  document.getElementById('lockOverlay').removeAttribute('hidden');
-  document.getElementById('lockOverlay').querySelector('.lock-pin-input').value = '';
-  document.getElementById('lockOverlay').querySelector('.lock-error').textContent = '';
+  document.getElementById("lockOverlay").removeAttribute("hidden");
+  document
+    .getElementById("lockOverlay")
+    .querySelector(".lock-pin-input").value = "";
+  document
+    .getElementById("lockOverlay")
+    .querySelector(".lock-error").textContent = "";
   updateBiometricButtonVisibility();
 }
 
 async function unlock() {
   _locked = false;
-  document.getElementById('lockOverlay').setAttribute('hidden', '');
+  document.getElementById("lockOverlay").setAttribute("hidden", "");
   startInactivityTimer();
 }
 
@@ -136,10 +153,12 @@ async function authenticateWithBiometric() {
     await navigator.credentials.get({
       publicKey: {
         challenge,
-        allowCredentials: [{ type: 'public-key', id: credId, transports: ['internal'] }],
-        userVerification: 'required',
+        allowCredentials: [
+          { type: "public-key", id: credId, transports: ["internal"] },
+        ],
+        userVerification: "required",
         timeout: 30000,
-      }
+      },
     });
     return true;
   } catch {
@@ -154,16 +173,19 @@ async function registerBiometric() {
     const cred = await navigator.credentials.create({
       publicKey: {
         challenge,
-        rp: { name: 'FinChronicle', id: location.hostname },
-        user: { id: userId, name: 'finchronicle_user', displayName: 'You' },
-        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+        rp: { name: "FinChronicle", id: location.hostname },
+        user: { id: userId, name: "finchronicle_user", displayName: "You" },
+        pubKeyCredParams: [
+          { type: "public-key", alg: -7 },
+          { type: "public-key", alg: -257 },
+        ],
         authenticatorSelection: {
-          authenticatorAttachment: 'platform',
-          userVerification: 'required',
-          residentKey: 'discouraged',
+          authenticatorAttachment: "platform",
+          userVerification: "required",
+          residentKey: "discouraged",
         },
         timeout: 60000,
-      }
+      },
     });
     setCredentialId(new Uint8Array(cred.rawId));
     return true;
@@ -175,15 +197,19 @@ async function registerBiometric() {
 // ---- Lock overlay helpers ----
 
 function setLockError(msg) {
-  const el = document.getElementById('lockOverlay').querySelector('.lock-error');
+  const el = document
+    .getElementById("lockOverlay")
+    .querySelector(".lock-error");
   el.textContent = msg;
-  const input = document.getElementById('lockOverlay').querySelector('.lock-pin-input');
-  input.classList.add('lock-input-shake');
-  setTimeout(() => input.classList.remove('lock-input-shake'), 400);
+  const input = document
+    .getElementById("lockOverlay")
+    .querySelector(".lock-pin-input");
+  input.classList.add("lock-input-shake");
+  setTimeout(() => input.classList.remove("lock-input-shake"), 400);
 }
 
 async function updateBiometricButtonVisibility() {
-  const btn = document.getElementById('biometricBtn');
+  const btn = document.getElementById("biometricBtn");
   if (!btn) return;
   const available = await isBiometricAvailable();
   btn.hidden = !available || !getCredentialId();
@@ -196,7 +222,7 @@ export async function enableLock(pin) {
   const hash = await hashPIN(pin, salt);
   localStorage.setItem(LS_SALT, salt);
   localStorage.setItem(LS_PIN_HASH, hash);
-  localStorage.setItem(LS_ENABLED, 'true');
+  localStorage.setItem(LS_ENABLED, "true");
   if (!localStorage.getItem(LS_TIMEOUT)) {
     setLockTimeout(DEFAULT_TIMEOUT_MINS);
   }
@@ -229,42 +255,50 @@ export async function initAppLock() {
 }
 
 export function bindLockOverlayEvents() {
-  const overlay   = document.getElementById('lockOverlay');
-  const pinForm   = document.getElementById('lockPinForm');
-  const pinInput  = overlay.querySelector('.lock-pin-input');
-  const unlockBtn = overlay.querySelector('.lock-unlock-btn');
-  const biometBtn = document.getElementById('biometricBtn');
-  const forgotBtn = overlay.querySelector('.lock-forgot-btn');
+  const overlay = document.getElementById("lockOverlay");
+  const pinForm = document.getElementById("lockPinForm");
+  const pinInput = overlay.querySelector(".lock-pin-input");
+  const unlockBtn = overlay.querySelector(".lock-unlock-btn");
+  const biometBtn = document.getElementById("biometricBtn");
+  const forgotBtn = overlay.querySelector(".lock-forgot-btn");
 
   async function attemptUnlock() {
     const pin = pinInput.value.trim();
     if (!pin) return;
     const ok = await verifyPIN(pin);
-    pinInput.value = '';
+    pinInput.value = "";
     if (ok) {
       await unlock();
     } else {
-      setLockError('Wrong PIN. Try again.');
+      setLockError("Wrong PIN. Try again.");
     }
   }
 
-  pinForm.addEventListener('submit', (e) => { e.preventDefault(); attemptUnlock(); });
-  unlockBtn.addEventListener('click', attemptUnlock);
+  pinForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    attemptUnlock();
+  });
+  unlockBtn.addEventListener("click", attemptUnlock);
 
-  biometBtn?.addEventListener('click', async () => {
+  biometBtn?.addEventListener("click", async () => {
     const ok = await authenticateWithBiometric();
     if (ok) {
       await unlock();
     } else {
-      setLockError('Biometric failed. Use your PIN instead.');
+      setLockError("Biometric failed. Use your PIN instead.");
     }
   });
 
-  forgotBtn.addEventListener('click', () => {
-    if (!confirm('Reset your PIN? Your financial data stays safe — only the lock is removed.')) return;
+  forgotBtn.addEventListener("click", () => {
+    if (
+      !confirm(
+        "Reset your PIN? Your financial data stays safe — only the lock is removed.",
+      )
+    )
+      return;
     disableLock();
     _locked = false;
-    overlay.setAttribute('hidden', '');
+    overlay.setAttribute("hidden", "");
   });
 
   updateBiometricButtonVisibility();
@@ -273,19 +307,19 @@ export function bindLockOverlayEvents() {
 // ---- Settings panel renderer ----
 
 export async function renderLockSettings() {
-  const container = document.getElementById('appLockSettingsContainer');
+  const container = document.getElementById("appLockSettingsContainer");
   if (!container) return;
 
-  const enabled   = isLockEnabled();
-  const bioAvail  = await isBiometricAvailable();
-  const hasCred   = !!getCredentialId();
-  const timeout   = getLockTimeout();
+  const enabled = isLockEnabled();
+  const bioAvail = await isBiometricAvailable();
+  const hasCred = !!getCredentialId();
+  const timeout = getLockTimeout();
 
   const timeoutOptions = [
-    { value: 1,  label: '1 minute' },
-    { value: 5,  label: '5 minutes' },
-    { value: 15, label: '15 minutes' },
-    { value: 0,  label: 'Never' },
+    { value: 1, label: "1 minute" },
+    { value: 5, label: "5 minutes" },
+    { value: 15, label: "15 minutes" },
+    { value: 0, label: "Never" },
   ];
 
   container.innerHTML = `
@@ -293,7 +327,9 @@ export async function renderLockSettings() {
       <h3>App Lock</h3>
       <p class="lock-settings-desc">Require a PIN to open the app. Your data is not encrypted — this stops casual access only.</p>
 
-      ${!enabled ? `
+      ${
+        !enabled
+          ? `
         <form id="lockSetupForm" autocomplete="off">
           <input type="text" name="username" autocomplete="username" hidden aria-hidden="true">
           <label class="lock-label" for="newPinInput">Set a PIN (4–8 digits)</label>
@@ -305,7 +341,8 @@ export async function renderLockSettings() {
             <i class="ri-lock-line"></i><span>Enable lock</span>
           </button>
         </form>
-      ` : `
+      `
+          : `
         <div class="lock-active-panel">
           <div class="lock-status-row">
             <i class="ri-lock-fill lock-active-icon"></i>
@@ -315,9 +352,12 @@ export async function renderLockSettings() {
 
           <label class="lock-label" for="lockTimeoutSelect">Auto-lock after</label>
           <select id="lockTimeoutSelect" class="lock-settings-select">
-            ${timeoutOptions.map(o =>
-              `<option value="${o.value}" ${o.value === timeout ? 'selected' : ''}>${o.label}</option>`
-            ).join('')}
+            ${timeoutOptions
+              .map(
+                (o) =>
+                  `<option value="${o.value}" ${o.value === timeout ? "selected" : ""}>${o.label}</option>`,
+              )
+              .join("")}
           </select>
 
           <div class="lock-section-divider"></div>
@@ -332,100 +372,118 @@ export async function renderLockSettings() {
             </button>
           </form>
 
-          ${bioAvail ? `
+          ${
+            bioAvail
+              ? `
             <div class="lock-section-divider"></div>
             <p class="lock-label">Biometric fast-unlock</p>
-            <p class="lock-settings-desc">${hasCred ? 'Face/fingerprint unlock is on.' : 'Use Face ID, Touch ID, or Windows Hello instead of typing your PIN.'}</p>
-            ${hasCred
-              ? `<button class="lock-danger-btn" id="removeBiometricBtn" type="button">Remove biometric</button>`
-              : `<button class="data-backup-btn" id="addBiometricBtn" type="button"><i class="ri-fingerprint-line"></i><span>Set up biometric</span></button>`
+            <p class="lock-settings-desc">${hasCred ? "Face/fingerprint unlock is on." : "Use Face ID, Touch ID, or Windows Hello instead of typing your PIN."}</p>
+            ${
+              hasCred
+                ? `<button class="lock-danger-btn" id="removeBiometricBtn" type="button">Remove biometric</button>`
+                : `<button class="data-backup-btn" id="addBiometricBtn" type="button"><i class="ri-fingerprint-line"></i><span>Set up biometric</span></button>`
             }
-          ` : ''}
+          `
+              : ""
+          }
         </div>
-      `}
+      `
+      }
     </div>
   `;
 
   bindLockSettingsEvents();
 
   // Keep the header lock button in sync
-  const lockNowBtn = document.getElementById('lockNowBtn');
+  const lockNowBtn = document.getElementById("lockNowBtn");
   if (lockNowBtn) lockNowBtn.hidden = !enabled;
 }
 
 function bindLockSettingsEvents() {
-  const setupForm   = document.getElementById('lockSetupForm');
-  const changeForm  = document.getElementById('changePinForm');
-  const disableBtn  = document.getElementById('disableLockBtn');
-  const timeoutSel  = document.getElementById('lockTimeoutSelect');
-  const addBioBtn   = document.getElementById('addBiometricBtn');
-  const rmBioBtn    = document.getElementById('removeBiometricBtn');
+  const setupForm = document.getElementById("lockSetupForm");
+  const changeForm = document.getElementById("changePinForm");
+  const disableBtn = document.getElementById("disableLockBtn");
+  const timeoutSel = document.getElementById("lockTimeoutSelect");
+  const addBioBtn = document.getElementById("addBiometricBtn");
+  const rmBioBtn = document.getElementById("removeBiometricBtn");
 
-  setupForm?.addEventListener('submit', async (e) => {
+  setupForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const pin     = document.getElementById('newPinInput').value;
-    const confirm = document.getElementById('confirmPinInput').value;
-    const errEl   = document.getElementById('lockSetupError');
+    const pin = document.getElementById("newPinInput").value;
+    const confirm = document.getElementById("confirmPinInput").value;
+    const errEl = document.getElementById("lockSetupError");
     if (!/^\d{4,8}$/.test(pin)) {
-      errEl.textContent = 'PIN must be 4–8 digits.'; return;
+      errEl.textContent = "PIN must be 4–8 digits.";
+      return;
     }
     if (pin !== confirm) {
-      errEl.textContent = 'PINs don\'t match.'; return;
+      errEl.textContent = "PINs don't match.";
+      return;
     }
     await enableLock(pin);
-    showLockMessage('Lock enabled.');
+    showLockMessage("Lock enabled.");
   });
 
-  disableBtn?.addEventListener('click', () => {
-    if (!confirm('Remove the app lock? Anyone with device access will be able to open the app.')) return;
+  disableBtn?.addEventListener("click", () => {
+    if (
+      !confirm(
+        "Remove the app lock? Anyone with device access will be able to open the app.",
+      )
+    )
+      return;
     disableLock();
-    showLockMessage('Lock removed.');
+    showLockMessage("Lock removed.");
   });
 
-  changeForm?.addEventListener('submit', async (e) => {
+  changeForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const current = document.getElementById('currentPinInput').value;
-    const next    = document.getElementById('newPinInput2').value;
-    const errEl   = document.getElementById('lockChangeError');
+    const current = document.getElementById("currentPinInput").value;
+    const next = document.getElementById("newPinInput2").value;
+    const errEl = document.getElementById("lockChangeError");
     if (!/^\d{4,8}$/.test(next)) {
-      errEl.textContent = 'New PIN must be 4–8 digits.'; return;
+      errEl.textContent = "New PIN must be 4–8 digits.";
+      return;
     }
     const ok = await changePIN(current, next);
     if (ok) {
-      showLockMessage('PIN updated.');
+      showLockMessage("PIN updated.");
     } else {
-      errEl.textContent = 'Current PIN is wrong.';
+      errEl.textContent = "Current PIN is wrong.";
     }
   });
 
-  timeoutSel?.addEventListener('change', () => {
+  timeoutSel?.addEventListener("change", () => {
     setLockTimeout(parseInt(timeoutSel.value, 10));
     resetInactivityTimer();
   });
 
-  addBioBtn?.addEventListener('click', async () => {
+  addBioBtn?.addEventListener("click", async () => {
     const ok = await registerBiometric();
     if (ok) {
       renderLockSettings();
-      showLockMessage('Biometric unlock set up.');
+      showLockMessage("Biometric unlock set up.");
     } else {
-      showLockMessage('Biometric setup failed. Try again.');
+      showLockMessage("Biometric setup failed. Try again.");
     }
   });
 
-  rmBioBtn?.addEventListener('click', () => {
+  rmBioBtn?.addEventListener("click", () => {
     localStorage.removeItem(LS_CRED_ID);
     renderLockSettings();
-    showLockMessage('Biometric unlock removed.');
+    showLockMessage("Biometric unlock removed.");
   });
 }
 
 function showLockMessage(msg) {
   // Reuse the app's existing showMessage if available, else a simple fallback.
-  if (typeof window._showMessage === 'function') {
+  if (typeof window._showMessage === "function") {
     window._showMessage(msg);
   } else {
-    const el = document.getElementById('successMessage');
-    if (el) { el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2500); }
+    const el = document.getElementById("successMessage");
+    if (el) {
+      el.textContent = msg;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 2500);
+    }
   }
 }

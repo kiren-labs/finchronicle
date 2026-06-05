@@ -329,7 +329,9 @@ export async function finaliseReconciliation(force = false) {
   }
 
   const count = toReconcile.length;
-  showMessage(`${count} transaction${count !== 1 ? "s" : ""} confirmed against your statement.`);
+  showMessage(
+    `${count} transaction${count !== 1 ? "s" : ""} confirmed against your statement.`,
+  );
   closeReconciliationModal();
   updateUI();
 }

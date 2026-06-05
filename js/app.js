@@ -173,11 +173,7 @@ import {
 } from "./settlement.js";
 import { initGoals, renderGoalsDashboard, bindGoalEvents } from "./goals.js";
 import { bindReconciliationEvents } from "./reconciliation.js";
-import {
-  initAppLock,
-  lock,
-  renderLockSettings,
-} from "./app-lock.js";
+import { initAppLock, lock, renderLockSettings } from "./app-lock.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -213,9 +209,7 @@ function bindStaticEvents() {
   document
     .querySelector('.header-btn[aria-label="Quick Add Transaction"]')
     .addEventListener("click", quickAddTransaction);
-  document
-    .getElementById("lockNowBtn")
-    ?.addEventListener("click", lock);
+  document.getElementById("lockNowBtn")?.addEventListener("click", lock);
 
   // ---- Update prompt ----
   document
