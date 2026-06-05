@@ -173,6 +173,11 @@ import {
 } from "./settlement.js";
 import { initGoals, renderGoalsDashboard, bindGoalEvents } from "./goals.js";
 import { bindReconciliationEvents } from "./reconciliation.js";
+import {
+  initAppLock,
+  lock,
+  renderLockSettings,
+} from "./app-lock.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -208,6 +213,9 @@ function bindStaticEvents() {
   document
     .querySelector('.header-btn[aria-label="Quick Add Transaction"]')
     .addEventListener("click", quickAddTransaction);
+  document
+    .getElementById("lockNowBtn")
+    ?.addEventListener("click", lock);
 
   // ---- Update prompt ----
   document
@@ -1172,6 +1180,11 @@ async function init() {
     updateCurrencyDisplay();
     loadBackupTimestamp();
     checkInstallPrompt();
+
+    // App Lock (v4.3.0) — render settings panel, then gate if enabled
+    window._showMessage = showMessage;
+    await renderLockSettings();
+    await initAppLock();
 
     // Service Worker (non-blocking)
     registerServiceWorker();
