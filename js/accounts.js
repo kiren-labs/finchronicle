@@ -16,9 +16,26 @@ import { sanitizeHTML, showMessage, generateId } from "./utils.js";
 import { renderSavingsDashboard } from "./savings.js";
 import { openReconciliationModal } from "./reconciliation.js";
 
+const LS_ACCOUNTS_VISIBLE = "showAccountsSection";
+
+export function isAccountsSectionVisible() {
+  return localStorage.getItem(LS_ACCOUNTS_VISIBLE) === "true";
+}
+
+export function setAccountsSectionVisible(visible) {
+  localStorage.setItem(LS_ACCOUNTS_VISIBLE, visible ? "true" : "false");
+  applyAccountsVisibility();
+}
+
+export function applyAccountsVisibility() {
+  const container = document.getElementById("accountsContainer");
+  if (container) container.hidden = !isAccountsSectionVisible();
+}
+
 // ---- Init ----
 
 export async function initAccounts() {
+  applyAccountsVisibility();
   try {
     await loadAccounts();
     if (state.accounts.length > 0) {

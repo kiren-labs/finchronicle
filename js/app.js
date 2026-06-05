@@ -145,6 +145,8 @@ import {
   renderNetWorthDashboard,
   renderAccountManager,
   bindAccountEvents,
+  isAccountsSectionVisible,
+  setAccountsSectionVisible,
 } from "./accounts.js";
 import { renderSavingsDashboard } from "./savings.js";
 import {
@@ -411,6 +413,15 @@ function bindStaticEvents() {
 
   // ---- Accounts (v3.18.0) ----
   bindAccountEvents();
+
+  // ---- Feature visibility toggles (v4.3.1) ----
+  const toggleAccounts = document.getElementById("toggleAccountsSection");
+  if (toggleAccounts) {
+    toggleAccounts.checked = isAccountsSectionVisible();
+    toggleAccounts.addEventListener("change", () => {
+      setAccountsSectionVisible(toggleAccounts.checked);
+    });
+  }
 
   // ---- Reconciliation (v4.0.0) ----
   bindReconciliationEvents();
