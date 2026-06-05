@@ -112,14 +112,23 @@ export function lock() {
   if (!isLockEnabled()) return;
   _locked = true;
   stopInactivityTimer();
-  document.getElementById("lockOverlay").removeAttribute("hidden");
-  document
-    .getElementById("lockOverlay")
-    .querySelector(".lock-pin-input").value = "";
-  document
-    .getElementById("lockOverlay")
-    .querySelector(".lock-error").textContent = "";
+  const overlay = document.getElementById("lockOverlay");
+  overlay.removeAttribute("hidden");
+  overlay.querySelector(".lock-pin-input").value = "";
+  overlay.querySelector(".lock-error").textContent = "";
   updateBiometricButtonVisibility();
+  _autoTriggerBiometric();
+}
+
+async function _autoTriggerBiometric() {
+  if (!getCredentialId()) return;
+  if (!(await isBiometricAvailable())) return;
+  // Brief delay so overlay is visible before the OS prompt appears
+  await new Promise((r) => setTimeout(r, 350));
+  if (!_locked) return;
+  const ok = await authenticateWithBiometric();
+  if (ok) await unlock();
+  // Dismissed or failed — silently stay on PIN screen, no error
 }
 
 async function unlock() {
