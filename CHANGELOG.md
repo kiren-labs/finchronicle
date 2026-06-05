@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.3.0] — 2026-06-05
+
+### Added — App Lock
+
+- **PIN lock** — optional UI gate that covers the app with a full-screen lock screen on load and after an inactivity timeout
+- **Biometric fast-unlock** — Face ID / Touch ID / Windows Hello via WebAuthn platform authenticator; shown only when the device supports it; falls back gracefully to PIN
+- **Auto-lock timeout** — configurable: 1 minute (default), 5 minutes, 15 minutes, or never
+- **Lock now** button in the header — instantly locks the app without waiting for the timeout; only visible when lock is enabled
+- **App Lock settings card** in the Settings tab — PIN setup, timeout selector, change PIN, add/remove biometric, and remove lock all from one place
+- **Forgot PIN** — resets the lock (PIN only) without touching any financial data
+- PIN stored as PBKDF2-derived hash (100,000 iterations, SHA-256) with a random salt — never plaintext
+- New module `js/app-lock.js`; added to SW cache for offline support
+
+### Technical
+- Lock overlay uses `hidden` attribute; inactivity timer wired to `click`, `keydown`, `touchstart`, `mousemove`
+- PIN inputs wrapped in `<form>` with hidden username field to satisfy browser password-manager accessibility requirements
+- `window._showMessage` bridge allows `app-lock.js` to reuse the app's existing toast without a circular import
+
 ## [4.2.1] — 2026-06-04
 
 ### Changed — Copy & Language Overhaul

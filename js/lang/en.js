@@ -1,7 +1,7 @@
 export default {
   _meta: {
     locale: "en",
-    version: "4.2.1",
+    version: "4.3.0",
     note: "All user-visible strings for FinChronicle. Keys mirror the module that owns the string.",
   },
   button: {
