@@ -2,37 +2,37 @@
 // FAQ Data and Rendering (v3.9.0)
 // ============================================================================
 
-import { t } from './i18n.js';
+import { t } from "./i18n.js";
 
 // Build FAQ structure from i18n
 export const faqData = [
   {
-    category: t('faq.category_backup'),
+    category: t("faq.category_backup"),
     icon: "ri-shield-check-line",
     questions: [
-      { q: t('faq.q_storage'), a: t('faq.a_storage') },
-      { q: t('faq.q_backup'), a: t('faq.a_backup') },
-      { q: t('faq.q_device_loss'), a: t('faq.a_device_loss') },
-      { q: t('faq.q_restore'), a: t('faq.a_restore') },
-      { q: t('faq.q_backup_frequency'), a: t('faq.a_backup_frequency') },
+      { q: t("faq.q_storage"), a: t("faq.a_storage") },
+      { q: t("faq.q_backup"), a: t("faq.a_backup") },
+      { q: t("faq.q_device_loss"), a: t("faq.a_device_loss") },
+      { q: t("faq.q_restore"), a: t("faq.a_restore") },
+      { q: t("faq.q_backup_frequency"), a: t("faq.a_backup_frequency") },
     ],
   },
   {
-    category: t('faq.category_privacy'),
+    category: t("faq.category_privacy"),
     icon: "ri-lock-line",
     questions: [
-      { q: t('faq.q_privacy'), a: t('faq.a_privacy') },
-      { q: t('faq.q_access'), a: t('faq.a_access') },
-      { q: t('faq.q_creator_access'), a: t('faq.a_creator_access') },
+      { q: t("faq.q_privacy"), a: t("faq.a_privacy") },
+      { q: t("faq.q_access"), a: t("faq.a_access") },
+      { q: t("faq.q_creator_access"), a: t("faq.a_creator_access") },
     ],
   },
   {
-    category: t('faq.category_usage'),
+    category: t("faq.category_usage"),
     icon: "ri-question-line",
     questions: [
-      { q: t('faq.q_import'), a: t('faq.a_import') },
-      { q: t('faq.q_currency'), a: t('faq.a_currency') },
-      { q: t('faq.q_insights'), a: t('faq.a_insights') },
+      { q: t("faq.q_import"), a: t("faq.a_import") },
+      { q: t("faq.q_currency"), a: t("faq.a_currency") },
+      { q: t("faq.q_insights"), a: t("faq.a_insights") },
     ],
   },
 ];

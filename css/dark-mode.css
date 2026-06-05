@@ -856,3 +856,16 @@ body.dark-mode .horizon-btn:hover {
   border-color: var(--color-primary);
   color: #fff;
 }
+
+/* App Lock dark mode (v4.3.0) */
+body.dark-mode .lock-pin-input,
+body.dark-mode .lock-settings-input,
+body.dark-mode .lock-settings-select {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .lock-biometric-btn {
+  background: var(--color-surface);
+}

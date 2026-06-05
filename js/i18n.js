@@ -2,7 +2,7 @@
 // i18n — String Localization & Variable Interpolation
 // ============================================================================
 
-import en from './lang/en.js';
+import en from "./lang/en.js";
 
 /**
  * Translate a key path to its string value, optionally interpolating variables.

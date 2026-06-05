@@ -31,6 +31,26 @@
     <!-- Skip to Main Content Link (Accessibility) -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
+    <!-- App Lock Overlay (v4.3.0) -->
+    <div id="lockOverlay" class="lock-overlay" hidden aria-modal="true" role="dialog" aria-label="App locked">
+        <div class="lock-card">
+            <div class="lock-icon-wrap"><i class="ri-lock-fill"></i></div>
+            <h2 class="lock-title">FinChronicle is locked</h2>
+            <p class="lock-subtitle">Enter your PIN to continue</p>
+            <form class="lock-pin-form" id="lockPinForm" autocomplete="off">
+                <input type="text" name="username" autocomplete="username" hidden aria-hidden="true">
+                <input type="password" class="lock-pin-input" inputmode="numeric" pattern="[0-9]*"
+                       maxlength="8" placeholder="PIN" autocomplete="current-password" aria-label="PIN">
+            </form>
+            <p class="lock-error" role="alert"></p>
+            <button class="lock-unlock-btn" type="button">Unlock</button>
+            <button id="biometricBtn" class="lock-biometric-btn" type="button" hidden>
+                <i class="ri-fingerprint-line"></i> Use Face / Fingerprint
+            </button>
+            <button class="lock-forgot-btn" type="button">Forgot PIN</button>
+        </div>
+    </div>
+
     <!-- Success Message -->
     <div class="success-message" id="successMessage">Transaction saved!</div>
 
@@ -310,6 +330,9 @@
                     <span class="version" id="appVersion">v3.7.1</span>
                     <button class="header-btn" aria-label="Send feedback" title="Send feedback">
                         <i class="ri-feedback-line"></i>
+                    </button>
+                    <button class="header-btn" aria-label="Lock app" title="Lock app" id="lockNowBtn" hidden>
+                        <i class="ri-lock-line"></i>
                     </button>
                     <button class="header-btn" aria-label="Quick Add Transaction" title="Quick Add">
                         <i class="ri-add-line"></i>
@@ -823,6 +846,9 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- App Lock (v4.3.0) -->
+                <div id="appLockSettingsContainer"></div>
 
                 <!-- Optional Fields (v3.16.0) -->
                 <div id="optionalFieldsSettingsContainer">

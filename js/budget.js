@@ -71,7 +71,10 @@ export async function saveBudget(budget) {
       state.budgets.push(budget);
     }
 
-    showMessage(t("message.budget_saved", { category: budget.category }), "success");
+    showMessage(
+      t("message.budget_saved", { category: budget.category }),
+      "success",
+    );
     return budget;
   } catch (error) {
     console.error("Error saving budget:", error);
