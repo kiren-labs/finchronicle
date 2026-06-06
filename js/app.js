@@ -1137,9 +1137,9 @@ async function init() {
     await loadRecurringIntoState();
     await initBudgets();
     await checkRecurringTransactions();
-    await initOptionalFields();
     await initQuickEntry();
     await initAccounts();
+    await initOptionalFields();
     await initGoals();
     initAlerts();
     initTagColors();

@@ -178,17 +178,20 @@ export function renderOptionalFieldsForm() {
   const currentType = document.getElementById("type")?.value;
   const fields = container.querySelectorAll("[data-optional-field]");
   fields.forEach((el) => {
-    const fieldName = el.dataset.optionalField;
-    // accountLinking only applies to income/expense, not transfer
-    if (fieldName === "accountLinking") {
-      el.hidden = !enabled[fieldName] || currentType === "transfer";
-    } else {
-      el.hidden = !enabled[fieldName];
-    }
+    el.hidden = !enabled[el.dataset.optionalField];
   });
 
-  // Populate account dropdown when visible
-  if (enabled.accountLinking && currentType !== "transfer") {
+  // Account linking field lives above the date field, outside the collapsible section
+  const accountLinkingField = document.getElementById("accountLinkingField");
+  const hasAccounts = (state.accounts || []).length > 0;
+  const accountLinkingVisible =
+    enabled.accountLinking && currentType !== "transfer" && hasAccounts;
+  if (accountLinkingField) {
+    accountLinkingField.hidden = !accountLinkingVisible;
+  }
+
+  // Always repopulate so it reflects current state.accounts (accounts may load after init)
+  if (accountLinkingVisible) {
     populateLinkedAccountSelect();
   }
 
