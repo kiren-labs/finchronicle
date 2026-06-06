@@ -627,5 +627,27 @@ export default {
     q_insights: "What are 'Insights' in the Groups tab?",
     a_insights:
       "Insights show your monthly overview: income, expenses, savings, and transaction count, plus month-over-month trends and your top spending categories.",
+    category_accounts: "Accounts & net worth",
+    q_what_are_accounts: "What are accounts and do I need them?",
+    a_what_are_accounts:
+      "Accounts represent your real bank or savings accounts — for example \"Salary Account\" or \"Saving SCB\". They are <strong>optional</strong>. All your spending charts, budgets, and category reports work perfectly without them. Accounts are only needed if you want to track account balances and see your Net Worth dashboard.",
+    q_opening_balance: "What is an opening balance?",
+    a_opening_balance:
+      "It's the real balance in your bank account on the day you create the account in the app. Log into your bank app, note the current balance, and enter it here. This is the starting point the app uses to calculate your running balance. You can update it anytime in Settings → Accounts → Edit.",
+    q_link_transactions: "How do I link transactions to an account?",
+    a_link_transactions:
+      "When adding a transaction, select an account from the <strong>Account</strong> field. For expenses, this is the account money came <em>from</em>. For income, it's the account money went <em>into</em>. For transfers, fill in both From and To accounts. Transactions without an account linked are simply not counted in the balance — your reports are unaffected.",
+    q_transfer_vs_expense: "What's the difference between a Transfer and an expense?",
+    a_transfer_vs_expense:
+      "Use <strong>Transfer</strong> when money moves between your own accounts — for example, moving ฿40,000 from your Salary Account to Saving SCB. This does <em>not</em> count as an expense. If you record it as an expense instead, it inflates your spending total and net worth looks lower than it is. Use <strong>Expense</strong> only when money leaves all your accounts entirely (buying groceries, paying rent, etc.).",
+    q_net_worth_wrong: "My Net Worth looks wrong. How do I fix it?",
+    a_net_worth_wrong:
+      "The most reliable fix is to update each account's opening balance to match your <em>actual current bank balance</em> today. Go to Settings → Accounts → tap the edit icon on each account → enter the real balance from your bank app → Save. This resets net worth to reality instantly. You don't need to fix old historical transactions.",
+    q_savings_as_expense: "I recorded savings as an expense. Is that a problem?",
+    a_savings_as_expense:
+      "Only for Net Worth tracking. If you moved money to a savings account but recorded it as an expense (category: Savings/Investments), the money still exists — it just looks like you spent it. Your spending charts will show an inflated expense total. The fix going forward is to use a Transfer transaction instead. For past entries, simply update your account's opening balance to today's real figure.",
+    q_balance_drift: "Why does my computed account balance differ from my real bank?",
+    a_balance_drift:
+      "Three common reasons: (1) Some transactions are not linked to an account — only linked transactions affect the balance. (2) You recorded savings or transfers as expenses. (3) The opening balance was set on a different date and transactions before that date are not counted. The simplest correction is always to reset the opening balance to today's real figure.",
   },
 };
