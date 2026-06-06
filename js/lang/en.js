@@ -652,5 +652,24 @@ export default {
       "Why does my account balance in the app differ from my bank statement?",
     a_balance_drift:
       "Three common reasons: (1) Some transactions are not linked to an account — only linked transactions affect the balance. (2) You recorded savings or transfers as expenses. (3) The opening balance was set on a different date and transactions before that date are not counted. The simplest correction is to reset the opening balance to today's real figure.",
+    category_tabs: "Understanding the tabs",
+    q_tab_add: "What can I do in the Add tab?",
+    a_tab_add:
+      "The <strong>Add</strong> tab is where you record every transaction. Choose a type — Expense, Income, or Transfer — then enter the amount, category, date, and an optional note. Use <strong>Quick Entry templates</strong> (the bar at the top) to fill in common transactions with one tap. If you have accounts set up, link the transaction to an account so your balance stays accurate.",
+    q_tab_list: "What can I do in the List tab?",
+    a_tab_list:
+      "The <strong>List</strong> tab shows all your transactions in date order. Use the month buttons to switch periods, the search bar to find a specific entry, or the Category filter to narrow results. Tap any transaction to edit or delete it. You can also filter by tags if you have tagged your transactions.",
+    q_tab_reports: "What can I do in the Reports tab?",
+    a_tab_reports:
+      "The <strong>Reports</strong> tab gives you a visual overview of your finances. It includes: a <strong>Spending by Category</strong> pie chart, an <strong>Income vs Expenses</strong> bar chart by month, a <strong>Weekly Spending</strong> chart for the last four weeks, and a <strong>Day of Month Heatmap</strong> showing which days you spend most. At the bottom you'll find the Annual Report and a Cash-Flow Forecast based on your recurring transactions.",
+    q_tab_groups: "What can I do in the Groups tab?",
+    a_tab_groups:
+      "The <strong>Groups</strong> tab organises your transactions into grouped summaries. Switch between grouping by <strong>Day</strong>, <strong>Week</strong>, <strong>Month</strong>, or <strong>Category</strong> using the filter buttons. Each group shows the total spent and a breakdown of individual transactions. The Insights view at the bottom of monthly groupings shows income, expenses, savings rate, and your top spending categories for that period.",
+    q_tab_settings: "What can I do in the Settings tab?",
+    a_tab_settings:
+      "The <strong>Settings</strong> tab contains everything that controls how the app works: change your currency, toggle dark mode, manage accounts, set budgets, configure recurring transactions, manage tags, and set up App Lock. The Data &amp; Backup section is here too — use it to download a backup, restore from a previous backup, or export your transactions to a spreadsheet. The FAQ (this section) is also in Settings.",
+    q_tab_summary: "What are the summary cards at the top of the screen?",
+    a_tab_summary:
+      "The summary cards show your current month's Net Balance, Total Entries, Income, and Expenses at a glance. Tap any card to jump straight to the List tab filtered for that category. Use the collapse button (the chevron on the right) to hide the cards if you want more space. The Net Worth, Savings, Goals, and Settlement sections below the cards can be shown or hidden from Settings → Features.",
   },
 };

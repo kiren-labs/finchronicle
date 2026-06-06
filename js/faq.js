@@ -48,6 +48,18 @@ export const faqData = [
       { q: t("faq.q_balance_drift"), a: t("faq.a_balance_drift") },
     ],
   },
+  {
+    category: t("faq.category_tabs"),
+    icon: "ri-layout-bottom-line",
+    questions: [
+      { q: t("faq.q_tab_add"), a: t("faq.a_tab_add") },
+      { q: t("faq.q_tab_list"), a: t("faq.a_tab_list") },
+      { q: t("faq.q_tab_reports"), a: t("faq.a_tab_reports") },
+      { q: t("faq.q_tab_groups"), a: t("faq.a_tab_groups") },
+      { q: t("faq.q_tab_settings"), a: t("faq.a_tab_settings") },
+      { q: t("faq.q_tab_summary"), a: t("faq.a_tab_summary") },
+    ],
+  },
 ];
 
 // Render FAQ section
