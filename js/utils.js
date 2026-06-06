@@ -75,6 +75,74 @@ export function monthNameToNumber(month) {
   return map[month.toLowerCase()] || "";
 }
 
+/**
+ * Evaluate a simple arithmetic expression from the amount field.
+ * Supports +, -, *, x, ×, /. Only digits, decimals, and operators allowed.
+ * Returns the numeric result or NaN if the expression is invalid.
+ */
+export function evaluateAmountExpr(raw) {
+  const expr = raw.trim().replace(/[x×]/gi, "*");
+  // Allow only digits, dots, spaces, and operators — nothing else
+  if (!/^[\d\s+\-*/().]+$/.test(expr)) return NaN;
+  // Must not be a bare operator or empty
+  if (!/\d/.test(expr)) return NaN;
+  try {
+    // Manual recursive-descent parser: no eval, no Function()
+    const tokens = expr.replace(/\s+/g, "").match(/(\d+\.?\d*)|([+\-*/()])/g);
+    if (!tokens) return NaN;
+    let pos = 0;
+
+    function parseExpr() {
+      let left = parseTerm();
+      while (
+        pos < tokens.length &&
+        (tokens[pos] === "+" || tokens[pos] === "-")
+      ) {
+        const op = tokens[pos++];
+        const right = parseTerm();
+        left = op === "+" ? left + right : left - right;
+      }
+      return left;
+    }
+
+    function parseTerm() {
+      let left = parseFactor();
+      while (
+        pos < tokens.length &&
+        (tokens[pos] === "*" || tokens[pos] === "/")
+      ) {
+        const op = tokens[pos++];
+        const right = parseFactor();
+        if (op === "/" && right === 0) return NaN;
+        left = op === "*" ? left * right : left / right;
+      }
+      return left;
+    }
+
+    function parseFactor() {
+      if (tokens[pos] === "(") {
+        pos++;
+        const val = parseExpr();
+        if (tokens[pos] === ")") pos++;
+        return val;
+      }
+      if (tokens[pos] === "-") {
+        pos++;
+        return -parseFactor();
+      }
+      const n = parseFloat(tokens[pos++]);
+      return isNaN(n) ? NaN : n;
+    }
+
+    const result = parseExpr();
+    return isFinite(result) && result > 0
+      ? Math.round(result * 100) / 100
+      : NaN;
+  } catch {
+    return NaN;
+  }
+}
+
 // Show a toast/notification message
 export function showMessage(text) {
   const msg = document.getElementById("successMessage");

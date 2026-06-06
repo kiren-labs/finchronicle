@@ -16,9 +16,29 @@ import { sanitizeHTML, showMessage, generateId } from "./utils.js";
 import { renderSavingsDashboard } from "./savings.js";
 import { openReconciliationModal } from "./reconciliation.js";
 
+const LS_ACCOUNTS_VISIBLE = "showAccountsSection";
+
+export function isAccountsSectionVisible() {
+  return localStorage.getItem(LS_ACCOUNTS_VISIBLE) === "true";
+}
+
+export function setAccountsSectionVisible(visible) {
+  localStorage.setItem(LS_ACCOUNTS_VISIBLE, visible ? "true" : "false");
+  applyAccountsVisibility();
+}
+
+export function applyAccountsVisibility() {
+  const visible = isAccountsSectionVisible();
+  const container = document.getElementById("accountsContainer");
+  if (container) container.hidden = !visible;
+  const netWorthSection = document.getElementById("netWorthSection");
+  if (netWorthSection) netWorthSection.hidden = !visible;
+}
+
 // ---- Init ----
 
 export async function initAccounts() {
+  applyAccountsVisibility();
   try {
     await loadAccounts();
     if (state.accounts.length > 0) {
@@ -254,7 +274,7 @@ export function renderNetWorthDashboard() {
   const section = document.getElementById("netWorthSection");
   if (!container || !section) return;
 
-  if (state.accounts.length === 0) {
+  if (state.accounts.length === 0 || !isAccountsSectionVisible()) {
     section.hidden = true;
     return;
   }

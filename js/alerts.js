@@ -92,16 +92,18 @@ function getRollingWeeklyAverages() {
   const weeks = Math.max(1, ROLLING_DAYS / 7);
 
   const categoryTotals = {};
+  const categoryCounts = {};
   for (const t of expenses) {
     const cat = t.category || "Other";
     categoryTotals[cat] = (categoryTotals[cat] || 0) + t.amount;
+    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
   }
 
   const averages = {};
   for (const [cat, total] of Object.entries(categoryTotals)) {
     averages[cat] = total / weeks;
   }
-  return averages;
+  return { averages, counts: categoryCounts };
 }
 
 // ---- Median transaction per category (90-day) ----
@@ -190,12 +192,16 @@ function getLastMonthByCategory() {
 /**
  * Check for a WEEKLY_SPIKE alert.
  * Fires when this week's spending in a category exceeds 40% of rolling weekly average.
+ * Skips categories paid infrequently (< 6 times in 90 days, i.e. less than ~bi-weekly)
+ * because their weekly average is meaningless — rent paid monthly will always "spike".
  */
-function checkWeeklySpike(weeklyAverages, thisWeek) {
+function checkWeeklySpike(weeklyAverages, counts, thisWeek) {
   const alerts = [];
   for (const [cat, spent] of Object.entries(thisWeek)) {
     const avg = weeklyAverages[cat];
     if (!avg || avg < 1) continue;
+    // Skip infrequent categories (monthly or less)
+    if ((counts[cat] || 0) < 6) continue;
     const ratio = spent / avg;
     if (ratio >= 1.4) {
       const pct = Math.round((ratio - 1) * 100);
@@ -452,7 +458,7 @@ function runHealthAlertChecks() {
 export function runAlertChecks(newTransaction = null) {
   if (state.transactions.length < 5) return []; // not enough data
 
-  const weeklyAverages = getRollingWeeklyAverages();
+  const { averages: weeklyAverages, counts } = getRollingWeeklyAverages();
   const medians = getCategoryMedians();
   const thisWeek = getThisWeekByCategory();
   const thisMonth = getThisMonthByCategory();
@@ -461,7 +467,7 @@ export function runAlertChecks(newTransaction = null) {
   const newAlerts = [];
 
   // Weekly spike
-  newAlerts.push(...checkWeeklySpike(weeklyAverages, thisWeek));
+  newAlerts.push(...checkWeeklySpike(weeklyAverages, counts, thisWeek));
 
   // Unusual amount (for newly saved transaction)
   if (newTransaction) {

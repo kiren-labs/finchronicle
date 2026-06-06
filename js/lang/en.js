@@ -1,7 +1,7 @@
 export default {
   _meta: {
     locale: "en",
-    version: "4.3.0",
+    version: "4.3.1",
     note: "All user-visible strings for FinChronicle. Keys mirror the module that owns the string.",
   },
   button: {
@@ -627,5 +627,49 @@ export default {
     q_insights: "What are 'Insights' in the Groups tab?",
     a_insights:
       "Insights show your monthly overview: income, expenses, savings, and transaction count, plus month-over-month trends and your top spending categories.",
+    category_accounts: "Accounts & net worth",
+    q_what_are_accounts: "What are accounts and do I need them?",
+    a_what_are_accounts:
+      'Accounts represent your real bank or savings accounts — for example "Salary Account" or "Saving SCB". They are <strong>optional</strong>. All your spending charts, budgets, and category reports work perfectly without them. Accounts are only needed if you want to track account balances and see your Net Worth dashboard.',
+    q_opening_balance: "What is an opening balance?",
+    a_opening_balance:
+      "It's the real balance in your bank account on the day you create the account in the app. Log into your bank app, note the current balance, and enter it here. This is the starting point the app uses to calculate your running balance. You can update it at any time in Settings → Accounts → Edit.",
+    q_link_transactions: "How do I link transactions to an account?",
+    a_link_transactions:
+      "When adding a transaction, select an account from the <strong>Account</strong> field. For expenses, this is the account the money came <em>from</em>. For income, this is the account the money went <em>into</em>. For transfers, fill in both From and To accounts. Transactions not linked to an account are simply not counted in the balance — your reports are unaffected.",
+    q_transfer_vs_expense:
+      "What's the difference between a Transfer and an Expense?",
+    a_transfer_vs_expense:
+      "Use <strong>Transfer</strong> when money moves between your own accounts — for example, moving money from your current account to your savings account. This does <em>not</em> count as an expense. If you record it as an expense instead, it inflates your spending total and your net worth will appear lower than it is. Use <strong>Expense</strong> only when money leaves your accounts entirely (buying groceries, paying rent, and so on).",
+    q_net_worth_wrong: "My Net Worth looks wrong. How do I fix it?",
+    a_net_worth_wrong:
+      "The most reliable fix is to update each account's opening balance to match your <em>actual current bank balance</em> today. Go to Settings → Accounts → tap the edit icon on each account → enter the real balance from your bank app → Save. Your net worth will update immediately. You don't need to correct historical transactions.",
+    q_savings_as_expense:
+      "I recorded savings as an expense. Is that a problem?",
+    a_savings_as_expense:
+      "Only for Net Worth tracking. If you moved money to a savings account but recorded it as an expense (category: Savings/Investments), the money still exists — it just looks like you spent it. Your spending charts will show an inflated expense total. From now on, use a Transfer transaction instead. For past entries, simply update your account's opening balance to today's real figure.",
+    q_balance_drift:
+      "Why does my account balance in the app differ from my bank statement?",
+    a_balance_drift:
+      "Three common reasons: (1) Some transactions are not linked to an account — only linked transactions affect the balance. (2) You recorded savings or transfers as expenses. (3) The opening balance was set on a different date and transactions before that date are not counted. The simplest correction is to reset the opening balance to today's real figure.",
+    category_tabs: "Understanding the tabs",
+    q_tab_add: "What can I do in the Add tab?",
+    a_tab_add:
+      "The <strong>Add</strong> tab is where you record every transaction. Choose a type — Expense, Income, or Transfer — then enter the amount, category, date, and an optional note. Use <strong>Quick Entry templates</strong> (the bar at the top) to fill in common transactions with one tap. If you have accounts set up, link the transaction to an account so your balance stays accurate.",
+    q_tab_list: "What can I do in the List tab?",
+    a_tab_list:
+      "The <strong>List</strong> tab shows all your transactions in date order. Use the month buttons to switch periods, the search bar to find a specific entry, or the Category filter to narrow results. Tap any transaction to edit or delete it. You can also filter by tags if you have tagged your transactions.",
+    q_tab_reports: "What can I do in the Reports tab?",
+    a_tab_reports:
+      "The <strong>Reports</strong> tab gives you a visual overview of your finances. It includes: a <strong>Spending by Category</strong> pie chart, an <strong>Income vs Expenses</strong> bar chart by month, a <strong>Weekly Spending</strong> chart for the last four weeks, and a <strong>Day of Month Heatmap</strong> showing which days you spend most. At the bottom you'll find the Annual Report and a Cash-Flow Forecast based on your recurring transactions.",
+    q_tab_groups: "What can I do in the Groups tab?",
+    a_tab_groups:
+      "The <strong>Groups</strong> tab organises your transactions into grouped summaries. Switch between grouping by <strong>Day</strong>, <strong>Week</strong>, <strong>Month</strong>, or <strong>Category</strong> using the filter buttons. Each group shows the total spent and a breakdown of individual transactions. The Insights view at the bottom of monthly groupings shows income, expenses, savings rate, and your top spending categories for that period.",
+    q_tab_settings: "What can I do in the Settings tab?",
+    a_tab_settings:
+      "The <strong>Settings</strong> tab contains everything that controls how the app works: change your currency, toggle dark mode, manage accounts, set budgets, configure recurring transactions, manage tags, and set up App Lock. The Data &amp; Backup section is here too — use it to download a backup, restore from a previous backup, or export your transactions to a spreadsheet. The FAQ (this section) is also in Settings.",
+    q_tab_summary: "What are the summary cards at the top of the screen?",
+    a_tab_summary:
+      "The summary cards show your current month's Net Balance, Total Entries, Income, and Expenses at a glance. Tap any card to jump straight to the List tab filtered for that category. Use the collapse button (the chevron on the right) to hide the cards if you want more space. The Net Worth, Savings, Goals, and Settlement sections below the cards can be shown or hidden from Settings → Features.",
   },
 };

@@ -4,6 +4,8 @@
 // surfing and "someone picks up my phone" threat. Not a crypto barrier.
 // ============================================================================
 
+import { showMessage } from "./utils.js";
+
 const LS_ENABLED = "appLock_enabled";
 const LS_PIN_HASH = "appLock_pin_hash";
 const LS_SALT = "appLock_salt";
@@ -12,7 +14,15 @@ const LS_CRED_ID = "appLock_cred_id"; // base64 WebAuthn credential ID
 
 const DEFAULT_TIMEOUT_MINS = 1;
 
+const TIMEOUT_OPTIONS = [
+  { value: 1, label: "1 minute" },
+  { value: 5, label: "5 minutes" },
+  { value: 15, label: "15 minutes" },
+  { value: 0, label: "Never" },
+];
+
 // ---- Inactivity timer ----
+
 let _lockTimer = null;
 let _locked = false;
 
@@ -41,19 +51,16 @@ function stopInactivityTimer() {
 
 async function generateSalt() {
   const bytes = crypto.getRandomValues(new Uint8Array(16));
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 async function hashPIN(pin, saltHex) {
   const saltBytes = new Uint8Array(
     saltHex.match(/.{2}/g).map((h) => parseInt(h, 16)),
   );
-  const pinBytes = new TextEncoder().encode(pin);
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    pinBytes,
+    new TextEncoder().encode(pin),
     "PBKDF2",
     false,
     ["deriveBits"],
@@ -63,12 +70,12 @@ async function hashPIN(pin, saltHex) {
     keyMaterial,
     256,
   );
-  return Array.from(new Uint8Array(bits))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  return Array.from(new Uint8Array(bits), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("");
 }
 
-// ---- Getters / setters ----
+// ---- localStorage helpers ----
 
 export function isLockEnabled() {
   return localStorage.getItem(LS_ENABLED) === "true";
@@ -86,13 +93,11 @@ function setLockTimeout(mins) {
 function getCredentialId() {
   const b64 = localStorage.getItem(LS_CRED_ID);
   if (!b64) return null;
-  const bin = atob(b64);
-  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
 }
 
 function setCredentialId(idBytes) {
-  const b64 = btoa(String.fromCharCode(...idBytes));
-  localStorage.setItem(LS_CRED_ID, b64);
+  localStorage.setItem(LS_CRED_ID, btoa(String.fromCharCode(...idBytes)));
 }
 
 // ---- Biometric support detection ----
@@ -106,25 +111,57 @@ export async function isBiometricAvailable() {
   }
 }
 
+// ---- Lock overlay DOM helpers ----
+
+function getLockOverlay() {
+  return document.getElementById("lockOverlay");
+}
+
+function setLockError(msg) {
+  const overlay = getLockOverlay();
+  overlay.querySelector(".lock-error").textContent = msg;
+  const input = overlay.querySelector(".lock-pin-input");
+  input.classList.add("lock-input-shake");
+  setTimeout(() => input.classList.remove("lock-input-shake"), 400);
+}
+
+async function updateBiometricButtonVisibility() {
+  const btn = document.getElementById("biometricBtn");
+  if (!btn) return;
+  btn.hidden = !(await isBiometricAvailable()) || !getCredentialId();
+}
+
+function updateLockButtonVisibility() {
+  const btn = document.getElementById("lockNowBtn");
+  if (btn) btn.hidden = !isLockEnabled();
+}
+
 // ---- Lock / Unlock ----
 
 export function lock() {
   if (!isLockEnabled()) return;
   _locked = true;
   stopInactivityTimer();
-  document.getElementById("lockOverlay").removeAttribute("hidden");
-  document
-    .getElementById("lockOverlay")
-    .querySelector(".lock-pin-input").value = "";
-  document
-    .getElementById("lockOverlay")
-    .querySelector(".lock-error").textContent = "";
+  const overlay = getLockOverlay();
+  overlay.removeAttribute("hidden");
+  overlay.querySelector(".lock-pin-input").value = "";
+  overlay.querySelector(".lock-error").textContent = "";
   updateBiometricButtonVisibility();
+  _autoTriggerBiometric();
+}
+
+async function _autoTriggerBiometric() {
+  if (!getCredentialId() || !(await isBiometricAvailable())) return;
+  // Brief delay so the overlay is visible before the OS prompt appears
+  await new Promise((r) => setTimeout(r, 350));
+  if (!_locked) return;
+  if (await authenticateWithBiometric()) await unlock();
+  // Dismissed or failed — silently stay on PIN screen
 }
 
 async function unlock() {
   _locked = false;
-  document.getElementById("lockOverlay").setAttribute("hidden", "");
+  getLockOverlay().setAttribute("hidden", "");
   startInactivityTimer();
 }
 
@@ -138,21 +175,18 @@ async function verifyPIN(pin) {
   const storedHash = localStorage.getItem(LS_PIN_HASH);
   const salt = localStorage.getItem(LS_SALT);
   if (!storedHash || !salt) return false;
-  const hash = await hashPIN(pin, salt);
-  return hash === storedHash;
+  return (await hashPIN(pin, salt)) === storedHash;
 }
 
-// ---- Biometric authentication ----
+// ---- Biometric registration / authentication ----
 
 async function authenticateWithBiometric() {
   const credId = getCredentialId();
   if (!credId) return false;
-
-  const challenge = crypto.getRandomValues(new Uint8Array(32));
   try {
     await navigator.credentials.get({
       publicKey: {
-        challenge,
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
         allowCredentials: [
           { type: "public-key", id: credId, transports: ["internal"] },
         ],
@@ -167,14 +201,16 @@ async function authenticateWithBiometric() {
 }
 
 async function registerBiometric() {
-  const challenge = crypto.getRandomValues(new Uint8Array(32));
-  const userId = crypto.getRandomValues(new Uint8Array(8));
   try {
     const cred = await navigator.credentials.create({
       publicKey: {
-        challenge,
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
         rp: { name: "FinChronicle", id: location.hostname },
-        user: { id: userId, name: "finchronicle_user", displayName: "You" },
+        user: {
+          id: crypto.getRandomValues(new Uint8Array(8)),
+          name: "finchronicle_user",
+          displayName: "You",
+        },
         pubKeyCredParams: [
           { type: "public-key", alg: -7 },
           { type: "public-key", alg: -257 },
@@ -194,68 +230,46 @@ async function registerBiometric() {
   }
 }
 
-// ---- Lock overlay helpers ----
-
-function setLockError(msg) {
-  const el = document
-    .getElementById("lockOverlay")
-    .querySelector(".lock-error");
-  el.textContent = msg;
-  const input = document
-    .getElementById("lockOverlay")
-    .querySelector(".lock-pin-input");
-  input.classList.add("lock-input-shake");
-  setTimeout(() => input.classList.remove("lock-input-shake"), 400);
-}
-
-async function updateBiometricButtonVisibility() {
-  const btn = document.getElementById("biometricBtn");
-  if (!btn) return;
-  const available = await isBiometricAvailable();
-  btn.hidden = !available || !getCredentialId();
-}
-
-// ---- Setup flow (in Settings) ----
+// ---- Lock setup / teardown ----
 
 export async function enableLock(pin) {
   const salt = await generateSalt();
-  const hash = await hashPIN(pin, salt);
   localStorage.setItem(LS_SALT, salt);
-  localStorage.setItem(LS_PIN_HASH, hash);
+  localStorage.setItem(LS_PIN_HASH, await hashPIN(pin, salt));
   localStorage.setItem(LS_ENABLED, "true");
-  if (!localStorage.getItem(LS_TIMEOUT)) {
-    setLockTimeout(DEFAULT_TIMEOUT_MINS);
-  }
+  if (!localStorage.getItem(LS_TIMEOUT)) setLockTimeout(DEFAULT_TIMEOUT_MINS);
   startInactivityTimer();
-  renderLockSettings();
+  await renderLockSettings();
+  updateLockButtonVisibility();
 }
 
 export function disableLock() {
-  localStorage.removeItem(LS_ENABLED);
-  localStorage.removeItem(LS_PIN_HASH);
-  localStorage.removeItem(LS_SALT);
-  localStorage.removeItem(LS_CRED_ID);
+  [LS_ENABLED, LS_PIN_HASH, LS_SALT, LS_CRED_ID, LS_TIMEOUT].forEach((k) =>
+    localStorage.removeItem(k),
+  );
   stopInactivityTimer();
+  updateLockButtonVisibility();
   renderLockSettings();
 }
 
 export async function changePIN(currentPin, newPin) {
-  const valid = await verifyPIN(currentPin);
-  if (!valid) return false;
+  if (!(await verifyPIN(currentPin))) return false;
   await enableLock(newPin);
   return true;
 }
 
-// ---- Init (called once from app.js after init()) ----
+// ---- Init ----
 
 export async function initAppLock() {
   bindLockOverlayEvents();
-  if (!isLockEnabled()) return;
-  lock();
+  updateLockButtonVisibility();
+  if (isLockEnabled()) lock();
 }
 
+// ---- Lock overlay events ----
+
 export function bindLockOverlayEvents() {
-  const overlay = document.getElementById("lockOverlay");
+  const overlay = getLockOverlay();
   const pinForm = document.getElementById("lockPinForm");
   const pinInput = overlay.querySelector(".lock-pin-input");
   const unlockBtn = overlay.querySelector(".lock-unlock-btn");
@@ -265,9 +279,8 @@ export function bindLockOverlayEvents() {
   async function attemptUnlock() {
     const pin = pinInput.value.trim();
     if (!pin) return;
-    const ok = await verifyPIN(pin);
     pinInput.value = "";
-    if (ok) {
+    if (await verifyPIN(pin)) {
       await unlock();
     } else {
       setLockError("Wrong PIN. Try again.");
@@ -281,8 +294,7 @@ export function bindLockOverlayEvents() {
   unlockBtn.addEventListener("click", attemptUnlock);
 
   biometBtn?.addEventListener("click", async () => {
-    const ok = await authenticateWithBiometric();
-    if (ok) {
+    if (await authenticateWithBiometric()) {
       await unlock();
     } else {
       setLockError("Biometric failed. Use your PIN instead.");
@@ -304,7 +316,7 @@ export function bindLockOverlayEvents() {
   updateBiometricButtonVisibility();
 }
 
-// ---- Settings panel renderer ----
+// ---- Settings panel ----
 
 export async function renderLockSettings() {
   const container = document.getElementById("appLockSettingsContainer");
@@ -315,88 +327,78 @@ export async function renderLockSettings() {
   const hasCred = !!getCredentialId();
   const timeout = getLockTimeout();
 
-  const timeoutOptions = [
-    { value: 1, label: "1 minute" },
-    { value: 5, label: "5 minutes" },
-    { value: 15, label: "15 minutes" },
-    { value: 0, label: "Never" },
-  ];
-
   container.innerHTML = `
     <div class="card">
       <h3>App Lock</h3>
       <p class="lock-settings-desc">Require a PIN to open the app. Your data is not encrypted — this stops casual access only.</p>
-
-      ${
-        !enabled
-          ? `
-        <form id="lockSetupForm" autocomplete="off">
-          <input type="text" name="username" autocomplete="username" hidden aria-hidden="true">
-          <label class="lock-label" for="newPinInput">Set a PIN (4–8 digits)</label>
-          <input type="password" id="newPinInput" class="lock-settings-input" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="8" placeholder="Enter PIN" autocomplete="new-password">
-          <label class="lock-label" for="confirmPinInput">Confirm PIN</label>
-          <input type="password" id="confirmPinInput" class="lock-settings-input" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="8" placeholder="Confirm PIN" autocomplete="new-password">
-          <p class="lock-setup-error" id="lockSetupError"></p>
-          <button class="data-backup-btn" id="enableLockBtn" type="submit">
-            <i class="ri-lock-line"></i><span>Enable lock</span>
-          </button>
-        </form>
-      `
-          : `
-        <div class="lock-active-panel">
-          <div class="lock-status-row">
-            <i class="ri-lock-fill lock-active-icon"></i>
-            <span class="lock-active-label">Lock is on</span>
-            <button class="lock-danger-btn" id="disableLockBtn" type="button">Remove lock</button>
-          </div>
-
-          <label class="lock-label" for="lockTimeoutSelect">Auto-lock after</label>
-          <select id="lockTimeoutSelect" class="lock-settings-select">
-            ${timeoutOptions
-              .map(
-                (o) =>
-                  `<option value="${o.value}" ${o.value === timeout ? "selected" : ""}>${o.label}</option>`,
-              )
-              .join("")}
-          </select>
-
-          <div class="lock-section-divider"></div>
-          <p class="lock-label">Change PIN</p>
-          <form id="changePinForm" autocomplete="off">
-            <input type="text" name="username" autocomplete="username" hidden aria-hidden="true">
-            <input type="password" id="currentPinInput" class="lock-settings-input" inputmode="numeric" pattern="[0-9]*" placeholder="Current PIN" autocomplete="current-password">
-            <input type="password" id="newPinInput2" class="lock-settings-input" inputmode="numeric" pattern="[0-9]*" placeholder="New PIN (4–8 digits)" autocomplete="new-password">
-            <p class="lock-setup-error" id="lockChangeError"></p>
-            <button class="data-backup-btn" id="changePinBtn" type="submit">
-              <i class="ri-key-line"></i><span>Update PIN</span>
-            </button>
-          </form>
-
-          ${
-            bioAvail
-              ? `
-            <div class="lock-section-divider"></div>
-            <p class="lock-label">Biometric fast-unlock</p>
-            <p class="lock-settings-desc">${hasCred ? "Face/fingerprint unlock is on." : "Use Face ID, Touch ID, or Windows Hello instead of typing your PIN."}</p>
-            ${
-              hasCred
-                ? `<button class="lock-danger-btn" id="removeBiometricBtn" type="button">Remove biometric</button>`
-                : `<button class="data-backup-btn" id="addBiometricBtn" type="button"><i class="ri-fingerprint-line"></i><span>Set up biometric</span></button>`
-            }
-          `
-              : ""
-          }
-        </div>
-      `
-      }
-    </div>
-  `;
+      ${enabled ? _buildActiveHTML(timeout, bioAvail, hasCred) : _buildSetupHTML()}
+    </div>`;
 
   bindLockSettingsEvents();
+  updateLockButtonVisibility();
+}
 
-  // Keep the header lock button in sync
-  const lockNowBtn = document.getElementById("lockNowBtn");
-  if (lockNowBtn) lockNowBtn.hidden = !enabled;
+function _buildSetupHTML() {
+  return `
+    <form id="lockSetupForm" autocomplete="off">
+      <input type="text" name="username" autocomplete="username" hidden aria-hidden="true">
+      <label class="lock-label" for="newPinInput">Set a PIN (4–8 digits)</label>
+      <input type="password" id="newPinInput" class="lock-settings-input" inputmode="numeric"
+        pattern="[0-9]*" minlength="4" maxlength="8" placeholder="Enter PIN" autocomplete="new-password">
+      <label class="lock-label" for="confirmPinInput">Confirm PIN</label>
+      <input type="password" id="confirmPinInput" class="lock-settings-input" inputmode="numeric"
+        pattern="[0-9]*" minlength="4" maxlength="8" placeholder="Confirm PIN" autocomplete="new-password">
+      <p class="lock-setup-error" id="lockSetupError"></p>
+      <button class="data-backup-btn" id="enableLockBtn" type="submit">
+        <i class="ri-lock-line"></i><span>Enable lock</span>
+      </button>
+    </form>`;
+}
+
+function _buildActiveHTML(timeout, bioAvail, hasCred) {
+  const timeoutOpts = TIMEOUT_OPTIONS.map(
+    (o) =>
+      `<option value="${o.value}"${o.value === timeout ? " selected" : ""}>${o.label}</option>`,
+  ).join("");
+
+  const biometricSection = bioAvail
+    ? `
+    <div class="lock-section-divider"></div>
+    <p class="lock-label">Biometric fast-unlock</p>
+    <p class="lock-settings-desc">${hasCred ? "Face/fingerprint unlock is on." : "Use Face ID, Touch ID, or Windows Hello instead of typing your PIN."}</p>
+    ${
+      hasCred
+        ? `<button class="lock-danger-btn" id="removeBiometricBtn" type="button">Remove biometric</button>`
+        : `<button class="data-backup-btn" id="addBiometricBtn" type="button"><i class="ri-fingerprint-line"></i><span>Set up biometric</span></button>`
+    }`
+    : "";
+
+  return `
+    <div class="lock-active-panel">
+      <div class="lock-status-row">
+        <i class="ri-lock-fill lock-active-icon"></i>
+        <span class="lock-active-label">Lock is on</span>
+        <button class="lock-danger-btn" id="disableLockBtn" type="button">Remove lock</button>
+      </div>
+
+      <label class="lock-label" for="lockTimeoutSelect">Auto-lock after</label>
+      <select id="lockTimeoutSelect" class="lock-settings-select">${timeoutOpts}</select>
+
+      <div class="lock-section-divider"></div>
+      <p class="lock-label">Change PIN</p>
+      <form id="changePinForm" autocomplete="off">
+        <input type="text" name="username" autocomplete="username" hidden aria-hidden="true">
+        <input type="password" id="currentPinInput" class="lock-settings-input" inputmode="numeric"
+          pattern="[0-9]*" placeholder="Current PIN" autocomplete="current-password">
+        <input type="password" id="newPinInput2" class="lock-settings-input" inputmode="numeric"
+          pattern="[0-9]*" placeholder="New PIN (4–8 digits)" autocomplete="new-password">
+        <p class="lock-setup-error" id="lockChangeError"></p>
+        <button class="data-backup-btn" id="changePinBtn" type="submit">
+          <i class="ri-key-line"></i><span>Update PIN</span>
+        </button>
+      </form>
+      ${biometricSection}
+    </div>`;
 }
 
 function bindLockSettingsEvents() {
@@ -421,7 +423,7 @@ function bindLockSettingsEvents() {
       return;
     }
     await enableLock(pin);
-    showLockMessage("Lock enabled.");
+    showMessage("Lock enabled.");
   });
 
   disableBtn?.addEventListener("click", () => {
@@ -432,7 +434,7 @@ function bindLockSettingsEvents() {
     )
       return;
     disableLock();
-    showLockMessage("Lock removed.");
+    showMessage("Lock removed.");
   });
 
   changeForm?.addEventListener("submit", async (e) => {
@@ -444,9 +446,8 @@ function bindLockSettingsEvents() {
       errEl.textContent = "New PIN must be 4–8 digits.";
       return;
     }
-    const ok = await changePIN(current, next);
-    if (ok) {
-      showLockMessage("PIN updated.");
+    if (await changePIN(current, next)) {
+      showMessage("PIN updated.");
     } else {
       errEl.textContent = "Current PIN is wrong.";
     }
@@ -458,32 +459,17 @@ function bindLockSettingsEvents() {
   });
 
   addBioBtn?.addEventListener("click", async () => {
-    const ok = await registerBiometric();
-    if (ok) {
+    if (await registerBiometric()) {
       renderLockSettings();
-      showLockMessage("Biometric unlock set up.");
+      showMessage("Biometric unlock set up.");
     } else {
-      showLockMessage("Biometric setup failed. Try again.");
+      showMessage("Biometric setup failed. Try again.");
     }
   });
 
   rmBioBtn?.addEventListener("click", () => {
     localStorage.removeItem(LS_CRED_ID);
     renderLockSettings();
-    showLockMessage("Biometric unlock removed.");
+    showMessage("Biometric unlock removed.");
   });
-}
-
-function showLockMessage(msg) {
-  // Reuse the app's existing showMessage if available, else a simple fallback.
-  if (typeof window._showMessage === "function") {
-    window._showMessage(msg);
-  } else {
-    const el = document.getElementById("successMessage");
-    if (el) {
-      el.textContent = msg;
-      el.classList.add("show");
-      setTimeout(() => el.classList.remove("show"), 2500);
-    }
-  }
 }

@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.3.1] — 2026-06-06
+
+### Added
+
+- **Arithmetic in amount field** — amount input accepts expressions (`500+250`, `1200*3`, `(80+20)*6`); evaluated on blur via a safe recursive-descent parser with no `eval` or `Function()`. Input changed from `type="number"` to `type="text"` with `inputmode="decimal"`.
+- **FAQ: Accounts & Net Worth** — 7 new entries covering account setup, opening balances, linking transactions, Transfer vs Expense distinctions, correcting net worth, and diagnosing balance drift.
+- **FAQ: Understanding the Tabs** — 6 new entries explaining each main tab (Add, List, Reports, Groups, Settings) and the summary cards.
+
+### Fixed
+
+- **Account dropdown empty on first open** — `initAccounts()` was running after `initOptionalFields()`, so `state.accounts` was empty when the account selector first populated. Fixed by swapping init order in `app.js`.
+- **Account field position** — Account linking field moved above the Date field in the DOM (outside `optionalFieldsContainer`) so it appears at the top of the form in the correct position regardless of optional fields state.
+- **Accounts & Net Worth feature toggle not hiding net worth** — toggling the feature off now hides both `#accountsContainer` and `#netWorthSection`. Previously only `#accountsContainer` was targeted. Also fixed `renderNetWorthDashboard()` unconditionally setting `section.hidden = false` on each render.
+- **Weekly spike alert firing on monthly categories** — rent and other infrequent expenses were always flagged as spikes because their rolling weekly average is near zero. Fixed by skipping categories with fewer than 6 transactions in the past 90 days.
+- **Features toggle rendering as unstyled native checkbox** — Accounts & Net Worth toggle had wrong CSS class names (`toggle-checkbox`, `toggle-slider`) instead of the correct ones (`field-toggle-checkbox`, `field-toggle-switch`).
+
+### Changed
+
+- **`js/app-lock.js` refactored** — extracted `getLockOverlay()` helper, `_buildSetupHTML()` and `_buildActiveHTML()` render functions, and `TIMEOUT_OPTIONS` constant. Removed `window._showMessage` global; replaced with a direct `import { showMessage } from "./utils.js"`. No behaviour change.
+- **FAQ language** — phrasing updated to BBC English: removed Americanisms, improved article usage, replaced colloquial terms (`"my real bank"` → `"my bank statement"`, `"resets net worth to reality instantly"` → `"Your net worth will update immediately"`).
+
+### Technical
+
+- No new dependencies
+- No DB version bump — all changes are UI and logic only
+- All existing data unaffected
+
+---
+
 ## [4.3.0] — 2026-06-05
 
 ### Added — App Lock

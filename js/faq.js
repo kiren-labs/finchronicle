@@ -35,6 +35,31 @@ export const faqData = [
       { q: t("faq.q_insights"), a: t("faq.a_insights") },
     ],
   },
+  {
+    category: t("faq.category_accounts"),
+    icon: "ri-bank-line",
+    questions: [
+      { q: t("faq.q_what_are_accounts"), a: t("faq.a_what_are_accounts") },
+      { q: t("faq.q_opening_balance"), a: t("faq.a_opening_balance") },
+      { q: t("faq.q_link_transactions"), a: t("faq.a_link_transactions") },
+      { q: t("faq.q_transfer_vs_expense"), a: t("faq.a_transfer_vs_expense") },
+      { q: t("faq.q_net_worth_wrong"), a: t("faq.a_net_worth_wrong") },
+      { q: t("faq.q_savings_as_expense"), a: t("faq.a_savings_as_expense") },
+      { q: t("faq.q_balance_drift"), a: t("faq.a_balance_drift") },
+    ],
+  },
+  {
+    category: t("faq.category_tabs"),
+    icon: "ri-layout-bottom-line",
+    questions: [
+      { q: t("faq.q_tab_add"), a: t("faq.a_tab_add") },
+      { q: t("faq.q_tab_list"), a: t("faq.a_tab_list") },
+      { q: t("faq.q_tab_reports"), a: t("faq.a_tab_reports") },
+      { q: t("faq.q_tab_groups"), a: t("faq.a_tab_groups") },
+      { q: t("faq.q_tab_settings"), a: t("faq.a_tab_settings") },
+      { q: t("faq.q_tab_summary"), a: t("faq.a_tab_summary") },
+    ],
+  },
 ];
 
 // Render FAQ section

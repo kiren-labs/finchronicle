@@ -41,6 +41,7 @@ import {
   sanitizeHTML,
   getErrorLog,
   clearErrorLog,
+  evaluateAmountExpr,
 } from "./utils.js";
 import { t } from "./i18n.js";
 import {
@@ -145,6 +146,8 @@ import {
   renderNetWorthDashboard,
   renderAccountManager,
   bindAccountEvents,
+  isAccountsSectionVisible,
+  setAccountsSectionVisible,
 } from "./accounts.js";
 import { renderSavingsDashboard } from "./savings.js";
 import {
@@ -202,6 +205,17 @@ async function getImportExportModule() {
 // ============================================================================
 
 function bindStaticEvents() {
+  // ---- Amount field arithmetic ----
+  const amountInput = document.getElementById("amount");
+  if (amountInput) {
+    amountInput.addEventListener("blur", () => {
+      const raw = amountInput.value.trim();
+      if (!raw || /^[\d.]+$/.test(raw)) return; // plain number, nothing to evaluate
+      const result = evaluateAmountExpr(raw);
+      if (!isNaN(result)) amountInput.value = result;
+    });
+  }
+
   // ---- Header buttons ----
   document
     .querySelector('.header-btn[aria-label="Send feedback"]')
@@ -411,6 +425,15 @@ function bindStaticEvents() {
 
   // ---- Accounts (v3.18.0) ----
   bindAccountEvents();
+
+  // ---- Feature visibility toggles (v4.3.1) ----
+  const toggleAccounts = document.getElementById("toggleAccountsSection");
+  if (toggleAccounts) {
+    toggleAccounts.checked = isAccountsSectionVisible();
+    toggleAccounts.addEventListener("change", () => {
+      setAccountsSectionVisible(toggleAccounts.checked);
+    });
+  }
 
   // ---- Reconciliation (v4.0.0) ----
   bindReconciliationEvents();
@@ -813,8 +836,9 @@ function bindFormSubmit() {
       const formCard = document.querySelector("#addTab .card");
       const originalBtnText = submitBtn.textContent;
 
-      const amountInput = document.getElementById("amount").value.trim();
-      const amount = parseFloat(amountInput);
+      const rawAmount = document.getElementById("amount").value.trim();
+      const amountInput = rawAmount;
+      const amount = evaluateAmountExpr(rawAmount);
 
       if (!amountInput) {
         showMessage(t("validation.enter_amount"));
@@ -1126,9 +1150,9 @@ async function init() {
     await loadRecurringIntoState();
     await initBudgets();
     await checkRecurringTransactions();
-    await initOptionalFields();
     await initQuickEntry();
     await initAccounts();
+    await initOptionalFields();
     await initGoals();
     initAlerts();
     initTagColors();
@@ -1176,7 +1200,6 @@ async function init() {
     checkInstallPrompt();
 
     // App Lock (v4.3.0) — render settings panel, then gate if enabled
-    window._showMessage = showMessage;
     await renderLockSettings();
     await initAppLock();
 
