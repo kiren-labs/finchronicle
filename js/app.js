@@ -1200,7 +1200,6 @@ async function init() {
     checkInstallPrompt();
 
     // App Lock (v4.3.0) — render settings panel, then gate if enabled
-    window._showMessage = showMessage;
     await renderLockSettings();
     await initAppLock();
 

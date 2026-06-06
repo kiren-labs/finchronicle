@@ -94,7 +94,10 @@ export function evaluateAmountExpr(raw) {
 
     function parseExpr() {
       let left = parseTerm();
-      while (pos < tokens.length && (tokens[pos] === "+" || tokens[pos] === "-")) {
+      while (
+        pos < tokens.length &&
+        (tokens[pos] === "+" || tokens[pos] === "-")
+      ) {
         const op = tokens[pos++];
         const right = parseTerm();
         left = op === "+" ? left + right : left - right;
@@ -104,7 +107,10 @@ export function evaluateAmountExpr(raw) {
 
     function parseTerm() {
       let left = parseFactor();
-      while (pos < tokens.length && (tokens[pos] === "*" || tokens[pos] === "/")) {
+      while (
+        pos < tokens.length &&
+        (tokens[pos] === "*" || tokens[pos] === "/")
+      ) {
         const op = tokens[pos++];
         const right = parseFactor();
         if (op === "/" && right === 0) return NaN;
@@ -120,13 +126,18 @@ export function evaluateAmountExpr(raw) {
         if (tokens[pos] === ")") pos++;
         return val;
       }
-      if (tokens[pos] === "-") { pos++; return -parseFactor(); }
+      if (tokens[pos] === "-") {
+        pos++;
+        return -parseFactor();
+      }
       const n = parseFloat(tokens[pos++]);
       return isNaN(n) ? NaN : n;
     }
 
     const result = parseExpr();
-    return (isFinite(result) && result > 0) ? Math.round(result * 100) / 100 : NaN;
+    return isFinite(result) && result > 0
+      ? Math.round(result * 100) / 100
+      : NaN;
   } catch {
     return NaN;
   }
