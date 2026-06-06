@@ -1,20 +1,17 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Simple offline-first personal finance tracker. Track expenses and income, filter by category, export to CSV, and manage your money with beautiful charts. Works completely offline, no internet required."
-    />
+    <meta name="description"
+        content="Simple offline-first personal finance tracker. Track expenses and income, filter by category, export to CSV, and manage your money with beautiful charts. Works completely offline, no internet required." />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="FinChronicle" />
     <meta name="theme-color" content="#0051D5" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; script-src 'self'; connect-src 'self';"
-    />
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; script-src 'self'; connect-src 'self';" />
     <title>FinChronicle - Track Your Financial Journey</title>
 
     <!-- PWA Icons -->
@@ -28,56 +25,30 @@
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="stylesheet" href="./css/chart.css" />
     <link rel="stylesheet" href="./css/dark-mode.css" />
-  </head>
+</head>
 
-  <body>
+<body>
     <!-- Skip to Main Content Link (Accessibility) -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <!-- App Lock Overlay (v4.3.0) -->
-    <div
-      id="lockOverlay"
-      class="lock-overlay"
-      hidden
-      aria-modal="true"
-      role="dialog"
-      aria-label="App locked"
-    >
-      <div class="lock-card">
-        <div class="lock-icon-wrap"><i class="ri-lock-fill"></i></div>
-        <h2 class="lock-title">FinChronicle is locked</h2>
-        <p class="lock-subtitle">Enter your PIN to continue</p>
-        <form class="lock-pin-form" id="lockPinForm" autocomplete="off">
-          <input
-            type="text"
-            name="username"
-            autocomplete="username"
-            hidden
-            aria-hidden="true"
-          />
-          <input
-            type="password"
-            class="lock-pin-input"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            maxlength="8"
-            placeholder="PIN"
-            autocomplete="current-password"
-            aria-label="PIN"
-          />
-        </form>
-        <p class="lock-error" role="alert"></p>
-        <button class="lock-unlock-btn" type="button">Unlock</button>
-        <button
-          id="biometricBtn"
-          class="lock-biometric-btn"
-          type="button"
-          hidden
-        >
-          <i class="ri-fingerprint-line"></i> Use Face / Fingerprint
-        </button>
-        <button class="lock-forgot-btn" type="button">Forgot PIN</button>
-      </div>
+    <div id="lockOverlay" class="lock-overlay" hidden aria-modal="true" role="dialog" aria-label="App locked">
+        <div class="lock-card">
+            <div class="lock-icon-wrap"><i class="ri-lock-fill"></i></div>
+            <h2 class="lock-title">FinChronicle is locked</h2>
+            <p class="lock-subtitle">Enter your PIN to continue</p>
+            <form class="lock-pin-form" id="lockPinForm" autocomplete="off">
+                <input type="text" name="username" autocomplete="username" hidden aria-hidden="true" />
+                <input type="password" class="lock-pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="8"
+                    placeholder="PIN" autocomplete="current-password" aria-label="PIN" />
+            </form>
+            <p class="lock-error" role="alert"></p>
+            <button class="lock-unlock-btn" type="button">Unlock</button>
+            <button id="biometricBtn" class="lock-biometric-btn" type="button" hidden>
+                <i class="ri-fingerprint-line"></i> Use Face / Fingerprint
+            </button>
+            <button class="lock-forgot-btn" type="button">Forgot PIN</button>
+        </div>
     </div>
 
     <!-- Success Message -->
@@ -85,1860 +56,1270 @@
 
     <!-- Delete Confirmation Modal -->
     <div class="modal" id="deleteModal">
-      <div class="modal-content">
-        <div class="modal-title">Delete Transaction?</div>
-        <div class="modal-text">You can't undo this.</div>
-        <div class="modal-actions">
-          <button class="modal-btn modal-btn-cancel">Cancel</button>
-          <button class="modal-btn modal-btn-confirm">Delete</button>
+        <div class="modal-content">
+            <div class="modal-title">Delete Transaction?</div>
+            <div class="modal-text">You can't undo this.</div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel">Cancel</button>
+                <button class="modal-btn modal-btn-confirm">Delete</button>
+            </div>
         </div>
-      </div>
     </div>
 
     <!-- Restore Preview Modal -->
     <div class="modal" id="restorePreviewModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3><i class="ri-file-list-line"></i> Backup preview</h3>
-          <button class="close-btn" aria-label="Close">
-            <i class="ri-close-line"></i>
-          </button>
-        </div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ri-file-list-line"></i> Backup preview</h3>
+                <button class="close-btn" aria-label="Close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
 
-        <div class="backup-preview-info">
-          <div class="preview-item">
-            <span class="preview-label">Backup Date:</span>
-            <span class="preview-value" id="previewBackupDate">-</span>
-          </div>
-          <div class="preview-item">
-            <span class="preview-label">Transaction Count:</span>
-            <span class="preview-value" id="previewCount">-</span>
-          </div>
-          <div class="preview-item">
-            <span class="preview-label">Date Range:</span>
-            <span class="preview-value" id="previewDateRange">-</span>
-          </div>
-          <div class="preview-item">
-            <span class="preview-label">Currency:</span>
-            <span class="preview-value" id="previewCurrency">-</span>
-          </div>
-          <div
-            class="preview-item"
-            id="previewIntegrityRow"
-            style="display: none"
-          >
-            <span class="preview-label">Integrity:</span>
-            <span class="preview-value" id="previewIntegrity">-</span>
-          </div>
-        </div>
+            <div class="backup-preview-info">
+                <div class="preview-item">
+                    <span class="preview-label">Backup Date:</span>
+                    <span class="preview-value" id="previewBackupDate">-</span>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Transaction Count:</span>
+                    <span class="preview-value" id="previewCount">-</span>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Date Range:</span>
+                    <span class="preview-value" id="previewDateRange">-</span>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Currency:</span>
+                    <span class="preview-value" id="previewCurrency">-</span>
+                </div>
+                <div class="preview-item" id="previewIntegrityRow" style="display: none">
+                    <span class="preview-label">Integrity:</span>
+                    <span class="preview-value" id="previewIntegrity">-</span>
+                </div>
+            </div>
 
-        <div class="restore-mode-info">
-          <div class="restore-mode-option">
-            <span class="restore-mode-badge restore-mode-badge-merge"
-              >Merge</span
-            >
-            <span class="restore-mode-desc"
-              >Adds missing records, keeps your existing data intact.</span
-            >
-          </div>
-          <div class="restore-mode-option">
-            <span class="restore-mode-badge restore-mode-badge-replace"
-              >Replace All</span
-            >
-            <span class="restore-mode-desc"
-              >Wipes all current data and writes the backup. Cannot be
-              undone.</span
-            >
-          </div>
-        </div>
+            <div class="restore-mode-info">
+                <div class="restore-mode-option">
+                    <span class="restore-mode-badge restore-mode-badge-merge">Merge</span>
+                    <span class="restore-mode-desc">Adds missing records, keeps your existing data intact.</span>
+                </div>
+                <div class="restore-mode-option">
+                    <span class="restore-mode-badge restore-mode-badge-replace">Replace All</span>
+                    <span class="restore-mode-desc">Wipes all current data and writes the backup. Cannot be
+                        undone.</span>
+                </div>
+            </div>
 
-        <div class="modal-actions restore-mode-actions">
-          <button class="modal-btn modal-btn-cancel" id="restoreCancelBtn">
-            Cancel
-          </button>
-          <button class="modal-btn modal-btn-primary" id="restoreMergeBtn">
-            Merge
-          </button>
-          <button class="modal-btn modal-btn-danger" id="restoreReplaceBtn">
-            Replace All
-          </button>
+            <div class="modal-actions restore-mode-actions">
+                <button class="modal-btn modal-btn-cancel" id="restoreCancelBtn">
+                    Cancel
+                </button>
+                <button class="modal-btn modal-btn-primary" id="restoreMergeBtn">
+                    Merge
+                </button>
+                <button class="modal-btn modal-btn-danger" id="restoreReplaceBtn">
+                    Replace All
+                </button>
+            </div>
         </div>
-      </div>
     </div>
 
     <!-- Restore Report Modal -->
     <div class="modal" id="restoreReportModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3><i class="ri-file-check-line"></i> Restore complete</h3>
-          <button class="close-btn" aria-label="Close">
-            <i class="ri-close-line"></i>
-          </button>
-        </div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ri-file-check-line"></i> Restore complete</h3>
+                <button class="close-btn" aria-label="Close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
 
-        <div class="restore-report-info">
-          <div class="report-stat">
-            <i class="ri-file-list-line report-icon"></i>
-            <div class="report-details">
-              <span class="report-label">Total in backup</span>
-              <span class="report-value" id="reportBackupTotal">-</span>
+            <div class="restore-report-info">
+                <div class="report-stat">
+                    <i class="ri-file-list-line report-icon"></i>
+                    <div class="report-details">
+                        <span class="report-label">Total in backup</span>
+                        <span class="report-value" id="reportBackupTotal">-</span>
+                    </div>
+                </div>
+                <div class="report-stat success">
+                    <i class="ri-check-line report-icon"></i>
+                    <div class="report-details">
+                        <span class="report-label">New transactions added</span>
+                        <span class="report-value" id="reportAdded">-</span>
+                    </div>
+                </div>
+                <div class="report-stat warning">
+                    <i class="ri-alert-line report-icon"></i>
+                    <div class="report-details">
+                        <span class="report-label">Duplicates skipped</span>
+                        <span class="report-value" id="reportDuplicates">-</span>
+                    </div>
+                </div>
+                <div class="report-stat total">
+                    <i class="ri-database-2-line report-icon"></i>
+                    <div class="report-details">
+                        <span class="report-label">Total transactions now</span>
+                        <span class="report-value" id="reportCurrentTotal">-</span>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="report-stat success">
-            <i class="ri-check-line report-icon"></i>
-            <div class="report-details">
-              <span class="report-label">New transactions added</span>
-              <span class="report-value" id="reportAdded">-</span>
-            </div>
-          </div>
-          <div class="report-stat warning">
-            <i class="ri-alert-line report-icon"></i>
-            <div class="report-details">
-              <span class="report-label">Duplicates skipped</span>
-              <span class="report-value" id="reportDuplicates">-</span>
-            </div>
-          </div>
-          <div class="report-stat total">
-            <i class="ri-database-2-line report-icon"></i>
-            <div class="report-details">
-              <span class="report-label">Total transactions now</span>
-              <span class="report-value" id="reportCurrentTotal">-</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="modal-actions">
-          <button class="modal-btn modal-btn-confirm">Done</button>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-confirm">Done</button>
+            </div>
         </div>
-      </div>
     </div>
 
     <!-- Recurring Transaction Modal (v3.11.0) -->
     <div class="modal" id="recurringModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3><i class="ri-repeat-line"></i> Add recurring</h3>
-          <button class="close-btn" aria-label="Close recurring modal">
-            <i class="ri-close-line"></i>
-          </button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ri-repeat-line"></i> Add recurring</h3>
+                <button class="close-btn" aria-label="Close recurring modal">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Type</label>
+                    <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
+                        <button type="button" class="type-option active" id="recurringTypeExpense" data-rtype="expense"
+                            role="radio" aria-checked="true">
+                            <i class="ri-arrow-down-circle-line"></i><span class="type-label"> Expense</span>
+                        </button>
+                        <button type="button" class="type-option" id="recurringTypeIncome" data-rtype="income"
+                            role="radio" aria-checked="false">
+                            <i class="ri-arrow-up-circle-line"></i><span class="type-label"> Income</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="recurringType" value="expense" />
+                </div>
+                <div class="form-group">
+                    <label for="recurringAmount">Amount</label>
+                    <input type="number" id="recurringAmount" placeholder="1000" min="0.01" max="999999999" step="0.01"
+                        inputmode="decimal" />
+                </div>
+                <div class="form-group">
+                    <label for="recurringCategory">Category</label>
+                    <select id="recurringCategory">
+                        <option value="" disabled selected>Select category</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="recurringNotes">Notes (Optional)</label>
+                    <input type="text" id="recurringNotes" placeholder="e.g. Monthly rent" />
+                </div>
+                <div class="form-group">
+                    <label for="recurringFrequency">Frequency</label>
+                    <select id="recurringFrequency">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Every 2 Weeks</option>
+                        <option value="monthly" selected>Monthly</option>
+                        <option value="quarterly">Quarterly (every 3 months)</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+                <div class="form-group" id="recurringDayGroup">
+                    <label for="recurringDay">Day of Month <span class="form-hint-inline">(1–28)</span></label>
+                    <input type="number" id="recurringDay" min="1" max="28" placeholder="e.g. 1" inputmode="numeric" />
+                    <div class="form-hint">
+                        Leave blank to use the same day as the start date
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="recurringStartDate">Start Date</label>
+                    <input type="date" id="recurringStartDate" />
+                </div>
+                <div class="form-group">
+                    <label for="recurringAccount">Account (Optional)</label>
+                    <select id="recurringAccount">
+                        <option value="">None — unlinked</option>
+                    </select>
+                    <div class="form-hint">
+                        Link to an account to enable Cash-Flow Forecast
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tags (Optional)</label>
+                    <div id="recurringTagPickerRow" class="tag-picker-row" hidden></div>
+                    <div class="tag-input-wrapper" id="recurringTagInputWrapper">
+                        <div class="tag-chips" id="recurringTagChips"></div>
+                        <input type="text" id="recurringTagInput" class="tag-input" placeholder="Add tag…"
+                            autocomplete="off" aria-label="Add tags" />
+                    </div>
+                    <div class="tag-suggestions" id="recurringTagSuggestions" hidden></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" id="recurringCancelBtn">
+                    Cancel
+                </button>
+                <button class="modal-btn modal-btn-confirm" id="recurringSaveBtn">
+                    Save
+                </button>
+            </div>
         </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Type</label>
-            <div
-              class="type-toggle"
-              role="radiogroup"
-              aria-label="Transaction type"
-            >
-              <button
-                type="button"
-                class="type-option active"
-                id="recurringTypeExpense"
-                data-rtype="expense"
-                role="radio"
-                aria-checked="true"
-              >
-                <i class="ri-arrow-down-circle-line"></i
-                ><span class="type-label"> Expense</span>
-              </button>
-              <button
-                type="button"
-                class="type-option"
-                id="recurringTypeIncome"
-                data-rtype="income"
-                role="radio"
-                aria-checked="false"
-              >
-                <i class="ri-arrow-up-circle-line"></i
-                ><span class="type-label"> Income</span>
-              </button>
-            </div>
-            <input type="hidden" id="recurringType" value="expense" />
-          </div>
-          <div class="form-group">
-            <label for="recurringAmount">Amount</label>
-            <input
-              type="number"
-              id="recurringAmount"
-              placeholder="1000"
-              min="0.01"
-              max="999999999"
-              step="0.01"
-              inputmode="decimal"
-            />
-          </div>
-          <div class="form-group">
-            <label for="recurringCategory">Category</label>
-            <select id="recurringCategory">
-              <option value="" disabled selected>Select category</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="recurringNotes">Notes (Optional)</label>
-            <input
-              type="text"
-              id="recurringNotes"
-              placeholder="e.g. Monthly rent"
-            />
-          </div>
-          <div class="form-group">
-            <label for="recurringFrequency">Frequency</label>
-            <select id="recurringFrequency">
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="biweekly">Every 2 Weeks</option>
-              <option value="monthly" selected>Monthly</option>
-              <option value="quarterly">Quarterly (every 3 months)</option>
-              <option value="yearly">Yearly</option>
-            </select>
-          </div>
-          <div class="form-group" id="recurringDayGroup">
-            <label for="recurringDay"
-              >Day of Month <span class="form-hint-inline">(1–28)</span></label
-            >
-            <input
-              type="number"
-              id="recurringDay"
-              min="1"
-              max="28"
-              placeholder="e.g. 1"
-              inputmode="numeric"
-            />
-            <div class="form-hint">
-              Leave blank to use the same day as the start date
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="recurringStartDate">Start Date</label>
-            <input type="date" id="recurringStartDate" />
-          </div>
-          <div class="form-group">
-            <label for="recurringAccount">Account (Optional)</label>
-            <select id="recurringAccount">
-              <option value="">None — unlinked</option>
-            </select>
-            <div class="form-hint">
-              Link to an account to enable Cash-Flow Forecast
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Tags (Optional)</label>
-            <div id="recurringTagPickerRow" class="tag-picker-row" hidden></div>
-            <div class="tag-input-wrapper" id="recurringTagInputWrapper">
-              <div class="tag-chips" id="recurringTagChips"></div>
-              <input
-                type="text"
-                id="recurringTagInput"
-                class="tag-input"
-                placeholder="Add tag…"
-                autocomplete="off"
-                aria-label="Add tags"
-              />
-            </div>
-            <div
-              class="tag-suggestions"
-              id="recurringTagSuggestions"
-              hidden
-            ></div>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="modal-btn modal-btn-cancel" id="recurringCancelBtn">
-            Cancel
-          </button>
-          <button class="modal-btn modal-btn-confirm" id="recurringSaveBtn">
-            Save
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Feedback Modal -->
     <div class="modal" id="feedbackModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3><i class="ri-feedback-line"></i> Send feedback</h3>
-          <button class="close-btn" aria-label="Close">
-            <i class="ri-close-line"></i>
-          </button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ri-feedback-line"></i> Send feedback</h3>
+                <button class="close-btn" aria-label="Close">
+                    <i class="ri-close-line"></i>
+                </button>
+            </div>
+
+            <div class="feedback-options">
+                <div class="feedback-option">
+                    <div class="feedback-icon">
+                        <i class="ri-github-fill"></i>
+                    </div>
+                    <div class="feedback-content">
+                        <h4>GitHub Issues</h4>
+                        <p>Report bugs, request features, or share general feedback</p>
+                        <div class="feedback-links">
+                            <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=bug_report.md"
+                                target="_blank" rel="noopener noreferrer" class="feedback-link">
+                                <i class="ri-bug-line"></i> Report Bug
+                            </a>
+                            <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=feature_request.md"
+                                target="_blank" rel="noopener noreferrer" class="feedback-link">
+                                <i class="ri-lightbulb-line"></i> Request Feature
+                            </a>
+                            <a href="https://github.com/kiren-labs/finance-tracker/issues/new?template=feedback.md"
+                                target="_blank" rel="noopener noreferrer" class="feedback-link">
+                                <i class="ri-chat-3-line"></i> General Feedback
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feedback-divider">
+                    <span>OR</span>
+                </div>
+
+                <div class="feedback-option">
+                    <div class="feedback-icon">
+                        <i class="ri-mail-line"></i>
+                    </div>
+                    <div class="feedback-content">
+                        <h4>Email Us</h4>
+                        <p>Don't have a GitHub account? Send us an email</p>
+                        <a href="mailto:feedbackfinchronicle@gmail.com?subject=FinChronicle%20Feedback"
+                            class="feedback-link feedback-link-primary">
+                            <i class="ri-send-plane-line"></i> Send Email
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="feedback-options">
-          <div class="feedback-option">
-            <div class="feedback-icon">
-              <i class="ri-github-fill"></i>
-            </div>
-            <div class="feedback-content">
-              <h4>GitHub Issues</h4>
-              <p>Report bugs, request features, or share general feedback</p>
-              <div class="feedback-links">
-                <a
-                  href="https://github.com/kiren-labs/finance-tracker/issues/new?template=bug_report.md"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="feedback-link"
-                >
-                  <i class="ri-bug-line"></i> Report Bug
-                </a>
-                <a
-                  href="https://github.com/kiren-labs/finance-tracker/issues/new?template=feature_request.md"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="feedback-link"
-                >
-                  <i class="ri-lightbulb-line"></i> Request Feature
-                </a>
-                <a
-                  href="https://github.com/kiren-labs/finance-tracker/issues/new?template=feedback.md"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="feedback-link"
-                >
-                  <i class="ri-chat-3-line"></i> General Feedback
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="feedback-divider">
-            <span>OR</span>
-          </div>
-
-          <div class="feedback-option">
-            <div class="feedback-icon">
-              <i class="ri-mail-line"></i>
-            </div>
-            <div class="feedback-content">
-              <h4>Email Us</h4>
-              <p>Don't have a GitHub account? Send us an email</p>
-              <a
-                href="mailto:feedbackfinchronicle@gmail.com?subject=FinChronicle%20Feedback"
-                class="feedback-link feedback-link-primary"
-              >
-                <i class="ri-send-plane-line"></i> Send Email
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div class="container">
-      <!-- Header -->
-      <header>
-        <div class="header-content">
-          <h1>
-            <i class="ri-donut-chart-line"></i>
-            <span class="title-text"
-              ><span class="fin-text">Fin</span
-              ><span class="chronicle-text">Chronicle</span></span
-            >
-          </h1>
-          <div class="header-meta">
-            <span class="status-inline"
-              ><span class="status-dot"></span> Offline</span
-            >
-            <span class="version" id="appVersion">v3.7.1</span>
-            <button
-              class="header-btn"
-              aria-label="Send feedback"
-              title="Send feedback"
-            >
-              <i class="ri-feedback-line"></i>
-            </button>
-            <button
-              class="header-btn"
-              aria-label="Lock app"
-              title="Lock app"
-              id="lockNowBtn"
-              hidden
-            >
-              <i class="ri-lock-line"></i>
-            </button>
-            <button
-              class="header-btn"
-              aria-label="Quick Add Transaction"
-              title="Quick Add"
-            >
-              <i class="ri-add-line"></i>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <!-- Main Content -->
-      <main>
-        <!-- Update Available Notification -->
-        <div class="update-prompt" id="updatePrompt">
-          <h3><i class="ri-sparkling-line"></i> Update available</h3>
-          <p>
-            A new version is available. Reload to get the latest features and
-            improvements.
-          </p>
-          <div class="update-actions">
-            <button class="update-btn-primary">Update Now</button>
-            <button class="update-btn-secondary">Later</button>
-          </div>
-        </div>
-
-        <!-- Install Prompt (iOS) -->
-        <div class="install-prompt" id="installPrompt" style="display: none">
-          <h3><i class="ri-smartphone-line"></i> Install app</h3>
-          <p>Tap Share → Add to Home Screen for the best experience.</p>
-          <button>Dismiss</button>
-        </div>
-
-        <!-- Summary Cards -->
-        <div class="summary-section">
-          <div class="summary-header">
-            <div class="summary-header-content">
-              <h2 class="summary-title">
-                <i class="ri-bar-chart-2-line summary-title-icon"></i>
-                <span id="summaryMonthLabel">Summary</span>
-              </h2>
-              <div class="summary-compact" id="summaryCompact">
-                <span class="compact-stat" id="compactNet">฿0</span>
-                <span class="compact-separator">•</span>
-                <span class="compact-stat-small"
-                  ><i class="ri-file-list-line"></i>
-                  <span id="compactEntries">0</span></span
-                >
-                <span class="compact-separator">•</span>
-                <span class="compact-stat-small compact-income"
-                  ><i class="ri-arrow-up-line"></i>
-                  <span id="compactIncome">฿0</span></span
-                >
-                <span class="compact-separator">•</span>
-                <span class="compact-stat-small compact-expense"
-                  ><i class="ri-arrow-down-line"></i>
-                  <span id="compactExpense">฿0</span></span
-                >
-                <span
-                  id="budgetAlertBadge"
-                  class="budget-alert-badge"
-                  hidden
-                ></span>
-              </div>
-            </div>
-            <button class="collapse-btn" aria-label="Toggle Summary">
-              <i class="ri-arrow-up-s-line" id="summaryCollapseIcon"></i>
-            </button>
-          </div>
-          <div class="summary" id="summaryCards">
-            <div
-              class="summary-card"
-              role="button"
-              tabindex="0"
-              aria-label="View transactions for this month"
-            >
-              <div class="card-icon">
-                <i class="ri-calendar-check-line"></i>
-              </div>
-              <div class="card-content">
-                <div class="summary-label" id="thisMonthLabel">This Month</div>
-                <div class="summary-value" id="monthNet">0</div>
-                <div class="summary-trend" id="monthNetTrend"></div>
-              </div>
-            </div>
-            <div
-              class="summary-card"
-              role="button"
-              tabindex="0"
-              aria-label="View all transactions for this month"
-            >
-              <div class="card-icon">
-                <i class="ri-list-check-2"></i>
-              </div>
-              <div class="card-content">
-                <div class="summary-label">Total Entries</div>
-                <div class="summary-value" id="totalEntries">0</div>
-                <div class="summary-meta" id="totalEntriesMeta">This month</div>
-              </div>
-            </div>
-            <div
-              class="summary-card positive"
-              role="button"
-              tabindex="0"
-              aria-label="View income transactions for this month"
-            >
-              <div class="card-icon">
-                <i class="ri-arrow-up-circle-fill"></i>
-              </div>
-              <div class="card-content">
-                <div class="summary-label">Income</div>
-                <div class="summary-value" id="monthIncome">0</div>
-                <div class="summary-trend" id="monthIncomeTrend"></div>
-              </div>
-            </div>
-            <div
-              class="summary-card negative"
-              role="button"
-              tabindex="0"
-              aria-label="View expense transactions for this month"
-            >
-              <div class="card-icon">
-                <i class="ri-arrow-down-circle-fill"></i>
-              </div>
-              <div class="card-content">
-                <div class="summary-label">Expenses</div>
-                <div class="summary-value" id="monthExpense">0</div>
-                <div class="summary-meta" id="monthExpenseMeta"></div>
-              </div>
-            </div>
-          </div>
-          <div id="budgetAlerts"></div>
-          <!-- Smart Spending Alerts (v3.21.0) -->
-          <div id="smartAlerts" hidden></div>
-          <!-- Net Worth Dashboard (v3.18.0) -->
-          <div class="card net-worth-card" id="netWorthSection" hidden>
-            <h3><i class="ri-wallet-3-line"></i> Net Worth</h3>
-            <div id="netWorthDashboard"></div>
-            <!-- Net Worth Trend Chart (v3.28.0) -->
-            <div id="netWorthTrendContainer" hidden>
-              <h4 class="nw-trend-title">
-                <i class="ri-line-chart-line"></i> Trend
-              </h4>
-              <div id="netWorthTrend"></div>
-            </div>
-          </div>
-          <!-- Savings Rate Dashboard (v3.19.0) -->
-          <div class="card savings-card" id="savingsSection" hidden>
-            <h3><i class="ri-seedling-line"></i> Savings</h3>
-            <div id="savingsDashboard"></div>
-          </div>
-          <!-- Savings Goals (v3.20.0) -->
-          <div class="card goals-card" id="goalsSection" hidden>
-            <div class="goals-header">
-              <h3><i class="ri-trophy-line"></i> Goals</h3>
-              <button class="btn-icon" id="addGoalBtn" title="Add Goal">
-                <i class="ri-add-line"></i>
-              </button>
-            </div>
-            <div id="goalsDashboard"></div>
-          </div>
-          <!-- Family Settlement (v3.26.0) -->
-          <div class="card settlement-card" id="settlementSection" hidden>
-            <h3><i class="ri-group-line"></i> Family Settlement</h3>
-            <div id="settlementDashboard"></div>
-          </div>
-        </div>
-        <!-- Goal Form Modal (v3.20.0) -->
-        <div id="goalFormModal" class="modal">
-          <div class="modal-content modal-sm">
-            <div class="modal-header">
-              <h3 id="goalFormTitle">New Savings Goal</h3>
-              <button
-                class="close-btn"
-                id="goalFormCloseBtn"
-                aria-label="Close"
-              >
-                <i class="ri-close-line"></i>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="goalNameInput">Goal Name</label>
-                <input
-                  type="text"
-                  id="goalNameInput"
-                  placeholder="e.g. Emergency Fund"
-                  maxlength="50"
-                />
-              </div>
-              <div class="form-group">
-                <label for="goalTargetInput">Target Amount</label>
-                <input
-                  type="number"
-                  id="goalTargetInput"
-                  placeholder="0"
-                  min="1"
-                  step="any"
-                />
-              </div>
-              <div class="form-group">
-                <label for="goalDeadlineInput">Deadline (optional)</label>
-                <input type="date" id="goalDeadlineInput" />
-              </div>
-              <div class="form-group">
-                <label for="goalLinkedAccount">Linked Account (optional)</label>
-                <select id="goalLinkedAccount">
-                  <option value="">None</option>
-                </select>
-              </div>
-              <button
-                type="button"
-                id="goalFormSaveBtn"
-                class="btn primary-btn"
-                style="width: 100%; margin-top: 12px"
-              >
-                Save Goal
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- Contribution Modal (v3.20.0) -->
-        <div id="contributionModal" class="modal">
-          <div class="modal-content modal-sm">
-            <div class="modal-header">
-              <h3>Add Contribution</h3>
-              <button
-                class="close-btn"
-                id="contributionCloseBtn"
-                aria-label="Close"
-              >
-                <i class="ri-close-line"></i>
-              </button>
-            </div>
-            <div class="modal-body">
-              <p class="contribution-goal-label">
-                To: <strong id="contributionGoalName"></strong>
-              </p>
-              <div class="form-group">
-                <label for="contributionAmountInput">Amount</label>
-                <input
-                  type="number"
-                  id="contributionAmountInput"
-                  placeholder="0"
-                  min="1"
-                  step="any"
-                />
-              </div>
-              <p class="contribution-remaining" id="contributionRemaining"></p>
-              <button
-                type="button"
-                id="contributionSaveBtn"
-                class="btn primary-btn"
-                style="width: 100%; margin-top: 12px"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- Currency Selector Modal -->
-        <div id="currencyModal" class="modal" style="display: none">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h3>Select Currency</h3>
-              <button class="close-btn" aria-label="Close">
-                <i class="ri-close-line"></i>
-              </button>
-            </div>
-            <div class="currency-list" id="currencyList">
-              <!-- Currency options will be populated by JavaScript -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Tab Navigation -->
-        <div class="tabs" role="tablist" aria-label="Main navigation">
-          <button
-            id="add-tab"
-            class="tab active"
-            role="tab"
-            aria-selected="true"
-            aria-controls="addTab"
-          >
-            <i class="ri-add-line"></i> Add
-          </button>
-          <button
-            id="list-tab"
-            class="tab"
-            role="tab"
-            aria-selected="false"
-            aria-controls="listTab"
-          >
-            <i class="ri-list-check"></i> List
-          </button>
-          <button
-            id="groups-tab"
-            class="tab"
-            role="tab"
-            aria-selected="false"
-            aria-controls="groupsTab"
-          >
-            <i class="ri-bar-chart-2-line"></i> Groups
-          </button>
-          <button
-            id="settings-tab"
-            class="tab"
-            role="tab"
-            aria-selected="false"
-            aria-controls="settingsTab"
-          >
-            <i class="ri-settings-3-line"></i> Settings
-          </button>
-        </div>
-
-        <!-- Add Transaction Tab -->
-        <div
-          id="addTab"
-          class="tab-content active"
-          role="tabpanel"
-          aria-labelledby="add-tab"
-        >
-          <!-- Quick Entry Bar (v3.17.0) -->
-          <div id="quickEntryBar" class="quick-entry-bar" hidden></div>
-
-          <div class="card" id="main-content">
-            <h2 id="formTitle" style="font-size: 20px; margin-bottom: 16px">
-              Add Transaction
-            </h2>
-            <form id="transactionForm" aria-label="Add transaction form">
-              <div class="form-group">
-                <label>Type</label>
-                <div
-                  class="type-toggle"
-                  role="radiogroup"
-                  aria-label="Transaction type"
-                >
-                  <button
-                    type="button"
-                    class="type-option active"
-                    data-type="expense"
-                    role="radio"
-                    aria-checked="true"
-                  >
-                    <i class="ri-arrow-down-circle-line"></i
-                    ><span class="type-label"> Expense</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="type-option"
-                    data-type="income"
-                    role="radio"
-                    aria-checked="false"
-                  >
-                    <i class="ri-arrow-up-circle-line"></i
-                    ><span class="type-label"> Income</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="type-option"
-                    data-type="transfer"
-                    role="radio"
-                    aria-checked="false"
-                  >
-                    <i class="ri-swap-line"></i
-                    ><span class="type-label"> Transfer</span>
-                  </button>
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <h1>
+                    <i class="ri-donut-chart-line"></i>
+                    <span class="title-text"><span class="fin-text">Fin</span><span
+                            class="chronicle-text">Chronicle</span></span>
+                </h1>
+                <div class="header-meta">
+                    <span class="status-inline"><span class="status-dot"></span> Offline</span>
+                    <span class="version" id="appVersion">v3.7.1</span>
+                    <button class="header-btn" aria-label="Send feedback" title="Send feedback">
+                        <i class="ri-feedback-line"></i>
+                    </button>
+                    <button class="header-btn" aria-label="Lock app" title="Lock app" id="lockNowBtn" hidden>
+                        <i class="ri-lock-line"></i>
+                    </button>
+                    <button class="header-btn" aria-label="Quick Add Transaction" title="Quick Add">
+                        <i class="ri-add-line"></i>
+                    </button>
                 </div>
-                <input type="hidden" id="type" value="expense" />
-              </div>
+            </div>
+        </header>
 
-              <div class="form-group">
-                <label for="amount">Amount (₹)</label>
-                <input
-                  type="number"
-                  id="amount"
-                  placeholder="1000"
-                  required
-                  min="0.01"
-                  max="10000000"
-                  step="0.01"
-                  inputmode="decimal"
-                  aria-label="Transaction amount in selected currency"
-                />
-              </div>
-
-              <div class="form-group" id="categoryGroup">
-                <label for="category">Category</label>
-                <select id="category" required>
-                  <option value="" disabled selected>Select category</option>
-                  <!-- Categories will be populated dynamically -->
-                </select>
-              </div>
-
-              <div id="transferFields" class="transfer-fields" hidden>
-                <div class="form-group">
-                  <label for="fromAccount">From Account</label>
-                  <div class="account-input-wrapper">
-                    <i class="ri-bank-line account-input-icon"></i>
-                    <input
-                      type="text"
-                      id="fromAccount"
-                      placeholder="e.g. Bank Account"
-                      autocomplete="off"
-                      aria-label="Source account"
-                    />
-                    <div
-                      class="account-suggestions"
-                      id="fromAccountSuggestions"
-                      hidden
-                    ></div>
-                  </div>
+        <!-- Main Content -->
+        <main>
+            <!-- Update Available Notification -->
+            <div class="update-prompt" id="updatePrompt">
+                <h3><i class="ri-sparkling-line"></i> Update available</h3>
+                <p>
+                    A new version is available. Reload to get the latest features and
+                    improvements.
+                </p>
+                <div class="update-actions">
+                    <button class="update-btn-primary">Update Now</button>
+                    <button class="update-btn-secondary">Later</button>
                 </div>
-                <div class="transfer-arrow">
-                  <i class="ri-arrow-down-line"></i>
-                </div>
-                <div class="form-group">
-                  <label for="toAccount">To Account</label>
-                  <div class="account-input-wrapper">
-                    <i class="ri-bank-line account-input-icon"></i>
-                    <input
-                      type="text"
-                      id="toAccount"
-                      placeholder="e.g. Credit Card"
-                      autocomplete="off"
-                      aria-label="Destination account"
-                    />
-                    <div
-                      class="account-suggestions"
-                      id="toAccountSuggestions"
-                      hidden
-                    ></div>
-                  </div>
-                </div>
-              </div>
+            </div>
 
-              <div class="form-group" id="accountLinkingField" hidden>
-                <label for="linkedAccount">Account</label>
-                <select id="linkedAccount" aria-label="Link to account">
-                  <option value="">None</option>
-                </select>
-              </div>
+            <!-- Install Prompt (iOS) -->
+            <div class="install-prompt" id="installPrompt" style="display: none">
+                <h3><i class="ri-smartphone-line"></i> Install app</h3>
+                <p>Tap Share → Add to Home Screen for the best experience.</p>
+                <button>Dismiss</button>
+            </div>
 
-              <div class="form-group">
-                <label for="date">Date</label>
-                <input type="date" id="date" required />
-              </div>
-
-              <div class="form-group">
-                <label for="notes">Notes (Optional)</label>
-                <input type="text" id="notes" placeholder="Add a note..." />
-              </div>
-
-              <!-- Optional Fields (v3.16.0) -->
-              <div
-                id="optionalFieldsSection"
-                class="optional-fields-section"
-                hidden
-              >
-                <button
-                  type="button"
-                  class="optional-fields-toggle"
-                  id="optionalFieldsToggle"
-                  aria-expanded="false"
-                  aria-controls="optionalFieldsContainer"
-                >
-                  <i class="ri-add-circle-line"></i> Additional details
-                  <i class="ri-arrow-down-s-line optional-fields-chevron"></i>
-                </button>
-                <div
-                  id="optionalFieldsContainer"
-                  class="optional-fields-container"
-                  hidden
-                >
-                  <div class="form-group" data-optional-field="tags" hidden>
-                    <label>Tags</label>
-                    <div id="tagPickerRow" class="tag-picker-row" hidden></div>
-                    <div class="tag-input-wrapper" id="tagInputWrapper">
-                      <div class="tag-chips" id="formTagChips"></div>
-                      <input
-                        type="text"
-                        id="tagInput"
-                        class="tag-input"
-                        placeholder="Add tag…"
-                        autocomplete="off"
-                        aria-label="Add tags"
-                      />
+            <!-- Summary Cards -->
+            <div class="summary-section">
+                <div class="summary-header">
+                    <div class="summary-header-content">
+                        <h2 class="summary-title">
+                            <i class="ri-bar-chart-2-line summary-title-icon"></i>
+                            <span id="summaryMonthLabel">Summary</span>
+                        </h2>
+                        <div class="summary-compact" id="summaryCompact">
+                            <span class="compact-stat" id="compactNet">฿0</span>
+                            <span class="compact-separator">•</span>
+                            <span class="compact-stat-small"><i class="ri-file-list-line"></i>
+                                <span id="compactEntries">0</span></span>
+                            <span class="compact-separator">•</span>
+                            <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i>
+                                <span id="compactIncome">฿0</span></span>
+                            <span class="compact-separator">•</span>
+                            <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i>
+                                <span id="compactExpense">฿0</span></span>
+                            <span id="budgetAlertBadge" class="budget-alert-badge" hidden></span>
+                        </div>
                     </div>
-                    <div
-                      class="tag-suggestions"
-                      id="tagSuggestions"
-                      hidden
-                    ></div>
-                  </div>
-                  <div
-                    class="form-group"
-                    data-optional-field="paymentMethod"
-                    hidden
-                  >
-                    <label for="paymentMethod">Payment Method</label>
-                    <select id="paymentMethod">
-                      <option value="">Select method</option>
-                      <option value="cash">Cash</option>
-                      <option value="credit-card">Credit Card</option>
-                      <option value="debit-card">Debit Card</option>
-                      <option value="bank-transfer">Bank Transfer</option>
-                      <option value="wallet">Wallet</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div class="form-group" data-optional-field="merchant" hidden>
-                    <label for="merchant">Merchant / Payee</label>
-                    <div class="account-input-wrapper">
-                      <i class="ri-store-2-line account-input-icon"></i>
-                      <input
-                        type="text"
-                        id="merchant"
-                        placeholder="e.g. Starbucks"
-                        autocomplete="off"
-                        maxlength="100"
-                        aria-label="Merchant name"
-                      />
-                      <div
-                        class="account-suggestions"
-                        id="merchantSuggestions"
-                        hidden
-                      ></div>
-                    </div>
-                  </div>
-                  <div
-                    class="form-group"
-                    data-optional-field="expenseType"
-                    hidden
-                  >
-                    <label for="expenseType">Expense Type</label>
-                    <select id="expenseType">
-                      <option value="">Select type</option>
-                      <option value="personal">Personal</option>
-                      <option value="business">Business</option>
-                      <option value="reimbursable">
-                        Someone will pay me back
-                      </option>
-                    </select>
-                  </div>
-                  <div
-                    class="form-group"
-                    data-optional-field="attachedTo"
-                    hidden
-                  >
-                    <label for="attachedTo">Person</label>
-                    <div class="account-input-wrapper">
-                      <i class="ri-user-line account-input-icon"></i>
-                      <input
-                        type="text"
-                        id="attachedTo"
-                        placeholder="e.g. Kevin"
-                        autocomplete="off"
-                        maxlength="50"
-                        aria-label="Person name"
-                      />
-                      <div
-                        class="account-suggestions"
-                        id="attachedToSuggestions"
-                        hidden
-                      ></div>
-                    </div>
-                  </div>
-                  <div
-                    class="form-group"
-                    data-optional-field="referenceId"
-                    hidden
-                  >
-                    <label for="referenceId">Reference / Receipt ID</label>
-                    <input
-                      type="text"
-                      id="referenceId"
-                      placeholder="e.g. INV-2026-001"
-                      maxlength="100"
-                      aria-label="Reference ID"
-                    />
-                  </div>
-                  <div class="form-group" data-optional-field="location" hidden>
-                    <label for="locationField">Location</label>
-                    <input
-                      type="text"
-                      id="locationField"
-                      placeholder="e.g. Bangkok"
-                      maxlength="100"
-                      aria-label="Location"
-                    />
-                  </div>
-                  <div
-                    class="form-group"
-                    data-optional-field="transactionCurrency"
-                    hidden
-                  >
-                    <!-- Multi-currency fields rendered by js/multi-currency.js -->
-                  </div>
+                    <button class="collapse-btn" aria-label="Toggle Summary">
+                        <i class="ri-arrow-up-s-line" id="summaryCollapseIcon"></i>
+                    </button>
                 </div>
-              </div>
-
-              <!-- Category suggestion (v3.16.0) -->
-              <div id="categorySuggestion" class="category-suggestion" hidden>
-                <i class="ri-lightbulb-line"></i>
-                <span
-                  >Suggested: <strong class="suggestion-category"></strong
-                ></span>
-                <button
-                  type="button"
-                  class="suggestion-accept"
-                  aria-label="Accept suggestion"
-                >
-                  Use
-                </button>
-                <button
-                  type="button"
-                  class="suggestion-dismiss"
-                  aria-label="Dismiss suggestion"
-                >
-                  <i class="ri-close-line"></i>
-                </button>
-              </div>
-
-              <input type="hidden" id="editId" value="" />
-
-              <button type="submit" class="primary" id="submitBtn">
-                Save Transaction
-              </button>
-              <div class="form-actions-row">
-                <button
-                  type="button"
-                  id="saveAsTemplateBtn"
-                  class="save-template-btn"
-                  aria-label="Save as quick entry template"
-                >
-                  <i class="ri-bookmark-line"></i> Save as template
-                </button>
-              </div>
-              <button
-                type="button"
-                class="primary"
-                id="cancelEditBtn"
-                style="background: #6e6e73; margin-top: 12px; display: none"
-                aria-label="Cancel editing"
-              >
-                Cancel
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <!-- List Tab -->
-        <div
-          id="listTab"
-          class="tab-content"
-          role="tabpanel"
-          aria-labelledby="list-tab"
-        >
-          <div class="filters" id="monthFilters"></div>
-          <div class="search-bar-wrapper">
-            <i class="ri-search-line search-icon"></i>
-            <input
-              type="text"
-              id="searchInput"
-              class="search-input"
-              placeholder="Search amount, category, notes, tags…"
-              aria-label="Search transactions"
-              autocomplete="off"
-            />
-            <button
-              class="search-clear-btn"
-              id="searchClearBtn"
-              aria-label="Clear search"
-              hidden
-            >
-              <i class="ri-close-line"></i>
-            </button>
-          </div>
-          <div id="activeTagFilters" class="active-tag-filters"></div>
-          <div style="margin-bottom: 16px">
-            <label for="categoryFilter" class="filter-label"
-              >Filter by Category</label
-            >
-            <select
-              class="category-filter"
-              id="categoryFilter"
-              aria-label="Filter transactions by category"
-            >
-              <option value="all">All Categories</option>
-            </select>
-          </div>
-          <div class="card">
-            <div id="transactionsList"></div>
-          </div>
-          <div
-            id="paginationControls"
-            class="pagination-container"
-            style="display: none"
-          >
-            <button
-              id="prevBtn"
-              class="pagination-btn pagination-btn-prev"
-              aria-label="Previous page"
-            >
-              <i class="ri-arrow-left-s-line"></i>
-              <span>Previous</span>
-            </button>
-            <div id="pageInfo" class="pagination-info"></div>
-            <button
-              id="nextBtn"
-              class="pagination-btn pagination-btn-next"
-              aria-label="Next page"
-            >
-              <span>Next</span>
-              <i class="ri-arrow-right-s-line"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Reports Tab -->
-        <div
-          id="reportsTab"
-          class="tab-content"
-          role="tabpanel"
-          aria-label="Reports"
-        >
-          <!-- Chart date range selector -->
-          <div class="chart-range-bar">
-            <span class="chart-range-label">Period:</span>
-            <div
-              class="range-pills"
-              role="group"
-              aria-label="Select chart date range"
-            >
-              <button class="range-pill" data-range="3m" type="button">
-                3M
-              </button>
-              <button class="range-pill active" data-range="6m" type="button">
-                6M
-              </button>
-              <button class="range-pill" data-range="1y" type="button">
-                1Y
-              </button>
-              <button class="range-pill" data-range="all" type="button">
-                All
-              </button>
-            </div>
-            <span
-              class="range-date-span"
-              id="rangeSpan"
-              aria-live="polite"
-            ></span>
-          </div>
-
-          <!-- Spending by Category (pie) -->
-          <p class="chart-section-title">Spending by Category</p>
-          <div id="categoryChart" class="category-chart"></div>
-
-          <!-- Income vs Expenses (bar) -->
-          <p class="chart-section-title">Income vs Expenses</p>
-          <div id="incomeExpenseChart" class="bar-chart-card"></div>
-
-          <!-- Weekly Spending -->
-          <p class="chart-section-title">Weekly Spending — Last 4 Weeks</p>
-          <div id="weeklyChart" class="weekly-chart-card"></div>
-
-          <!-- Day of Month Heatmap -->
-          <p class="chart-section-title" id="heatmapTitle">
-            Spending by Day of Month
-          </p>
-          <div id="dayHeatmap" class="day-heatmap-card"></div>
-
-          <!-- Annual Report (v3.21.0) -->
-          <div class="annual-report-section">
-            <p class="chart-section-title">Year in Review</p>
-            <div id="annualReportContent" class="annual-report-content"></div>
-          </div>
-
-          <!-- Cash-Flow Forecast (v4.1.0) -->
-          <div id="forecast-section" class="forecast-section">
-            <div class="forecast-header">
-              <p class="chart-section-title" style="margin: 0">
-                Cash-Flow Forecast
-              </p>
-              <div
-                class="forecast-horizon-toggle"
-                role="group"
-                aria-label="Forecast horizon"
-              >
-                <button class="horizon-btn active" data-days="30" type="button">
-                  30d
-                </button>
-                <button class="horizon-btn" data-days="60" type="button">
-                  60d
-                </button>
-                <button class="horizon-btn" data-days="90" type="button">
-                  90d
-                </button>
-              </div>
-            </div>
-            <div id="forecast-content"></div>
-          </div>
-        </div>
-
-        <!-- Groups Tab -->
-        <div
-          id="groupsTab"
-          class="tab-content"
-          role="tabpanel"
-          aria-labelledby="groups-tab"
-        >
-          <div class="filters">
-            <button class="filter-btn active">By Month</button>
-            <button class="filter-btn">By Category</button>
-          </div>
-          <div id="groupedContent"></div>
-        </div>
-
-        <!-- Settings Tab -->
-        <div
-          id="settingsTab"
-          class="tab-content"
-          role="tabpanel"
-          aria-labelledby="settings-tab"
-        >
-          <div class="card">
-            <h2 style="font-size: 20px; margin-bottom: 16px">Settings</h2>
-            <div class="settings-actions">
-              <button
-                class="toolbar-btn"
-                aria-label="Check for updates"
-                id="updateCheckBtn"
-              >
-                <i class="ri-refresh-line"></i>
-                <span>Check for updates</span>
-              </button>
-              <button
-                class="toolbar-btn"
-                aria-label="Change currency"
-                id="currencyBtn"
-              >
-                <i class="ri-exchange-dollar-line"></i>
-                <span>Currency</span>
-                <span class="currency-display">
-                  <span id="currencySymbol">₹</span>
-                  <span id="currencyCode">INR</span>
-                </span>
-              </button>
-              <button
-                class="toolbar-btn"
-                aria-label="Toggle dark mode"
-                id="darkModeBtn"
-              >
-                <i class="ri-contrast-2-line" id="darkModeIcon"></i>
-                <span>Dark Mode</span>
-              </button>
-              <button
-                class="toolbar-btn"
-                aria-label="Send feedback"
-                id="feedbackBtn"
-              >
-                <i class="ri-feedback-line"></i>
-                <span>Send feedback</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- App Lock (v4.3.0) -->
-          <div id="appLockSettingsContainer"></div>
-
-          <!-- Feature Visibility (v4.3.1) -->
-          <div class="card" id="featureVisibilityCard">
-            <h3 style="margin-bottom: 12px">Features</h3>
-            <p class="optional-fields-desc">
-              Show or hide sections of the app. Hiding a section never deletes
-              your data.
-            </p>
-            <div class="optional-field-toggles">
-              <label class="field-toggle-row">
-                <span class="field-toggle-label">Accounts &amp; Net Worth</span>
-                <input
-                  type="checkbox"
-                  id="toggleAccountsSection"
-                  class="field-toggle-checkbox"
-                />
-                <span class="field-toggle-switch"></span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Optional Fields (v3.16.0) -->
-          <div id="optionalFieldsSettingsContainer">
-            <div class="card">
-              <div
-                class="optional-fields-settings-header"
-                data-toggle-optional-settings
-                aria-expanded="false"
-                role="button"
-                tabindex="0"
-              >
-                <h3>Optional Fields</h3>
-                <i class="ri-arrow-down-s-line optional-settings-chevron"></i>
-              </div>
-              <p class="optional-fields-desc">
-                Enable additional fields on the transaction form. Disabling a
-                field hides it but never deletes existing data.
-              </p>
-              <div
-                id="optionalFieldToggles"
-                class="optional-field-toggles"
-              ></div>
-            </div>
-          </div>
-
-          <!-- Quick Entry Templates (v3.17.0) -->
-          <div id="quickTemplatesContainer">
-            <div class="card">
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  margin-bottom: 16px;
-                "
-              >
-                <h3>Quick Entry Templates</h3>
-                <span class="template-count" id="templateCount"></span>
-              </div>
-              <div id="quickTemplatesList"></div>
-            </div>
-          </div>
-
-          <!-- Accounts (v3.18.0) -->
-          <div id="accountsContainer">
-            <div class="card">
-              <div
-                style="
-                  display: flex;
-                  justify-content: space-between;
-                  align-items: center;
-                  margin-bottom: 16px;
-                "
-              >
-                <h3><i class="ri-bank-line"></i> Accounts</h3>
-                <div style="display: flex; align-items: center; gap: 8px">
-                  <span class="template-count" id="accountCount"></span>
-                  <button
-                    class="toolbar-btn"
-                    aria-label="Add account"
-                    id="addAccountBtn"
-                  >
-                    <i class="ri-add-line"></i>
-                  </button>
+                <div class="summary" id="summaryCards">
+                    <div class="summary-card" role="button" tabindex="0" aria-label="View transactions for this month">
+                        <div class="card-icon">
+                            <i class="ri-calendar-check-line"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="summary-label" id="thisMonthLabel">This Month</div>
+                            <div class="summary-value" id="monthNet">0</div>
+                            <div class="summary-trend" id="monthNetTrend"></div>
+                        </div>
+                    </div>
+                    <div class="summary-card" role="button" tabindex="0"
+                        aria-label="View all transactions for this month">
+                        <div class="card-icon">
+                            <i class="ri-list-check-2"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="summary-label">Total Entries</div>
+                            <div class="summary-value" id="totalEntries">0</div>
+                            <div class="summary-meta" id="totalEntriesMeta">This month</div>
+                        </div>
+                    </div>
+                    <div class="summary-card positive" role="button" tabindex="0"
+                        aria-label="View income transactions for this month">
+                        <div class="card-icon">
+                            <i class="ri-arrow-up-circle-fill"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="summary-label">Income</div>
+                            <div class="summary-value" id="monthIncome">0</div>
+                            <div class="summary-trend" id="monthIncomeTrend"></div>
+                        </div>
+                    </div>
+                    <div class="summary-card negative" role="button" tabindex="0"
+                        aria-label="View expense transactions for this month">
+                        <div class="card-icon">
+                            <i class="ri-arrow-down-circle-fill"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="summary-label">Expenses</div>
+                            <div class="summary-value" id="monthExpense">0</div>
+                            <div class="summary-meta" id="monthExpenseMeta"></div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div id="accountsList"></div>
+                <div id="budgetAlerts"></div>
+                <!-- Smart Spending Alerts (v3.21.0) -->
+                <div id="smartAlerts" hidden></div>
+                <!-- Net Worth Dashboard (v3.18.0) -->
+                <div class="card net-worth-card" id="netWorthSection" hidden>
+                    <h3><i class="ri-wallet-3-line"></i> Net Worth</h3>
+                    <div id="netWorthDashboard"></div>
+                    <!-- Net Worth Trend Chart (v3.28.0) -->
+                    <div id="netWorthTrendContainer" hidden>
+                        <h4 class="nw-trend-title">
+                            <i class="ri-line-chart-line"></i> Trend
+                        </h4>
+                        <div id="netWorthTrend"></div>
+                    </div>
+                </div>
+                <!-- Savings Rate Dashboard (v3.19.0) -->
+                <div class="card savings-card" id="savingsSection" hidden>
+                    <h3><i class="ri-seedling-line"></i> Savings</h3>
+                    <div id="savingsDashboard"></div>
+                </div>
+                <!-- Savings Goals (v3.20.0) -->
+                <div class="card goals-card" id="goalsSection" hidden>
+                    <div class="goals-header">
+                        <h3><i class="ri-trophy-line"></i> Goals</h3>
+                        <button class="btn-icon" id="addGoalBtn" title="Add Goal">
+                            <i class="ri-add-line"></i>
+                        </button>
+                    </div>
+                    <div id="goalsDashboard"></div>
+                </div>
+                <!-- Family Settlement (v3.26.0) -->
+                <div class="card settlement-card" id="settlementSection" hidden>
+                    <h3><i class="ri-group-line"></i> Family Settlement</h3>
+                    <div id="settlementDashboard"></div>
+                </div>
             </div>
-          </div>
+            <!-- Goal Form Modal (v3.20.0) -->
+            <div id="goalFormModal" class="modal">
+                <div class="modal-content modal-sm">
+                    <div class="modal-header">
+                        <h3 id="goalFormTitle">New Savings Goal</h3>
+                        <button class="close-btn" id="goalFormCloseBtn" aria-label="Close">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="goalNameInput">Goal Name</label>
+                            <input type="text" id="goalNameInput" placeholder="e.g. Emergency Fund" maxlength="50" />
+                        </div>
+                        <div class="form-group">
+                            <label for="goalTargetInput">Target Amount</label>
+                            <input type="number" id="goalTargetInput" placeholder="0" min="1" step="any" />
+                        </div>
+                        <div class="form-group">
+                            <label for="goalDeadlineInput">Deadline (optional)</label>
+                            <input type="date" id="goalDeadlineInput" />
+                        </div>
+                        <div class="form-group">
+                            <label for="goalLinkedAccount">Linked Account (optional)</label>
+                            <select id="goalLinkedAccount">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+                        <button type="button" id="goalFormSaveBtn" class="btn primary-btn"
+                            style="width: 100%; margin-top: 12px">
+                            Save Goal
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Contribution Modal (v3.20.0) -->
+            <div id="contributionModal" class="modal">
+                <div class="modal-content modal-sm">
+                    <div class="modal-header">
+                        <h3>Add Contribution</h3>
+                        <button class="close-btn" id="contributionCloseBtn" aria-label="Close">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="contribution-goal-label">
+                            To: <strong id="contributionGoalName"></strong>
+                        </p>
+                        <div class="form-group">
+                            <label for="contributionAmountInput">Amount</label>
+                            <input type="number" id="contributionAmountInput" placeholder="0" min="1" step="any" />
+                        </div>
+                        <p class="contribution-remaining" id="contributionRemaining"></p>
+                        <button type="button" id="contributionSaveBtn" class="btn primary-btn"
+                            style="width: 100%; margin-top: 12px">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Currency Selector Modal -->
+            <div id="currencyModal" class="modal" style="display: none">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Select Currency</h3>
+                        <button class="close-btn" aria-label="Close">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                    <div class="currency-list" id="currencyList">
+                        <!-- Currency options will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
 
-          <!-- Account Form Modal -->
-          <div
-            id="accountFormModal"
-            class="modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="accountFormTitle"
-          >
-            <div class="modal-content modal-sm">
-              <div class="modal-header">
-                <h3 id="accountFormTitle">Add account</h3>
-                <button
-                  class="close-btn account-form-close"
-                  aria-label="Close account form"
-                >
-                  <i class="ri-close-line"></i>
+            <!-- Tab Navigation -->
+            <div class="tabs" role="tablist" aria-label="Main navigation">
+                <button id="add-tab" class="tab active" role="tab" aria-selected="true" aria-controls="addTab">
+                    <i class="ri-add-line"></i> Add
                 </button>
-              </div>
-              <div class="modal-body">
-                <!-- Type + icon preview row -->
-                <div class="account-form-type-row">
-                  <div
-                    class="account-form-type-icon"
-                    id="accountTypeIconPreview"
-                    aria-hidden="true"
-                  >
-                    <i class="ri-bank-line"></i>
-                  </div>
-                  <div class="form-group account-form-type-select-group">
-                    <label for="accountTypeSelect">Account Type</label>
-                    <select
-                      id="accountTypeSelect"
-                      aria-describedby="accountTypeHint"
-                    >
-                      <option value="checking">Checking</option>
-                      <option value="savings">Savings</option>
-                      <option value="credit-card">Credit Card</option>
-                      <option value="cash">Cash</option>
-                      <option value="investment">Investment</option>
-                      <option value="loan">Loan</option>
-                      <option value="mortgage">Mortgage</option>
-                      <option value="other">Other</option>
+                <button id="list-tab" class="tab" role="tab" aria-selected="false" aria-controls="listTab">
+                    <i class="ri-list-check"></i> List
+                </button>
+                <button id="groups-tab" class="tab" role="tab" aria-selected="false" aria-controls="groupsTab">
+                    <i class="ri-bar-chart-2-line"></i> Groups
+                </button>
+                <button id="settings-tab" class="tab" role="tab" aria-selected="false" aria-controls="settingsTab">
+                    <i class="ri-settings-3-line"></i> Settings
+                </button>
+            </div>
+
+            <!-- Add Transaction Tab -->
+            <div id="addTab" class="tab-content active" role="tabpanel" aria-labelledby="add-tab">
+                <!-- Quick Entry Bar (v3.17.0) -->
+                <div id="quickEntryBar" class="quick-entry-bar" hidden></div>
+
+                <div class="card" id="main-content">
+                    <h2 id="formTitle" style="font-size: 20px; margin-bottom: 16px">
+                        Add Transaction
+                    </h2>
+                    <form id="transactionForm" aria-label="Add transaction form">
+                        <div class="form-group">
+                            <label>Type</label>
+                            <div class="type-toggle" role="radiogroup" aria-label="Transaction type">
+                                <button type="button" class="type-option active" data-type="expense" role="radio"
+                                    aria-checked="true">
+                                    <i class="ri-arrow-down-circle-line"></i><span class="type-label"> Expense</span>
+                                </button>
+                                <button type="button" class="type-option" data-type="income" role="radio"
+                                    aria-checked="false">
+                                    <i class="ri-arrow-up-circle-line"></i><span class="type-label"> Income</span>
+                                </button>
+                                <button type="button" class="type-option" data-type="transfer" role="radio"
+                                    aria-checked="false">
+                                    <i class="ri-swap-line"></i><span class="type-label"> Transfer</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="type" value="expense" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Amount (₹)</label>
+                            <input type="number" id="amount" placeholder="1000" required min="0.01" max="10000000"
+                                step="0.01" inputmode="decimal" aria-label="Transaction amount in selected currency" />
+                        </div>
+
+                        <div class="form-group" id="categoryGroup">
+                            <label for="category">Category</label>
+                            <select id="category" required>
+                                <option value="" disabled selected>Select category</option>
+                                <!-- Categories will be populated dynamically -->
+                            </select>
+                        </div>
+
+                        <div id="transferFields" class="transfer-fields" hidden>
+                            <div class="form-group">
+                                <label for="fromAccount">From Account</label>
+                                <div class="account-input-wrapper">
+                                    <i class="ri-bank-line account-input-icon"></i>
+                                    <input type="text" id="fromAccount" placeholder="e.g. Bank Account"
+                                        autocomplete="off" aria-label="Source account" />
+                                    <div class="account-suggestions" id="fromAccountSuggestions" hidden></div>
+                                </div>
+                            </div>
+                            <div class="transfer-arrow">
+                                <i class="ri-arrow-down-line"></i>
+                            </div>
+                            <div class="form-group">
+                                <label for="toAccount">To Account</label>
+                                <div class="account-input-wrapper">
+                                    <i class="ri-bank-line account-input-icon"></i>
+                                    <input type="text" id="toAccount" placeholder="e.g. Credit Card" autocomplete="off"
+                                        aria-label="Destination account" />
+                                    <div class="account-suggestions" id="toAccountSuggestions" hidden></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="accountLinkingField" hidden>
+                            <label for="linkedAccount">Account</label>
+                            <select id="linkedAccount" aria-label="Link to account">
+                                <option value="">None</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes">Notes (Optional)</label>
+                            <input type="text" id="notes" placeholder="Add a note..." />
+                        </div>
+
+                        <!-- Optional Fields (v3.16.0) -->
+                        <div id="optionalFieldsSection" class="optional-fields-section" hidden>
+                            <button type="button" class="optional-fields-toggle" id="optionalFieldsToggle"
+                                aria-expanded="false" aria-controls="optionalFieldsContainer">
+                                <i class="ri-add-circle-line"></i> Additional details
+                                <i class="ri-arrow-down-s-line optional-fields-chevron"></i>
+                            </button>
+                            <div id="optionalFieldsContainer" class="optional-fields-container" hidden>
+                                <div class="form-group" data-optional-field="tags" hidden>
+                                    <label>Tags</label>
+                                    <div id="tagPickerRow" class="tag-picker-row" hidden></div>
+                                    <div class="tag-input-wrapper" id="tagInputWrapper">
+                                        <div class="tag-chips" id="formTagChips"></div>
+                                        <input type="text" id="tagInput" class="tag-input" placeholder="Add tag…"
+                                            autocomplete="off" aria-label="Add tags" />
+                                    </div>
+                                    <div class="tag-suggestions" id="tagSuggestions" hidden></div>
+                                </div>
+                                <div class="form-group" data-optional-field="paymentMethod" hidden>
+                                    <label for="paymentMethod">Payment Method</label>
+                                    <select id="paymentMethod">
+                                        <option value="">Select method</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="credit-card">Credit Card</option>
+                                        <option value="debit-card">Debit Card</option>
+                                        <option value="bank-transfer">Bank Transfer</option>
+                                        <option value="wallet">Wallet</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" data-optional-field="merchant" hidden>
+                                    <label for="merchant">Merchant / Payee</label>
+                                    <div class="account-input-wrapper">
+                                        <i class="ri-store-2-line account-input-icon"></i>
+                                        <input type="text" id="merchant" placeholder="e.g. Starbucks" autocomplete="off"
+                                            maxlength="100" aria-label="Merchant name" />
+                                        <div class="account-suggestions" id="merchantSuggestions" hidden></div>
+                                    </div>
+                                </div>
+                                <div class="form-group" data-optional-field="expenseType" hidden>
+                                    <label for="expenseType">Expense Type</label>
+                                    <select id="expenseType">
+                                        <option value="">Select type</option>
+                                        <option value="personal">Personal</option>
+                                        <option value="business">Business</option>
+                                        <option value="reimbursable">
+                                            Someone will pay me back
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group" data-optional-field="attachedTo" hidden>
+                                    <label for="attachedTo">Person</label>
+                                    <div class="account-input-wrapper">
+                                        <i class="ri-user-line account-input-icon"></i>
+                                        <input type="text" id="attachedTo" placeholder="e.g. Kevin" autocomplete="off"
+                                            maxlength="50" aria-label="Person name" />
+                                        <div class="account-suggestions" id="attachedToSuggestions" hidden></div>
+                                    </div>
+                                </div>
+                                <div class="form-group" data-optional-field="referenceId" hidden>
+                                    <label for="referenceId">Reference / Receipt ID</label>
+                                    <input type="text" id="referenceId" placeholder="e.g. INV-2026-001" maxlength="100"
+                                        aria-label="Reference ID" />
+                                </div>
+                                <div class="form-group" data-optional-field="location" hidden>
+                                    <label for="locationField">Location</label>
+                                    <input type="text" id="locationField" placeholder="e.g. Bangkok" maxlength="100"
+                                        aria-label="Location" />
+                                </div>
+                                <div class="form-group" data-optional-field="transactionCurrency" hidden>
+                                    <!-- Multi-currency fields rendered by js/multi-currency.js -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Category suggestion (v3.16.0) -->
+                        <div id="categorySuggestion" class="category-suggestion" hidden>
+                            <i class="ri-lightbulb-line"></i>
+                            <span>Suggested: <strong class="suggestion-category"></strong></span>
+                            <button type="button" class="suggestion-accept" aria-label="Accept suggestion">
+                                Use
+                            </button>
+                            <button type="button" class="suggestion-dismiss" aria-label="Dismiss suggestion">
+                                <i class="ri-close-line"></i>
+                            </button>
+                        </div>
+
+                        <input type="hidden" id="editId" value="" />
+
+                        <button type="submit" class="primary" id="submitBtn">
+                            Save Transaction
+                        </button>
+                        <div class="form-actions-row">
+                            <button type="button" id="saveAsTemplateBtn" class="save-template-btn"
+                                aria-label="Save as quick entry template">
+                                <i class="ri-bookmark-line"></i> Save as template
+                            </button>
+                        </div>
+                        <button type="button" class="primary" id="cancelEditBtn"
+                            style="background: #6e6e73; margin-top: 12px; display: none" aria-label="Cancel editing">
+                            Cancel
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- List Tab -->
+            <div id="listTab" class="tab-content" role="tabpanel" aria-labelledby="list-tab">
+                <div class="filters" id="monthFilters"></div>
+                <div class="search-bar-wrapper">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="Search amount, category, notes, tags…" aria-label="Search transactions"
+                        autocomplete="off" />
+                    <button class="search-clear-btn" id="searchClearBtn" aria-label="Clear search" hidden>
+                        <i class="ri-close-line"></i>
+                    </button>
+                </div>
+                <div id="activeTagFilters" class="active-tag-filters"></div>
+                <div style="margin-bottom: 16px">
+                    <label for="categoryFilter" class="filter-label">Filter by Category</label>
+                    <select class="category-filter" id="categoryFilter" aria-label="Filter transactions by category">
+                        <option value="all">All Categories</option>
                     </select>
-                    <p id="accountTypeHint" class="sr-only">
-                      Choose the type of account to auto-select the icon and
-                      default classification.
+                </div>
+                <div class="card">
+                    <div id="transactionsList"></div>
+                </div>
+                <div id="paginationControls" class="pagination-container" style="display: none">
+                    <button id="prevBtn" class="pagination-btn pagination-btn-prev" aria-label="Previous page">
+                        <i class="ri-arrow-left-s-line"></i>
+                        <span>Previous</span>
+                    </button>
+                    <div id="pageInfo" class="pagination-info"></div>
+                    <button id="nextBtn" class="pagination-btn pagination-btn-next" aria-label="Next page">
+                        <span>Next</span>
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reportsTab" class="tab-content" role="tabpanel" aria-label="Reports">
+                <!-- Chart date range selector -->
+                <div class="chart-range-bar">
+                    <span class="chart-range-label">Period:</span>
+                    <div class="range-pills" role="group" aria-label="Select chart date range">
+                        <button class="range-pill" data-range="3m" type="button">
+                            3M
+                        </button>
+                        <button class="range-pill active" data-range="6m" type="button">
+                            6M
+                        </button>
+                        <button class="range-pill" data-range="1y" type="button">
+                            1Y
+                        </button>
+                        <button class="range-pill" data-range="all" type="button">
+                            All
+                        </button>
+                    </div>
+                    <span class="range-date-span" id="rangeSpan" aria-live="polite"></span>
+                </div>
+
+                <!-- Spending by Category (pie) -->
+                <p class="chart-section-title">Spending by Category</p>
+                <div id="categoryChart" class="category-chart"></div>
+
+                <!-- Income vs Expenses (bar) -->
+                <p class="chart-section-title">Income vs Expenses</p>
+                <div id="incomeExpenseChart" class="bar-chart-card"></div>
+
+                <!-- Weekly Spending -->
+                <p class="chart-section-title">Weekly Spending — Last 4 Weeks</p>
+                <div id="weeklyChart" class="weekly-chart-card"></div>
+
+                <!-- Day of Month Heatmap -->
+                <p class="chart-section-title" id="heatmapTitle">
+                    Spending by Day of Month
+                </p>
+                <div id="dayHeatmap" class="day-heatmap-card"></div>
+
+                <!-- Annual Report (v3.21.0) -->
+                <div class="annual-report-section">
+                    <p class="chart-section-title">Year in Review</p>
+                    <div id="annualReportContent" class="annual-report-content"></div>
+                </div>
+
+                <!-- Cash-Flow Forecast (v4.1.0) -->
+                <div id="forecast-section" class="forecast-section">
+                    <div class="forecast-header">
+                        <p class="chart-section-title" style="margin: 0">
+                            Cash-Flow Forecast
+                        </p>
+                        <div class="forecast-horizon-toggle" role="group" aria-label="Forecast horizon">
+                            <button class="horizon-btn active" data-days="30" type="button">
+                                30d
+                            </button>
+                            <button class="horizon-btn" data-days="60" type="button">
+                                60d
+                            </button>
+                            <button class="horizon-btn" data-days="90" type="button">
+                                90d
+                            </button>
+                        </div>
+                    </div>
+                    <div id="forecast-content"></div>
+                </div>
+            </div>
+
+            <!-- Groups Tab -->
+            <div id="groupsTab" class="tab-content" role="tabpanel" aria-labelledby="groups-tab">
+                <div class="filters">
+                    <button class="filter-btn active">By Month</button>
+                    <button class="filter-btn">By Category</button>
+                </div>
+                <div id="groupedContent"></div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="tab-content" role="tabpanel" aria-labelledby="settings-tab">
+                <div class="card">
+                    <h2 style="font-size: 20px; margin-bottom: 16px">Settings</h2>
+                    <div class="settings-actions">
+                        <button class="toolbar-btn" aria-label="Check for updates" id="updateCheckBtn">
+                            <i class="ri-refresh-line"></i>
+                            <span>Check for updates</span>
+                        </button>
+                        <button class="toolbar-btn" aria-label="Change currency" id="currencyBtn">
+                            <i class="ri-exchange-dollar-line"></i>
+                            <span>Currency</span>
+                            <span class="currency-display">
+                                <span id="currencySymbol">₹</span>
+                                <span id="currencyCode">INR</span>
+                            </span>
+                        </button>
+                        <button class="toolbar-btn" aria-label="Toggle dark mode" id="darkModeBtn">
+                            <i class="ri-contrast-2-line" id="darkModeIcon"></i>
+                            <span>Dark Mode</span>
+                        </button>
+                        <button class="toolbar-btn" aria-label="Send feedback" id="feedbackBtn">
+                            <i class="ri-feedback-line"></i>
+                            <span>Send feedback</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- App Lock (v4.3.0) -->
+                <div id="appLockSettingsContainer"></div>
+
+                <!-- Feature Visibility (v4.3.1) -->
+                <div class="card" id="featureVisibilityCard">
+                    <h3 style="margin-bottom: 12px">Features</h3>
+                    <p class="optional-fields-desc">
+                        Show or hide sections of the app. Hiding a section never deletes
+                        your data.
                     </p>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="accountNameInput">Account Name</label>
-                  <input
-                    type="text"
-                    id="accountNameInput"
-                    placeholder="e.g. Kasikorn Savings"
-                    maxlength="50"
-                    autocomplete="off"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="accountBalanceInput">Opening Balance</label>
-                  <input
-                    type="number"
-                    id="accountBalanceInput"
-                    placeholder="0.00"
-                    step="0.01"
-                    inputmode="decimal"
-                  />
-                </div>
-                <div
-                  class="account-form-divider"
-                  role="separator"
-                  aria-hidden="true"
-                ></div>
-                <div class="form-group toggle-row">
-                  <label for="accountClassificationSelect">Account type</label>
-                  <select id="accountClassificationSelect">
-                    <option value="asset">I own this (savings, cash)</option>
-                    <option value="liability">
-                      I owe this (loan, credit card)
-                    </option>
-                  </select>
-                </div>
-                <div class="form-group toggle-row">
-                  <label id="accountSavingsLabel">Counts as Savings</label>
-                  <label
-                    class="field-toggle"
-                    aria-labelledby="accountSavingsLabel"
-                  >
-                    <input
-                      type="checkbox"
-                      id="accountSavingsToggle"
-                      class="field-toggle-checkbox"
-                      hidden
-                    />
-                    <span class="field-toggle-switch"></span>
-                  </label>
-                </div>
-                <div class="account-form-actions">
-                  <button type="button" id="accountFormSaveBtn" class="primary">
-                    Save Account
-                  </button>
-                  <button
-                    type="button"
-                    id="accountReconcileBtn"
-                    class="reconcile-trigger-btn"
-                    hidden
-                  >
-                    <i class="ri-scales-3-line" aria-hidden="true"></i>
-                    Reconcile this account
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Reconciliation Modal (v4.0.0) -->
-          <div
-            id="reconciliationModal"
-            class="modal"
-            aria-modal="true"
-            aria-labelledby="reconciliationAccountName"
-            role="dialog"
-          >
-            <div class="modal-content modal-lg">
-              <div class="modal-header">
-                <h3 id="reconciliationAccountName">Reconcile Account</h3>
-                <button
-                  class="close-btn reconciliation-close"
-                  aria-label="Close reconciliation"
-                >
-                  <i class="ri-close-line"></i>
-                </button>
-              </div>
-              <div class="modal-body">
-                <!-- What is reconciliation -->
-                <div class="reconciliation-explainer">
-                  <div class="recon-explainer-icon">
-                    <i class="ri-scales-3-line"></i>
-                  </div>
-                  <div>
-                    <p class="recon-explainer-title">What is reconciliation?</p>
-                    <p class="recon-explainer-body">
-                      Reconciliation confirms that your records match your
-                      official bank statement. Check off each transaction that
-                      appears on your statement — when the difference reaches
-                      zero, your books are accurate.
-                    </p>
-                  </div>
+                    <div class="optional-field-toggles">
+                        <label class="field-toggle-row">
+                            <span class="field-toggle-label">Accounts &amp; Net Worth</span>
+                            <input type="checkbox" id="toggleAccountsSection" class="field-toggle-checkbox" />
+                            <span class="field-toggle-switch"></span>
+                        </label>
+                    </div>
                 </div>
 
-                <!-- Step 1: Enter statement details -->
-                <div class="recon-step">
-                  <span class="recon-step-num">1</span>
-                  <span class="recon-step-label"
-                    >Enter your bank statement details</span
-                  >
-                </div>
-                <div class="reconciliation-inputs">
-                  <div class="form-group">
-                    <label for="reconciliationStatementBalance"
-                      >Bank statement balance</label
-                    >
-                    <input
-                      type="number"
-                      id="reconciliationStatementBalance"
-                      placeholder="0.00"
-                      step="0.01"
-                      inputmode="decimal"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label for="reconciliationStatementDate"
-                      >Statement Date</label
-                    >
-                    <input type="date" id="reconciliationStatementDate" />
-                  </div>
-                  <button
-                    type="button"
-                    id="reconciliationLoadBtn"
-                    class="toolbar-btn recon-load-btn"
-                  >
-                    <i class="ri-search-line"></i> Load
-                  </button>
+                <!-- Optional Fields (v3.16.0) -->
+                <div id="optionalFieldsSettingsContainer">
+                    <div class="card">
+                        <div class="optional-fields-settings-header" data-toggle-optional-settings aria-expanded="false"
+                            role="button" tabindex="0">
+                            <h3>Optional Fields</h3>
+                            <i class="ri-arrow-down-s-line optional-settings-chevron"></i>
+                        </div>
+                        <p class="optional-fields-desc">
+                            Enable additional fields on the transaction form. Disabling a
+                            field hides it but never deletes existing data.
+                        </p>
+                        <div id="optionalFieldToggles" class="optional-field-toggles"></div>
+                    </div>
                 </div>
 
-                <!-- Step 2: Tick off transactions -->
-                <div class="recon-step" id="reconciliationStep2" hidden>
-                  <span class="recon-step-num">2</span>
-                  <span class="recon-step-label"
-                    >Tick each transaction that appears on your statement</span
-                  >
-                </div>
-                <div
-                  id="reconciliationList"
-                  class="reconciliation-list"
-                  aria-label="Transactions to reconcile"
-                ></div>
-
-                <!-- Difference indicator -->
-                <div
-                  id="reconciliationDifference"
-                  class="reconciliation-difference"
-                  aria-live="polite"
-                ></div>
-
-                <!-- Step 3: Finalize -->
-                <div class="reconciliation-actions">
-                  <button
-                    type="button"
-                    id="reconciliationFinaliseBtn"
-                    class="reconcile-action-btn reconcile-action-primary"
-                    hidden
-                  >
-                    <i class="ri-check-double-line"></i> Finalize reconciliation
-                  </button>
-                  <button
-                    type="button"
-                    id="reconciliationForceBtn"
-                    class="reconcile-action-btn reconcile-action-danger"
-                    hidden
-                  >
-                    <i class="ri-alert-line"></i> Reconcile Anyway
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recurring Transactions (v3.11.0) -->
-          <div id="recurringContainer"></div>
-
-          <!-- Budgets (v3.13.0) -->
-          <div id="budgetContainer">
-            <div class="card">
-              <div
-                style="
+                <!-- Quick Entry Templates (v3.17.0) -->
+                <div id="quickTemplatesContainer">
+                    <div class="card">
+                        <div style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
                   margin-bottom: 16px;
-                "
-              >
-                <h3>Monthly Budgets</h3>
-                <button
-                  class="toolbar-btn"
-                  aria-label="Add budget"
-                  id="addBudgetBtn"
-                >
-                  <i class="ri-add-line"></i>
-                  <span>Add budget</span>
-                </button>
-              </div>
-              <div
-                style="
+                ">
+                            <h3>Quick Entry Templates</h3>
+                            <span class="template-count" id="templateCount"></span>
+                        </div>
+                        <div id="quickTemplatesList"></div>
+                    </div>
+                </div>
+
+                <!-- Accounts (v3.18.0) -->
+                <div id="accountsContainer">
+                    <div class="card">
+                        <div style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 16px;
+                ">
+                            <h3><i class="ri-bank-line"></i> Accounts</h3>
+                            <div style="display: flex; align-items: center; gap: 8px">
+                                <span class="template-count" id="accountCount"></span>
+                                <button class="toolbar-btn" aria-label="Add account" id="addAccountBtn">
+                                    <i class="ri-add-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="accountsList"></div>
+                    </div>
+                </div>
+
+                <!-- Account Form Modal -->
+                <div id="accountFormModal" class="modal" role="dialog" aria-modal="true"
+                    aria-labelledby="accountFormTitle">
+                    <div class="modal-content modal-sm">
+                        <div class="modal-header">
+                            <h3 id="accountFormTitle">Add account</h3>
+                            <button class="close-btn account-form-close" aria-label="Close account form">
+                                <i class="ri-close-line"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Type + icon preview row -->
+                            <div class="account-form-type-row">
+                                <div class="account-form-type-icon" id="accountTypeIconPreview" aria-hidden="true">
+                                    <i class="ri-bank-line"></i>
+                                </div>
+                                <div class="form-group account-form-type-select-group">
+                                    <label for="accountTypeSelect">Account Type</label>
+                                    <select id="accountTypeSelect" aria-describedby="accountTypeHint">
+                                        <option value="checking">Checking</option>
+                                        <option value="savings">Savings</option>
+                                        <option value="credit-card">Credit Card</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="investment">Investment</option>
+                                        <option value="loan">Loan</option>
+                                        <option value="mortgage">Mortgage</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <p id="accountTypeHint" class="sr-only">
+                                        Choose the type of account to auto-select the icon and
+                                        default classification.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="accountNameInput">Account Name</label>
+                                <input type="text" id="accountNameInput" placeholder="e.g. Kasikorn Savings"
+                                    maxlength="50" autocomplete="off" />
+                            </div>
+                            <div class="form-group">
+                                <label for="accountBalanceInput">Opening Balance</label>
+                                <input type="number" id="accountBalanceInput" placeholder="0.00" step="0.01"
+                                    inputmode="decimal" />
+                            </div>
+                            <div class="account-form-divider" role="separator" aria-hidden="true"></div>
+                            <div class="form-group toggle-row">
+                                <label for="accountClassificationSelect">Account type</label>
+                                <select id="accountClassificationSelect">
+                                    <option value="asset">I own this (savings, cash)</option>
+                                    <option value="liability">
+                                        I owe this (loan, credit card)
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-group toggle-row">
+                                <label id="accountSavingsLabel">Counts as Savings</label>
+                                <label class="field-toggle" aria-labelledby="accountSavingsLabel">
+                                    <input type="checkbox" id="accountSavingsToggle" class="field-toggle-checkbox"
+                                        hidden />
+                                    <span class="field-toggle-switch"></span>
+                                </label>
+                            </div>
+                            <div class="account-form-actions">
+                                <button type="button" id="accountFormSaveBtn" class="primary">
+                                    Save Account
+                                </button>
+                                <button type="button" id="accountReconcileBtn" class="reconcile-trigger-btn" hidden>
+                                    <i class="ri-scales-3-line" aria-hidden="true"></i>
+                                    Reconcile this account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reconciliation Modal (v4.0.0) -->
+                <div id="reconciliationModal" class="modal" aria-modal="true"
+                    aria-labelledby="reconciliationAccountName" role="dialog">
+                    <div class="modal-content modal-lg">
+                        <div class="modal-header">
+                            <h3 id="reconciliationAccountName">Reconcile Account</h3>
+                            <button class="close-btn reconciliation-close" aria-label="Close reconciliation">
+                                <i class="ri-close-line"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- What is reconciliation -->
+                            <div class="reconciliation-explainer">
+                                <div class="recon-explainer-icon">
+                                    <i class="ri-scales-3-line"></i>
+                                </div>
+                                <div>
+                                    <p class="recon-explainer-title">What is reconciliation?</p>
+                                    <p class="recon-explainer-body">
+                                        Reconciliation confirms that your records match your
+                                        official bank statement. Check off each transaction that
+                                        appears on your statement — when the difference reaches
+                                        zero, your books are accurate.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 1: Enter statement details -->
+                            <div class="recon-step">
+                                <span class="recon-step-num">1</span>
+                                <span class="recon-step-label">Enter your bank statement details</span>
+                            </div>
+                            <div class="reconciliation-inputs">
+                                <div class="form-group">
+                                    <label for="reconciliationStatementBalance">Bank statement balance</label>
+                                    <input type="number" id="reconciliationStatementBalance" placeholder="0.00"
+                                        step="0.01" inputmode="decimal" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="reconciliationStatementDate">Statement Date</label>
+                                    <input type="date" id="reconciliationStatementDate" />
+                                </div>
+                                <button type="button" id="reconciliationLoadBtn" class="toolbar-btn recon-load-btn">
+                                    <i class="ri-search-line"></i> Load
+                                </button>
+                            </div>
+
+                            <!-- Step 2: Tick off transactions -->
+                            <div class="recon-step" id="reconciliationStep2" hidden>
+                                <span class="recon-step-num">2</span>
+                                <span class="recon-step-label">Tick each transaction that appears on your
+                                    statement</span>
+                            </div>
+                            <div id="reconciliationList" class="reconciliation-list"
+                                aria-label="Transactions to reconcile"></div>
+
+                            <!-- Difference indicator -->
+                            <div id="reconciliationDifference" class="reconciliation-difference" aria-live="polite">
+                            </div>
+
+                            <!-- Step 3: Finalize -->
+                            <div class="reconciliation-actions">
+                                <button type="button" id="reconciliationFinaliseBtn"
+                                    class="reconcile-action-btn reconcile-action-primary" hidden>
+                                    <i class="ri-check-double-line"></i> Finalize reconciliation
+                                </button>
+                                <button type="button" id="reconciliationForceBtn"
+                                    class="reconcile-action-btn reconcile-action-danger" hidden>
+                                    <i class="ri-alert-line"></i> Reconcile Anyway
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recurring Transactions (v3.11.0) -->
+                <div id="recurringContainer"></div>
+
+                <!-- Budgets (v3.13.0) -->
+                <div id="budgetContainer">
+                    <div class="card">
+                        <div style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 16px;
+                ">
+                            <h3>Monthly Budgets</h3>
+                            <button class="toolbar-btn" aria-label="Add budget" id="addBudgetBtn">
+                                <i class="ri-add-line"></i>
+                                <span>Add budget</span>
+                            </button>
+                        </div>
+                        <div style="
                   text-align: center;
                   color: var(--text-secondary);
                   padding: 20px 0;
-                "
-              >
-                No budgets set yet. Add one to start tracking spending limits.
-              </div>
-            </div>
-          </div>
+                ">
+                            No budgets set yet. Add one to start tracking spending limits.
+                        </div>
+                    </div>
+                </div>
 
-          <!-- Tags (v3.14.0) -->
-          <div id="tagManagementContainer">
-            <div class="card">
-              <div
-                style="
+                <!-- Tags (v3.14.0) -->
+                <div id="tagManagementContainer">
+                    <div class="card">
+                        <div style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
                   margin-bottom: 16px;
-                "
-              >
-                <h3>Tags</h3>
-              </div>
-              <div id="tagManagementList">
-                <div
-                  style="
+                ">
+                            <h3>Tags</h3>
+                        </div>
+                        <div id="tagManagementList">
+                            <div style="
                     text-align: center;
                     color: var(--text-secondary);
                     padding: 20px 0;
-                  "
-                >
-                  No tags yet. Add tags to transactions to organize them.
+                  ">
+                                No tags yet. Add tags to transactions to organize them.
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <!-- Smart Alerts History (v3.21.0) -->
-          <div id="alertHistoryContainer">
-            <div class="card">
-              <div
-                style="
+                <!-- Smart Alerts History (v3.21.0) -->
+                <div id="alertHistoryContainer">
+                    <div class="card">
+                        <div style="
                   display: flex;
                   justify-content: space-between;
                   align-items: center;
                   margin-bottom: 16px;
-                "
-              >
-                <h3><i class="ri-alarm-warning-line"></i> Alert History</h3>
-                <button
-                  class="toolbar-btn"
-                  aria-label="Clear Alerts"
-                  id="clearAlertsBtn"
-                >
-                  <i class="ri-delete-bin-line"></i>
-                </button>
-              </div>
-              <div id="alertHistoryList"></div>
+                ">
+                            <h3><i class="ri-alarm-warning-line"></i> Alert History</h3>
+                            <button class="toolbar-btn" aria-label="Clear Alerts" id="clearAlertsBtn">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                        </div>
+                        <div id="alertHistoryList"></div>
+                    </div>
+                </div>
+
+                <!-- Data & Backup (v4.2.0) -->
+                <div class="card" id="dataBackupCard">
+                    <h3 style="margin-bottom: 16px">
+                        <i class="ri-database-2-line" aria-hidden="true"></i> Data &amp;
+                        Backup
+                    </h3>
+
+                    <!-- Overdue banner — shown by updateAutoBackupUI() when backup is due -->
+                    <div id="backupOverdueBanner" class="backup-overdue-banner" hidden>
+                        <div class="backup-overdue-text">
+                            <i class="ri-alarm-warning-line" aria-hidden="true"></i>
+                            <span id="backupOverdueMsg">Backup overdue — tap to save a copy now.</span>
+                        </div>
+                        <button class="backup-overdue-btn" id="backupOverdueBtn" type="button">
+                            Back up now
+                        </button>
+                    </div>
+
+                    <div class="data-backup-section">
+                        <span class="data-backup-section-label">Export</span>
+                        <div class="data-backup-btn-group">
+                            <button class="data-backup-btn" id="downloadBackupBtn" type="button">
+                                <i class="ri-save-line" aria-hidden="true"></i>
+                                <span>Download backup</span>
+                            </button>
+                            <p class="data-backup-hint">
+                                Full backup — all your data, nothing left out.
+                            </p>
+                            <button class="data-backup-btn" id="encryptedBackupBtn2" type="button">
+                                <i class="ri-lock-line" aria-hidden="true"></i>
+                                <span>Password-protected backup</span>
+                            </button>
+                            <p class="data-backup-hint">
+                                Password-protected. You'll need your password to restore this
+                                backup.
+                            </p>
+                            <button class="data-backup-btn" id="exportSpreadsheetBtn" type="button">
+                                <i class="ri-file-excel-line" aria-hidden="true"></i>
+                                <span>Export to Spreadsheet</span>
+                            </button>
+                            <p class="data-backup-hint">
+                                Spreadsheet — transactions only, opens in Excel or Google
+                                Sheets.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="data-backup-section">
+                        <span class="data-backup-section-label">Restore</span>
+                        <div class="data-backup-btn-group">
+                            <button class="data-backup-btn" id="restoreBackupBtn2" type="button">
+                                <i class="ri-upload-cloud-line" aria-hidden="true"></i>
+                                <span>Restore from Backup</span>
+                            </button>
+                            <p class="data-backup-hint">
+                                Accepts .json (full backup), .enc (encrypted), or .csv
+                                (transactions only).
+                            </p>
+                            <button class="data-backup-btn" id="importSpreadsheetBtn" type="button">
+                                <i class="ri-file-upload-line" aria-hidden="true"></i>
+                                <span>Import Spreadsheet</span>
+                            </button>
+                            <p class="data-backup-hint">
+                                CSV import — adds transactions only
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="data-backup-section">
+                        <span class="data-backup-section-label">Auto-Backup</span>
+                        <div class="auto-backup-toggle-row">
+                            <label for="autoBackupToggle2" class="auto-backup-label">Enable automatic backups</label>
+                            <button id="autoBackupToggle2" class="toggle-switch" role="switch" aria-checked="false"
+                                aria-label="Toggle auto-backup" type="button">
+                                <span class="toggle-knob"></span>
+                            </button>
+                        </div>
+                        <div id="autoBackupFreqRow" class="auto-backup-row disabled">
+                            <label for="backupFrequency2">Frequency</label>
+                            <select id="backupFrequency2" disabled>
+                                <option value="daily">Daily</option>
+                                <option value="weekly" selected>Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
+                        <p class="data-backup-hint" id="lastBackupHint">
+                            Last backup: Never
+                        </p>
+                    </div>
+
+                    <div id="storageHealthWidget"></div>
+                </div>
+
+                <!-- Hidden file inputs -->
+                <input type="file" id="spreadsheetImportFile" accept=".csv,text/csv" hidden aria-hidden="true" />
+                <input type="file" id="dataRestoreFile" accept=".json,.enc,.csv" hidden aria-hidden="true" />
+
+                <!-- Backup Status Card (v3.9.0) -->
+                <div id="backupStatusContainer"></div>
+
+                <!-- FAQ Section (v3.9.0) -->
+                <div id="faqContainer"></div>
+
+                <!-- Error Log (v3.29.0) -->
+                <div id="errorLogContainer"></div>
             </div>
-          </div>
-
-          <!-- Data & Backup (v4.2.0) -->
-          <div class="card" id="dataBackupCard">
-            <h3 style="margin-bottom: 16px">
-              <i class="ri-database-2-line" aria-hidden="true"></i> Data &amp;
-              Backup
-            </h3>
-
-            <!-- Overdue banner — shown by updateAutoBackupUI() when backup is due -->
-            <div id="backupOverdueBanner" class="backup-overdue-banner" hidden>
-              <div class="backup-overdue-text">
-                <i class="ri-alarm-warning-line" aria-hidden="true"></i>
-                <span id="backupOverdueMsg"
-                  >Backup overdue — tap to save a copy now.</span
-                >
-              </div>
-              <button
-                class="backup-overdue-btn"
-                id="backupOverdueBtn"
-                type="button"
-              >
-                Back up now
-              </button>
-            </div>
-
-            <div class="data-backup-section">
-              <span class="data-backup-section-label">Export</span>
-              <div class="data-backup-btn-group">
-                <button
-                  class="data-backup-btn"
-                  id="downloadBackupBtn"
-                  type="button"
-                >
-                  <i class="ri-save-line" aria-hidden="true"></i>
-                  <span>Download backup</span>
-                </button>
-                <p class="data-backup-hint">
-                  Full backup — all your data, nothing left out.
-                </p>
-                <button
-                  class="data-backup-btn"
-                  id="encryptedBackupBtn2"
-                  type="button"
-                >
-                  <i class="ri-lock-line" aria-hidden="true"></i>
-                  <span>Password-protected backup</span>
-                </button>
-                <p class="data-backup-hint">
-                  Password-protected. You'll need your password to restore this
-                  backup.
-                </p>
-                <button
-                  class="data-backup-btn"
-                  id="exportSpreadsheetBtn"
-                  type="button"
-                >
-                  <i class="ri-file-excel-line" aria-hidden="true"></i>
-                  <span>Export to Spreadsheet</span>
-                </button>
-                <p class="data-backup-hint">
-                  Spreadsheet — transactions only, opens in Excel or Google
-                  Sheets.
-                </p>
-              </div>
-            </div>
-
-            <div class="data-backup-section">
-              <span class="data-backup-section-label">Restore</span>
-              <div class="data-backup-btn-group">
-                <button
-                  class="data-backup-btn"
-                  id="restoreBackupBtn2"
-                  type="button"
-                >
-                  <i class="ri-upload-cloud-line" aria-hidden="true"></i>
-                  <span>Restore from Backup</span>
-                </button>
-                <p class="data-backup-hint">
-                  Accepts .json (full backup), .enc (encrypted), or .csv
-                  (transactions only).
-                </p>
-                <button
-                  class="data-backup-btn"
-                  id="importSpreadsheetBtn"
-                  type="button"
-                >
-                  <i class="ri-file-upload-line" aria-hidden="true"></i>
-                  <span>Import Spreadsheet</span>
-                </button>
-                <p class="data-backup-hint">
-                  CSV import — adds transactions only
-                </p>
-              </div>
-            </div>
-
-            <div class="data-backup-section">
-              <span class="data-backup-section-label">Auto-Backup</span>
-              <div class="auto-backup-toggle-row">
-                <label for="autoBackupToggle2" class="auto-backup-label"
-                  >Enable automatic backups</label
-                >
-                <button
-                  id="autoBackupToggle2"
-                  class="toggle-switch"
-                  role="switch"
-                  aria-checked="false"
-                  aria-label="Toggle auto-backup"
-                  type="button"
-                >
-                  <span class="toggle-knob"></span>
-                </button>
-              </div>
-              <div id="autoBackupFreqRow" class="auto-backup-row disabled">
-                <label for="backupFrequency2">Frequency</label>
-                <select id="backupFrequency2" disabled>
-                  <option value="daily">Daily</option>
-                  <option value="weekly" selected>Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
-              </div>
-              <p class="data-backup-hint" id="lastBackupHint">
-                Last backup: Never
-              </p>
-            </div>
-
-            <div id="storageHealthWidget"></div>
-          </div>
-
-          <!-- Hidden file inputs -->
-          <input
-            type="file"
-            id="spreadsheetImportFile"
-            accept=".csv,text/csv"
-            hidden
-            aria-hidden="true"
-          />
-          <input
-            type="file"
-            id="dataRestoreFile"
-            accept=".json,.enc,.csv"
-            hidden
-            aria-hidden="true"
-          />
-
-          <!-- Backup Status Card (v3.9.0) -->
-          <div id="backupStatusContainer"></div>
-
-          <!-- FAQ Section (v3.9.0) -->
-          <div id="faqContainer"></div>
-
-          <!-- Error Log (v3.29.0) -->
-          <div id="errorLogContainer"></div>
-        </div>
-      </main>
+        </main>
     </div>
 
     <!-- Bottom Navigation -->
     <nav class="bottom-nav" role="tablist" aria-label="Main navigation">
-      <button
-        id="add-nav"
-        class="nav-item active"
-        role="tab"
-        aria-selected="true"
-        aria-controls="addTab"
-      >
-        <i class="ri-add-line nav-item-icon"></i>
-        <span>Add</span>
-      </button>
-      <button
-        id="list-nav"
-        class="nav-item"
-        role="tab"
-        aria-selected="false"
-        aria-controls="listTab"
-      >
-        <i class="ri-list-check nav-item-icon"></i>
-        <span>List</span>
-      </button>
-      <button
-        id="reports-nav"
-        class="nav-item"
-        role="tab"
-        aria-selected="false"
-        aria-controls="reportsTab"
-      >
-        <i class="ri-bar-chart-2-line nav-item-icon"></i>
-        <span>Reports</span>
-      </button>
-      <button
-        id="groups-nav"
-        class="nav-item"
-        role="tab"
-        aria-selected="false"
-        aria-controls="groupsTab"
-      >
-        <i class="ri-stack-line nav-item-icon"></i>
-        <span>Groups</span>
-      </button>
-      <button
-        id="settings-nav"
-        class="nav-item"
-        role="tab"
-        aria-selected="false"
-        aria-controls="settingsTab"
-      >
-        <i class="ri-settings-3-line nav-item-icon"></i>
-        <span>Settings</span>
-      </button>
+        <button id="add-nav" class="nav-item active" role="tab" aria-selected="true" aria-controls="addTab">
+            <i class="ri-add-line nav-item-icon"></i>
+            <span>Add</span>
+        </button>
+        <button id="list-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="listTab">
+            <i class="ri-list-check nav-item-icon"></i>
+            <span>List</span>
+        </button>
+        <button id="reports-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="reportsTab">
+            <i class="ri-bar-chart-2-line nav-item-icon"></i>
+            <span>Reports</span>
+        </button>
+        <button id="groups-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="groupsTab">
+            <i class="ri-stack-line nav-item-icon"></i>
+            <span>Groups</span>
+        </button>
+        <button id="settings-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="settingsTab">
+            <i class="ri-settings-3-line nav-item-icon"></i>
+            <span>Settings</span>
+        </button>
     </nav>
 
     <script type="module" src="./js/app.js"></script>
-  </body>
+</body>
+
 </html>

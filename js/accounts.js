@@ -28,8 +28,11 @@ export function setAccountsSectionVisible(visible) {
 }
 
 export function applyAccountsVisibility() {
+  const visible = isAccountsSectionVisible();
   const container = document.getElementById("accountsContainer");
-  if (container) container.hidden = !isAccountsSectionVisible();
+  if (container) container.hidden = !visible;
+  const netWorthSection = document.getElementById("netWorthSection");
+  if (netWorthSection) netWorthSection.hidden = !visible;
 }
 
 // ---- Init ----
@@ -271,7 +274,7 @@ export function renderNetWorthDashboard() {
   const section = document.getElementById("netWorthSection");
   if (!container || !section) return;
 
-  if (state.accounts.length === 0) {
+  if (state.accounts.length === 0 || !isAccountsSectionVisible()) {
     section.hidden = true;
     return;
   }
