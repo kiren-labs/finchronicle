@@ -16,6 +16,15 @@ const DEFAULT_TIMEOUT_MINS = 1;
 let _lockTimer = null;
 let _locked = false;
 
+// ---- Button visibility sync (keep header lock button in sync) ----
+function updateLockButtonVisibility() {
+  const lockNowBtn = document.getElementById("lockNowBtn");
+  const enabled = isLockEnabled();
+  if (lockNowBtn) {
+    lockNowBtn.hidden = !enabled;
+  }
+}
+
 function resetInactivityTimer() {
   const mins = getLockTimeout();
   if (mins === 0) return;
@@ -236,7 +245,8 @@ export async function enableLock(pin) {
     setLockTimeout(DEFAULT_TIMEOUT_MINS);
   }
   startInactivityTimer();
-  renderLockSettings();
+  await renderLockSettings();
+  updateLockButtonVisibility();
 }
 
 export function disableLock() {
@@ -244,7 +254,9 @@ export function disableLock() {
   localStorage.removeItem(LS_PIN_HASH);
   localStorage.removeItem(LS_SALT);
   localStorage.removeItem(LS_CRED_ID);
+  localStorage.removeItem(LS_TIMEOUT);
   stopInactivityTimer();
+  updateLockButtonVisibility();
   renderLockSettings();
 }
 
@@ -259,6 +271,7 @@ export async function changePIN(currentPin, newPin) {
 
 export async function initAppLock() {
   bindLockOverlayEvents();
+  updateLockButtonVisibility();
   if (!isLockEnabled()) return;
   lock();
 }
@@ -404,8 +417,7 @@ export async function renderLockSettings() {
   bindLockSettingsEvents();
 
   // Keep the header lock button in sync
-  const lockNowBtn = document.getElementById("lockNowBtn");
-  if (lockNowBtn) lockNowBtn.hidden = !enabled;
+  updateLockButtonVisibility();
 }
 
 function bindLockSettingsEvents() {
