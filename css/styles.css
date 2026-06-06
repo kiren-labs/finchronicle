@@ -6757,3 +6757,8 @@ button.primary.loading .btn-spinner {
   background: var(--color-border);
   margin: var(--space-md) 0;
 }
+
+/* Utility Classes */
+.hidden {
+  display: none;
+}
