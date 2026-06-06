@@ -530,6 +530,134 @@ No mechanism to rename a category across all transactions or merge two categorie
 
 ---
 
+### v4.16.0 — Thai Tax Estimator
+**Priority: MEDIUM**
+**New file: `js/tax.js`**
+**Gated on: `getCurrency().code === 'THB'`**
+
+Reads salary income already logged in the app and shows the user their estimated Thai personal income tax, how much they are saving via deductions, and how much they could still save with unused deduction vehicles. Invisible to non-THB users — no UI shown, no calculations run.
+
+**Why this fits the app's constraints:**
+- Zero external API calls — Thai tax brackets are static constants
+- All data already in IndexedDB (salary transactions)
+- Works offline
+- Expat-friendly: Thai deductions are based on tax residency (180+ days), not citizenship — all instruments (SSF, RMF, PVD, health insurance) are available to work-permit holders
+
+---
+
+**Two phases, shippable independently:**
+
+**Phase 1 — Salary-Derived Tax Insight (low effort, ~150 lines)**
+
+Reads from existing `type: 'income', category: 'Salary'` transactions. No new data entry.
+
+Adds a "Tax Estimate" card to the Reports tab (hidden unless currency = THB):
+
+```
+Income This Year (YTD)        ฿800,000
+Estimated Tax (current rate)  ฿90,000
+Effective Rate                11.3%
+Marginal Bracket              20%
+
+Unused SSF room               ฿200,000  → could save ฿40,000 in tax
+Unused PVD room (15% − 3%)   ฿96,000   → could save ฿19,200 in tax
+Total potential saving         ฿59,200
+```
+
+One toggle in Settings: "I pay Thai personal income tax" — enables the insight. Defaults to hidden.
+
+**Phase 2 — Full Tax Planner Panel (medium effort)**
+
+A settings panel where the user enters their deduction setup once, stored in `appSettings`:
+
+```javascript
+appSettings.taxProfile = {
+  enabled: true,
+  pvdEmployeeRate: 3,          // % — default 3, max 15
+  ssfContributed: 0,           // THB this year
+  rmfContributed: 0,           // THB this year
+  lifeInsurancePremium: 0,     // THB this year
+  healthInsurancePremium: 0,   // THB this year
+  personalAllowance: 60000,    // fixed
+  spouseAllowance: 60000,      // toggle
+  childrenCount: 1,            // × ฿30,000 each
+  parentAllowance: 0,          // × ฿30,000 each (max 2)
+  socialSecurity: 9000,        // auto-filled from ฿750 × months
+}
+```
+
+Output — side-by-side comparison:
+
+| | Current | Optimised |
+|---|---|---|
+| Gross income | ฿1,500,000 | ฿1,500,000 |
+| Total deductions | ฿280,000 | ฿680,000 |
+| Net taxable income | ฿1,220,000 | ฿820,000 |
+| **Tax bill** | **฿194,000** | **฿114,000** |
+| **You save** | — | **฿80,000** |
+
+Slider to adjust PVD rate (3%–15%) with live tax recalculation. Each deduction row shows: current amount, max allowed, incremental tax saving.
+
+---
+
+**Thai tax brackets (2026, hardcoded constants):**
+
+```javascript
+const THB_TAX_BRACKETS = [
+  { upTo: 150_000,   rate: 0.00 },
+  { upTo: 300_000,   rate: 0.05 },
+  { upTo: 500_000,   rate: 0.10 },
+  { upTo: 750_000,   rate: 0.15 },
+  { upTo: 1_000_000, rate: 0.20 },
+  { upTo: 2_000_000, rate: 0.25 },
+  { upTo: 5_000_000, rate: 0.30 },
+  { upTo: Infinity,  rate: 0.35 },
+];
+```
+
+**Deduction caps (hardcoded — Revenue Department rules):**
+
+```javascript
+const DEDUCTION_CAPS = {
+  employment:       100_000,   // 50% of income, max ฿100,000
+  personal:          60_000,
+  spouse:            60_000,
+  perChild:          30_000,
+  perParent:         30_000,   // max 2 parents
+  socialSecurity:     9_000,   // actual paid, capped
+  pvdRmfSsfCombined: 500_000,  // combined retirement savings cap
+  ssfMax:            200_000,  // sub-cap within combined
+  lifeHealthCombined: 100_000, // life insurance + health insurance combined
+};
+```
+
+**Currency guard — always applied first:**
+```javascript
+export function renderTaxInsight() {
+  if (getCurrency().code !== 'THB') return; // silently skip
+  if (!state.appSettings?.taxProfile?.enabled) return;
+  // ... render
+}
+```
+
+**Always reads `homeAmount` not display amount** — correct for multi-currency salary entries.
+
+---
+
+**Files to create/modify:**
+- `js/tax.js` (new) — bracket calculator, deduction engine, render functions
+- `js/state.js` — add `taxProfile` to `DEFAULT_APP_SETTINGS`
+- `js/settings.js` — tax profile settings panel (Phase 2)
+- `js/app.js` — import + bind events
+- `index.html` — tax insight card in Reports tab; tax profile in Settings (Phase 2)
+- `css/styles.css`, `css/dark-mode.css` — tax card, comparison table, PVD slider
+- `sw.js` — add `js/tax.js` to `CACHE_URLS`
+- Version: bump to 4.16.0
+
+**Note:** Phase 1 ships in v4.16.0. Phase 2 (full planner) can follow as v4.16.1 or be bundled if implementation time allows. No DB version bump required — `taxProfile` is stored inside the existing `appSettings` IDB store.
+
+---
+
 ### v4.14.0 — Loan / EMI Tracker
 **Priority: MEDIUM**
 **New file: `js/loans.js`**
