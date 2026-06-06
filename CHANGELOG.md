@@ -9,6 +9,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.3.1] — 2026-06-06
+
+### Added — FAQ & Documentation
+
+#### Accounts & Net Worth FAQ
+- New FAQ section with 7 questions addressing account setup and net worth tracking
+- Topics: What accounts are; opening balances; how to link transactions; Transfer vs Expense distinctions; fixing incorrect net worth; debugging balance drift
+- Written in clear, neutral BBC-English with practical examples
+
+#### Understanding the Tabs FAQ
+- New FAQ section with 6 questions explaining each of the 5 main tabs plus summary cards
+- Coverage: Add tab (transaction types, Quick Entry, account linking); List tab (filters, search, edit); Reports tab (charts, Annual Report, Cash-Flow Forecast); Groups tab (grouping options, Insights); Settings tab (all features); Summary cards (Net Balance, Income, Expenses, collapsing)
+- Helps new users navigate the app and understand each area's purpose
+
+### Changed — UX & Clarity
+
+#### Language & Grammar Improvements
+- Updated 8 FAQ strings to BBC English standard: removed Americanisms (`anytime` → `at any time`), improved article usage, fixed pronoun inconsistencies, removed Thailand-specific examples (e.g. currency symbols) in favour of generic ones
+- Rewritten awkward constructions for clarity: `"Transactions without an account linked"` → `"Transactions not linked to an account"`
+- Replaced colloquial phrasing: `"resets net worth to reality instantly"` → `"Your net worth will update immediately"`
+- More precise terminology: `"my real bank"` → `"my bank statement"`
+
+#### App Lock Refinements
+- Improved inactivity timer to handle edge cases with page visibility and focus changes
+- Lock button visibility now synchronises with lock state changes immediately
+- Message handling between app-lock overlay and main app cleaned up for reliability
+
+#### Amount Input Field
+- Enhanced arithmetic expression support — users can now enter `100 + 50` or `500 - 20` and the app calculates the result automatically
+- Improved formatting for large numbers and decimal precision
+
+#### Features & Visibility
+- Account linking now visible and usable in the Add tab when accounts are set up
+- New `hidden` utility class for better control over element visibility
+- UI controls (pagination, integrity row, currency modal, install prompt) refined for consistency
+
+### Fixed — Stability
+
+- Fixed optional fields initialisation to respect account linking feature flag
+- Fixed weekly spike alert logic to properly account for infrequent spending categories
+- Feature visibility toggles for accounts section now working as intended
+- Version number updated in manifest.json and service worker cache naming
+
+### Technical
+
+- No new dependencies
+- All changes backward-compatible; existing data unaffected
+- FAQ section now ships with the app and loads from i18n strings
+
+---
+
 ## [4.3.0] — 2026-06-05
 
 ### Added — App Lock
