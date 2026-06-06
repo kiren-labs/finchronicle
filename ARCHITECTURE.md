@@ -1,6 +1,6 @@
 # FinChronicle - Complete Architecture Guide
 
-**Version:** 3.28.0
+**Version:** 4.3.1
 **Last Updated:** 2026-05-13
 **For:** Developers who want to understand or contribute to the codebase
 
@@ -197,7 +197,7 @@ app.js (entry point)
 ### 🗄️ IndexedDB Structure
 
 **Database:** `FinChronicleDB`
-**Version:** 10
+**DB Version:** 12
 
 **Object Stores:**
 

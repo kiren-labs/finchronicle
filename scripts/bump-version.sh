@@ -235,7 +235,9 @@ update_manifest_json() {
 
 update_architecture_md() {
   info "Updating Version badge in $ARCHITECTURE_MD..."
-  safe_sed "$ARCHITECTURE_MD" "s/^\*\*Version:\*\* .*/\*\*Version:\*\* $NEW_VERSION/"
+  # Scope to the file header block (lines before the first ---) to avoid
+  # touching **DB Version:** or any other versioned section further down.
+  safe_sed "$ARCHITECTURE_MD" "1,/^---/s/^\*\*Version:\*\* .*/\*\*Version:\*\* $NEW_VERSION/"
 }
 
 update_readme_md() {
