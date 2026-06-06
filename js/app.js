@@ -41,6 +41,7 @@ import {
   sanitizeHTML,
   getErrorLog,
   clearErrorLog,
+  evaluateAmountExpr,
 } from "./utils.js";
 import { t } from "./i18n.js";
 import {
@@ -204,6 +205,17 @@ async function getImportExportModule() {
 // ============================================================================
 
 function bindStaticEvents() {
+  // ---- Amount field arithmetic ----
+  const amountInput = document.getElementById("amount");
+  if (amountInput) {
+    amountInput.addEventListener("blur", () => {
+      const raw = amountInput.value.trim();
+      if (!raw || /^[\d.]+$/.test(raw)) return; // plain number, nothing to evaluate
+      const result = evaluateAmountExpr(raw);
+      if (!isNaN(result)) amountInput.value = result;
+    });
+  }
+
   // ---- Header buttons ----
   document
     .querySelector('.header-btn[aria-label="Send feedback"]')
@@ -824,8 +836,9 @@ function bindFormSubmit() {
       const formCard = document.querySelector("#addTab .card");
       const originalBtnText = submitBtn.textContent;
 
-      const amountInput = document.getElementById("amount").value.trim();
-      const amount = parseFloat(amountInput);
+      const rawAmount = document.getElementById("amount").value.trim();
+      const amountInput = rawAmount;
+      const amount = evaluateAmountExpr(rawAmount);
 
       if (!amountInput) {
         showMessage(t("validation.enter_amount"));
