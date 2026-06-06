@@ -11,52 +11,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.3.1] — 2026-06-06
 
-### Added — FAQ & Documentation
+### Added
 
-#### Accounts & Net Worth FAQ
-- New FAQ section with 7 questions addressing account setup and net worth tracking
-- Topics: What accounts are; opening balances; how to link transactions; Transfer vs Expense distinctions; fixing incorrect net worth; debugging balance drift
-- Written in clear, neutral BBC-English with practical examples
+- **Arithmetic in amount field** — amount input accepts expressions (`500+250`, `1200*3`, `(80+20)*6`); evaluated on blur via a safe recursive-descent parser with no `eval` or `Function()`. Input changed from `type="number"` to `type="text"` with `inputmode="decimal"`.
+- **FAQ: Accounts & Net Worth** — 7 new entries covering account setup, opening balances, linking transactions, Transfer vs Expense distinctions, correcting net worth, and diagnosing balance drift.
+- **FAQ: Understanding the Tabs** — 6 new entries explaining each main tab (Add, List, Reports, Groups, Settings) and the summary cards.
 
-#### Understanding the Tabs FAQ
-- New FAQ section with 6 questions explaining each of the 5 main tabs plus summary cards
-- Coverage: Add tab (transaction types, Quick Entry, account linking); List tab (filters, search, edit); Reports tab (charts, Annual Report, Cash-Flow Forecast); Groups tab (grouping options, Insights); Settings tab (all features); Summary cards (Net Balance, Income, Expenses, collapsing)
-- Helps new users navigate the app and understand each area's purpose
+### Fixed
 
-### Changed — UX & Clarity
+- **Account dropdown empty on first open** — `initAccounts()` was running after `initOptionalFields()`, so `state.accounts` was empty when the account selector first populated. Fixed by swapping init order in `app.js`.
+- **Account field position** — Account linking field moved above the Date field in the DOM (outside `optionalFieldsContainer`) so it appears at the top of the form in the correct position regardless of optional fields state.
+- **Accounts & Net Worth feature toggle not hiding net worth** — toggling the feature off now hides both `#accountsContainer` and `#netWorthSection`. Previously only `#accountsContainer` was targeted. Also fixed `renderNetWorthDashboard()` unconditionally setting `section.hidden = false` on each render.
+- **Weekly spike alert firing on monthly categories** — rent and other infrequent expenses were always flagged as spikes because their rolling weekly average is near zero. Fixed by skipping categories with fewer than 6 transactions in the past 90 days.
+- **Features toggle rendering as unstyled native checkbox** — Accounts & Net Worth toggle had wrong CSS class names (`toggle-checkbox`, `toggle-slider`) instead of the correct ones (`field-toggle-checkbox`, `field-toggle-switch`).
 
-#### Language & Grammar Improvements
-- Updated 8 FAQ strings to BBC English standard: removed Americanisms (`anytime` → `at any time`), improved article usage, fixed pronoun inconsistencies, removed Thailand-specific examples (e.g. currency symbols) in favour of generic ones
-- Rewritten awkward constructions for clarity: `"Transactions without an account linked"` → `"Transactions not linked to an account"`
-- Replaced colloquial phrasing: `"resets net worth to reality instantly"` → `"Your net worth will update immediately"`
-- More precise terminology: `"my real bank"` → `"my bank statement"`
+### Changed
 
-#### App Lock Refinements
-- Improved inactivity timer to handle edge cases with page visibility and focus changes
-- Lock button visibility now synchronises with lock state changes immediately
-- Message handling between app-lock overlay and main app cleaned up for reliability
-
-#### Amount Input Field
-- Enhanced arithmetic expression support — users can now enter `100 + 50` or `500 - 20` and the app calculates the result automatically
-- Improved formatting for large numbers and decimal precision
-
-#### Features & Visibility
-- Account linking now visible and usable in the Add tab when accounts are set up
-- New `hidden` utility class for better control over element visibility
-- UI controls (pagination, integrity row, currency modal, install prompt) refined for consistency
-
-### Fixed — Stability
-
-- Fixed optional fields initialisation to respect account linking feature flag
-- Fixed weekly spike alert logic to properly account for infrequent spending categories
-- Feature visibility toggles for accounts section now working as intended
-- Version number updated in manifest.json and service worker cache naming
+- **`js/app-lock.js` refactored** — extracted `getLockOverlay()` helper, `_buildSetupHTML()` and `_buildActiveHTML()` render functions, and `TIMEOUT_OPTIONS` constant. Removed `window._showMessage` global; replaced with a direct `import { showMessage } from "./utils.js"`. No behaviour change.
+- **FAQ language** — phrasing updated to BBC English: removed Americanisms, improved article usage, replaced colloquial terms (`"my real bank"` → `"my bank statement"`, `"resets net worth to reality instantly"` → `"Your net worth will update immediately"`).
 
 ### Technical
 
 - No new dependencies
-- All changes backward-compatible; existing data unaffected
-- FAQ section now ships with the app and loads from i18n strings
+- No DB version bump — all changes are UI and logic only
+- All existing data unaffected
 
 ---
 
