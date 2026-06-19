@@ -874,3 +874,13 @@ body.dark-mode .lock-biometric-btn {
 body.dark-mode .field-error {
   color: var(--color-danger-text);
 }
+
+/* Budget vs Actual — table rows already use token bg/text which remap in dark mode */
+body.dark-mode .bva-over td {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+body.dark-mode .bva-warn td {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}

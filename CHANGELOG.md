@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.5.0] — 2026-06-19
+
+### Added
+
+- **Budget vs Actual Report** — consolidated table in the Budgets tab showing Category, Budget, Actual, Variance, and % Used for the selected month.
+  - Rows turn red (≥100% used) or yellow (≥80% used) with a ⚠ indicator
+  - Unbudgeted categories with spend listed in a separate section below the main table
+  - Totals row summarising budgeted-category spend
+  - **Export CSV** button downloads `budget-vs-actual-YYYY-MM.csv`
+  - Synced to the global month filter (`state.selectedMonth`)
+- **`logError` / `getErrorLog` / `clearErrorLog`** moved to `js/utils.js` — eliminates circular dependency between `db.js` and `app.js`
+- `ERROR_LOG_KEY` exported from `utils.js` for test shim access
+- `idbGetAll` fallback now calls `logError` for silent DB-not-ready events
+- `saveTransactionToDB` retry catch now calls `logError`
+- `.field-error` dark-mode contrast fix — uses `--color-danger-text` token (WCAG AA)
+- CSV backup/restore round-trip fix — `stripCSVEscape()` in `parseBackupCSV()` removes leading `'` injected by `sanitizeBackupCell()` on formula chars
+
+### Technical
+
+- No new IDB stores, no DB_VERSION bump
+- `getBudgetVsActual()`, `renderBudgetVsActualTable()`, `exportBudgetVsActualCSV()` exported from `js/budget.js`
+- BVA table CSS in `css/styles.css`; dark-mode overrides in `css/dark-mode.css`
+
 ## [4.4.0] — 2026-06-19
 
 ### Added
