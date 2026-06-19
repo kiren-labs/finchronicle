@@ -471,18 +471,14 @@ function bindStaticEvents() {
 }
 
 function bindSettingsButtons() {
-  const actions = {
-    "Check for updates": checkForUpdates,
-    "Change currency": toggleCurrencySelector,
-    "Toggle dark mode": toggleDarkMode,
-    "Send feedback": () => openFeedbackModal(),
-  };
-
-  document.querySelectorAll("#settingsTab .toolbar-btn").forEach((btn) => {
-    const label = btn.getAttribute("aria-label");
-    if (actions[label]) {
-      btn.addEventListener("click", actions[label]);
-    }
+  const bindings = [
+    ["updateCheckBtn", checkForUpdates],
+    ["currencyBtn", toggleCurrencySelector],
+    ["darkModeBtn", toggleDarkMode],
+    ["feedbackBtn", () => openFeedbackModal()],
+  ];
+  bindings.forEach(([id, handler]) => {
+    document.getElementById(id)?.addEventListener("click", handler);
   });
 }
 
@@ -923,7 +919,13 @@ function bindFormSubmit() {
       ).getTime();
 
       try {
-        await saveTransactionToDB(sanitizedTransaction);
+        try {
+          await saveTransactionToDB(sanitizedTransaction);
+        } catch {
+          // One retry after 300ms — handles transient IDB lock / quota spike
+          await new Promise((r) => setTimeout(r, 300));
+          await saveTransactionToDB(sanitizedTransaction);
+        }
 
         submitBtn.classList.remove("loading");
         submitBtn.classList.add("success");
