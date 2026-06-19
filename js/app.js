@@ -826,6 +826,8 @@ function bindTagInputEvents() {
 // Form Submission Handler
 // ============================================================================
 
+let saveRenderTimeout = null;
+
 function bindFormSubmit() {
   document
     .getElementById("transactionForm")
@@ -925,7 +927,8 @@ function bindFormSubmit() {
         }
 
         const savedEditingId = state.editingId;
-        setTimeout(() => {
+        clearTimeout(saveRenderTimeout);
+        saveRenderTimeout = setTimeout(() => {
           submitBtn.classList.remove("success");
           submitBtn.disabled = false;
           submitBtn.textContent = state.editingId
@@ -960,6 +963,7 @@ function bindFormSubmit() {
           renderSettlementDashboard();
         }, 800);
       } catch (err) {
+        logError(err?.message, err?.stack);
         console.error("Save failed:", err);
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
@@ -985,6 +989,7 @@ async function handleMarkSettled(id) {
       showMessage(t("message.marked_settled"));
     }
   } catch (err) {
+    logError(err?.message, err?.stack);
     console.error("Failed to mark transaction as settled:", err);
     showMessage(t("error.transaction_save_failed"));
   }
@@ -1132,7 +1137,9 @@ function openBudgetModal(budget = null) {
       renderBudgetAlerts();
       updateUI();
     } catch (error) {
+      logError(error?.message, error?.stack);
       console.error("Error saving budget:", error);
+      showMessage(t("error.transaction_save_failed"));
     }
   });
 }
@@ -1206,6 +1213,7 @@ async function init() {
     // Service Worker (non-blocking)
     registerServiceWorker();
   } catch (err) {
+    logError(err?.message, err?.stack);
     console.error("App initialization failed:", err);
     showMessage(t("error.data_load_failed"));
   }
