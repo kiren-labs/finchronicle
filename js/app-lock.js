@@ -14,6 +14,12 @@ const LS_CRED_ID = "appLock_cred_id"; // base64 WebAuthn credential ID
 
 const DEFAULT_TIMEOUT_MINS = 1;
 
+const MAX_PIN_ATTEMPTS = 5;
+const LOCKOUT_SECONDS = 30;
+let _pinAttempts = 0;
+let _lockoutUntil = 0; // epoch ms
+let _lockoutTimer = null;
+
 const TIMEOUT_OPTIONS = [
   { value: 1, label: "1 minute" },
   { value: 5, label: "5 minutes" },
@@ -141,10 +147,15 @@ function updateLockButtonVisibility() {
 export function lock() {
   if (!isLockEnabled()) return;
   _locked = true;
+  _pinAttempts = 0;
+  _lockoutUntil = 0;
+  clearInterval(_lockoutTimer);
   stopInactivityTimer();
   const overlay = getLockOverlay();
   overlay.removeAttribute("hidden");
-  overlay.querySelector(".lock-pin-input").value = "";
+  const pinInput = overlay.querySelector(".lock-pin-input");
+  pinInput.value = "";
+  pinInput.disabled = false;
   overlay.querySelector(".lock-error").textContent = "";
   updateBiometricButtonVisibility();
   _autoTriggerBiometric();
@@ -279,11 +290,46 @@ export function bindLockOverlayEvents() {
   async function attemptUnlock() {
     const pin = pinInput.value.trim();
     if (!pin) return;
+
+    // Enforce lockout cooldown
+    const now = Date.now();
+    if (_lockoutUntil > now) {
+      const secs = Math.ceil((_lockoutUntil - now) / 1000);
+      setLockError(`Too many attempts. Try again in ${secs}s.`);
+      pinInput.value = "";
+      return;
+    }
+
     pinInput.value = "";
     if (await verifyPIN(pin)) {
+      _pinAttempts = 0;
+      _lockoutUntil = 0;
+      clearInterval(_lockoutTimer);
       await unlock();
     } else {
-      setLockError("Wrong PIN. Try again.");
+      _pinAttempts += 1;
+      const remaining = MAX_PIN_ATTEMPTS - _pinAttempts;
+      if (_pinAttempts >= MAX_PIN_ATTEMPTS) {
+        _pinAttempts = 0;
+        _lockoutUntil = Date.now() + LOCKOUT_SECONDS * 1000;
+        pinInput.disabled = true;
+        unlockBtn.disabled = true;
+        setLockError(`Too many attempts. Locked for ${LOCKOUT_SECONDS}s.`);
+        let countdown = LOCKOUT_SECONDS;
+        _lockoutTimer = setInterval(() => {
+          countdown -= 1;
+          if (countdown <= 0) {
+            clearInterval(_lockoutTimer);
+            pinInput.disabled = false;
+            unlockBtn.disabled = false;
+            setLockError("");
+          } else {
+            setLockError(`Too many attempts. Try again in ${countdown}s.`);
+          }
+        }, 1000);
+      } else {
+        setLockError(`Wrong PIN. ${remaining} attempt${remaining !== 1 ? "s" : ""} left.`);
+      }
     }
   }
 

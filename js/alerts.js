@@ -5,7 +5,7 @@
 import { state } from "./state.js";
 import { formatCurrency } from "./currency.js";
 import { getAccountBalance } from "./accounts.js";
-import { getSavingsRate } from "./savings.js";
+import { getSavingsRate, getMonthlyIncome } from "./savings.js";
 
 // ---- Constants ----
 
@@ -209,6 +209,7 @@ function checkWeeklySpike(weeklyAverages, counts, thisWeek) {
         type: ALERT_TYPES.WEEKLY_SPIKE,
         category: cat,
         message: `${cat}: ${pct}% above weekly average`,
+        suggestion: `Consider keeping ${cat} under ${formatCurrency(Math.round(avg))} this week — your 90-day weekly average.`,
         severity: ratio >= 2 ? "danger" : "warning",
         value: spent,
         average: avg,
@@ -233,6 +234,7 @@ function checkUnusualAmount(transaction, medians) {
       type: ALERT_TYPES.UNUSUAL_AMOUNT,
       category: cat,
       message: `${formatCurrency(transaction.amount)} in ${cat} — ${Math.round(ratio)}x your average`,
+      suggestion: `Your typical ${cat} transaction is around ${formatCurrency(Math.round(median))}. Double-check this entry is correct.`,
       severity: ratio >= 5 ? "danger" : "warning",
       value: transaction.amount,
       average: median,
@@ -270,10 +272,16 @@ function checkVelocity(thisMonthTotals) {
       const pctOver = Math.round(
         ((projectedTotal - budget.monthlyLimit) / budget.monthlyLimit) * 100,
       );
+      const remainingBudget = Math.max(0, budget.monthlyLimit - spent);
+      const remainingDays = daysInMonth - dayOfMonth;
+      const dailyCap = remainingDays > 0 ? Math.round(remainingBudget / remainingDays) : 0;
       alerts.push({
         type: ALERT_TYPES.VELOCITY_WARNING,
         category: budget.category,
         message: `${budget.category}: on pace to exceed budget by ${pctOver}% (~day ${exceedDay})`,
+        suggestion: remainingDays > 0
+          ? `Limit ${budget.category} to ${formatCurrency(dailyCap)}/day for the rest of the month to stay within budget.`
+          : null,
         severity: pctOver >= 30 ? "danger" : "warning",
         value: projectedTotal,
         limit: budget.monthlyLimit,
@@ -298,6 +306,7 @@ function checkCategoryDrift(thisMonth, lastMonth) {
         type: ALERT_TYPES.CATEGORY_DRIFT,
         category: cat,
         message: `${cat} spending ${Math.round(ratio)}x last month`,
+        suggestion: `Last month you spent ${formatCurrency(Math.round(lastSpent))} on ${cat} — this month is on track for ${formatCurrency(Math.round(spent))}.`,
         severity: ratio >= 3 ? "danger" : "warning",
         value: spent,
         previous: lastSpent,
@@ -356,10 +365,14 @@ function checkBillDue() {
           : daysUntil === 1
             ? "tomorrow"
             : `in ${daysUntil} days`;
+      const shortfall = Math.round(tmpl.amount - balance);
       alerts.push({
         type: ALERT_TYPES.BILL_DUE,
         category: tmpl.category || "_health",
         message: `${tmpl.name || tmpl.category} (${formatCurrency(tmpl.amount)}) is due ${dayLabel} — ${tmpl.fromAccount} balance is ${formatCurrency(balance)}.`,
+        suggestion: shortfall > 0
+          ? `Transfer ${formatCurrency(shortfall)} to ${tmpl.fromAccount} before ${dayLabel === "today" ? "end of day" : dayLabel}.`
+          : null,
         severity: balance < tmpl.amount ? "danger" : "warning",
         value: tmpl.amount,
         account: tmpl.fromAccount,
@@ -385,10 +398,19 @@ function checkSavingsRateTrend() {
   const avg = (
     validRates.reduce((s, r) => s + r, 0) / validRates.length
   ).toFixed(1);
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const avgIncome = getMonthlyIncome(currentMonth);
+  const targetSavings = avgIncome * 0.2;
+  const currentSavings = avgIncome * (parseFloat(avg) / 100);
+  const gap = Math.round(targetSavings - currentSavings);
+  const suggestion = avgIncome > 0 && gap > 0
+    ? `At your income of ${formatCurrency(Math.round(avgIncome))}, saving 20% means cutting expenses by ${formatCurrency(gap)}/month.`
+    : null;
   return {
     type: ALERT_TYPES.SAVINGS_RATE_TREND,
     category: "_health",
     message: `Your savings rate has been below 10% for 3 months (avg ${avg}%).`,
+    suggestion,
     severity: "warning",
   };
 }
@@ -419,10 +441,16 @@ function checkMonthlyPace() {
     if (spent >= budget.monthlyLimit) continue; // budget alert already covers this
     const projected = (spent / dayOfMonth) * daysInMonth;
     if (projected > budget.monthlyLimit * 1.2) {
+      const remaining = budget.monthlyLimit - spent;
+      const remainingDays = daysInMonth - dayOfMonth;
+      const dailyCap = remainingDays > 0 ? Math.round(remaining / remainingDays) : 0;
       alerts.push({
         type: ALERT_TYPES.MONTHLY_PACE,
         category: budget.category,
         message: `${budget.category} spending is on pace for ${formatCurrency(Math.round(projected))} this month — budget is ${formatCurrency(budget.monthlyLimit)}.`,
+        suggestion: remainingDays > 0
+          ? `Spend no more than ${formatCurrency(dailyCap)}/day on ${budget.category} to stay within budget.`
+          : null,
         severity: projected > budget.monthlyLimit * 1.5 ? "danger" : "warning",
         value: projected,
         limit: budget.monthlyLimit,
@@ -598,9 +626,12 @@ export function renderAlertBanners(alerts) {
 }
 
 function renderAlertBanner(alert) {
+  const suggestion = alert.suggestion
+    ? `<span class="smart-alert-suggestion">${alert.suggestion}</span>`
+    : "";
   return `<div class="smart-alert smart-alert-${alert.severity}" data-alert-id="${alert.id}">
     <i class="${alert.severity === "danger" ? "ri-alarm-warning-fill" : "ri-error-warning-line"}"></i>
-    <span class="smart-alert-text">${alert.message}</span>
+    <span class="smart-alert-text">${alert.message}${suggestion}</span>
     <button class="smart-alert-dismiss" data-dismiss="${alert.id}" aria-label="Dismiss">
       <i class="ri-close-line"></i>
     </button>

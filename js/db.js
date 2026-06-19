@@ -401,9 +401,6 @@ export async function migrateFromLocalStorage() {
       const oldTransactions = JSON.parse(stored);
       if (oldTransactions.length > 0) {
         await bulkSaveTransactionsToDB(oldTransactions);
-        console.log(
-          `Migrated ${oldTransactions.length} transactions to IndexedDB`,
-        );
       }
       localStorage.removeItem("transactions");
     } catch (err) {

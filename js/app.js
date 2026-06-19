@@ -18,7 +18,8 @@ function logError(message, stack) {
     if (log.length > MAX_ERRORS) log.splice(0, log.length - MAX_ERRORS);
     localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
   } catch {
-    /* localStorage full or unavailable — silently ignore */
+    // DA3: localStorage full or unavailable (Safari Private Browsing) — surface to console so errors are never silently lost
+    console.error("[FinChronicle] logError fallback:", message, stack);
   }
 }
 
@@ -33,6 +34,18 @@ window.addEventListener("unhandledrejection", (event) => {
   const reason = event.reason;
   logError(reason?.message || String(reason), reason?.stack || "");
 });
+
+// DA4: window.onerror does not fire for ES module top-level import failures.
+// A failed static import causes the entire module script to not execute — the
+// error surfaces as an 'error' event on the script element itself.
+window.addEventListener("error", (event) => {
+  if (event.target && event.target.tagName === "SCRIPT") {
+    logError(
+      `Module load failed: ${event.target.src || "(inline)"}`,
+      "script-load-error",
+    );
+  }
+}, true); // capture phase to catch script element errors
 
 import { state, currencies } from "./state.js";
 import {
@@ -458,18 +471,14 @@ function bindStaticEvents() {
 }
 
 function bindSettingsButtons() {
-  const actions = {
-    "Check for updates": checkForUpdates,
-    "Change currency": toggleCurrencySelector,
-    "Toggle dark mode": toggleDarkMode,
-    "Send feedback": () => openFeedbackModal(),
-  };
-
-  document.querySelectorAll("#settingsTab .toolbar-btn").forEach((btn) => {
-    const label = btn.getAttribute("aria-label");
-    if (actions[label]) {
-      btn.addEventListener("click", actions[label]);
-    }
+  const bindings = [
+    ["updateCheckBtn", checkForUpdates],
+    ["currencyBtn", toggleCurrencySelector],
+    ["darkModeBtn", toggleDarkMode],
+    ["feedbackBtn", () => openFeedbackModal()],
+  ];
+  bindings.forEach(([id, handler]) => {
+    document.getElementById(id)?.addEventListener("click", handler);
   });
 }
 
@@ -826,6 +835,8 @@ function bindTagInputEvents() {
 // Form Submission Handler
 // ============================================================================
 
+let saveRenderTimeout = null;
+
 function bindFormSubmit() {
   document
     .getElementById("transactionForm")
@@ -879,12 +890,21 @@ function bindFormSubmit() {
         ...getMultiCurrencyFormData(),
       };
 
+      // Clear field errors from previous submit
+      ["amount", "category", "date"].forEach((field) => {
+        const el = document.getElementById(`${field}Error`);
+        if (el) el.textContent = "";
+      });
+
       const validation = validateTransaction(transaction);
 
       if (!validation.valid) {
-        const errorMessage = validation.errors
-          .map((err) => err.message)
-          .join(", ");
+        // Surface per-field errors via aria-describedby spans
+        validation.errors.forEach((err) => {
+          const el = document.getElementById(`${err.field}Error`);
+          if (el) el.textContent = err.message;
+        });
+        const errorMessage = validation.errors.map((err) => err.message).join(", ");
         showMessage(errorMessage);
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
@@ -899,7 +919,13 @@ function bindFormSubmit() {
       ).getTime();
 
       try {
-        await saveTransactionToDB(sanitizedTransaction);
+        try {
+          await saveTransactionToDB(sanitizedTransaction);
+        } catch {
+          // One retry after 300ms — handles transient IDB lock / quota spike
+          await new Promise((r) => setTimeout(r, 300));
+          await saveTransactionToDB(sanitizedTransaction);
+        }
 
         submitBtn.classList.remove("loading");
         submitBtn.classList.add("success");
@@ -925,7 +951,8 @@ function bindFormSubmit() {
         }
 
         const savedEditingId = state.editingId;
-        setTimeout(() => {
+        clearTimeout(saveRenderTimeout);
+        saveRenderTimeout = setTimeout(() => {
           submitBtn.classList.remove("success");
           submitBtn.disabled = false;
           submitBtn.textContent = state.editingId
@@ -960,6 +987,7 @@ function bindFormSubmit() {
           renderSettlementDashboard();
         }, 800);
       } catch (err) {
+        logError(err?.message, err?.stack);
         console.error("Save failed:", err);
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
@@ -985,6 +1013,7 @@ async function handleMarkSettled(id) {
       showMessage(t("message.marked_settled"));
     }
   } catch (err) {
+    logError(err?.message, err?.stack);
     console.error("Failed to mark transaction as settled:", err);
     showMessage(t("error.transaction_save_failed"));
   }
@@ -1006,15 +1035,6 @@ function registerServiceWorker() {
   }
 
   let refreshing = false;
-
-  navigator.serviceWorker.addEventListener("message", (event) => {
-    if (event.data.type === "SW_UPDATED") {
-      console.log("✅ Service Worker updated:", event.data.version);
-      if (!refreshing) {
-        showUpdatePrompt();
-      }
-    }
-  });
 
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (refreshing) return;
@@ -1132,7 +1152,9 @@ function openBudgetModal(budget = null) {
       renderBudgetAlerts();
       updateUI();
     } catch (error) {
+      logError(error?.message, error?.stack);
       console.error("Error saving budget:", error);
+      showMessage(t("error.transaction_save_failed"));
     }
   });
 }
@@ -1147,13 +1169,19 @@ async function init() {
     await requestStoragePersistence();
     await migrateFromLocalStorage();
     await loadDataFromDB();
-    await loadRecurringIntoState();
-    await initBudgets();
+
+    // Independent feature inits — run in parallel (~150–300ms faster startup
+    await Promise.all([
+      loadRecurringIntoState(),
+      initBudgets(),
+      initQuickEntry(),
+      initAccounts(),
+      initOptionalFields(),
+      initGoals(),
+    ]);
+
+    // Recurring check depends on loadRecurringIntoState completing first
     await checkRecurringTransactions();
-    await initQuickEntry();
-    await initAccounts();
-    await initOptionalFields();
-    await initGoals();
     initAlerts();
     initTagColors();
 
@@ -1206,9 +1234,20 @@ async function init() {
     // Service Worker (non-blocking)
     registerServiceWorker();
   } catch (err) {
+    logError(err?.message, err?.stack);
     console.error("App initialization failed:", err);
     showMessage(t("error.data_load_failed"));
   }
+}
+
+// M19: Register SW message listener early — before init() — so SW_UPDATED
+// messages sent during fast updates are never missed.
+if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data?.type === "SW_UPDATED") {
+      showUpdatePrompt();
+    }
+  });
 }
 
 // Since type="module" defers execution, DOM is ready

@@ -84,11 +84,13 @@ export function exportToCSV() {
     t.homeAmount || "",
   ]);
 
+  const sanitizeCell = (cell) => {
+    const s = String(cell).replace(/"/g, '""');
+    return /^[=+\-@\t]/.test(s) ? `'${s}` : s;
+  };
   let csv = `${headers.join(",")}\n`;
   csv += rows
-    .map((row) =>
-      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
-    )
+    .map((row) => row.map((cell) => `"${sanitizeCell(cell)}"`).join(","))
     .join("\n");
 
   const blob = new Blob([csv], { type: "text/csv" });
@@ -359,8 +361,10 @@ export async function importFromCSV(text) {
         : rawType === "transfer"
           ? "transfer"
           : "expense";
-    const baseCategory = (row[categoryIndex] || "").trim();
-    const rawNotes = notesIndex !== -1 ? (row[notesIndex] || "").trim() : "";
+    const stripFormula = (s) => s.replace(/^[=+\-@\t]+/, "");
+    const baseCategory = stripFormula((row[categoryIndex] || "").trim());
+    const rawNotes =
+      notesIndex !== -1 ? stripFormula((row[notesIndex] || "").trim()) : "";
     const category =
       type === "transfer"
         ? "Transfer"
@@ -397,7 +401,7 @@ export async function importFromCSV(text) {
         txn.paymentMethod = sanitizeHTML(val);
     }
     if (merchantIndex !== -1) {
-      const val = (row[merchantIndex] || "").trim();
+      const val = stripFormula((row[merchantIndex] || "").trim());
       if (val) txn.merchant = sanitizeHTML(val);
     }
     if (expenseTypeIndex !== -1) {
@@ -406,7 +410,7 @@ export async function importFromCSV(text) {
         txn.expenseType = sanitizeHTML(val);
     }
     if (attachedToIndex !== -1) {
-      const val = (row[attachedToIndex] || "").trim();
+      const val = stripFormula((row[attachedToIndex] || "").trim());
       if (val) txn.attachedTo = sanitizeHTML(val);
     }
     if (referenceIdIndex !== -1) {
@@ -414,7 +418,7 @@ export async function importFromCSV(text) {
       if (val) txn.referenceId = sanitizeHTML(val);
     }
     if (locationIndex !== -1) {
-      const val = (row[locationIndex] || "").trim();
+      const val = stripFormula((row[locationIndex] || "").trim());
       if (val) txn.location = sanitizeHTML(val);
     }
     // Multi-currency fields (v3.24.0)

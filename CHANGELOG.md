@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.4.0] — 2026-06-19
+
+### Added
+
+- **Actionable Spending Insights** — every smart alert now includes an optional `suggestion` line with a concrete, numbers-based action to take. Suggestions are computed from existing state at detection time; no new data entry required.
+  - Weekly spike → "Keep {category} under {90d weekly avg} this week"
+  - Unusual amount → "Your typical {category} transaction is around {median}. Double-check this entry."
+  - Velocity warning → "Limit {category} to {remaining budget ÷ remaining days}/day for the rest of the month"
+  - Monthly pace → "Spend no more than {daily cap}/day on {category} to stay within budget"
+  - Category drift → "Last month you spent {lastMonth} on {category} — this month is on track for {projected}"
+  - Savings rate trend → "At your income of {income}, saving 20% means cutting expenses by {gap}/month"
+  - Bill due + low balance → "Transfer {shortfall} to {account} before {due date}"
+- **`.smart-alert-suggestion`** — muted italic sub-text style below the alert message. Inherits alert colour; dismissed with the same dismiss button.
+
+### Technical
+
+- No new module, no DB changes, no new IDB stores
+- `getMonthlyIncome` imported into `js/alerts.js` for savings-rate suggestion calculation
+- Suggestions only render when the maths produces a meaningful positive number (guard: `remainingDays > 0`, `gap > 0`, `avgIncome > 0`)
+- All currency values use `formatCurrency()` — respects user's currency setting
+
+---
+
 ## [4.3.1] — 2026-06-06
 
 ### Added

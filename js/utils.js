@@ -11,8 +11,12 @@ export function generateId() {
 
 export function getErrorLog() {
   try {
-    return JSON.parse(localStorage.getItem("errorLog") || "[]");
+    const raw = localStorage.getItem("errorLog");
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
+    localStorage.removeItem("errorLog");
     return [];
   }
 }
