@@ -869,3 +869,8 @@ body.dark-mode .lock-settings-select {
 body.dark-mode .lock-biometric-btn {
   background: var(--color-surface);
 }
+
+/* Field error text — use danger-text (#FF6B6B) for WCAG AA contrast on dark surface */
+body.dark-mode .field-error {
+  color: var(--color-danger-text);
+}

@@ -15,7 +15,7 @@ import {
   GOALS_STORE,
   NET_WORTH_SNAPSHOTS_STORE,
 } from "./state.js";
-import { showMessage } from "./utils.js";
+import { showMessage, logError } from "./utils.js";
 
 // ============================================================================
 // Generic IDB Helpers — eliminates repetitive promise/transaction boilerplate
@@ -47,7 +47,10 @@ function txToPromise(tx) {
 
 /** Get all records from a store. Returns [] if DB not ready or store missing. */
 function idbGetAll(storeName, fallback = []) {
-  if (!state.db || !hasStore(storeName)) return Promise.resolve(fallback);
+  if (!state.db || !hasStore(storeName)) {
+    logError(`idbGetAll: skipped — ${!state.db ? "db not ready" : `store '${storeName}' missing`}`, "db.js:idbGetAll");
+    return Promise.resolve(fallback);
+  }
   const store = state.db
     .transaction([storeName], "readonly")
     .objectStore(storeName);

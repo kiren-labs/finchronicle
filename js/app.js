@@ -2,26 +2,7 @@
 // App Entry Point — Initialisation, Event Bindings, Service Worker
 // ============================================================================
 
-// ---- Global Error Log (v3.29.0) ----
-// Must be before any imports to catch early errors.
-const ERROR_LOG_KEY = "errorLog";
-const MAX_ERRORS = 50;
-
-function logError(message, stack) {
-  try {
-    const log = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || "[]");
-    log.push({
-      timestamp: new Date().toISOString(),
-      message,
-      stack: stack || "",
-    });
-    if (log.length > MAX_ERRORS) log.splice(0, log.length - MAX_ERRORS);
-    localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
-  } catch {
-    // DA3: localStorage full or unavailable (Safari Private Browsing) — surface to console so errors are never silently lost
-    console.error("[FinChronicle] logError fallback:", message, stack);
-  }
-}
+// Global error handlers — logError imported from utils.js (imports hoist before body runs in ES modules)
 
 window.onerror = (message, source, lineno, colno, error) => {
   const msg = String(message);
@@ -49,6 +30,7 @@ window.addEventListener("error", (event) => {
 
 import { state, currencies } from "./state.js";
 import {
+  logError,
   showMessage,
   generateId,
   sanitizeHTML,
@@ -921,8 +903,9 @@ function bindFormSubmit() {
       try {
         try {
           await saveTransactionToDB(sanitizedTransaction);
-        } catch {
+        } catch (retryErr) {
           // One retry after 300ms — handles transient IDB lock / quota spike
+          logError(retryErr?.message, retryErr?.stack);
           await new Promise((r) => setTimeout(r, 300));
           await saveTransactionToDB(sanitizedTransaction);
         }

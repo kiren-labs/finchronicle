@@ -7,22 +7,38 @@ export function generateId() {
   return crypto.randomUUID();
 }
 
-// ---- Error Log Access (v3.29.0) ----
+// ---- Error Log (v4.4.1) ----
+// Stores up to 50 entries in localStorage. No PII — messages and stack traces only.
+// Falls back to console.error in Safari Private Browsing (localStorage unavailable).
+
+export const ERROR_LOG_KEY = "errorLog";
+const MAX_ERRORS = 50;
+
+export function logError(message, stack) {
+  try {
+    const log = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || "[]");
+    log.push({ timestamp: new Date().toISOString(), message, stack: stack || "" });
+    if (log.length > MAX_ERRORS) log.splice(0, log.length - MAX_ERRORS);
+    localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
+  } catch {
+    console.error("[FinChronicle] logError fallback:", message, stack);
+  }
+}
 
 export function getErrorLog() {
   try {
-    const raw = localStorage.getItem("errorLog");
+    const raw = localStorage.getItem(ERROR_LOG_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch {
-    localStorage.removeItem("errorLog");
+    localStorage.removeItem(ERROR_LOG_KEY);
     return [];
   }
 }
 
 export function clearErrorLog() {
-  localStorage.removeItem("errorLog");
+  localStorage.removeItem(ERROR_LOG_KEY);
 }
 
 // Sanitize HTML to prevent XSS attacks

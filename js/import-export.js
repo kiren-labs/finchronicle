@@ -209,11 +209,16 @@ export async function createBackup() {
     t.homeAmount || "",
   ]);
 
+  const sanitizeBackupCell = (cell) => {
+    const s = String(cell).replace(/"/g, '""');
+    return /^[=+\-@\t]/.test(s) ? `'${s}` : s;
+  };
+
   let csv = `${metadata}\n`;
   csv += `${headers.join(",")}\n`;
   csv += rows
     .map((row) =>
-      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      row.map((cell) => `"${sanitizeBackupCell(cell)}"`).join(","),
     )
     .join("\n");
 
@@ -572,6 +577,9 @@ export function parseBackupCSV(text) {
   const settledAtIdx = headers.findIndex((h) => h === "settledat");
   const settledByIdx = headers.findIndex((h) => h === "settledby");
 
+  // Strip CSV formula-escape apostrophe added by sanitizeBackupCell on export
+  const stripCSVEscape = (s) => (s.startsWith("'") && /^'[=+\-@\t]/.test(s) ? s.slice(1) : s);
+
   const parsedTransactions = [];
   const dataRows = rows.slice(1);
 
@@ -584,7 +592,7 @@ export function parseBackupCSV(text) {
       return;
     }
 
-    const rawNotes = notesIndex !== -1 ? (row[notesIndex] || "").trim() : "";
+    const rawNotes = notesIndex !== -1 ? stripCSVEscape((row[notesIndex] || "").trim()) : "";
 
     const transaction = {
       id:
@@ -649,7 +657,7 @@ export function parseBackupCSV(text) {
         transaction.paymentMethod = sanitizeHTML(val);
     }
     if (merchantIdx !== -1) {
-      const val = (row[merchantIdx] || "").trim();
+      const val = stripCSVEscape((row[merchantIdx] || "").trim());
       if (val) transaction.merchant = sanitizeHTML(val);
     }
     if (expenseTypeIdx !== -1) {
@@ -658,7 +666,7 @@ export function parseBackupCSV(text) {
         transaction.expenseType = sanitizeHTML(val);
     }
     if (attachedToIdx !== -1) {
-      const val = (row[attachedToIdx] || "").trim();
+      const val = stripCSVEscape((row[attachedToIdx] || "").trim());
       if (val) transaction.attachedTo = sanitizeHTML(val);
     }
     if (referenceIdIdx !== -1) {
@@ -666,7 +674,7 @@ export function parseBackupCSV(text) {
       if (val) transaction.referenceId = sanitizeHTML(val);
     }
     if (locationIdx !== -1) {
-      const val = (row[locationIdx] || "").trim();
+      const val = stripCSVEscape((row[locationIdx] || "").trim());
       if (val) transaction.location = sanitizeHTML(val);
     }
     // Multi-currency fields (v3.24.0)
