@@ -18,7 +18,8 @@ function logError(message, stack) {
     if (log.length > MAX_ERRORS) log.splice(0, log.length - MAX_ERRORS);
     localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
   } catch {
-    /* localStorage full or unavailable — silently ignore */
+    // DA3: localStorage full or unavailable (Safari Private Browsing) — surface to console so errors are never silently lost
+    console.error("[FinChronicle] logError fallback:", message, stack);
   }
 }
 
@@ -33,6 +34,18 @@ window.addEventListener("unhandledrejection", (event) => {
   const reason = event.reason;
   logError(reason?.message || String(reason), reason?.stack || "");
 });
+
+// DA4: window.onerror does not fire for ES module top-level import failures.
+// A failed static import causes the entire module script to not execute — the
+// error surfaces as an 'error' event on the script element itself.
+window.addEventListener("error", (event) => {
+  if (event.target && event.target.tagName === "SCRIPT") {
+    logError(
+      `Module load failed: ${event.target.src || "(inline)"}`,
+      "script-load-error",
+    );
+  }
+}, true); // capture phase to catch script element errors
 
 import { state, currencies } from "./state.js";
 import {
