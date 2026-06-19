@@ -590,15 +590,18 @@
             <div class="form-group">
               <label for="amount">Amount (₹)</label>
               <input type="text" id="amount" placeholder="1000 or 500+250" required inputmode="decimal"
-                autocomplete="off" aria-label="Transaction amount in selected currency" />
+                autocomplete="off" aria-label="Transaction amount in selected currency"
+                aria-describedby="amountError" />
+              <span id="amountError" class="field-error" role="alert" aria-live="polite"></span>
             </div>
 
             <div class="form-group" id="categoryGroup">
               <label for="category">Category</label>
-              <select id="category" required>
+              <select id="category" required aria-describedby="categoryError">
                 <option value="" disabled selected>Select category</option>
                 <!-- Categories will be populated dynamically -->
               </select>
+              <span id="categoryError" class="field-error" role="alert" aria-live="polite"></span>
             </div>
 
             <div id="transferFields" class="transfer-fields" hidden>
@@ -634,7 +637,8 @@
 
             <div class="form-group">
               <label for="date">Date</label>
-              <input type="date" id="date" required />
+              <input type="date" id="date" required aria-describedby="dateError" />
+              <span id="dateError" class="field-error" role="alert" aria-live="polite"></span>
             </div>
 
             <div class="form-group">

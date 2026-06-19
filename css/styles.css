@@ -6813,3 +6813,11 @@ button.primary.loading .btn-spinner {
 .filter-group {
   margin-bottom: var(--space-lg);
 }
+
+.field-error {
+  display: block;
+  font-size: var(--font-sm);
+  color: var(--color-danger);
+  margin-top: var(--space-2xs);
+  min-height: 0;
+}

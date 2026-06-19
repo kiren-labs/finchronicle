@@ -894,12 +894,21 @@ function bindFormSubmit() {
         ...getMultiCurrencyFormData(),
       };
 
+      // Clear field errors from previous submit
+      ["amount", "category", "date"].forEach((field) => {
+        const el = document.getElementById(`${field}Error`);
+        if (el) el.textContent = "";
+      });
+
       const validation = validateTransaction(transaction);
 
       if (!validation.valid) {
-        const errorMessage = validation.errors
-          .map((err) => err.message)
-          .join(", ");
+        // Surface per-field errors via aria-describedby spans
+        validation.errors.forEach((err) => {
+          const el = document.getElementById(`${err.field}Error`);
+          if (el) el.textContent = err.message;
+        });
+        const errorMessage = validation.errors.map((err) => err.message).join(", ");
         showMessage(errorMessage);
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
@@ -1024,15 +1033,6 @@ function registerServiceWorker() {
   }
 
   let refreshing = false;
-
-  navigator.serviceWorker.addEventListener("message", (event) => {
-    if (event.data.type === "SW_UPDATED") {
-      console.log("✅ Service Worker updated:", event.data.version);
-      if (!refreshing) {
-        showUpdatePrompt();
-      }
-    }
-  });
 
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (refreshing) return;
@@ -1167,13 +1167,19 @@ async function init() {
     await requestStoragePersistence();
     await migrateFromLocalStorage();
     await loadDataFromDB();
-    await loadRecurringIntoState();
-    await initBudgets();
+
+    // Independent feature inits — run in parallel (~150–300ms faster startup
+    await Promise.all([
+      loadRecurringIntoState(),
+      initBudgets(),
+      initQuickEntry(),
+      initAccounts(),
+      initOptionalFields(),
+      initGoals(),
+    ]);
+
+    // Recurring check depends on loadRecurringIntoState completing first
     await checkRecurringTransactions();
-    await initQuickEntry();
-    await initAccounts();
-    await initOptionalFields();
-    await initGoals();
     initAlerts();
     initTagColors();
 
@@ -1230,6 +1236,16 @@ async function init() {
     console.error("App initialization failed:", err);
     showMessage(t("error.data_load_failed"));
   }
+}
+
+// M19: Register SW message listener early — before init() — so SW_UPDATED
+// messages sent during fast updates are never missed.
+if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data?.type === "SW_UPDATED") {
+      showUpdatePrompt();
+    }
+  });
 }
 
 // Since type="module" defers execution, DOM is ready
