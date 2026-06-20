@@ -7297,7 +7297,10 @@ button.primary.loading .btn-spinner {
   font-size: 0.85rem;
 }
 @media (max-width: 400px) {
-  .bva-set-budget-btn { padding: 3px 8px; font-size: 0.7rem; }
+  .bva-set-budget-btn {
+    padding: 3px 8px;
+    font-size: 0.7rem;
+  }
 }
 
 /* ---- Financial Health Ratios (v4.6.0) ---- */
