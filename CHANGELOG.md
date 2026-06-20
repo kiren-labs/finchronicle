@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.7.0] — 2026-06-20
+
+### Added
+
+- **Subscription Tracker** — new segue panel accessible from the Reports tab ("Subscriptions →" entry button, same pattern as Grouped View).
+  - Filters all recurring expense templates with `frequency: 'monthly'` or `'yearly'` automatically — no manual tagging required.
+  - Summary header showing **monthly total** and **annual total** in a 2-stat card grid.
+  - Income % footer — "X% of avg monthly income" computed from the last 3 months of income data.
+  - Per-subscription rows showing name, notes, frequency label, next due date, and monthly equivalent amount. Yearly subscriptions show both the monthly rate and the actual annual charge.
+  - Rows sorted: active first, then by monthly cost descending. Paused subscriptions appear dimmed.
+  - **"Manage Recurring" button** — closes the panel, navigates to Settings, and scrolls the Recurring card into view automatically.
+
+### Fixed
+
+- **Biometric double-prompt on iOS** — `_autoTriggerBiometric()` (auto-fires on lock) and the manual biometric button handler could both call `navigator.credentials.get()` concurrently, causing Face ID / Touch ID to appear twice. Fixed with `_biometricInProgress` mutex flag shared between both code paths. `lock()` resets the flag on every new lock cycle.
+
+### Technical
+
+- No new IDB stores, no DB_VERSION bump
+- `getSubscriptions()` and `renderSubscriptionTracker()` exported from `js/recurring.js`
+- `renderSubscriptionTracker` imported and wired in `js/app.js`; open/close handlers follow identical pattern to `groupedViewPanel`
+- "Manage Recurring" uses `fc:navigate` CustomEvent + `requestAnimationFrame` scroll to `#recurringContainer`
+- Subscription panel CSS in `css/styles.css` (`.sub-*` classes); dark-mode overrides in `css/dark-mode.css`
+
 ## [4.6.0] — 2026-06-20
 
 ### Added
