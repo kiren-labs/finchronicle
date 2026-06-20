@@ -4538,7 +4538,7 @@ button.primary.loading .btn-spinner {
   margin-top: var(--space-md);
 }
 
-.net-worth-card h3 {
+.net-worth-card .card-section-title {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -4898,7 +4898,7 @@ button.primary.loading .btn-spinner {
   margin-top: var(--space-md);
 }
 
-.savings-card h3 {
+.savings-card .card-section-title {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -7310,6 +7310,17 @@ button.primary.loading .btn-spinner {
   margin: 0 0 var(--space-md);
   font-weight: 500;
 }
+/* Shared card heading — replaces h3 in Net Worth, Savings, Health Ratios cards */
+.card-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
 .health-ratio-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
