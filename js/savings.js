@@ -167,6 +167,183 @@ export function getCumulativeSavings() {
   return total;
 }
 
+// ---- Financial Health Ratio Calculations (v4.6.0) ----
+
+function getAvgMonthlyExpense(months = 3) {
+  const now = new Date();
+  let total = 0;
+  let count = 0;
+  for (let i = 1; i <= months; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const m = d.toISOString().slice(0, 7);
+    const monthTotal = state.transactions
+      .filter((t) => !t.deleted && t.type === "expense" && t.date && t.date.startsWith(m))
+      .reduce((s, t) => s + (t.homeAmount || t.amount), 0);
+    if (monthTotal > 0) { total += monthTotal; count++; }
+  }
+  return count > 0 ? total / count : 0;
+}
+
+function getAvgMonthlyIncome(months = 3) {
+  const now = new Date();
+  let total = 0;
+  let count = 0;
+  for (let i = 1; i <= months; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const m = d.toISOString().slice(0, 7);
+    const inc = getMonthlyIncome(m);
+    if (inc > 0) { total += inc; count++; }
+  }
+  return count > 0 ? total / count : 0;
+}
+
+function getLiquidAssetBalance() {
+  const { ACCOUNT_CLASSIFICATION } = { ACCOUNT_CLASSIFICATION: { checking: "asset", savings: "asset", "credit-card": "liability", cash: "asset", investment: "asset", loan: "liability", mortgage: "liability", other: "asset" } };
+  let total = 0;
+  state.accounts.forEach((a) => {
+    const cls = a.classification || ACCOUNT_CLASSIFICATION[a.type] || "asset";
+    if (cls !== "asset") return;
+    if (["investment", "other"].includes(a.type)) return; // illiquid
+    const opening = a.openingBalance || 0;
+    let credits = 0, debits = 0;
+    state.transactions.forEach((t) => {
+      if (t.deleted) return;
+      if (t.type === "transfer") {
+        if (t.toAccount === a.name) credits += t.amount;
+        if (t.fromAccount === a.name) debits += t.amount;
+      } else if (t.type === "income" && t.toAccount === a.name) {
+        credits += t.amount;
+      } else if (t.type === "expense" && t.fromAccount === a.name) {
+        debits += t.amount;
+      }
+    });
+    total += opening + credits - debits;
+  });
+  return Math.max(total, 0);
+}
+
+function getMonthlyDebtPayments() {
+  const now = new Date();
+  const currentMonth = now.toISOString().slice(0, 7);
+  const debtCategories = ["Credit Card", "EMI", "Personal Loan", "Debt/Loans"];
+  return state.transactions
+    .filter((t) => !t.deleted && t.type === "expense" && t.date && t.date.startsWith(currentMonth) &&
+      (debtCategories.includes(t.category) ||
+       state.accounts.some((a) => ["credit-card", "loan", "mortgage"].includes(a.type) && t.fromAccount === a.name)))
+    .reduce((s, t) => s + (t.homeAmount || t.amount), 0);
+}
+
+function getMonthlyHousingCost() {
+  const now = new Date();
+  const currentMonth = now.toISOString().slice(0, 7);
+  const housingCategories = ["Rent", "Mortgage", "Housing"];
+  return state.transactions
+    .filter((t) => !t.deleted && t.type === "expense" && t.date && t.date.startsWith(currentMonth) &&
+      housingCategories.some((c) => t.category === c || t.category.startsWith(c)))
+    .reduce((s, t) => s + (t.homeAmount || t.amount), 0);
+}
+
+function hasEnoughData() {
+  const months = new Set(state.transactions.filter((t) => !t.deleted).map((t) => t.date ? t.date.slice(0, 7) : ""));
+  months.delete("");
+  return months.size >= 2;
+}
+
+export function renderHealthRatios() {
+  const container = document.getElementById("healthRatiosDashboard");
+  const section = document.getElementById("healthRatiosSection");
+  if (!container || !section) return;
+
+  if (!hasEnoughData()) { section.hidden = true; return; }
+
+  const avgExpense = getAvgMonthlyExpense(3);
+  const avgIncome = getAvgMonthlyIncome(3);
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const currentIncome = getMonthlyIncome(currentMonth) || avgIncome;
+
+  // Emergency Fund
+  const liquidBalance = getLiquidAssetBalance();
+  const emergencyMonths = avgExpense > 0 ? liquidBalance / avgExpense : null;
+
+  // Debt-to-Income
+  const debtPayments = getMonthlyDebtPayments();
+  const dti = currentIncome > 0 ? (debtPayments / currentIncome) * 100 : null;
+
+  // Housing Cost
+  const housing = getMonthlyHousingCost();
+  const housingPct = currentIncome > 0 ? (housing / currentIncome) * 100 : null;
+
+  // Savings Rate
+  const savingsRate = getSavingsRate(currentMonth);
+  const srHasIncome = currentIncome > 0;
+
+  section.hidden = false;
+
+  function ratioCard(label, valueStr, subtext, status, icon) {
+    const cls = status === "good" ? "ratio-good" : status === "warn" ? "ratio-warn" : "ratio-bad";
+    const dot = status === "good" ? "ri-checkbox-circle-fill" : status === "warn" ? "ri-error-warning-fill" : "ri-close-circle-fill";
+    return `<div class="health-ratio-card ${cls}">
+      <span class="ratio-icon"><i class="${icon}"></i></span>
+      <span class="ratio-label">${label}</span>
+      <span class="ratio-value">${valueStr}</span>
+      <span class="ratio-sub">${subtext}</span>
+      <i class="ratio-status-icon ${dot}"></i>
+    </div>`;
+  }
+
+  // Emergency Fund card
+  let efCard;
+  if (emergencyMonths === null || !state.accounts.length) {
+    efCard = ratioCard("Emergency Fund", "—", "Set up accounts to track", "warn", "ri-shield-check-line");
+  } else {
+    const s = emergencyMonths >= 6 ? "good" : emergencyMonths >= 3 ? "warn" : "bad";
+    efCard = ratioCard("Emergency Fund", `${emergencyMonths.toFixed(1)} mo`, `Target ≥ 6 mo · ${formatCurrency(liquidBalance)} liquid`, s, "ri-shield-check-line");
+  }
+
+  // DTI card
+  let dtiCard;
+  if (dti === null) {
+    dtiCard = ratioCard("Debt-to-Income", "—", "No income this month", "warn", "ri-bank-card-line");
+  } else if (debtPayments === 0) {
+    dtiCard = ratioCard("Debt-to-Income", "0%", "No debt payments · Target < 36%", "good", "ri-bank-card-line");
+  } else {
+    const s = dti < 36 ? "good" : dti < 50 ? "warn" : "bad";
+    dtiCard = ratioCard("Debt-to-Income", `${dti.toFixed(1)}%`, `${formatCurrency(debtPayments)}/mo · Target < 36%`, s, "ri-bank-card-line");
+  }
+
+  // Housing card
+  let housingCard;
+  if (housingPct === null) {
+    housingCard = ratioCard("Housing Cost", "—", "No income this month", "warn", "ri-home-4-line");
+  } else if (housing === 0) {
+    housingCard = ratioCard("Housing Cost", "0%", "No housing expense · Target < 30%", "good", "ri-home-4-line");
+  } else {
+    const s = housingPct < 30 ? "good" : housingPct < 40 ? "warn" : "bad";
+    housingCard = ratioCard("Housing Cost", `${housingPct.toFixed(1)}%`, `${formatCurrency(housing)}/mo · Target < 30%`, s, "ri-home-4-line");
+  }
+
+  // Savings Rate card
+  let srCard;
+  if (!srHasIncome) {
+    srCard = ratioCard("Savings Rate", "—", "No income this month", "warn", "ri-seedling-line");
+  } else {
+    const s = savingsRate >= 20 ? "good" : savingsRate >= 10 ? "warn" : "bad";
+    srCard = ratioCard("Savings Rate", `${savingsRate.toFixed(1)}%`, `Target ≥ 20%`, s, "ri-seedling-line");
+  }
+
+  const cards = [efCard, dtiCard, housingCard, srCard];
+  const goodCount = [
+    emergencyMonths !== null && emergencyMonths >= 6,
+    dti !== null && dti < 36,
+    housingPct !== null && housingPct < 30,
+    srHasIncome && savingsRate >= 20,
+  ].filter(Boolean).length;
+
+  container.innerHTML = `
+    <p class="ratio-summary">${goodCount} of 4 ratios healthy</p>
+    <div class="health-ratio-grid">${cards.join("")}</div>`;
+}
+
 // ---- Render Dashboard ----
 
 export function renderSavingsDashboard() {
