@@ -167,7 +167,8 @@ export function updateSummary() {
     $.monthExpenseTrend.innerHTML = `<i class="ri-arrow-${expenseDelta.direction === "up" ? "up" : expenseDelta.direction === "down" ? "down" : "right"}-line"></i> ${sign}${Math.abs(expenseDelta.pct).toFixed(1)}% vs last month`;
     $.monthExpenseTrend.className = `summary-trend ${expenseDelta.direction === "up" ? "negative" : expenseDelta.direction === "down" ? "positive" : "neutral"}`;
   } else {
-    $.monthExpenseTrend.textContent = expense === 0 && prevTotals.expense === 0 ? "—" : "";
+    $.monthExpenseTrend.textContent =
+      expense === 0 && prevTotals.expense === 0 ? "—" : "";
     $.monthExpenseTrend.className = "summary-trend neutral";
   }
 

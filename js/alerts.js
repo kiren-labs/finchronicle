@@ -57,7 +57,9 @@ export function initAlerts() {
     const entries = raw ? JSON.parse(raw) : [];
     snoozedAlerts = new Set(
       Array.isArray(entries)
-        ? entries.filter((k) => typeof k === "string" && k.includes(`:${currentMonth}`))
+        ? entries.filter(
+            (k) => typeof k === "string" && k.includes(`:${currentMonth}`),
+          )
         : [],
     );
     localStorage.setItem(SNOOZE_KEY, JSON.stringify([...snoozedAlerts]));
@@ -551,7 +553,12 @@ export function runAlertChecks(newTransaction = null) {
     const snoozeKey = `${alert.type}:${alert.category}:${
       alert.type === ALERT_TYPES.SAVINGS_RATE_TREND ? quarter : currentMonth
     }`;
-    if (seen.has(key) || dismissedAlerts.has(key) || snoozedAlerts.has(snoozeKey)) continue;
+    if (
+      seen.has(key) ||
+      dismissedAlerts.has(key) ||
+      snoozedAlerts.has(snoozeKey)
+    )
+      continue;
     seen.add(key);
     alert.id = key;
     alert.date = today;

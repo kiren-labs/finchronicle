@@ -436,7 +436,8 @@ function bindStaticEvents() {
   document.addEventListener("click", (e) => {
     if (e.target.closest("#addBudgetBtn")) openBudgetModal();
     const setBudgetBtn = e.target.closest("[data-set-budget]");
-    if (setBudgetBtn) openBudgetModal({ category: setBudgetBtn.dataset.setBudget });
+    if (setBudgetBtn)
+      openBudgetModal({ category: setBudgetBtn.dataset.setBudget });
   });
 
   // ---- Search bar (v3.14.0) ----
