@@ -58,8 +58,6 @@ import {
   updateReportsView,
   switchTab,
   quickAddTransaction,
-  toggleSummaryCollapse,
-  loadSummaryState,
   onSummaryTileClick,
   changeGrouping,
   editTransaction,
@@ -238,14 +236,6 @@ function bindStaticEvents() {
     .getElementById("statusStripToggle")
     ?.addEventListener("click", () => switchTab("home"));
 
-  // ---- Summary section header (collapse) ----
-  document
-    .querySelector(".summary-header")
-    .addEventListener("click", toggleSummaryCollapse);
-  document.querySelector(".collapse-btn").addEventListener("click", (e) => {
-    e.stopPropagation();
-    toggleSummaryCollapse();
-  });
 
   // ---- Summary tile clicks ----
   document.querySelectorAll(".summary-card").forEach((card) => {
@@ -1210,7 +1200,6 @@ async function init() {
     await initAutoBackup();
     checkAppVersion();
     loadDarkMode();
-    loadSummaryState();
     updateCurrencyDisplay();
     loadBackupTimestamp();
     checkInstallPrompt();
