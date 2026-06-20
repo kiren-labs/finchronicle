@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.5.1] — 2026-06-20
+
+### Added
+
+- **Home tab** — dedicated dashboard tab separating the summary/dashboard from the transaction entry form. Add tab is now form-only; Home tab shows all summary cards, budget, net worth, savings, goals, alerts, and settlement sections.
+- **Global Status Strip** — persistent mini-summary bar visible on all tabs (hidden on Settings). Shows current month label, net balance, income, expenses, and entry count at a glance. Strip button navigates to Home tab.
+
+### Fixed
+
+- **Budget vs Actual NaN** — `getBudgetVsActual()` was reading `b.limit` (undefined) instead of `b.monthlyLimit`, causing NaN in the budget table. Fixed.
+- **Ghost card on Home when collapsed** — removed collapsed state from summary header; collapse/expand is no longer needed on the dedicated Home tab.
+
+### Changed
+
+- **Collapse/expand removed from Home tab** — the Home tab is the full dashboard; collapsing it served no purpose. Button and related JS removed.
+- **Bottom nav reordered** — Home | List | Add | Reports | Settings. Add button styled consistently with other nav items (primary blue colour, no elevated pill shape).
+- **Header privacy indicator** — replaced the "Offline" green dot label with a compact shield icon chip, then simplified to no header indicator to avoid crowding the logo on small screens.
+- **Default landing tab** changed from Add to Home.
+
+### Technical
+
+- `state.currentTab` default changed to `"home"`
+- `switchTab()` handles `"home"` case; adds/removes `settings-active` body class to hide strip on Settings
+- `toggleSummaryCollapse()` and `loadSummaryState()` removed from `ui.js` exports and `app.js` init
+- Status strip label updated in `updateSummary()` with short month name
+
 ## [4.5.0] — 2026-06-19
 
 ### Added
