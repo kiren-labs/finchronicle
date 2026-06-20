@@ -2087,7 +2087,7 @@ button.primary.loading .btn-spinner {
   margin-bottom: var(--space-lg);
 }
 
-.insights-header h3 {
+.insights-header .insights-overview-label {
   font-size: var(--font-lg);
   font-weight: 600;
   color: var(--color-text);
@@ -2225,7 +2225,7 @@ button.primary.loading .btn-spinner {
   color: var(--color-primary);
 }
 
-.budget-health-title h3 {
+.budget-health-title .budget-health-heading {
   font-size: var(--font-md);
   font-weight: 600;
   color: var(--color-text);
@@ -2315,7 +2315,7 @@ button.primary.loading .btn-spinner {
   box-shadow: var(--shadow-sm);
 }
 
-.section-header h3 {
+.section-header .top-categories-heading {
   font-size: var(--font-lg);
   font-weight: 600;
   color: var(--color-text);

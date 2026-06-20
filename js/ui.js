@@ -1248,7 +1248,7 @@ export function renderMonthlyInsights() {
   const summaryHTML = `
         <div class="insights-section">
             <div class="insights-header">
-          <h3 id="insightsOverviewLabel">Monthly overview</h3>
+          <p id="insightsOverviewLabel" class="insights-overview-label">Monthly overview</p>
                 <label for="insightsMonthSelector" class="sr-only">Select month for insights</label>
                 <select id="insightsMonthSelector" class="insights-month-selector" aria-labelledby="insightsOverviewLabel" aria-label="Select month to view financial insights">
                     ${monthOptions}
@@ -1311,7 +1311,7 @@ export function renderMonthlyInsights() {
                 <div class="budget-health-header">
                     <div class="budget-health-title">
                         <i class="ri-pulse-line"></i>
-                    <h3>Budget health</h3>
+                    <p class="budget-health-heading">Budget health</p>
                     </div>
                     <div class="budget-health-status ${statusClass}">
                         <i class="ri-${budgetHealth.statusIcon}"></i>
@@ -1359,7 +1359,7 @@ export function renderMonthlyInsights() {
     categoriesHTML = `
             <div class="top-categories-section">
                 <div class="section-header">
-            <h3>Top spending categories</h3>
+            <p class="top-categories-heading">Top spending categories</p>
                 </div>
                 <div class="category-list">
                     ${categoryRows}

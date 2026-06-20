@@ -931,3 +931,17 @@ body.dark-mode .segue-panel-header {
 body.dark-mode .health-ratio-card {
   background: var(--color-surface);
 }
+
+/* Savings income prompt — primary color in dark mode is too dark; use strong variant */
+body.dark-mode .savings-income-prompt-btn {
+  color: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
+}
+body.dark-mode .savings-income-prompt-btn:hover {
+  background: var(--color-primary-soft);
+}
+
+/* Bottom nav Add button — same reason: primary (#0053ad) is unreadable on dark surface */
+body.dark-mode .nav-item-add {
+  color: var(--color-primary-strong);
+}
