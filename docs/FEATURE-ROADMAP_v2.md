@@ -787,9 +787,9 @@ Last significant data-capture gap. Storage-first constraints apply.
 | v4.2.0  | Backup & Restore Overhaul — full envelope, UI consolidation, merge/replace | 12         | HIGH     | ✅ Shipped |
 | v4.2.1  | Copy & language overhaul — plain-English errors, jargon removal, i18n      | 12         | HIGH     | ✅ Shipped |
 | v4.3.0  | App Lock — PIN + biometric (WebAuthn), auto-lock, lock-now button          | 12         | HIGH     | ✅ Shipped |
-| v4.4.0  | Actionable Spending Insights — `suggestion` field on every alert           | 12         | HIGH     | Planned    |
-| v4.5.0  | Budget vs Actual Report — consolidated variance table                      | 12         | HIGH     | Planned    |
-| v4.6.0  | Financial Health Ratios (emergency fund, debt-to-income, housing cost)     | 12         | HIGH     | Planned    |
+| v4.4.0  | Actionable Spending Insights — `suggestion` field on every alert           | 12         | HIGH     | ✅ Shipped |
+| v4.5.0  | Budget vs Actual Report — consolidated variance table                      | 12         | HIGH     | ✅ Shipped |
+| v4.6.0  | Financial Health Ratios (emergency fund, debt-to-income, housing cost)     | 12         | HIGH     | ✅ Shipped |
 | v4.7.0  | Subscription Tracker                                                       | 12         | MEDIUM   | Planned    |
 | v4.8.0  | Duplicate Transaction Detection                                            | 12         | MEDIUM   | Planned    |
 | v4.9.0  | Bank Statement CSV Importer                                                | 12         | MEDIUM   | Planned    |
