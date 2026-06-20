@@ -242,23 +242,29 @@ function bindStaticEvents() {
     ?.addEventListener("click", () => switchTab("home"));
 
   // ---- Grouped View segue panel ----
-  document.getElementById("openGroupedViewBtn")?.addEventListener("click", () => {
-    const panel = document.getElementById("groupedViewPanel");
-    if (panel) {
-      panel.classList.add("open");
-      panel.setAttribute("aria-hidden", "false");
-      updateGroupedView();
-    }
-  });
-  document.getElementById("closeGroupedViewBtn")?.addEventListener("click", () => {
-    const panel = document.getElementById("groupedViewPanel");
-    if (panel) {
-      panel.classList.remove("open");
-      panel.setAttribute("aria-hidden", "true");
-    }
-  });
+  document
+    .getElementById("openGroupedViewBtn")
+    ?.addEventListener("click", () => {
+      const panel = document.getElementById("groupedViewPanel");
+      if (panel) {
+        panel.classList.add("open");
+        panel.setAttribute("aria-hidden", "false");
+        updateGroupedView();
+      }
+    });
+  document
+    .getElementById("closeGroupedViewBtn")
+    ?.addEventListener("click", () => {
+      const panel = document.getElementById("groupedViewPanel");
+      if (panel) {
+        panel.classList.remove("open");
+        panel.setAttribute("aria-hidden", "true");
+      }
+    });
   document.querySelectorAll("#groupedViewPanel .filter-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => changeGrouping(e.target.dataset.group, e));
+    btn.addEventListener("click", (e) =>
+      changeGrouping(e.target.dataset.group, e),
+    );
   });
 
   // ---- Summary tile clicks ----

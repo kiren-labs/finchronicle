@@ -11,327 +11,352 @@
 /* === Layout ================================================================ */
 
 .category-chart {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: var(--space-2xl);
-    align-items: center;
-    padding: var(--space-xl);
-    background: var(--color-surface);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-    margin-bottom: var(--space-xl);
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: var(--space-2xl);
+  align-items: center;
+  padding: var(--space-xl);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-xl);
 }
 
 /* Empty state spans both columns */
 .category-chart:has(.chart-empty) {
-    grid-template-columns: 1fr;
+  grid-template-columns: 1fr;
 }
 
 /* === Donut wrapper ========================================================= */
 
 .chart-donut-wrapper {
-    position: relative;
-    width: 180px;
-    height: 180px;
-    flex-shrink: 0;
-    margin: auto;
+  position: relative;
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+  margin: auto;
 }
 
 /* Outer compass tick ring — 12 marks via repeating-conic + mask */
 .chart-donut-wrapper::before {
-    content: '';
-    position: absolute;
-    inset: -10px;
-    border-radius: 50%;
-    background: repeating-conic-gradient(
-        from 0deg,
-        transparent 0deg 28deg,
-        var(--color-border) 28deg 30deg
-    );
-    -webkit-mask-image: radial-gradient(
-        farthest-side,
-        transparent calc(100% - 7px),
-        #000 calc(100% - 7px)
-    );
-    mask-image: radial-gradient(
-        farthest-side,
-        transparent calc(100% - 7px),
-        #000 calc(100% - 7px)
-    );
-    opacity: 0;
-    animation: tick-appear 0.35s 0.55s ease forwards;
-    pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    transparent 0deg 28deg,
+    var(--color-border) 28deg 30deg
+  );
+  -webkit-mask-image: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 7px),
+    #000 calc(100% - 7px)
+  );
+  mask-image: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 7px),
+    #000 calc(100% - 7px)
+  );
+  opacity: 0;
+  animation: tick-appear 0.35s 0.55s ease forwards;
+  pointer-events: none;
 }
 
 @keyframes tick-appear {
-    to { opacity: 0.45; }
+  to {
+    opacity: 0.45;
+  }
 }
 
 /* === Donut ring ============================================================ */
 
 .chart-donut {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
 
-    /* background-color shows through transparent gaps — adapts via dark-mode token */
-    background-color: var(--color-surface);
-    transition: background-color var(--transition-fast);
+  /* background-color shows through transparent gaps — adapts via dark-mode token */
+  background-color: var(--color-surface);
+  transition: background-color var(--transition-fast);
 
-    /* background-image is set by JS: donut.style.backgroundImage = conic-gradient(...) */
+  /* background-image is set by JS: donut.style.backgroundImage = conic-gradient(...) */
 
-    /* Start from 12 o'clock */
-    transform: rotate(-90deg);
-    animation: donut-bloom 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  /* Start from 12 o'clock */
+  transform: rotate(-90deg);
+  animation: donut-bloom 0.6s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 }
 
 @keyframes donut-bloom {
-    from {
-        transform: rotate(-90deg) scale(0.8);
-        opacity: 0;
-        filter: blur(1px);
-    }
-    to {
-        transform: rotate(-90deg) scale(1);
-        opacity: 1;
-        filter: blur(0);
-    }
+  from {
+    transform: rotate(-90deg) scale(0.8);
+    opacity: 0;
+    filter: blur(1px);
+  }
+  to {
+    transform: rotate(-90deg) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
 }
 
 /* Donut hole — surface-coloured circle punched through the centre */
 .chart-donut::after {
-    content: '';
-    position: absolute;
-    inset: 28%;
-    border-radius: 50%;
-    background: var(--color-surface);
-    transition: background var(--transition-fast);
-    z-index: 1;
+  content: "";
+  position: absolute;
+  inset: 28%;
+  border-radius: 50%;
+  background: var(--color-surface);
+  transition: background var(--transition-fast);
+  z-index: 1;
 }
 
 /* === Centre display ======================================================== */
 
 .chart-center-info {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-    pointer-events: none;
-    /* constrain text to the visible hole (~80px) */
-    padding: 32%;
-    box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+  /* constrain text to the visible hole (~80px) */
+  padding: 32%;
+  box-sizing: border-box;
 }
 
 .chart-center-amount {
-    font-size: var(--font-md);
-    font-weight: 700;
-    color: var(--color-text);
-    letter-spacing: -0.3px;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    text-align: center;
-    white-space: nowrap;
-    transition: color var(--transition-fast);
-    animation: center-appear 0.3s 0.6s ease both;
+  font-size: var(--font-md);
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.3px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+  animation: center-appear 0.3s 0.6s ease both;
 }
 
 .chart-center-label {
-    font-size: 9px;
-    font-weight: 500;
-    color: var(--color-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    margin-top: 3px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    transition: color var(--transition-fast);
-    animation: center-appear 0.3s 0.7s ease both;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-top: 3px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: color var(--transition-fast);
+  animation: center-appear 0.3s 0.7s ease both;
 }
 
 @keyframes center-appear {
-    from { opacity: 0; transform: scale(0.85); }
-    to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* === Legend ================================================================ */
 
 .chart-legend {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    max-height: 256px;
-    overflow-y: auto;
-    /* subtle scrollbar */
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-border) transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 256px;
+  overflow-y: auto;
+  /* subtle scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
 }
 
-.chart-legend::-webkit-scrollbar        { width: 3px; }
-.chart-legend::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: 2px; }
-.chart-legend::-webkit-scrollbar-track  { background: transparent; }
+.chart-legend::-webkit-scrollbar {
+  width: 3px;
+}
+.chart-legend::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+.chart-legend::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 /* Dim all siblings while any one row is hovered */
 .chart-legend:has(.legend-item:hover) .legend-item:not(:hover) {
-    opacity: 0.22;
+  opacity: 0.22;
 }
 
 .legend-item {
-    display: grid;
-    grid-template-columns: 8px 1fr auto auto;
-    align-items: center;
-    gap: var(--space-sm);
-    /* bottom padding leaves room for the micro-bar */
-    padding: 5px var(--space-sm) 10px var(--space-sm);
-    border-radius: var(--radius-sm);
-    position: relative;
-    overflow: hidden;
-    cursor: default;
-    transition:
-        opacity    var(--transition-fast),
-        background var(--transition-fast);
-    /* staggered entrance — delay set by JS via --legend-delay */
-    animation: legend-enter 0.35s ease both;
-    animation-delay: var(--legend-delay, 0s);
+  display: grid;
+  grid-template-columns: 8px 1fr auto auto;
+  align-items: center;
+  gap: var(--space-sm);
+  /* bottom padding leaves room for the micro-bar */
+  padding: 5px var(--space-sm) 10px var(--space-sm);
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition:
+    opacity var(--transition-fast),
+    background var(--transition-fast);
+  /* staggered entrance — delay set by JS via --legend-delay */
+  animation: legend-enter 0.35s ease both;
+  animation-delay: var(--legend-delay, 0s);
 }
 
 @keyframes legend-enter {
-    from { opacity: 0; transform: translateX(-7px); }
-    to   { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .legend-item:hover {
-    background: var(--color-bg);
+  background: var(--color-bg);
 }
 
 /* Coloured swatch */
 .legend-swatch {
-    width: 8px;
-    height: 8px;
-    border-radius: 2px;
-    background: var(--item-color, var(--color-text-muted));
-    flex-shrink: 0;
-    transition: transform var(--transition-fast);
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--item-color, var(--color-text-muted));
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
 }
 
 .legend-item:hover .legend-swatch {
-    transform: scale(1.55);
+  transform: scale(1.55);
 }
 
 /* Category name */
 .legend-name {
-    font-size: var(--font-sm);
-    font-weight: 500;
-    color: var(--color-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 /* Percentage — uses text color for WCAG AA contrast (swatch encodes the category color) */
 .legend-pct {
-    font-size: var(--font-sm);
-    font-weight: 700;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    text-align: right;
-    white-space: nowrap;
+  font-size: var(--font-sm);
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
 }
 
 /* Amount */
 .legend-amt {
-    font-size: var(--font-sm);
-    color: var(--color-text-muted);
-    font-variant-numeric: tabular-nums;
-    text-align: right;
-    white-space: nowrap;
-    min-width: 52px;
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+  min-width: 52px;
 }
 
 /* Micro progress bar — pinned to bottom of each row */
 .legend-bar {
-    position: absolute;
-    bottom: 2px;
-    left: var(--space-sm);
-    right: var(--space-sm);
-    height: 1.5px;
-    background: var(--color-border);
-    border-radius: 1px;
-    overflow: hidden;
+  position: absolute;
+  bottom: 2px;
+  left: var(--space-sm);
+  right: var(--space-sm);
+  height: 1.5px;
+  background: var(--color-border);
+  border-radius: 1px;
+  overflow: hidden;
 }
 
 .legend-bar-fill {
-    height: 100%;
-    width: var(--item-pct, 0%);
-    background: var(--item-color, var(--color-text-muted));
-    border-radius: 1px;
-    transform-origin: left;
-    transform: scaleX(0);
-    /* delay = legend-delay + 0.25s so bars arrive after rows */
-    animation: bar-grow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    animation-delay: calc(var(--legend-delay, 0s) + 0.25s);
+  height: 100%;
+  width: var(--item-pct, 0%);
+  background: var(--item-color, var(--color-text-muted));
+  border-radius: 1px;
+  transform-origin: left;
+  transform: scaleX(0);
+  /* delay = legend-delay + 0.25s so bars arrive after rows */
+  animation: bar-grow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--legend-delay, 0s) + 0.25s);
 }
 
 @keyframes bar-grow {
-    from { transform: scaleX(0); }
-    to   { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 /* === Empty / no-data state ================================================= */
 
 .chart-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-3xl) var(--space-xl);
-    color: var(--color-text-muted);
-    gap: var(--space-sm);
-    font-size: var(--font-md);
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl) var(--space-xl);
+  color: var(--color-text-muted);
+  gap: var(--space-sm);
+  font-size: var(--font-md);
+  width: 100%;
 }
 
 .chart-empty i {
-    font-size: 36px;
-    opacity: 0.2;
-    display: block;
+  font-size: 36px;
+  opacity: 0.2;
+  display: block;
 }
 
 /* === Section header (optional title above chart) =========================== */
 
 .chart-section-title {
-    font-size: var(--font-sm);
-    font-weight: 600;
-    color: var(--color-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    margin-bottom: var(--space-md);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: var(--space-md);
 }
 
 /* === Responsive ============================================================ */
 
 @media (max-width: 480px) {
-    .category-chart {
-        grid-template-columns: 1fr;
-        gap: var(--space-lg);
-        padding: var(--space-lg);
-    }
+  .category-chart {
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+  }
 
-    .chart-donut-wrapper {
-        width: 160px;
-        height: 160px;
-    }
+  .chart-donut-wrapper {
+    width: 160px;
+    height: 160px;
+  }
 
-    .chart-legend {
-        max-height: 200px;
-    }
+  .chart-legend {
+    max-height: 200px;
+  }
 }
 
 /* =============================================================================
@@ -347,7 +372,6 @@
  *   --chart-c8: #8E8E93;   slate   — Misc / Other
  * ============================================================================= */
 
-
 /* =============================================================================
  * v3.12.0 — Reports: range selector, bar chart, weekly chart, day heatmap
  * ============================================================================= */
@@ -357,261 +381,298 @@
 .bar-chart-card,
 .weekly-chart-card,
 .day-heatmap-card {
-    background: var(--color-surface);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-    padding: var(--space-xl);
-    margin-bottom: var(--space-xl);
-    transition: background var(--transition-fast), border-color var(--transition-fast);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 /* === Chart date range selector ============================================= */
 
 .chart-range-bar {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
 }
 
 .chart-range-label {
-    font-size: var(--font-sm);
-    font-weight: 500;
-    color: var(--color-text-muted);
-    white-space: nowrap;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 .range-pills {
-    display: flex;
-    gap: 4px;
+  display: flex;
+  gap: 4px;
 }
 
 .range-date-span {
-    margin-left: auto;
-    font-size: var(--font-sm);
-    color: var(--color-text-muted);
-    white-space: nowrap;
-    align-self: center;
-    font-variant-numeric: tabular-nums;
+  margin-left: auto;
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  align-self: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .range-pill {
-    font-size: var(--font-sm);
-    font-weight: 600;
-    color: var(--color-text-muted);
-    background: transparent;
-    border: 1.5px solid var(--color-border);
-    border-radius: 20px;
-    padding: 4px 12px;
-    cursor: pointer;
-    transition:
-        color var(--transition-fast),
-        background var(--transition-fast),
-        border-color var(--transition-fast);
-    line-height: 1.4;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+  line-height: 1.4;
 }
 
 .range-pill:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .range-pill.active {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: var(--color-on-primary);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
 /* === Small empty state (for new charts) ==================================== */
 
 .chart-empty-sm {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    padding: var(--space-2xl) var(--space-xl);
-    color: var(--color-text-muted);
-    font-size: var(--font-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xl) var(--space-xl);
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
 }
 
 .chart-empty-sm i {
-    font-size: 20px;
-    opacity: 0.35;
-    flex-shrink: 0;
+  font-size: 20px;
+  opacity: 0.35;
+  flex-shrink: 0;
 }
 
 /* === Income vs Expenses bar chart ========================================= */
 
 .bar-chart {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
 .bar-cols {
-    display: flex;
-    align-items: flex-end;
-    gap: var(--space-sm);
-    height: 120px;
-    padding-bottom: var(--space-xs);
-    border-bottom: 1px solid var(--color-border);
-    overflow-x: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-border) transparent;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  height: 120px;
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
 }
 
-.bar-cols::-webkit-scrollbar       { height: 3px; }
-.bar-cols::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
-.bar-cols::-webkit-scrollbar-track { background: transparent; }
+.bar-cols::-webkit-scrollbar {
+  height: 3px;
+}
+.bar-cols::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+.bar-cols::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 .bar-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-xs);
-    flex: 1;
-    min-width: 36px;
-    animation: col-enter 0.35s ease both;
-    animation-delay: var(--bar-delay, 0s);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  flex: 1;
+  min-width: 36px;
+  animation: col-enter 0.35s ease both;
+  animation-delay: var(--bar-delay, 0s);
 }
 
 @keyframes col-enter {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .bar-group {
-    display: flex;
-    align-items: flex-end;
-    gap: 2px;
-    height: 100px;
-    width: 100%;
-    justify-content: center;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 100px;
+  width: 100%;
+  justify-content: center;
 }
 
 .bar {
-    flex: 1;
-    max-width: 14px;
-    min-height: 2px;
-    height: var(--bar-h, 0%);
-    border-radius: 3px 3px 0 0;
-    transform-origin: bottom;
-    animation: bar-rise 0.55s cubic-bezier(0.34, 1.3, 0.64, 1) both;
-    animation-delay: var(--bar-delay, 0s);
+  flex: 1;
+  max-width: 14px;
+  min-height: 2px;
+  height: var(--bar-h, 0%);
+  border-radius: 3px 3px 0 0;
+  transform-origin: bottom;
+  animation: bar-rise 0.55s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+  animation-delay: var(--bar-delay, 0s);
 }
 
 @keyframes bar-rise {
-    from { transform: scaleY(0); }
-    to   { transform: scaleY(1); }
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
 }
 
-.bar.income-bar  { background: var(--color-success); }
-.bar.expense-bar { background: var(--color-danger); }
+.bar.income-bar {
+  background: var(--color-success);
+}
+.bar.expense-bar {
+  background: var(--color-danger);
+}
 
 .bar-month-label {
-    font-size: 10px;
-    color: var(--color-text-muted);
-    white-space: nowrap;
-    text-align: center;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  text-align: center;
 }
 
 .bar-net-label {
-    font-size: 9px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    text-align: center;
-    letter-spacing: -0.2px;
+  font-size: 9px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: center;
+  letter-spacing: -0.2px;
 }
 
 /* -strong variants are dark enough for WCAG AA on light bg (≥4.5:1)
    dark-mode.css remaps them to bright values that pass on dark surfaces */
-.bar-net-label.positive { color: var(--color-success-strong); }
-.bar-net-label.negative { color: var(--color-danger-strong); }
+.bar-net-label.positive {
+  color: var(--color-success-strong);
+}
+.bar-net-label.negative {
+  color: var(--color-danger-strong);
+}
 
 .bar-chart-legend {
-    display: flex;
-    align-items: center;
-    gap: var(--space-lg);
-    font-size: var(--font-sm);
-    color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
 }
 
 .bar-legend-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 2px;
-    margin-right: 4px;
-    vertical-align: middle;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
 }
 
-.bar-legend-dot.income-dot  { background: var(--color-success); }
-.bar-legend-dot.expense-dot { background: var(--color-danger); }
+.bar-legend-dot.income-dot {
+  background: var(--color-success);
+}
+.bar-legend-dot.expense-dot {
+  background: var(--color-danger);
+}
 
 /* === Weekly spending chart ================================================= */
 
 .weekly-chart {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
 .week-row {
-    display: grid;
-    grid-template-columns: 90px 1fr auto auto;
-    align-items: center;
-    gap: var(--space-md);
-    animation: legend-enter 0.35s ease both;
-    animation-delay: var(--week-delay, 0s);
+  display: grid;
+  grid-template-columns: 90px 1fr auto auto;
+  align-items: center;
+  gap: var(--space-md);
+  animation: legend-enter 0.35s ease both;
+  animation-delay: var(--week-delay, 0s);
 }
 
 .week-label {
-    font-size: var(--font-sm);
-    color: var(--color-text-muted);
-    white-space: nowrap;
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 .week-bar-track {
-    height: 6px;
-    background: var(--color-bg);
-    border-radius: 3px;
-    overflow: hidden;
+  height: 6px;
+  background: var(--color-bg);
+  border-radius: 3px;
+  overflow: hidden;
 }
 
 .week-bar-fill {
-    height: 100%;
-    width: var(--week-w, 0%);
-    background: var(--color-primary);
-    border-radius: 3px;
-    transform-origin: left;
-    transform: scaleX(0);
-    animation: bar-grow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-    animation-delay: calc(var(--week-delay, 0s) + 0.15s);
+  height: 100%;
+  width: var(--week-w, 0%);
+  background: var(--color-primary);
+  border-radius: 3px;
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: bar-grow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--week-delay, 0s) + 0.15s);
 }
 
 .week-amount {
-    font-size: var(--font-sm);
-    font-weight: 600;
-    color: var(--color-text);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    min-width: 52px;
-    text-align: right;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  min-width: 52px;
+  text-align: right;
 }
 
 .week-trend {
-    font-size: 11px;
-    font-weight: 600;
-    min-width: 40px;
-    text-align: right;
-    white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: right;
+  white-space: nowrap;
 }
 
-.week-trend.up   { color: var(--color-danger-strong); }
-.week-trend.down { color: var(--color-success-strong); }
-.week-trend.same { color: var(--color-text-muted); }
+.week-trend.up {
+  color: var(--color-danger-strong);
+}
+.week-trend.down {
+  color: var(--color-success-strong);
+}
+.week-trend.same {
+  color: var(--color-text-muted);
+}
 
 /* === Day-of-month heatmap ================================================== */
 
@@ -621,107 +682,110 @@
  * Dark:  rgb 255, 80, 68  (override via dark-mode.css token --chart-heat)
  */
 .day-heatmap {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
 .heatmap-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
 }
 
 .heatmap-cell {
-    height: 32px;
-    border-radius: var(--radius-sm);
-    background: var(--color-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: default;
-    transition: transform var(--transition-fast);
-    border: 1px solid var(--color-border);
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  transition: transform var(--transition-fast);
+  border: 1px solid var(--color-border);
 }
 
 .heatmap-cell.active {
-    background: rgba(var(--chart-heat), calc(0.15 + var(--cell-intensity, 0) * 0.80));
-    border-color: transparent;
+  background: rgba(
+    var(--chart-heat),
+    calc(0.15 + var(--cell-intensity, 0) * 0.8)
+  );
+  border-color: transparent;
 }
 
 .heatmap-cell:hover {
-    transform: scale(1.15);
-    z-index: 1;
-    position: relative;
+  transform: scale(1.15);
+  z-index: 1;
+  position: relative;
 }
 
 .heatmap-day {
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--color-text-muted);
-    pointer-events: none;
-    line-height: 1;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  line-height: 1;
 }
 
 .heatmap-cell.active .heatmap-day {
-    color: var(--color-text);
+  color: var(--color-text);
 }
 
 .heatmap-legend {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    font-size: 11px;
-    color: var(--color-text-muted);
-    justify-content: flex-end;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  justify-content: flex-end;
 }
 
 .heatmap-legend-scale {
-    width: 64px;
-    height: 4px;
-    border-radius: 2px;
-    background: linear-gradient(
-        to right,
-        rgba(var(--chart-heat), 0.12),
-        rgba(var(--chart-heat), 0.90)
-    );
+  width: 64px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(var(--chart-heat), 0.12),
+    rgba(var(--chart-heat), 0.9)
+  );
 }
 
 /* === Responsive ============================================================ */
 
 @media (max-width: 400px) {
-    .range-date-span {
-        display: none;
-    }
+  .range-date-span {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
-    .bar-chart-card,
-    .weekly-chart-card,
-    .day-heatmap-card {
-        padding: var(--space-lg);
-    }
+  .bar-chart-card,
+  .weekly-chart-card,
+  .day-heatmap-card {
+    padding: var(--space-lg);
+  }
 
-    .bar-cols {
-        height: 100px;
-        gap: var(--space-xs);
-    }
+  .bar-cols {
+    height: 100px;
+    gap: var(--space-xs);
+  }
 
-    .bar-group {
-        height: 80px;
-    }
+  .bar-group {
+    height: 80px;
+  }
 
-    .week-row {
-        grid-template-columns: 76px 1fr auto auto;
-        gap: var(--space-sm);
-    }
+  .week-row {
+    grid-template-columns: 76px 1fr auto auto;
+    gap: var(--space-sm);
+  }
 
-    .heatmap-grid {
-        grid-template-columns: repeat(7, 1fr);
-        gap: 3px;
-    }
+  .heatmap-grid {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
 
-    .heatmap-cell {
-        height: 28px;
-    }
+  .heatmap-cell {
+    height: 28px;
+  }
 }
