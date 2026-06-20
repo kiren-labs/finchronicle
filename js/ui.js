@@ -170,6 +170,22 @@ export function updateSummary() {
   $.compactEntries.textContent = count;
   $.compactIncome.textContent = formatCurrency(income);
   $.compactExpense.textContent = formatCurrency(expense);
+
+  // Update status strip label (short month name)
+  const stripLabel = document.getElementById("statusStripLabel");
+  if (stripLabel) {
+    if (state.selectedMonth === "all") {
+      stripLabel.textContent = "All";
+    } else {
+      const [y, m] = state.selectedMonth
+        ? state.selectedMonth.split("-")
+        : activeMonth.split("-");
+      stripLabel.textContent = new Date(
+        parseInt(y),
+        parseInt(m) - 1,
+      ).toLocaleDateString("en-US", { month: "short" });
+    }
+  }
 }
 
 // ---- Transaction List (P3: DocumentFragment rendering) ----
@@ -715,6 +731,18 @@ export function switchTab(tab) {
     .querySelectorAll(".tab-content")
     .forEach((t) => t.classList.remove("active"));
   document.getElementById(`${tab}Tab`).classList.add("active");
+
+  // Toggle settings-active class on body (hides status strip on settings tab)
+  document.body.classList.toggle("settings-active", tab === "settings");
+
+  // Update status strip button icon: grid icon on non-home tabs, check icon on home
+  const stripBtn = document.getElementById("statusStripToggle");
+  if (stripBtn) {
+    const icon = stripBtn.querySelector("i");
+    if (icon) {
+      icon.className = tab === "home" ? "ri-check-line" : "ri-layout-grid-line";
+    }
+  }
 
   // Refresh the newly visible tab's content (P1: lazy-render)
   switch (tab) {

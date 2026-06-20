@@ -366,6 +366,26 @@
         <button>Dismiss</button>
       </div>
 
+      <!-- Global Status Strip (visible on all tabs) -->
+      <div id="statusStrip" class="status-strip">
+        <div class="status-strip-inner">
+          <i class="ri-bar-chart-2-line status-strip-icon"></i>
+          <span class="status-strip-label" id="statusStripLabel">Jun</span>
+          <span class="status-strip-sep">•</span>
+          <span class="compact-stat" id="compactNet">฿0</span>
+          <span class="status-strip-sep">•</span>
+          <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i><span id="compactIncome">฿0</span></span>
+          <span class="status-strip-sep">•</span>
+          <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i><span id="compactExpense">฿0</span></span>
+          <span class="status-strip-sep">•</span>
+          <span class="compact-stat-small"><i class="ri-file-list-line"></i><span id="compactEntries">0</span></span>
+          <span id="budgetAlertBadge" class="budget-alert-badge" hidden></span>
+        </div>
+        <button class="status-strip-btn" id="statusStripToggle" aria-label="View dashboard">
+          <i class="ri-layout-grid-line"></i>
+        </button>
+      </div>
+
       <!-- Home Tab -->
       <div id="homeTab" class="tab-content active" role="tabpanel" aria-labelledby="home-nav">
       <!-- Summary Cards -->
@@ -373,22 +393,8 @@
         <div class="summary-header">
           <div class="summary-header-content">
             <h2 class="summary-title">
-              <i class="ri-bar-chart-2-line summary-title-icon"></i>
               <span id="summaryMonthLabel">Summary</span>
             </h2>
-            <div class="summary-compact" id="summaryCompact">
-              <span class="compact-stat" id="compactNet">฿0</span>
-              <span class="compact-separator">•</span>
-              <span class="compact-stat-small"><i class="ri-file-list-line"></i>
-                <span id="compactEntries">0</span></span>
-              <span class="compact-separator">•</span>
-              <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i>
-                <span id="compactIncome">฿0</span></span>
-              <span class="compact-separator">•</span>
-              <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i>
-                <span id="compactExpense">฿0</span></span>
-              <span id="budgetAlertBadge" class="budget-alert-badge" hidden></span>
-            </div>
           </div>
           <button class="collapse-btn" aria-label="Toggle Summary">
             <i class="ri-arrow-up-s-line" id="summaryCollapseIcon"></i>

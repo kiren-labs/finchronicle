@@ -233,6 +233,11 @@ function bindStaticEvents() {
     .querySelector("#installPrompt button")
     .addEventListener("click", hideInstallPrompt);
 
+  // ---- Status strip button: navigate to Home ----
+  document
+    .getElementById("statusStripToggle")
+    ?.addEventListener("click", () => switchTab("home"));
+
   // ---- Summary section header (collapse) ----
   document
     .querySelector(".summary-header")
