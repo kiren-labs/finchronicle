@@ -59,9 +59,6 @@ export function updateUI() {
     case "reports":
       updateReportsView();
       break;
-    case "groups":
-      updateGroupedView();
-      break;
     case "settings":
       updateSettingsContent();
       break;
@@ -839,7 +836,7 @@ export function onSummaryTileClick(tileType) {
 export function changeGrouping(type, event) {
   state.currentGrouping = type;
 
-  document.querySelectorAll("#groupsTab .filter-btn").forEach((btn) => {
+  document.querySelectorAll("#groupedViewPanel .filter-btn").forEach((btn) => {
     btn.classList.remove("active");
   });
   if (event && event.target) {

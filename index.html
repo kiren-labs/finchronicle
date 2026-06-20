@@ -861,15 +861,31 @@
           </div>
           <div id="forecast-content"></div>
         </div>
+
+        <!-- Grouped View Entry Button -->
+        <button class="grouped-view-entry-btn" id="openGroupedViewBtn" type="button">
+          <i class="ri-list-ordered"></i>
+          <span>Grouped View</span>
+          <i class="ri-arrow-right-s-line grouped-view-chevron"></i>
+        </button>
       </div>
 
-      <!-- Groups Tab -->
-      <div id="groupsTab" class="tab-content" role="tabpanel" aria-labelledby="groups-tab">
-        <div class="filters">
-          <button class="filter-btn active">By Month</button>
-          <button class="filter-btn">By Category</button>
+      <!-- Grouped View Segue Panel -->
+      <div id="groupedViewPanel" class="segue-panel" aria-hidden="true">
+        <div class="segue-panel-header">
+          <button class="segue-back-btn" id="closeGroupedViewBtn" type="button" aria-label="Back to Reports">
+            <i class="ri-arrow-left-s-line"></i>
+            <span>Reports</span>
+          </button>
+          <span class="segue-panel-title">Grouped View</span>
         </div>
-        <div id="groupedContent"></div>
+        <div class="segue-panel-body">
+          <div class="filters">
+            <button class="filter-btn active" data-group="month">By Month</button>
+            <button class="filter-btn" data-group="category">By Category</button>
+          </div>
+          <div id="groupedContent"></div>
+        </div>
       </div>
 
       <!-- Settings Tab -->

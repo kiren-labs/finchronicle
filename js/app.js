@@ -63,6 +63,7 @@ import {
   switchTab,
   quickAddTransaction,
   onSummaryTileClick,
+  updateGroupedView,
   changeGrouping,
   editTransaction,
   deleteTransaction,
@@ -240,6 +241,26 @@ function bindStaticEvents() {
     .getElementById("statusStripToggle")
     ?.addEventListener("click", () => switchTab("home"));
 
+  // ---- Grouped View segue panel ----
+  document.getElementById("openGroupedViewBtn")?.addEventListener("click", () => {
+    const panel = document.getElementById("groupedViewPanel");
+    if (panel) {
+      panel.classList.add("open");
+      panel.setAttribute("aria-hidden", "false");
+      updateGroupedView();
+    }
+  });
+  document.getElementById("closeGroupedViewBtn")?.addEventListener("click", () => {
+    const panel = document.getElementById("groupedViewPanel");
+    if (panel) {
+      panel.classList.remove("open");
+      panel.setAttribute("aria-hidden", "true");
+    }
+  });
+  document.querySelectorAll("#groupedViewPanel .filter-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => changeGrouping(e.target.dataset.group, e));
+  });
+
   // ---- Summary tile clicks ----
   document.querySelectorAll(".summary-card").forEach((card) => {
     const label = card.getAttribute("aria-label") || "";
@@ -268,7 +289,7 @@ function bindStaticEvents() {
     .addEventListener("click", closeCurrencySelector);
 
   // ---- Tab navigation (top tabs + bottom nav) ----
-  ["home", "add", "list", "reports", "groups", "settings"].forEach((tab) => {
+  ["home", "add", "list", "reports", "settings"].forEach((tab) => {
     const topTab = document.getElementById(`${tab}-tab`);
     if (topTab) topTab.addEventListener("click", () => switchTab(tab));
 

@@ -890,3 +890,18 @@ body.dark-mode .bva-warn td {
   background: var(--color-warning-bg);
   color: var(--color-warning-text);
 }
+
+body.dark-mode .grouped-view-entry-btn {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+body.dark-mode .grouped-view-entry-btn:hover {
+  background: var(--color-bg);
+}
+body.dark-mode .segue-panel {
+  background: var(--color-bg);
+}
+body.dark-mode .segue-panel-header {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
