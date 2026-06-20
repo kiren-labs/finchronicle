@@ -1,124 +1,130 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Generate PNG Icons - FinChronicle</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #f5f5f7;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #0051D5;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            color: #6e6e73;
-            margin-bottom: 30px;
-        }
-        button {
-            background: #0051D5;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 10px 5px;
-        }
-        button:hover {
-            opacity: 0.9;
-        }
-        .preview {
-            margin: 20px 0;
-            padding: 20px;
-            background: #f5f5f7;
-            border-radius: 8px;
-        }
-        .preview h3 {
-            margin-bottom: 10px;
-        }
-        .icon-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .icon-item {
-            text-align: center;
-        }
-        .icon-item img {
-            max-width: 100%;
-            border: 2px solid #e5e5e7;
-            border-radius: 8px;
-            background: white;
-        }
-        .icon-item p {
-            margin-top: 8px;
-            font-size: 14px;
-            color: #6e6e73;
-        }
-        .success {
-            background: #d4f4dd;
-            color: #34c759;
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-            display: none;
-        }
-        .instructions {
-            background: #fff9e6;
-            border-left: 4px solid #fdcb6e;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .instructions h3 {
-            margin-top: 0;
-            color: #d68910;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f5f5f7;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #0051d5;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        color: #6e6e73;
+        margin-bottom: 30px;
+      }
+      button {
+        background: #0051d5;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin: 10px 5px;
+      }
+      button:hover {
+        opacity: 0.9;
+      }
+      .preview {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f5f5f7;
+        border-radius: 8px;
+      }
+      .preview h3 {
+        margin-bottom: 10px;
+      }
+      .icon-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .icon-item {
+        text-align: center;
+      }
+      .icon-item img {
+        max-width: 100%;
+        border: 2px solid #e5e5e7;
+        border-radius: 8px;
+        background: white;
+      }
+      .icon-item p {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #6e6e73;
+      }
+      .success {
+        background: #d4f4dd;
+        color: #34c759;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 10px 0;
+        display: none;
+      }
+      .instructions {
+        background: #fff9e6;
+        border-left: 4px solid #fdcb6e;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+      .instructions h3 {
+        margin-top: 0;
+        color: #d68910;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>📖 FinChronicle Icon Generator</h1>
-        <p class="subtitle">Generate PNG icons from your SVG for better PWA compatibility</p>
+      <h1>📖 FinChronicle Icon Generator</h1>
+      <p class="subtitle">
+        Generate PNG icons from your SVG for better PWA compatibility
+      </p>
 
-        <div class="instructions">
-            <h3>📋 Instructions</h3>
-            <ol>
-                <li>Click the "Generate All PNG Icons" button below</li>
-                <li>PNG files will be automatically downloaded</li>
-                <li>Save them in the <code>icons/</code> folder</li>
-                <li>The manifest.json has been updated to use these PNG files</li>
-            </ol>
-        </div>
+      <div class="instructions">
+        <h3>📋 Instructions</h3>
+        <ol>
+          <li>Click the "Generate All PNG Icons" button below</li>
+          <li>PNG files will be automatically downloaded</li>
+          <li>Save them in the <code>icons/</code> folder</li>
+          <li>The manifest.json has been updated to use these PNG files</li>
+        </ol>
+      </div>
 
-        <button onclick="generateAllIcons()">Generate All PNG Icons</button>
-        <button onclick="generateIconOnly()">Generate Icon Only (without text)</button>
+      <button onclick="generateAllIcons()">Generate All PNG Icons</button>
+      <button onclick="generateIconOnly()">
+        Generate Icon Only (without text)
+      </button>
 
-        <div class="success" id="successMsg">✅ Icons generated successfully! Check your downloads folder.</div>
+      <div class="success" id="successMsg">
+        ✅ Icons generated successfully! Check your downloads folder.
+      </div>
 
-        <div class="preview">
-            <h3>Preview</h3>
-            <div class="icon-grid" id="iconGrid"></div>
-        </div>
+      <div class="preview">
+        <h3>Preview</h3>
+        <div class="icon-grid" id="iconGrid"></div>
+      </div>
     </div>
 
     <script>
-        // SVG content for icon (from icon.svg)
-        const iconSVG = `<svg width="1024" height="1024" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      // SVG content for icon (from icon.svg)
+      const iconSVG = `<svg width="1024" height="1024" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <!-- Background gradient: White to light gray -->
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -185,105 +191,107 @@
 </svg>
 `;
 
-        function svgToPng(svgString, width, height) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-                const url = URL.createObjectURL(svgBlob);
+      function svgToPng(svgString, width, height) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          const svgBlob = new Blob([svgString], {
+            type: "image/svg+xml;charset=utf-8",
+          });
+          const url = URL.createObjectURL(svgBlob);
 
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
+          img.onload = function () {
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
 
-                    // Fill white background
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, width, height);
+            // Fill white background
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, width, height);
 
-                    ctx.drawImage(img, 0, 0, width, height);
-                    URL.revokeObjectURL(url);
-
-                    canvas.toBlob(function(blob) {
-                        resolve(blob);
-                    }, 'image/png');
-                };
-
-                img.onerror = reject;
-                img.src = url;
-            });
-        }
-
-        function downloadBlob(blob, filename) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
+            ctx.drawImage(img, 0, 0, width, height);
             URL.revokeObjectURL(url);
-        }
 
-        function showPreview(blob, size, name) {
-            const url = URL.createObjectURL(blob);
-            const grid = document.getElementById('iconGrid');
-            const item = document.createElement('div');
-            item.className = 'icon-item';
-            item.innerHTML = `
+            canvas.toBlob(function (blob) {
+              resolve(blob);
+            }, "image/png");
+          };
+
+          img.onerror = reject;
+          img.src = url;
+        });
+      }
+
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function showPreview(blob, size, name) {
+        const url = URL.createObjectURL(blob);
+        const grid = document.getElementById("iconGrid");
+        const item = document.createElement("div");
+        item.className = "icon-item";
+        item.innerHTML = `
                 <img src="${url}" alt="${name}">
                 <p>${name} (${size}x${size})</p>
             `;
-            grid.appendChild(item);
+        grid.appendChild(item);
+      }
+
+      async function generateAllIcons() {
+        document.getElementById("iconGrid").innerHTML = "";
+
+        try {
+          // Generate 192x192
+          const icon192 = await svgToPng(iconSVG, 192, 192);
+          downloadBlob(icon192, "icon-192.png");
+          showPreview(icon192, 192, "icon-192.png");
+
+          // Generate 512x512
+          const icon512 = await svgToPng(iconSVG, 512, 512);
+          downloadBlob(icon512, "icon-512.png");
+          showPreview(icon512, 512, "icon-512.png");
+
+          // Generate maskable 512x512
+          const maskable512 = await svgToPng(maskableSVG, 512, 512);
+          downloadBlob(maskable512, "maskable-icon-512.png");
+          showPreview(maskable512, 512, "maskable-icon-512.png");
+
+          document.getElementById("successMsg").style.display = "block";
+          setTimeout(() => {
+            document.getElementById("successMsg").style.display = "none";
+          }, 5000);
+        } catch (error) {
+          alert("Error generating icons: " + error.message);
         }
+      }
 
-        async function generateAllIcons() {
-            document.getElementById('iconGrid').innerHTML = '';
+      async function generateIconOnly() {
+        document.getElementById("iconGrid").innerHTML = "";
 
-            try {
-                // Generate 192x192
-                const icon192 = await svgToPng(iconSVG, 192, 192);
-                downloadBlob(icon192, 'icon-192.png');
-                showPreview(icon192, 192, 'icon-192.png');
+        try {
+          // Generate simple icon without text
+          const icon192 = await svgToPng(iconNoTextSVG, 192, 192);
+          downloadBlob(icon192, "icon-192-simple.png");
+          showPreview(icon192, 192, "icon-192-simple.png");
 
-                // Generate 512x512
-                const icon512 = await svgToPng(iconSVG, 512, 512);
-                downloadBlob(icon512, 'icon-512.png');
-                showPreview(icon512, 512, 'icon-512.png');
+          const icon512 = await svgToPng(iconNoTextSVG, 512, 512);
+          downloadBlob(icon512, "icon-512-simple.png");
+          showPreview(icon512, 512, "icon-512-simple.png");
 
-                // Generate maskable 512x512
-                const maskable512 = await svgToPng(maskableSVG, 512, 512);
-                downloadBlob(maskable512, 'maskable-icon-512.png');
-                showPreview(maskable512, 512, 'maskable-icon-512.png');
-
-                document.getElementById('successMsg').style.display = 'block';
-                setTimeout(() => {
-                    document.getElementById('successMsg').style.display = 'none';
-                }, 5000);
-            } catch (error) {
-                alert('Error generating icons: ' + error.message);
-            }
+          document.getElementById("successMsg").style.display = "block";
+          setTimeout(() => {
+            document.getElementById("successMsg").style.display = "none";
+          }, 5000);
+        } catch (error) {
+          alert("Error generating icons: " + error.message);
         }
-
-        async function generateIconOnly() {
-            document.getElementById('iconGrid').innerHTML = '';
-
-            try {
-                // Generate simple icon without text
-                const icon192 = await svgToPng(iconNoTextSVG, 192, 192);
-                downloadBlob(icon192, 'icon-192-simple.png');
-                showPreview(icon192, 192, 'icon-192-simple.png');
-
-                const icon512 = await svgToPng(iconNoTextSVG, 512, 512);
-                downloadBlob(icon512, 'icon-512-simple.png');
-                showPreview(icon512, 512, 'icon-512-simple.png');
-
-                document.getElementById('successMsg').style.display = 'block';
-                setTimeout(() => {
-                    document.getElementById('successMsg').style.display = 'none';
-                }, 5000);
-            } catch (error) {
-                alert('Error generating icons: ' + error.message);
-            }
-        }
+      }
     </script>
-</body>
+  </body>
 </html>
