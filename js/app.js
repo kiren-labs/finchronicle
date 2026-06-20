@@ -255,7 +255,7 @@ function bindStaticEvents() {
       const panel = document.getElementById("groupedViewPanel");
       if (panel) {
         panel.classList.add("open");
-        panel.setAttribute("aria-hidden", "false");
+        panel.removeAttribute("inert");
         updateGroupedView();
       }
     });
@@ -265,7 +265,7 @@ function bindStaticEvents() {
       const panel = document.getElementById("groupedViewPanel");
       if (panel) {
         panel.classList.remove("open");
-        panel.setAttribute("aria-hidden", "true");
+        panel.setAttribute("inert", "");
       }
     });
   document.querySelectorAll("#groupedViewPanel .filter-btn").forEach((btn) => {
