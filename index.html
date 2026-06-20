@@ -436,6 +436,7 @@
             <div class="card-content">
               <div class="summary-label">Expenses</div>
               <div class="summary-value" id="monthExpense">0</div>
+              <div class="summary-trend" id="monthExpenseTrend"></div>
               <div class="summary-meta" id="monthExpenseMeta"></div>
             </div>
           </div>
@@ -445,23 +446,6 @@
         <div id="budgetVsActualContainer"></div>
         <!-- Smart Spending Alerts (v3.21.0) -->
         <div id="smartAlerts" hidden></div>
-        <!-- Net Worth Dashboard (v3.18.0) -->
-        <div class="card net-worth-card" id="netWorthSection" hidden>
-          <h3><i class="ri-wallet-3-line"></i> Net Worth</h3>
-          <div id="netWorthDashboard"></div>
-          <!-- Net Worth Trend Chart (v3.28.0) -->
-          <div id="netWorthTrendContainer" hidden>
-            <h4 class="nw-trend-title">
-              <i class="ri-line-chart-line"></i> Trend
-            </h4>
-            <div id="netWorthTrend"></div>
-          </div>
-        </div>
-        <!-- Savings Rate Dashboard (v3.19.0) -->
-        <div class="card savings-card" id="savingsSection" hidden>
-          <h3><i class="ri-seedling-line"></i> Savings</h3>
-          <div id="savingsDashboard"></div>
-        </div>
         <!-- Savings Goals (v3.20.0) -->
         <div class="card goals-card" id="goalsSection" hidden>
           <div class="goals-header">
@@ -552,24 +536,6 @@
         </div>
       </div>
 
-      <!-- Tab Navigation -->
-      <div class="tabs" role="tablist" aria-label="Main navigation">
-        <button id="home-tab" class="tab active" role="tab" aria-selected="true" aria-controls="homeTab">
-          <i class="ri-home-line"></i> Home
-        </button>
-        <button id="add-tab" class="tab" role="tab" aria-selected="false" aria-controls="addTab">
-          <i class="ri-add-line"></i> Add
-        </button>
-        <button id="list-tab" class="tab" role="tab" aria-selected="false" aria-controls="listTab">
-          <i class="ri-list-check"></i> List
-        </button>
-        <button id="groups-tab" class="tab" role="tab" aria-selected="false" aria-controls="groupsTab">
-          <i class="ri-bar-chart-2-line"></i> Groups
-        </button>
-        <button id="settings-tab" class="tab" role="tab" aria-selected="false" aria-controls="settingsTab">
-          <i class="ri-settings-3-line"></i> Settings
-        </button>
-      </div>
 
       <!-- Add Transaction Tab -->
       <div id="addTab" class="tab-content" role="tabpanel" aria-labelledby="add-nav">
@@ -762,7 +728,7 @@
       </div>
 
       <!-- List Tab -->
-      <div id="listTab" class="tab-content" role="tabpanel" aria-labelledby="list-tab">
+      <div id="listTab" class="tab-content" role="tabpanel" aria-labelledby="list-nav">
         <div class="filters" id="monthFilters"></div>
         <div class="search-bar-wrapper">
           <i class="ri-search-line search-icon"></i>
@@ -862,6 +828,30 @@
           <div id="forecast-content"></div>
         </div>
 
+        <!-- Net Worth Dashboard (moved from Home v4.6.0) -->
+        <div class="card net-worth-card" id="netWorthSection" hidden>
+          <p class="card-section-title"><i class="ri-wallet-3-line"></i> Net Worth</p>
+          <div id="netWorthDashboard"></div>
+          <!-- Net Worth Trend Chart (v3.28.0) -->
+          <div id="netWorthTrendContainer" hidden>
+            <p class="nw-trend-title">
+              <i class="ri-line-chart-line"></i> Trend
+            </p>
+            <div id="netWorthTrend"></div>
+          </div>
+        </div>
+        <!-- Savings Rate Dashboard (moved from Home v4.6.0) -->
+        <div class="card savings-card" id="savingsSection" hidden>
+          <p class="card-section-title"><i class="ri-seedling-line"></i> Savings</p>
+          <div id="savingsDashboard"></div>
+        </div>
+
+        <!-- Financial Health Ratios (v4.6.0) -->
+        <div class="card health-ratios-card" id="healthRatiosSection" hidden>
+          <p class="card-section-title"><i class="ri-heart-pulse-line"></i> Financial Health</p>
+          <div id="healthRatiosDashboard"></div>
+        </div>
+
         <!-- Grouped View Entry Button -->
         <button class="grouped-view-entry-btn" id="openGroupedViewBtn" type="button">
           <i class="ri-list-ordered"></i>
@@ -871,7 +861,7 @@
       </div>
 
       <!-- Grouped View Segue Panel -->
-      <div id="groupedViewPanel" class="segue-panel" aria-hidden="true">
+      <div id="groupedViewPanel" class="segue-panel" inert>
         <div class="segue-panel-header">
           <button class="segue-back-btn" id="closeGroupedViewBtn" type="button" aria-label="Back to Reports">
             <i class="ri-arrow-left-s-line"></i>
@@ -889,7 +879,7 @@
       </div>
 
       <!-- Settings Tab -->
-      <div id="settingsTab" class="tab-content" role="tabpanel" aria-labelledby="settings-tab">
+      <div id="settingsTab" class="tab-content" role="tabpanel" aria-labelledby="settings-nav">
         <div class="card">
           <h2 class="card-title">Settings</h2>
           <div class="settings-actions">

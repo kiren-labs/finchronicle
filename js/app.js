@@ -241,6 +241,13 @@ function bindStaticEvents() {
     .getElementById("statusStripToggle")
     ?.addEventListener("click", () => switchTab("home"));
 
+  // ---- fc:navigate CustomEvent (used by savings prompt, etc.) ----
+  document.addEventListener("fc:navigate", (e) => {
+    const { tab, type } = e.detail || {};
+    if (tab) switchTab(tab);
+    if (type) selectType(type);
+  });
+
   // ---- Grouped View segue panel ----
   document
     .getElementById("openGroupedViewBtn")
@@ -248,7 +255,7 @@ function bindStaticEvents() {
       const panel = document.getElementById("groupedViewPanel");
       if (panel) {
         panel.classList.add("open");
-        panel.setAttribute("aria-hidden", "false");
+        panel.removeAttribute("inert");
         updateGroupedView();
       }
     });
@@ -258,7 +265,7 @@ function bindStaticEvents() {
       const panel = document.getElementById("groupedViewPanel");
       if (panel) {
         panel.classList.remove("open");
-        panel.setAttribute("aria-hidden", "true");
+        panel.setAttribute("inert", "");
       }
     });
   document.querySelectorAll("#groupedViewPanel .filter-btn").forEach((btn) => {
@@ -428,6 +435,9 @@ function bindStaticEvents() {
   // ---- Add Budget button (delegated — button is re-rendered by renderBudgetList) ----
   document.addEventListener("click", (e) => {
     if (e.target.closest("#addBudgetBtn")) openBudgetModal();
+    const setBudgetBtn = e.target.closest("[data-set-budget]");
+    if (setBudgetBtn)
+      openBudgetModal({ category: setBudgetBtn.dataset.setBudget });
   });
 
   // ---- Search bar (v3.14.0) ----
@@ -988,9 +998,7 @@ function bindFormSubmit() {
 
           updateUI();
           renderQuickBar();
-          renderNetWorthDashboard();
           renderAccountManager();
-          renderSavingsDashboard();
           renderAlertBanners(runAlertChecks(sanitizedTransaction));
           renderAnnualReport();
           renderForecast();

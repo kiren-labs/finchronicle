@@ -301,7 +301,7 @@ export function renderBudgetList() {
 
 // Render budget modal
 export function renderBudgetModal(budget = null) {
-  const isEdit = !!budget;
+  const isEdit = !!budget?.id;
   const title = isEdit ? "Edit budget" : "Add budget";
 
   const categoryOptions = Object.entries(categories.expense)
@@ -575,19 +575,37 @@ export function renderBudgetVsActualTable() {
   if (unbudgeted.length > 0) {
     const section = document.createElement("div");
     section.className = "bva-unbudgeted";
-    const sh = document.createElement("p");
-    sh.className = "bva-section-header";
-    sh.textContent = "Unbudgeted Spending";
-    section.appendChild(sh);
+    const header = document.createElement("div");
+    header.className = "bva-unbudgeted-header";
+    const title = document.createElement("span");
+    title.className = "bva-section-header";
+    title.textContent = "Unbudgeted Spending";
+    const badge = document.createElement("span");
+    badge.className = "bva-top-badge";
+    badge.textContent = `top ${unbudgeted.length}`;
+    header.appendChild(title);
+    header.appendChild(badge);
+    section.appendChild(header);
     unbudgeted.forEach((row) => {
       const line = document.createElement("div");
       line.className = "bva-unbudgeted-row";
+      const info = document.createElement("div");
+      info.className = "bva-unbudgeted-info";
       const cat = document.createElement("span");
+      cat.className = "bva-unbudgeted-cat";
       cat.textContent = row.category;
       const amt = document.createElement("span");
+      amt.className = "bva-unbudgeted-amt";
       amt.textContent = formatCurrency(row.actual);
-      line.appendChild(cat);
-      line.appendChild(amt);
+      info.appendChild(cat);
+      info.appendChild(amt);
+      const setBudgetBtn = document.createElement("button");
+      setBudgetBtn.className = "bva-set-budget-btn";
+      setBudgetBtn.dataset.setBudget = row.category;
+      setBudgetBtn.setAttribute("aria-label", `Add budget for ${row.category}`);
+      setBudgetBtn.innerHTML = `Set budget`;
+      line.appendChild(info);
+      line.appendChild(setBudgetBtn);
       section.appendChild(line);
     });
     table.appendChild(section);

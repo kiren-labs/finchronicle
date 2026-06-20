@@ -3,7 +3,7 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "4.5.0";
+export const APP_VERSION = "4.6.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
@@ -221,6 +221,7 @@ export function getDOM() {
       monthExpense: document.getElementById("monthExpense"),
       monthNetTrend: document.getElementById("monthNetTrend"),
       monthIncomeTrend: document.getElementById("monthIncomeTrend"),
+      monthExpenseTrend: document.getElementById("monthExpenseTrend"),
       monthExpenseMeta: document.getElementById("monthExpenseMeta"),
       compactNet: document.getElementById("compactNet"),
       compactEntries: document.getElementById("compactEntries"),

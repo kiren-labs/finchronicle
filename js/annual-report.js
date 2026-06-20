@@ -151,7 +151,7 @@ export function renderAnnualReport(year = null) {
     const incIcon = yoy.incomeChange >= 0 ? "↑" : "↓";
     yoySection = `
       <div class="annual-yoy">
-        <h4>vs ${yoy.prevYear}</h4>
+        <p class="annual-subsection-title">vs ${yoy.prevYear}</p>
         ${yoy.incomeChange !== null ? `<span class="yoy-item ${yoy.incomeChange >= 0 ? "positive" : "negative"}">${incIcon} Income ${yoy.incomeChange >= 0 ? "+" : ""}${yoy.incomeChange}%</span>` : ""}
         ${yoy.expenseChange !== null ? `<span class="yoy-item ${yoy.expenseChange <= 0 ? "positive" : "negative"}">${expIcon} Expenses ${yoy.expenseChange >= 0 ? "+" : ""}${yoy.expenseChange}%</span>` : ""}
       </div>
@@ -163,7 +163,7 @@ export function renderAnnualReport(year = null) {
   if (topExpenses.length > 0) {
     topSection = `
       <div class="annual-section">
-        <h4>Top 5 largest expenses</h4>
+        <p class="annual-subsection-title">Top 5 largest expenses</p>
         <div class="annual-top-list">
           ${topExpenses
             .map(

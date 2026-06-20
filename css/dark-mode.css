@@ -927,3 +927,43 @@ body.dark-mode .segue-panel-header {
   background: var(--color-surface);
   border-color: var(--color-border);
 }
+body.dark-mode .segue-back-btn {
+  color: var(--color-primary-strong);
+}
+
+body.dark-mode .health-ratio-card {
+  background: var(--color-surface);
+}
+
+/* Primary-colored outline buttons: --color-primary (#0053ad) is unreadable on dark surfaces.
+   Override all affected buttons to use --color-primary-strong (#409cff) which is WCAG AA compliant. */
+body.dark-mode .savings-income-prompt-btn {
+  color: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
+}
+body.dark-mode .savings-income-prompt-btn:hover {
+  background: var(--color-primary-soft);
+}
+
+body.dark-mode .bva-export-btn {
+  color: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
+  background: var(--color-primary-soft);
+}
+body.dark-mode .bva-export-btn:hover {
+  background: var(--color-primary-strong);
+  color: #000;
+}
+
+body.dark-mode .bva-set-budget-btn {
+  color: var(--color-primary-strong);
+  border-color: var(--color-primary-strong);
+}
+body.dark-mode .bva-set-budget-btn:hover {
+  background: var(--color-primary-soft);
+}
+
+/* Bottom nav Add button — same reason */
+body.dark-mode .nav-item-add {
+  color: var(--color-primary-strong);
+}

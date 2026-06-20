@@ -2087,7 +2087,7 @@ button.primary.loading .btn-spinner {
   margin-bottom: var(--space-lg);
 }
 
-.insights-header h3 {
+.insights-header .insights-overview-label {
   font-size: var(--font-lg);
   font-weight: 600;
   color: var(--color-text);
@@ -2225,7 +2225,7 @@ button.primary.loading .btn-spinner {
   color: var(--color-primary);
 }
 
-.budget-health-title h3 {
+.budget-health-title .budget-health-heading {
   font-size: var(--font-md);
   font-weight: 600;
   color: var(--color-text);
@@ -2315,7 +2315,7 @@ button.primary.loading .btn-spinner {
   box-shadow: var(--shadow-sm);
 }
 
-.section-header h3 {
+.section-header .top-categories-heading {
   font-size: var(--font-lg);
   font-weight: 600;
   color: var(--color-text);
@@ -4538,7 +4538,7 @@ button.primary.loading .btn-spinner {
   margin-top: var(--space-md);
 }
 
-.net-worth-card h3 {
+.net-worth-card .card-section-title {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -4898,7 +4898,7 @@ button.primary.loading .btn-spinner {
   margin-top: var(--space-md);
 }
 
-.savings-card h3 {
+.savings-card .card-section-title {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -5271,10 +5271,12 @@ button.primary.loading .btn-spinner {
   display: block;
   margin-top: var(--space-xs);
   font-size: var(--font-sm);
-  opacity: 0.75;
   font-style: italic;
+  color: inherit;
+  filter: brightness(0.7);
 }
 
+.smart-alert-snooze,
 .smart-alert-dismiss {
   background: none;
   border: none;
@@ -5286,6 +5288,7 @@ button.primary.loading .btn-spinner {
   transition: opacity 0.2s;
 }
 
+.smart-alert-snooze:hover,
 .smart-alert-dismiss:hover {
   opacity: 1;
 }
@@ -5461,10 +5464,12 @@ button.primary.loading .btn-spinner {
   border-radius: var(--radius-md);
 }
 
-.annual-yoy h4 {
+.annual-yoy .annual-subsection-title,
+.annual-section .annual-subsection-title {
   font-size: 12px;
-  margin-bottom: var(--space-xs);
+  margin: 0 0 var(--space-xs);
   color: var(--color-text-muted);
+  font-weight: 600;
 }
 
 .yoy-item {
@@ -5724,7 +5729,7 @@ button.primary.loading .btn-spinner {
   border-top: 1px solid var(--color-border);
 }
 
-.storage-health-card h4 {
+.storage-health-card .storage-health-title {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -5734,7 +5739,7 @@ button.primary.loading .btn-spinner {
   color: var(--color-text);
 }
 
-.storage-health-card h4 i {
+.storage-health-card .storage-health-title i {
   font-size: var(--icon-lg);
   color: var(--color-primary);
 }
@@ -5790,7 +5795,7 @@ button.primary.loading .btn-spinner {
   color: var(--color-primary);
 }
 
-.storage-health-header h4 {
+.storage-health-header .storage-health-title {
   font-size: var(--font-lg);
   font-weight: 600;
   margin: 0;
@@ -7046,10 +7051,11 @@ button.primary.loading .btn-spinner {
   font-size: var(--font-sm);
   padding: var(--space-xs) var(--space-md);
   background: var(--color-primary-soft);
-  color: var(--color-primary-strong);
-  border: 1px solid var(--color-border);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
   border-radius: var(--radius-sm);
   cursor: pointer;
+  font-weight: 600;
 }
 .bva-export-btn:hover {
   background: var(--color-primary);
@@ -7086,7 +7092,7 @@ button.primary.loading .btn-spinner {
   color: var(--color-warning-text);
 }
 .bva-positive {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 .bva-negative {
   color: var(--color-danger);
@@ -7100,15 +7106,44 @@ button.primary.loading .btn-spinner {
   font-weight: 600;
   font-size: var(--font-sm);
   color: var(--color-text-muted);
-  margin: var(--space-lg) 0 var(--space-xs);
+  margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+.bva-unbudgeted-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--space-lg) 0 var(--space-sm);
+}
+.bva-top-badge {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
 .bva-unbudgeted-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: var(--space-xs) 0;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
   border-bottom: 1px solid var(--color-border);
+}
+.bva-unbudgeted-row:last-child {
+  border-bottom: none;
+}
+.bva-unbudgeted-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.bva-unbudgeted-cat {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.bva-unbudgeted-amt {
   font-size: var(--font-sm);
   color: var(--color-text-muted);
 }
@@ -7204,4 +7239,150 @@ button.primary.loading .btn-spinner {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-lg);
+}
+
+/* ---- Savings income prompt (shown when no income recorded) ---- */
+.savings-income-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) 0;
+  text-align: center;
+}
+.savings-income-prompt-msg {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+.savings-income-prompt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-primary);
+  background: none;
+  color: var(--color-primary);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.savings-income-prompt-btn:hover {
+  background: var(--color-primary-soft);
+}
+
+/* ---- Unbudgeted row Set Budget button ---- */
+.bva-set-budget-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-primary);
+  background: none;
+  color: var(--color-primary);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+.bva-set-budget-btn:hover {
+  background: var(--color-primary-soft);
+}
+.bva-set-budget-btn i {
+  font-size: 0.85rem;
+}
+@media (max-width: 400px) {
+  .bva-set-budget-btn {
+    padding: 3px 8px;
+    font-size: 0.7rem;
+  }
+}
+
+/* ---- Financial Health Ratios (v4.6.0) ---- */
+.ratio-summary {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-md);
+  font-weight: 500;
+}
+/* Shared card heading — replaces h3 in Net Worth, Savings, Health Ratios cards */
+.card-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.health-ratio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+.health-ratio-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  position: relative;
+}
+.ratio-icon {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+}
+.ratio-label {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-top: 2px;
+}
+.ratio-value {
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  line-height: 1.1;
+}
+.ratio-sub {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  line-height: 1.3;
+}
+.ratio-status-icon {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  font-size: 1rem;
+}
+.health-ratio-card.ratio-good {
+  border-color: var(--color-success);
+}
+.health-ratio-card.ratio-good .ratio-value,
+.health-ratio-card.ratio-good .ratio-status-icon {
+  color: var(--color-success-strong);
+}
+.health-ratio-card.ratio-warn {
+  border-color: var(--color-warning);
+}
+.health-ratio-card.ratio-warn .ratio-value,
+.health-ratio-card.ratio-warn .ratio-status-icon {
+  color: var(--color-warning-text);
+}
+.health-ratio-card.ratio-bad {
+  border-color: var(--color-danger);
+}
+.health-ratio-card.ratio-bad .ratio-value,
+.health-ratio-card.ratio-bad .ratio-status-icon {
+  color: var(--color-danger-strong);
 }
