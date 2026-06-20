@@ -5463,10 +5463,12 @@ button.primary.loading .btn-spinner {
   border-radius: var(--radius-md);
 }
 
-.annual-yoy h4 {
+.annual-yoy .annual-subsection-title,
+.annual-section .annual-subsection-title {
   font-size: 12px;
-  margin-bottom: var(--space-xs);
+  margin: 0 0 var(--space-xs);
   color: var(--color-text-muted);
+  font-weight: 600;
 }
 
 .yoy-item {
@@ -5726,7 +5728,7 @@ button.primary.loading .btn-spinner {
   border-top: 1px solid var(--color-border);
 }
 
-.storage-health-card h4 {
+.storage-health-card .storage-health-title {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -5736,7 +5738,7 @@ button.primary.loading .btn-spinner {
   color: var(--color-text);
 }
 
-.storage-health-card h4 i {
+.storage-health-card .storage-health-title i {
   font-size: var(--icon-lg);
   color: var(--color-primary);
 }
@@ -5792,7 +5794,7 @@ button.primary.loading .btn-spinner {
   color: var(--color-primary);
 }
 
-.storage-health-header h4 {
+.storage-health-header .storage-health-title {
   font-size: var(--font-lg);
   font-weight: 600;
   margin: 0;

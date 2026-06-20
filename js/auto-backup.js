@@ -533,7 +533,7 @@ export async function renderStorageHealth() {
     <div class="storage-health-inline">
       <div class="storage-health-header">
         <i class="ri-hard-drive-2-line" aria-hidden="true"></i>
-        <h4>Storage Health</h4>
+        <p class="storage-health-title">Storage Health</p>
       </div>
       <div class="storage-meter">
         <div class="storage-meter-fill storage-${statusClass}" style="width: ${Math.min(health.usedPercent, 100)}%"></div>
