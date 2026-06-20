@@ -451,9 +451,10 @@ export function getBudgetVsActual() {
   const budgeted = state.budgets
     .map((b) => {
       const actual = actualByCategory[b.category] || 0;
-      const variance = b.limit - actual;
-      const pct = b.limit > 0 ? Math.round((actual / b.limit) * 100) : 0;
-      return { category: b.category, budget: b.limit, actual, variance, pct };
+      const limit = b.monthlyLimit || 0;
+      const variance = limit - actual;
+      const pct = limit > 0 ? Math.round((actual / limit) * 100) : 0;
+      return { category: b.category, budget: limit, actual, variance, pct };
     })
     .sort((a, b) => b.pct - a.pct);
 
