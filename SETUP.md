@@ -68,6 +68,7 @@ sed -i '' 's/kiren-labs/your-actual-username/g' README_OPENSOURCE.md
 ```
 
 Then rename it:
+
 ```bash
 mv README_OPENSOURCE.md README.md
 ```
@@ -75,17 +76,21 @@ mv README_OPENSOURCE.md README.md
 ### 5. Set Up Repository Settings
 
 #### Description
+
 ```
 A beautiful, offline-first Progressive Web App for tracking personal finances
 ```
 
 #### Website
+
 ```
 https://kiren-labs.github.io/finchronicle/
 ```
 
 #### Topics (Tags)
+
 Add these topics to make your repo discoverable:
+
 ```
 pwa
 progressive-web-app
@@ -101,11 +106,13 @@ privacy-first
 ```
 
 #### About Section
+
 - [x] Include in the home page
 
 ### 6. Add Repository Banner (Optional)
 
 Create a banner image at:
+
 ```
 screenshots/banner.png
 ```
@@ -113,6 +120,7 @@ screenshots/banner.png
 Dimensions: 1280 x 640 pixels
 
 Update README.md to include it:
+
 ```markdown
 <div align="center">
   <img src="screenshots/banner.png" alt="Finance Tracker Banner" width="100%"/>
@@ -187,6 +195,7 @@ Create a `screenshots/` folder and add:
 6. **mobile.png** - Mobile view
 
 Take screenshots at:
+
 - Desktop: 1440px width
 - Mobile: 375px width (iPhone size)
 
@@ -253,6 +262,7 @@ Update if you change the repository name:
 ### GitHub Analytics
 
 Track automatically:
+
 - Stars
 - Forks
 - Issues
@@ -266,12 +276,17 @@ Add Google Analytics (optional):
 ```html
 <!-- Add to index.html <head> -->
 <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+<script
+  async
+  src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"
+></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'GA_MEASUREMENT_ID');
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+  gtag("js", new Date());
+  gtag("config", "GA_MEASUREMENT_ID");
 </script>
 ```
 
@@ -297,16 +312,19 @@ Add Google Analytics (optional):
 ## 🔄 Ongoing Maintenance
 
 ### Weekly
+
 - [ ] Check and respond to issues
 - [ ] Review pull requests
 - [ ] Update dependencies (if added)
 
 ### Monthly
+
 - [ ] Review roadmap
 - [ ] Plan next version
 - [ ] Update documentation
 
 ### When Releasing
+
 - [ ] Update VERSION.md
 - [ ] Update CHANGELOG.md
 - [ ] Update version numbers in code

@@ -9,11 +9,13 @@ This directory contains automation scripts for FinChronicle development and rele
 Full automated release process. Handles version bumping, committing, tagging, and pushing.
 
 **Usage:**
+
 ```bash
 ./scripts/release.sh 3.10.3
 ```
 
 **What it does:**
+
 1. ✅ Validates version format (semantic versioning)
 2. ✅ Checks for uncommitted changes
 3. ✅ Pulls latest changes from main branch
@@ -26,6 +28,7 @@ Full automated release process. Handles version bumping, committing, tagging, an
 10. ✅ Triggers GitHub Actions for release creation
 
 **Requirements:**
+
 - Clean working directory (no uncommitted changes)
 - CHANGELOG.md must have entry for the new version
 - Must be run from repository root
@@ -37,17 +40,20 @@ Full automated release process. Handles version bumping, committing, tagging, an
 Updates version numbers in all version-controlled files without committing.
 
 **Usage:**
+
 ```bash
 ./scripts/bump-version.sh 3.10.3
 ```
 
 **What it updates:**
+
 - `app.js` → Line 2: `const APP_VERSION = '3.10.3'`
 - `sw.js` → Line 3: `// Version: 3.10.3`
 - `sw.js` → Line 4: `const CACHE_NAME = 'finchronicle-v3.10.3'`
 - `manifest.json` → `"version": "3.10.3"`
 
 **Use cases:**
+
 - Preview version changes before committing
 - Update versions manually (commit yourself)
 - Testing version update logic
@@ -100,6 +106,7 @@ FinChronicle uses [Semantic Versioning](https://semver.org/):
 - **PATCH** (x.x.3): Bug fixes (backward compatible)
 
 **Examples:**
+
 - `3.10.2` → `3.10.3` (bug fix)
 - `3.10.3` → `3.11.0` (new feature)
 - `3.11.0` → `4.0.0` (breaking change)
@@ -111,6 +118,7 @@ FinChronicle uses [Semantic Versioning](https://semver.org/):
 ### Version Validation
 
 Both scripts validate version format:
+
 - Must match: `MAJOR.MINOR.PATCH`
 - Must be numeric: `3.10.3` ✅
 - Invalid: `v3.10.3` ❌ (no 'v' prefix)
@@ -119,6 +127,7 @@ Both scripts validate version format:
 ### Pre-flight Checks (release.sh)
 
 Before releasing, the script checks:
+
 - ✅ No uncommitted changes
 - ✅ On main branch (warns if not)
 - ✅ CHANGELOG.md has entry for version
@@ -127,6 +136,7 @@ Before releasing, the script checks:
 ### Post-execution
 
 After successful release:
+
 1. GitHub Actions workflow triggers (`.github/workflows/release.yml`)
 2. Release created at: `https://github.com/kiren-labs/finance-tracker/releases`
 3. GitHub Pages deploys automatically
@@ -137,6 +147,7 @@ After successful release:
 ## 🛠️ Troubleshooting
 
 ### "Version number required"
+
 ```bash
 # Wrong
 ./scripts/release.sh
@@ -146,7 +157,9 @@ After successful release:
 ```
 
 ### "Invalid version format"
+
 Use semantic versioning: `MAJOR.MINOR.PATCH`
+
 ```bash
 # Wrong
 ./scripts/release.sh v3.10.3  # No 'v' prefix
@@ -157,16 +170,21 @@ Use semantic versioning: `MAJOR.MINOR.PATCH`
 ```
 
 ### "No CHANGELOG entry found"
+
 Add a section to `CHANGELOG.md`:
+
 ```markdown
 ## [3.10.3] - 2026-02-23
 
 ### Added
+
 - Feature description
 ```
 
 ### "You have uncommitted changes"
+
 Commit or stash changes first:
+
 ```bash
 git status
 git add .
@@ -175,7 +193,9 @@ git commit -m "fix: something"
 ```
 
 ### Permission denied
+
 Make scripts executable:
+
 ```bash
 chmod +x scripts/*.sh
 ```

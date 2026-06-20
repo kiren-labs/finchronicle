@@ -5,7 +5,9 @@ First off, thank you for considering contributing to Finance Tracker! 🎉 It's 
 ## 🌟 Ways to Contribute
 
 ### 1. Report Bugs 🐛
+
 Found a bug? Please [open an issue](https://github.com/kiren-labs/finchronicle/issues/new?template=bug_report.md) with:
+
 - Clear title and description
 - Steps to reproduce
 - Expected vs actual behavior
@@ -13,19 +15,23 @@ Found a bug? Please [open an issue](https://github.com/kiren-labs/finchronicle/i
 - Screenshots if applicable
 
 ### 2. Suggest Features 💡
+
 Have an idea? [Open a feature request](https://github.com/kiren-labs/finchronicle/issues/new?template=feature_request.md) with:
+
 - Clear description of the feature
 - Why it would be useful
 - How it should work
 - Any mockups or examples
 
 ### 3. Improve Documentation 📝
+
 - Fix typos or unclear instructions
 - Add examples or tutorials
 - Translate documentation
 - Create video guides
 
 ### 4. Write Code 🔧
+
 - Fix bugs
 - Implement features
 - Improve performance
@@ -36,6 +42,7 @@ Have an idea? [Open a feature request](https://github.com/kiren-labs/finchronicl
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Git installed
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 - Text editor (VS Code recommended)
@@ -52,6 +59,7 @@ Have an idea? [Open a feature request](https://github.com/kiren-labs/finchronicl
      ```
 
 2. **Create a branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -64,9 +72,11 @@ Have an idea? [Open a feature request](https://github.com/kiren-labs/finchronicl
    - `style/` - UI/CSS changes
 
 3. **Start local server**
+
    ```bash
    python3 -m http.server 8000
    ```
+
    Open: http://localhost:8000
 
 4. **Make your changes**
@@ -82,41 +92,48 @@ Have an idea? [Open a feature request](https://github.com/kiren-labs/finchronicl
 
 ```javascript
 // Use descriptive variable names
-const transactionList = [];  // Good
-const tl = [];               // Bad
+const transactionList = []; // Good
+const tl = []; // Bad
 
 // Use camelCase for functions and variables
-function calculateTotal() { }     // Good
-function calculate_total() { }    // Bad
+function calculateTotal() {} // Good
+function calculate_total() {} // Bad
 
 // Add comments for complex logic
 // Calculate monthly income by filtering transactions
 const monthlyIncome = transactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + t.amount, 0);
+  .filter((t) => t.type === "income")
+  .reduce((sum, t) => sum + t.amount, 0);
 
 // Use const/let, not var
-const MAX_AMOUNT = 1000000;  // Good
-var MAX_AMOUNT = 1000000;    // Bad
+const MAX_AMOUNT = 1000000; // Good
+var MAX_AMOUNT = 1000000; // Bad
 ```
 
 ### HTML/CSS Style
 
 ```html
 <!-- Use semantic HTML -->
-<main>  <!-- Good -->
-    <section class="card">
-        <h2>Title</h2>
-    </section>
+<main>
+  <!-- Good -->
+  <section class="card">
+    <h2>Title</h2>
+  </section>
 </main>
 
 <!-- Use meaningful class names -->
-<div class="transaction-item">  <!-- Good -->
-<div class="ti">                <!-- Bad -->
+<div class="transaction-item">
+  <!-- Good -->
+  <div class="ti">
+    <!-- Bad -->
 
-<!-- Keep inline styles minimal -->
-<div class="card">                         <!-- Good -->
-<div style="padding: 20px; color: red;">   <!-- Bad -->
+    <!-- Keep inline styles minimal -->
+    <div class="card">
+      <!-- Good -->
+      <div style="padding: 20px; color: red;"><!-- Bad --></div>
+    </div>
+  </div>
+</div>
 ```
 
 ### Accessibility
@@ -133,13 +150,14 @@ When making changes, update versions:
 
 ```javascript
 // index.html (line ~1077)
-const APP_VERSION = '3.2.0';  // Update this
+const APP_VERSION = "3.2.0"; // Update this
 
 // sw.js (line 2)
-const CACHE_NAME = 'finchronicle-v6';  // Increment this
+const CACHE_NAME = "finchronicle-v6"; // Increment this
 ```
 
 Versioning rules (Semantic Versioning):
+
 - **MAJOR** (4.0.0): Breaking changes
 - **MINOR** (3.2.0): New features, backward compatible
 - **PATCH** (3.1.1): Bug fixes only
@@ -182,12 +200,16 @@ python3 -m http.server 8000
 
 - Update README.md if needed
 - Add entry to CHANGELOG.md:
+
   ```markdown
   ## [3.2.0] - 2025-01-15
+
   ### Added
+
   - Feature description
 
   ### Fixed
+
   - Bug fix description
   ```
 
@@ -199,6 +221,7 @@ git commit -m "feat: Add budget tracking feature"
 ```
 
 Commit message format:
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `docs:` - Documentation only
@@ -208,6 +231,7 @@ Commit message format:
 - `chore:` - Maintenance
 
 Examples:
+
 ```
 feat: Add recurring transactions
 fix: Currency selector not closing on mobile
@@ -248,6 +272,7 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce:
+
 1. Go to '...'
 2. Click on '....'
 3. See error
@@ -259,10 +284,11 @@ What you expected to happen.
 If applicable, add screenshots.
 
 **Environment:**
- - Device: [e.g. iPhone 12, Desktop]
- - OS: [e.g. iOS 15, Windows 11]
- - Browser: [e.g. Safari 15, Chrome 98]
- - Version: [e.g. v3.1.0]
+
+- Device: [e.g. iPhone 12, Desktop]
+- OS: [e.g. iOS 15, Windows 11]
+- Browser: [e.g. Safari 15, Chrome 98]
+- Version: [e.g. v3.1.0]
 ```
 
 ---
@@ -291,20 +317,20 @@ Add any other context, screenshots, or mockups.
 
 ```css
 /* Light Mode */
---primary: #0051D5;      /* Blue - action buttons */
---success: #34c759;      /* Green - income, positive */
---danger: #ff3b30;       /* Red - expense, delete */
---background: #f5f5f7;   /* Light gray background */
---card: #ffffff;         /* White cards */
---text: #1d1d1f;         /* Dark text */
+--primary: #0051d5; /* Blue - action buttons */
+--success: #34c759; /* Green - income, positive */
+--danger: #ff3b30; /* Red - expense, delete */
+--background: #f5f5f7; /* Light gray background */
+--card: #ffffff; /* White cards */
+--text: #1d1d1f; /* Dark text */
 
 /* Dark Mode */
---primary: #0A84FF;      /* Lighter blue */
---success: #30d158;      /* Lighter green */
---danger: #ff453a;       /* Lighter red */
---background: #000000;   /* Black background */
---card: #1c1c1e;         /* Dark gray cards */
---text: #f5f5f7;         /* Light text */
+--primary: #0a84ff; /* Lighter blue */
+--success: #30d158; /* Lighter green */
+--danger: #ff453a; /* Lighter red */
+--background: #000000; /* Black background */
+--card: #1c1c1e; /* Dark gray cards */
+--text: #f5f5f7; /* Light text */
 ```
 
 ### Typography
@@ -330,12 +356,14 @@ Add any other context, screenshots, or mockups.
 ### Manual Testing
 
 Test on:
+
 - ✅ Chrome (desktop & mobile)
 - ✅ Firefox (desktop & mobile)
 - ✅ Safari (desktop & iOS)
 - ✅ Edge (desktop)
 
 Test scenarios:
+
 - ✅ Add/edit/delete transactions
 - ✅ Switch between tabs
 - ✅ Toggle dark mode
@@ -377,6 +405,7 @@ For the full Code of Conduct, see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 ## 🎉 Recognition
 
 Contributors will be:
+
 - Listed in README.md
 - Mentioned in release notes
 - Forever appreciated! 💙

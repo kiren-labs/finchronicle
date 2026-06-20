@@ -30,6 +30,7 @@
 #### Complexity Problems:
 
 **Problem 1: Dual Writes (Consistency Hell)**
+
 ```javascript
 // Every save triggers BOTH systems
 Transaction Form Submit
@@ -41,27 +42,29 @@ Transaction Form Submit
 ```
 
 **Problem 2: Sync Logic Becomes Complex**
+
 ```javascript
 // If user edits in v3 → must update v4
 // If user deletes in v4 → must delete v3
 // If amounts don't match → which is truth?
 
 async function editTransaction(id, updates) {
-    // Update v3
-    const v3 = await updateV3Transaction(id, updates);
-    
-    // Update v4 (must find matching entry!)
-    const v4Entry = await findMatchingV4Entry(v3);
-    if (!v4Entry) throw new Error('V4 entry not found!');
-    
-    const v4Updated = convertV3ToV4(updates);
-    await updateV4JournalEntry(v4Entry.id, v4Updated);
-    
-    // If v4 update fails after v3? INCONSISTENT!
+  // Update v3
+  const v3 = await updateV3Transaction(id, updates);
+
+  // Update v4 (must find matching entry!)
+  const v4Entry = await findMatchingV4Entry(v3);
+  if (!v4Entry) throw new Error("V4 entry not found!");
+
+  const v4Updated = convertV3ToV4(updates);
+  await updateV4JournalEntry(v4Entry.id, v4Updated);
+
+  // If v4 update fails after v3? INCONSISTENT!
 }
 ```
 
 **Problem 3: Query Complexity**
+
 ```javascript
 // "Show me all transactions in Feb"
 // - Query BOTH stores
@@ -70,17 +73,18 @@ async function editTransaction(id, updates) {
 // - Much slower
 
 async function getAllTransactionsForMonth(month) {
-    const v3Data = await queryV3(month);
-    const v4Data = await queryV4(month);
-    
-    // Now what? Both lists different format
-    // Merge? De-dup? A transaction appears twice?
-    const merged = deduplicateAndMerge(v3Data, v4Data);
-    return merged; // Expensive!
+  const v3Data = await queryV3(month);
+  const v4Data = await queryV4(month);
+
+  // Now what? Both lists different format
+  // Merge? De-dup? A transaction appears twice?
+  const merged = deduplicateAndMerge(v3Data, v4Data);
+  return merged; // Expensive!
 }
 ```
 
 **Problem 4: Trial Balance Breaks**
+
 ```javascript
 // Trial balance only works in v4
 // User adds in v3: { expense, 50 }
@@ -89,14 +93,15 @@ async function getAllTransactionsForMonth(month) {
 // But we can't validate until... when?
 
 function verifyTrialBalance() {
-    // Only checks v4
-    // Ignores v3 data
-    // User might have added in v3
-    // So app thinks balanced... but user sees different data
+  // Only checks v4
+  // Ignores v3 data
+  // User might have added in v3
+  // So app thinks balanced... but user sees different data
 }
 ```
 
 **Problem 5: User Confusion**
+
 ```
 User adds expense in v3 form: ✅ Shows $50
 User switches to "advanced mode" → sees v4 data
@@ -106,6 +111,7 @@ User panics: "Is my data broken?"
 ```
 
 #### Risk Assessment:
+
 - 🔴 **Data consistency:** NIGHTMARE
 - 🔴 **Bug potential:** Exponential (2x combinations)
 - 🔴 **Performance:** Slow dual writes/reads
@@ -119,6 +125,7 @@ User panics: "Is my data broken?"
 ### Approach 2: Feature Flag (Choose One, Switch Later) 🟡 MEDIUM RISK
 
 **Idea:** User picksa mode on setup:
+
 - **Mode: Single-Entry** → Use v3 system only
 - **Mode: Double-Entry** → Use v4 system only
 - Can migrate from v3→v4 later (one-way)
@@ -128,20 +135,21 @@ User panics: "Is my data broken?"
 // [ ] Single-Entry Mode (simple, fast, current)
 // [ ] Double-Entry Mode (advanced, multi-account, new)
 
-let mode = 'single-entry'; // or 'double-entry'
+let mode = "single-entry"; // or 'double-entry'
 
 async function saveTransaction(tx) {
-    if (mode === 'single-entry') {
-        await saveToV3(tx);
-    } else {
-        await saveToV4(tx);
-    }
+  if (mode === "single-entry") {
+    await saveToV3(tx);
+  } else {
+    await saveToV4(tx);
+  }
 }
 
 // This is clean! Only ONE path at runtime
 ```
 
 #### Advantages:
+
 - ✅ **Simple:** Only one system active
 - ✅ **Fast:** No dual writes
 - ✅ **Clear:** No confusion which store to query
@@ -150,6 +158,7 @@ async function saveTransaction(tx) {
 - ✅ **Opt-in:** New users can choose
 
 #### Challenges:
+
 ```javascript
 // Challenge 1: Two UIs to maintain
 // v3 UI (current)
@@ -178,6 +187,7 @@ if (mode === 'single-entry') {
 ```
 
 #### Risk Assessment:
+
 - 🟡 **Data consistency:** Good (separate systems)
 - 🟡 **Code complexity:** Medium (2 UIs + 2 queries)
 - 🟡 **Performance:** Good
@@ -185,11 +195,13 @@ if (mode === 'single-entry') {
 - 🟡 **Maintenance:** Need to maintain both systems
 
 **When it works well:**
+
 - Small features (v3 ≠ v4 is just a flag)
 - Not fully backward compatible (users stay in v3)
 - Migration is explicit opt-in
 
 **When it breaks:**
+
 - When you want new features only in v4 (forces users out of v3)
 - When both systems need same data (you duplicate)
 - When you want to deprecate v3 (but users won't migrate)
@@ -204,14 +216,13 @@ if (mode === 'single-entry') {
 // On app startup:
 
 if (!migrated) {
-    // First load
-    // = "Upgrade available for v4?"
-    // User clicks: "Upgrade Now" or "Ask Later" (but show banner)
-    
-    // Migration happens ONCE
-    // Data converts: v3 → v4
-    // v3 stores kept as backup (read-only)
-    // User never switches back
+  // First load
+  // = "Upgrade available for v4?"
+  // User clicks: "Upgrade Now" or "Ask Later" (but show banner)
+  // Migration happens ONCE
+  // Data converts: v3 → v4
+  // v3 stores kept as backup (read-only)
+  // User never switches back
 }
 
 // After migration:
@@ -221,6 +232,7 @@ if (!migrated) {
 ```
 
 #### Advantages:
+
 - ✅ **Simple:** v3 is dead, v4 is only system
 - ✅ **No sync headaches:** Single source of truth
 - ✅ **Fast:** No dual writes
@@ -230,12 +242,14 @@ if (!migrated) {
 - ✅ **Future-proof:** Can build advanced features on v4
 
 #### Risks:
+
 - 🟡 **Migration must work:** No going back
 - 🟡 **Data loss risk:** If migration fails
 - 🟡 **Can't try it:** Users can't test before committing
 - 🟡 **Adoption:** Some users might not upgrade
 
 #### Mitigations:
+
 ```javascript
 // Before migration:
 ✅ Mandatory backup
@@ -248,6 +262,7 @@ if (!migrated) {
 ```
 
 #### Risk Assessment:
+
 - 🟢 **Data consistency:** Excellent (single system)
 - 🟢 **Code complexity:** Low (no branching)
 - 🟢 **Performance:** Excellent
@@ -255,6 +270,7 @@ if (!migrated) {
 - 🟢 **Maintenance:** Only v4 to support
 
 **When to use this:**
+
 - Major version upgrade (v3→v4)
 - New system is clearly better
 - You have migration + rollback plan
@@ -264,23 +280,24 @@ if (!migrated) {
 
 ## Comparison Matrix
 
-| Factor | Dual Active | Feature Flag | One-Way Migration |
-|--------|------------|--------------|-------------------|
-| **Complexity** | 🔴 NIGHTMARE | 🟡 MEDIUM | 🟢 LOW |
-| **Data Consistency** | 🔴 HARD | 🟢 EASY | 🟢 EASY |
-| **Performance** | 🔴 SLOW | 🟢 FAST | 🟢 FAST |
-| **Code Paths** | 🔴 N × N | 🟡 2× (v3, v4) | 🟢 1× (v4 only) |
-| **Testing Burden** | 🔴 EXPONENTIAL | 🟡 MANAGEABLE | 🟢 SIMPLE |
-| **User Confusion** | 🔴 HIGH | 🟡 MEDIUM | 🟢 LOW |
-| **Migration Risk** | 🔴 ALWAYS SYNCING | 🟡 MEDIUM | 🟡 MEDIUM |
-| **Backward Compat** | 🟢 YES | 🟢 YES | 🟡 NO |
-| **Maintenance** | 🔴 WORST | 🟡 MEDIUM | 🟢 BEST |
+| Factor               | Dual Active       | Feature Flag   | One-Way Migration |
+| -------------------- | ----------------- | -------------- | ----------------- |
+| **Complexity**       | 🔴 NIGHTMARE      | 🟡 MEDIUM      | 🟢 LOW            |
+| **Data Consistency** | 🔴 HARD           | 🟢 EASY        | 🟢 EASY           |
+| **Performance**      | 🔴 SLOW           | 🟢 FAST        | 🟢 FAST           |
+| **Code Paths**       | 🔴 N × N          | 🟡 2× (v3, v4) | 🟢 1× (v4 only)   |
+| **Testing Burden**   | 🔴 EXPONENTIAL    | 🟡 MANAGEABLE  | 🟢 SIMPLE         |
+| **User Confusion**   | 🔴 HIGH           | 🟡 MEDIUM      | 🟢 LOW            |
+| **Migration Risk**   | 🔴 ALWAYS SYNCING | 🟡 MEDIUM      | 🟡 MEDIUM         |
+| **Backward Compat**  | 🟢 YES            | 🟢 YES         | 🟡 NO             |
+| **Maintenance**      | 🔴 WORST          | 🟡 MEDIUM      | 🟢 BEST           |
 
 ---
 
 ## Real-World Examples
 
 ### Example 1: Gmail (Feature Flag Approach)
+
 ```
 Gmail had "Classic" and "New UI" for YEARS
 Problem: Maintained 2 UIs
@@ -290,6 +307,7 @@ Cost: High maintenance for years
 ```
 
 ### Example 2: Slack (One-Way Upgrade)
+
 ```
 Slack v1 → v2: Complete rewrite
 Decision: Migrated ALL users at once
@@ -299,6 +317,7 @@ Lesson: Clean upgrade beats messy dual systems
 ```
 
 ### Example 3: Stripe (Dual Systems - Regretted It)
+
 ```
 Stripe kept API v1 and v2 running in parallel for 5+ YEARS
 Problem: Developers confused, bugs in sync, maintenance nightmare
@@ -359,6 +378,7 @@ If you're hesitant:
 ```
 
 **Cost of Feature Flag Approach:**
+
 - 3 months supporting both = +$15,000 dev cost
 - 2-3 bugs you didn't anticipate in dual mode
 - Users confused "which should I use?"
@@ -406,11 +426,11 @@ async function saveTransaction(tx) {
 
 ## Impact Summary
 
-| If You Do... | Impact on Timeline | Impact on Code | Risk Level |
-|---|---|---|---|
-| **Dual Active Sync** | +6 weeks | +200% complexity | 🔴 CRITICAL |
-| **Feature Flag (min)** | +2 weeks | +50% complexity | 🟡 MEDIUM |
-| **One-Way (current)** | No change | No change | 🟡 MEDIUM |
+| If You Do...           | Impact on Timeline | Impact on Code   | Risk Level  |
+| ---------------------- | ------------------ | ---------------- | ----------- |
+| **Dual Active Sync**   | +6 weeks           | +200% complexity | 🔴 CRITICAL |
+| **Feature Flag (min)** | +2 weeks           | +50% complexity  | 🟡 MEDIUM   |
+| **One-Way (current)**  | No change          | No change        | 🟡 MEDIUM   |
 
 ---
 
@@ -437,6 +457,7 @@ async function saveTransaction(tx) {
 ```
 
 **This approach:**
+
 - ✅ Starts clean (v4.0 one-way)
 - ✅ Monitors adoption before deciding
 - ✅ Keeps option to backtrack to feature-flag if needed
@@ -448,6 +469,7 @@ async function saveTransaction(tx) {
 ## Your Current Plan is Good!
 
 Looking back at your roadmap:
+
 - ✅ One-way migration (correct choice)
 - ✅ Backup before migration (risk mitigation ✅)
 - ✅ Dry-run capability (let users see preview ✅)
@@ -457,11 +479,13 @@ Looking back at your roadmap:
 **You don't need to change anything.** This is the right call.
 
 **Only add Feature Flag if:**
+
 - 🔴 Stakeholders demand "optional"
 - 🔴 You're concerned about adoption
 - 🔴 You want longer validation period
 
 **Then:**
+
 - Accept +2-3 weeks dev time
 - Accept +50% code complexity
 - Plan to deprecate v3 by v4.2

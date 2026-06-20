@@ -15,17 +15,17 @@
 ```javascript
 // Fixed accounts that come with v4
 const DEFAULT_ACCOUNTS = {
-  '1000': 'Cash',
-  '1100': 'Checking Account',
-  '1200': 'Savings Account',
-  '2000': 'Credit Card Debt',
-  '2100': 'Loans',
-  '3000': 'Opening Balance Equity',
-  '4000': 'Salary',
-  '4100': 'Freelance Income',
-  '5000': 'Groceries',
-  '5100': 'Dining Out',
-  '5200': 'Transportation',
+  1000: "Cash",
+  1100: "Checking Account",
+  1200: "Savings Account",
+  2000: "Credit Card Debt",
+  2100: "Loans",
+  3000: "Opening Balance Equity",
+  4000: "Salary",
+  4100: "Freelance Income",
+  5000: "Groceries",
+  5100: "Dining Out",
+  5200: "Transportation",
   // ... more predefined
 };
 
@@ -37,6 +37,7 @@ const DEFAULT_ACCOUNTS = {
 ```
 
 #### Advantages:
+
 - ✅ **Simple:** No account management UI needed
 - ✅ **Safe:** Can't break trial balance
 - ✅ **Consistent:** All users same structure
@@ -45,12 +46,14 @@ const DEFAULT_ACCOUNTS = {
 - ✅ **Fast MVP:** Focus on core features
 
 #### Disadvantages:
+
 - ❌ **Not personal:** "Why can't I add my own categories?"
 - ❌ **Missing categories:** "I have a boat expense, not in list"
 - ❌ **Can't rename:** "I want to call it 'Salary' not 'Job Income'"
 - ❌ **Some unused:** "I don't have credit card debt"
 
 #### Risk Assessment:
+
 - 🟢 **Complexity:** Low
 - 🟢 **User friction:** Moderate (some complaints)
 - 🟢 **Data integrity:** Excellent (can't break)
@@ -66,12 +69,12 @@ const DEFAULT_ACCOUNTS = {
 // User can do this:
 const userAccounts = [
   // Built-in (can't delete)
-  { id: '1100', name: 'Checking Account', isSystem: true },
-  
+  { id: "1100", name: "Checking Account", isSystem: true },
+
   // User-added (can delete)
-  { id: '1300', name: 'My Boat Fund', type: 'asset', isSystem: false },
-  { id: '5500', name: 'Boat Expenses', type: 'expense', isSystem: false },
-  { id: '5600', name: 'Cryptocurrency', type: 'asset', isSystem: false },
+  { id: "1300", name: "My Boat Fund", type: "asset", isSystem: false },
+  { id: "5500", name: "Boat Expenses", type: "expense", isSystem: false },
+  { id: "5600", name: "Cryptocurrency", type: "asset", isSystem: false },
 ];
 
 // Full UI:
@@ -82,6 +85,7 @@ const userAccounts = [
 ```
 
 #### Advantages:
+
 - ✅ **Very personal:** Users customize to their needs
 - ✅ **Handles edge cases:** Boat owner, crypto holder, etc.
 - ✅ **Rename freedom:** "Job Income" → "Salary"
@@ -89,6 +93,7 @@ const userAccounts = [
 - ✅ **Professional:** Feels more powerful
 
 #### Disadvantages:
+
 - ❌ **Added complexity:** Account management screens
 - ❌ **Data integrity risks:** User deletes critical account
 - ❌ **Migration complexity:** Map old categories to custom accounts
@@ -97,6 +102,7 @@ const userAccounts = [
 - ❌ **Validation:** Account type must match usage
 
 #### Key Risks:
+
 ```javascript
 // Risk 1: User deletes account that has transactions
 // Before: Groceries account has 50 transactions
@@ -123,6 +129,7 @@ const userAccounts = [
 ```
 
 #### Risk Assessment:
+
 - 🔴 **Complexity:** Very High
 - 🔴 **User friction:** Low (users happy with options)
 - 🟡 **Data integrity:** High if good validation, risky without it
@@ -132,22 +139,23 @@ const userAccounts = [
 
 ## Comparison Matrix
 
-| Factor | Fixed Accounts | Customizable |
-|--------|---|---|
-| **MVP Timeline** | 🟢 6 weeks | 🔴 9 weeks |
-| **Code Complexity** | 🟢 LOW | 🟡 MEDIUM-HIGH |
-| **Data Integrity Risk** | 🟢 SAFE | 🟡 RISKY |
-| **User Satisfaction** | 🟡 MODERATE | 🟢 HIGH |
-| **New User Friendly** | 🟢 YES | 🔴 OVERWHELMING |
-| **Power User Friendly** | 🔴 NO | 🟢 YES |
-| **Testing Burden** | 🟢 SIMPLE | 🔴 COMPLEX |
-| **Migration Complexity** | 🟢 EASY | 🔴 HARD |
+| Factor                   | Fixed Accounts | Customizable    |
+| ------------------------ | -------------- | --------------- |
+| **MVP Timeline**         | 🟢 6 weeks     | 🔴 9 weeks      |
+| **Code Complexity**      | 🟢 LOW         | 🟡 MEDIUM-HIGH  |
+| **Data Integrity Risk**  | 🟢 SAFE        | 🟡 RISKY        |
+| **User Satisfaction**    | 🟡 MODERATE    | 🟢 HIGH         |
+| **New User Friendly**    | 🟢 YES         | 🔴 OVERWHELMING |
+| **Power User Friendly**  | 🔴 NO          | 🟢 YES          |
+| **Testing Burden**       | 🟢 SIMPLE      | 🔴 COMPLEX      |
+| **Migration Complexity** | 🟢 EASY        | 🔴 HARD         |
 
 ---
 
 ## Real-World Examples
 
 ### Example 1: QuickBooks (Customizable)
+
 ```
 QuickBooks allows full chart of accounts customization
 Problem: New users overwhelmed, make mistakes
@@ -156,6 +164,7 @@ Lesson: Customization is great... if you guide users carefully
 ```
 
 ### Example 2: YNAB (Fixed)
+
 ```
 You Need A Budget uses fixed categories
 Strategy: Built-in categories are well-researched
@@ -165,6 +174,7 @@ Lesson: Fixed structure works if it's well-designed
 ```
 
 ### Example 3: Stripe (Progressive)
+
 ```
 Stripe started with fixed (simple)
 Later: Added custom fields for power users
@@ -176,6 +186,7 @@ Lesson: Start simple, add customization as users mature
 ## RECOMMENDATION: Hybrid Approach (Best of Both)
 
 ### Phase 1: v4.0 MVP (Fixed Accounts)
+
 ```javascript
 // ✅ DO:
 - Provide 30-40 well-researched default accounts
@@ -190,6 +201,7 @@ Lesson: Start simple, add customization as users mature
 ```
 
 **User Experience:**
+
 ```
 ┌──────────────────────────────────────┐
 │ Accounts (View/Hide)                 │
@@ -205,36 +217,38 @@ Lesson: Start simple, add customization as users mature
 ```
 
 **Code:**
+
 ```javascript
 // User can rename (not delete/restructure)
 async function renameAccount(accountId, newName) {
-    // Validate
-    if (!newName || newName.length < 2) {
-        throw new Error('Account name too short');
-    }
-    
-    if (newName.length > 50) {
-        throw new Error('Account name too long');
-    }
-    
-    // Update (type, structure unchanged)
-    const account = await getAccount(accountId);
-    account.name = newName;
-    return await updateAccount(accountId, account);
+  // Validate
+  if (!newName || newName.length < 2) {
+    throw new Error("Account name too short");
+  }
+
+  if (newName.length > 50) {
+    throw new Error("Account name too long");
+  }
+
+  // Update (type, structure unchanged)
+  const account = await getAccount(accountId);
+  account.name = newName;
+  return await updateAccount(accountId, account);
 }
 
 // User can hide/show (not delete)
 async function deactivateAccount(accountId, isActive) {
-    const account = await getAccount(accountId);
-    account.isActive = isActive;  // true = show, false = hide
-    return await updateAccount(accountId, account);
-    
-    // Hidden accounts don't appear in dropdowns
-    // But data isn't deleted, so trial balance stays intact
+  const account = await getAccount(accountId);
+  account.isActive = isActive; // true = show, false = hide
+  return await updateAccount(accountId, account);
+
+  // Hidden accounts don't appear in dropdowns
+  // But data isn't deleted, so trial balance stays intact
 }
 ```
 
 **Benefits:**
+
 - ✅ Users can personalize (rename "Salary" → "Job")
 - ✅ Users can hide clutter (deactivate unused accounts)
 - ✅ No risk of breaking data structure
@@ -245,6 +259,7 @@ async function deactivateAccount(accountId, isActive) {
 ---
 
 ### Phase 2: v4.1 Custom Accounts (With Guardrails)
+
 ```javascript
 // Later, add custom account creation WITH validation
 
@@ -268,6 +283,7 @@ async function deactivateAccount(accountId, isActive) {
 ```
 
 **Advanced UI (v4.1+):**
+
 ```
 ┌──────────────────────────────────────┐
 │ Chart of Accounts                    │
@@ -293,6 +309,7 @@ async function deactivateAccount(accountId, isActive) {
 ## Implementation Strategy: PHASE-BY-PHASE
 
 ### v4.0 (MVP - Weeks 1-6): Fixed + Rename/Hide
+
 ```javascript
 // What users CAN do:
 1. Rename accounts (e.g., "Salary" → "Job Income")
@@ -317,6 +334,7 @@ async function deactivateAccount(accountId, isActive) {
 ---
 
 ### v4.1+ (Post-MVP - Later): Full Customization (With Validation)
+
 ```javascript
 // What users CAN do (with guardrails):
 1. Create custom accounts with proper validation
@@ -372,45 +390,43 @@ v4.2+     │ Account templates      │ For different use cases
 const DEFAULT_ACCOUNTS = {
   // ASSETS (1000-1999)
   assets: [
-    { id: '1000', name: 'Cash (บาท)', type: 'asset' },
-    { id: '1100', name: 'Checking Account', type: 'asset' },
-    { id: '1200', name: 'Savings Account', type: 'asset' },
-    { id: '1300', name: 'Investment Account', type: 'asset' }, // Optional
+    { id: "1000", name: "Cash (บาท)", type: "asset" },
+    { id: "1100", name: "Checking Account", type: "asset" },
+    { id: "1200", name: "Savings Account", type: "asset" },
+    { id: "1300", name: "Investment Account", type: "asset" }, // Optional
   ],
 
   // LIABILITIES (2000-2999)
   liabilities: [
-    { id: '2000', name: 'Credit Card Debt', type: 'liability' },
-    { id: '2100', name: 'Loans', type: 'liability' },
+    { id: "2000", name: "Credit Card Debt", type: "liability" },
+    { id: "2100", name: "Loans", type: "liability" },
   ],
 
   // EQUITY (3000-3999)
-  equity: [
-    { id: '3000', name: 'Opening Balance', type: 'equity' },
-  ],
+  equity: [{ id: "3000", name: "Opening Balance", type: "equity" }],
 
   // INCOME (4000-4999) - Common for Thailand
   income: [
-    { id: '4000', name: 'Salary', type: 'income' },
-    { id: '4100', name: 'Freelance/Side Income', type: 'income' },
-    { id: '4200', name: 'Investment Returns', type: 'income' },
-    { id: '4300', name: 'Bonus', type: 'income' },
-    { id: '4900', name: 'Other Income', type: 'income' },
+    { id: "4000", name: "Salary", type: "income" },
+    { id: "4100", name: "Freelance/Side Income", type: "income" },
+    { id: "4200", name: "Investment Returns", type: "income" },
+    { id: "4300", name: "Bonus", type: "income" },
+    { id: "4900", name: "Other Income", type: "income" },
   ],
 
   // EXPENSES (5000-5999) - Common for Thailand
   expenses: [
-    { id: '5000', name: 'Groceries', type: 'expense' },
-    { id: '5100', name: 'Coffee/Dining', type: 'expense' },
-    { id: '5200', name: 'Transportation', type: 'expense' },
-    { id: '5300', name: 'Utilities/Internet', type: 'expense' },
-    { id: '5400', name: 'Rent', type: 'expense' },
-    { id: '5500', name: 'Entertainment', type: 'expense' },
-    { id: '5600', name: 'Healthcare', type: 'expense' },
-    { id: '5700', name: 'Shopping', type: 'expense' },
-    { id: '5800', name: 'Subscriptions', type: 'expense' },
-    { id: '5900', name: 'Other Expenses', type: 'expense' },
-  ]
+    { id: "5000", name: "Groceries", type: "expense" },
+    { id: "5100", name: "Coffee/Dining", type: "expense" },
+    { id: "5200", name: "Transportation", type: "expense" },
+    { id: "5300", name: "Utilities/Internet", type: "expense" },
+    { id: "5400", name: "Rent", type: "expense" },
+    { id: "5500", name: "Entertainment", type: "expense" },
+    { id: "5600", name: "Healthcare", type: "expense" },
+    { id: "5700", name: "Shopping", type: "expense" },
+    { id: "5800", name: "Subscriptions", type: "expense" },
+    { id: "5900", name: "Other Expenses", type: "expense" },
+  ],
 };
 ```
 
@@ -454,12 +470,14 @@ When users ask "I need X category":
 ## Summary: When to Allow Customization
 
 ### v4.0 MVP: ✅ DO THIS
+
 - ✅ Rename accounts (Safety: Structure unchanged)
 - ✅ Deactivate/hide accounts (Safety: Data preserved)
 - ✅ Show role-based defaults (80% coverage)
 - ❌ Don't allow add/delete/restructure
 
 ### v4.1+: ✅ ADD LATER
+
 - ✅ Add custom accounts (with validation)
 - ✅ Delete custom accounts (but not system)
 - ✅ Plan for migrations (handle custom accounts)
@@ -470,20 +488,21 @@ When users ask "I need X category":
 ## Final Decision
 
 **For v4.0:**
+
 ```javascript
 DEFAULT_CHART_OF_ACCOUNTS = {
   // ~30-40 well-designed accounts
   // Covers 80% of use cases
   // Users can rename + hide
   // Structure is protected
-  
   // Timeline: No impact (already included)
   // Risk: None (can't break data)
   // User satisfaction: Good (can personalize names)
-}
+};
 ```
 
 **For v4.1:**
+
 ```python
 CUSTOM_ACCOUNTS = {
   # Full account management
@@ -505,6 +524,7 @@ CUSTOM_ACCOUNTS = {
 This is the **professional approach** - Facebook, Slack, Stripe all started with opinionated defaults, then added customization later.
 
 **Want me to:**
+
 1. Expand the default chart of accounts for your use case?
 2. Design the renaming/deactivation UI?
 3. Plan the v4.1 custom accounts feature?

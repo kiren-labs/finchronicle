@@ -26,6 +26,7 @@
 ## ✨ Features
 
 ### 🎯 Core Features
+
 - ✅ **100% Offline** - Works without internet connection
 - ✅ **Privacy First** - All data stays on your device
 - ✅ **No Sign-Up** - Start using immediately
@@ -34,6 +35,7 @@
 - ✅ **Dark Mode** - Easy on the eyes at night
 
 ### 💰 Financial Tracking
+
 - ✅ **Income, Expenses & Transfers** - Track all transaction types
 - ✅ **Category Hierarchy** - Parent/sub-category structure with drill-down filtering (v4.0.0)
 - ✅ **Account Linking** - Link transactions to accounts for accurate balance tracking (v4.0.0)
@@ -58,6 +60,7 @@
 - ✅ **Export to CSV** - Backup, restore, and annual exports
 
 ### 🎨 User Experience
+
 - ✅ **Quick Entry Templates** - Save & reuse common transaction patterns
 - ✅ **Optional Fields** - Payment method, merchant, expense type, account linking
 - ✅ **Smart Category Suggestions** - Auto-suggest categories from notes text
@@ -69,6 +72,7 @@
 - ✅ **Modern Icons** - Professional Remix Icon font
 
 ### 🛠️ Technical Features
+
 - ✅ **ES Modules** - 27 focused modules, no build step required
 - ✅ **Zero Dependencies** - No npm, no frameworks
 - ✅ **Service Worker** - Cache-first offline strategy
@@ -174,17 +178,20 @@ finchronicle/
 
 1. **Edit files** — logic lives in `js/` modules, UI structure in `index.html`, styling in `css/`
 2. **Update version** in three places:
+
    ```javascript
    // js/state.js
-   export const APP_VERSION = '4.1.0';
+   export const APP_VERSION = "4.1.0";
 
    // sw.js
-   const CACHE_NAME = 'finchronicle-v4.1.0';
+   const CACHE_NAME = "finchronicle-v4.1.0";
    ```
+
    ```json
    // manifest.json
    "version": "4.1.0"
    ```
+
 3. **Test locally**:
    ```bash
    python3 -m http.server 8000
@@ -199,11 +206,12 @@ finchronicle/
 Click the currency button in the toolbar and select from 20+ currencies!
 
 Or modify the default in [js/currency.js](js/currency.js):
+
 ```javascript
 // In js/currency.js, getCurrency() function:
 export function getCurrency() {
-    const saved = localStorage.getItem('currency');
-    return saved && currencies[saved] ? saved : 'INR'; // Change to your default
+  const saved = localStorage.getItem("currency");
+  return saved && currencies[saved] ? saved : "INR"; // Change to your default
 }
 ```
 
@@ -212,20 +220,20 @@ export function getCurrency() {
 ```javascript
 // In js/state.js, categories object:
 export const categories = {
-    income: [
-        'Salary',
-        'Business',
-        'Investment',
-        'Your New Category', // Add here
-        'Other Income'
-    ],
-    expense: [
-        'Food',
-        'Groceries',
-        'Transport',
-        'Your New Category', // Add here
-        'Other Expense'
-    ]
+  income: [
+    "Salary",
+    "Business",
+    "Investment",
+    "Your New Category", // Add here
+    "Other Income",
+  ],
+  expense: [
+    "Food",
+    "Groceries",
+    "Transport",
+    "Your New Category", // Add here
+    "Other Expense",
+  ],
 };
 ```
 
@@ -233,11 +241,11 @@ export const categories = {
 
 ```css
 /* In css/tokens.css: */
---color-primary: #0051D5;     /* Blue - main app color */
---color-success: #34c759;     /* Green - income */
---color-danger: #ff3b30;      /* Red - expense */
---color-bg: #f5f5f7;          /* Light mode background */
---color-surface: #ffffff;     /* Card background */
+--color-primary: #0051d5; /* Blue - main app color */
+--color-success: #34c759; /* Green - income */
+--color-danger: #ff3b30; /* Red - expense */
+--color-bg: #f5f5f7; /* Light mode background */
+--color-surface: #ffffff; /* Card background */
 ```
 
 ---
@@ -257,6 +265,7 @@ export const categories = {
 ## 🔒 Privacy & Security
 
 ### Your Data
+
 - ✅ Stored **locally** on your device only
 - ✅ **Never sent** to any server
 - ✅ **No tracking** or analytics
@@ -264,9 +273,11 @@ export const categories = {
 - ✅ **No ads** or monetization
 
 ### What We Collect
+
 - ❌ **Nothing!** This app collects zero data.
 
 ### Data Access
+
 - Only you can access your data
 - Transaction data stays in your browser's IndexedDB
 - Settings stay in your browser's localStorage
@@ -277,6 +288,7 @@ export const categories = {
 ## 🛣️ Roadmap
 
 ### Completed (v3.11–4.0)
+
 - ✅ Recurring transactions (v3.11)
 - ✅ Budget limits & alerts (v3.13)
 - ✅ Tags & full-text search (v3.14)
@@ -353,6 +365,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 Most finance apps ask you to create an account, pay a subscription, and hand over your transaction history to a server you don't control. FinChronicle takes the opposite approach.
 
 **It's built for people who:**
+
 - Want their financial data on their device and nowhere else
 - Log transactions manually — quick 10-second entries on mobile
 - Travel or live somewhere with unreliable internet
@@ -360,6 +373,7 @@ Most finance apps ask you to create an account, pay a subscription, and hand ove
 - Want a full budget + net worth + reconciliation stack without paying monthly
 
 **What you give up:**
+
 - Automatic bank transaction sync (manual entry only)
 - Multi-user or shared finance features
 - Double-entry accounting (journal entries, trial balance)
@@ -406,6 +420,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## ⭐ Show Your Support
 
 If this project helped you, please consider:
+
 - ⭐ Starring the repository
 - 🐦 Sharing on social media
 - 🤝 Contributing improvements

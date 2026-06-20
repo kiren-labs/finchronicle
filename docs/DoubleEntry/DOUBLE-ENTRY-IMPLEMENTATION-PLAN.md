@@ -30,6 +30,7 @@ This document outlines a comprehensive plan to add **optional** double-entry boo
 ### Why Double-Entry Bookkeeping?
 
 **Current Limitations (Single-Entry):**
+
 - ❌ Can't track multiple bank accounts separately
 - ❌ Can't track credit card balances
 - ❌ Can't manage loans/debts properly
@@ -40,6 +41,7 @@ This document outlines a comprehensive plan to add **optional** double-entry boo
 - ❌ Can't reconcile with bank statements
 
 **Benefits of Double-Entry:**
+
 - ✅ Track multiple accounts (checking, savings, credit cards, cash)
 - ✅ Calculate net worth automatically (assets - liabilities)
 - ✅ Balance sheet and income statement generation
@@ -54,6 +56,7 @@ This document outlines a comprehensive plan to add **optional** double-entry boo
 ### Target Users
 
 **Primary Beneficiaries:**
+
 1. **Small Business Owners** - Need proper accounting
 2. **Freelancers** - Track business vs personal finances
 3. **Power Users** - Want comprehensive financial management
@@ -61,6 +64,7 @@ This document outlines a comprehensive plan to add **optional** double-entry boo
 5. **Investors** - Track portfolios and net worth
 
 **Will NOT Benefit:**
+
 1. Casual users who just want to track spending
 2. Users who only use one bank account
 3. Students with simple finances
@@ -70,6 +74,7 @@ This document outlines a comprehensive plan to add **optional** double-entry boo
 **Recommendation: YES, absolutely optional**
 
 Reasons:
+
 1. Maintains simplicity for existing users
 2. Gradual learning curve
 3. No forced migration
@@ -85,16 +90,17 @@ Reasons:
 ```javascript
 Transaction = {
   id: number,
-  type: 'income' | 'expense',
+  type: "income" | "expense",
   amount: number,
   category: string,
   date: string,
   notes: string,
-  createdAt: string
-}
+  createdAt: string,
+};
 ```
 
 **User Flow:**
+
 1. Select type (income/expense)
 2. Enter amount
 3. Choose category
@@ -102,6 +108,7 @@ Transaction = {
 5. Save
 
 **Calculation:**
+
 - Total Income = Sum of all income transactions
 - Total Expenses = Sum of all expense transactions
 - Net = Income - Expenses
@@ -146,6 +153,7 @@ LegacyTransaction = {
 ```
 
 **User Flow (Simplified Mode):**
+
 1. Select transaction type (income/expense/transfer)
 2. Choose FROM account (expense: checking, income: salary category)
 3. Choose TO account (expense: groceries category, income: checking)
@@ -154,12 +162,14 @@ LegacyTransaction = {
 6. Save → System creates proper journal entry behind the scenes
 
 **User Flow (Advanced Mode):**
+
 1. Create journal entry manually
 2. Add multiple debits/credits
 3. System validates: Total Debits = Total Credits
 4. Save
 
 **Calculation:**
+
 - Account Balance = Sum of (Debits - Credits) for that account
 - Assets = Sum of all asset account balances
 - Liabilities = Sum of all liability account balances
@@ -189,6 +199,7 @@ LegacyTransaction = {
 ```
 
 **Simple Mode:**
+
 - Current single-entry interface
 - No account selection required
 - Categories work as before
@@ -196,6 +207,7 @@ LegacyTransaction = {
 - For: Casual users, beginners
 
 **Double-Entry Mode:**
+
 - Full chart of accounts
 - Account selection required
 - Proper journal entries
@@ -205,6 +217,7 @@ LegacyTransaction = {
 ### Data Storage Strategy
 
 **Option 1: Dual Storage (Recommended)**
+
 ```
 IndexedDB:
   - transactions (legacy, read-only)
@@ -214,6 +227,7 @@ IndexedDB:
 ```
 
 **Option 2: Migration Only**
+
 ```
 IndexedDB:
   - accounts
@@ -236,44 +250,70 @@ When user enables double-entry mode, create these accounts:
 const DEFAULT_ACCOUNTS = {
   // ASSETS (1000-1999)
   assets: [
-    { id: '1000', name: 'Cash', type: 'asset', subtype: 'cash' },
-    { id: '1100', name: 'Checking Account', type: 'asset', subtype: 'bank' },
-    { id: '1200', name: 'Savings Account', type: 'asset', subtype: 'bank' },
-    { id: '1300', name: 'Credit Card', type: 'asset', subtype: 'credit_card', balance: 0 },
+    { id: "1000", name: "Cash", type: "asset", subtype: "cash" },
+    { id: "1100", name: "Checking Account", type: "asset", subtype: "bank" },
+    { id: "1200", name: "Savings Account", type: "asset", subtype: "bank" },
+    {
+      id: "1300",
+      name: "Credit Card",
+      type: "asset",
+      subtype: "credit_card",
+      balance: 0,
+    },
   ],
 
   // LIABILITIES (2000-2999)
   liabilities: [
-    { id: '2000', name: 'Credit Card Debt', type: 'liability', subtype: 'credit_card' },
-    { id: '2100', name: 'Loans', type: 'liability', subtype: 'loan' },
+    {
+      id: "2000",
+      name: "Credit Card Debt",
+      type: "liability",
+      subtype: "credit_card",
+    },
+    { id: "2100", name: "Loans", type: "liability", subtype: "loan" },
   ],
 
   // EQUITY (3000-3999)
   equity: [
-    { id: '3000', name: 'Opening Balance', type: 'equity', subtype: 'opening' },
+    { id: "3000", name: "Opening Balance", type: "equity", subtype: "opening" },
   ],
 
   // INCOME (4000-4999)
   income: [
-    { id: '4000', name: 'Salary', type: 'income', subtype: 'salary' },
-    { id: '4100', name: 'Freelance Income', type: 'income', subtype: 'business' },
-    { id: '4200', name: 'Investment Income', type: 'income', subtype: 'investment' },
-    { id: '4900', name: 'Other Income', type: 'income', subtype: 'other' },
+    { id: "4000", name: "Salary", type: "income", subtype: "salary" },
+    {
+      id: "4100",
+      name: "Freelance Income",
+      type: "income",
+      subtype: "business",
+    },
+    {
+      id: "4200",
+      name: "Investment Income",
+      type: "income",
+      subtype: "investment",
+    },
+    { id: "4900", name: "Other Income", type: "income", subtype: "other" },
   ],
 
   // EXPENSES (5000-5999)
   expenses: [
-    { id: '5000', name: 'Groceries', type: 'expense', subtype: 'food' },
-    { id: '5100', name: 'Dining Out', type: 'expense', subtype: 'food' },
-    { id: '5200', name: 'Transportation', type: 'expense', subtype: 'transport' },
-    { id: '5300', name: 'Utilities', type: 'expense', subtype: 'bills' },
-    { id: '5400', name: 'Rent', type: 'expense', subtype: 'housing' },
-    { id: '5500', name: 'Entertainment', type: 'expense', subtype: 'leisure' },
-    { id: '5600', name: 'Healthcare', type: 'expense', subtype: 'health' },
-    { id: '5700', name: 'Shopping', type: 'expense', subtype: 'shopping' },
-    { id: '5800', name: 'Education', type: 'expense', subtype: 'education' },
-    { id: '5900', name: 'Other Expenses', type: 'expense', subtype: 'other' },
-  ]
+    { id: "5000", name: "Groceries", type: "expense", subtype: "food" },
+    { id: "5100", name: "Dining Out", type: "expense", subtype: "food" },
+    {
+      id: "5200",
+      name: "Transportation",
+      type: "expense",
+      subtype: "transport",
+    },
+    { id: "5300", name: "Utilities", type: "expense", subtype: "bills" },
+    { id: "5400", name: "Rent", type: "expense", subtype: "housing" },
+    { id: "5500", name: "Entertainment", type: "expense", subtype: "leisure" },
+    { id: "5600", name: "Healthcare", type: "expense", subtype: "health" },
+    { id: "5700", name: "Shopping", type: "expense", subtype: "shopping" },
+    { id: "5800", name: "Education", type: "expense", subtype: "education" },
+    { id: "5900", name: "Other Expenses", type: "expense", subtype: "other" },
+  ],
 };
 ```
 
@@ -284,30 +324,31 @@ When migrating from single-entry, map categories to accounts:
 ```javascript
 const CATEGORY_TO_ACCOUNT_MAP = {
   // Income categories → Income accounts
-  'Salary': '4000',
-  'Freelance': '4100',
-  'Investment': '4200',
+  Salary: "4000",
+  Freelance: "4100",
+  Investment: "4200",
 
   // Expense categories → Expense accounts
-  'Groceries': '5000',
-  'Food': '5000',
-  'Dining': '5100',
-  'Transportation': '5200',
-  'Utilities': '5300',
-  'Rent': '5400',
-  'Entertainment': '5500',
-  'Healthcare': '5600',
-  'Shopping': '5700',
-  'Education': '5800',
+  Groceries: "5000",
+  Food: "5000",
+  Dining: "5100",
+  Transportation: "5200",
+  Utilities: "5300",
+  Rent: "5400",
+  Entertainment: "5500",
+  Healthcare: "5600",
+  Shopping: "5700",
+  Education: "5800",
   // Default fallback
-  'Other Expense': '5900',
-  'Other Income': '4900'
+  "Other Expense": "5900",
+  "Other Income": "4900",
 };
 ```
 
 ### Journal Entry Examples
 
 **Example 1: Salary Received**
+
 ```javascript
 {
   date: '2026-02-01',
@@ -321,6 +362,7 @@ const CATEGORY_TO_ACCOUNT_MAP = {
 ```
 
 **Example 2: Grocery Purchase**
+
 ```javascript
 {
   date: '2026-02-05',
@@ -334,6 +376,7 @@ const CATEGORY_TO_ACCOUNT_MAP = {
 ```
 
 **Example 3: Transfer Between Accounts**
+
 ```javascript
 {
   date: '2026-02-10',
@@ -353,6 +396,7 @@ const CATEGORY_TO_ACCOUNT_MAP = {
 ### Phase 1: Opt-In Setup
 
 **User Flow:**
+
 1. User goes to Settings
 2. Sees new option: "Enable Advanced Accounting (Double-Entry)"
 3. Clicks "Learn More" → Explanation modal
@@ -361,6 +405,7 @@ const CATEGORY_TO_ACCOUNT_MAP = {
 ### Phase 2: Migration Wizard
 
 **Step 1: Welcome**
+
 ```
 ┌─────────────────────────────────────────┐
 │  Welcome to Double-Entry Bookkeeping!  │
@@ -376,6 +421,7 @@ const CATEGORY_TO_ACCOUNT_MAP = {
 ```
 
 **Step 2: Set Opening Balances**
+
 ```
 ┌─────────────────────────────────────────┐
 │  Set Your Account Balances              │
@@ -393,6 +439,7 @@ const CATEGORY_TO_ACCOUNT_MAP = {
 ```
 
 **Step 3: Assign Default Account**
+
 ```
 ┌─────────────────────────────────────────┐
 │  Which account do you use most?         │
@@ -409,6 +456,7 @@ const CATEGORY_TO_ACCOUNT_MAP = {
 ```
 
 **Step 4: Review Migration**
+
 ```
 ┌─────────────────────────────────────────┐
 │  Migration Preview                      │
@@ -425,6 +473,7 @@ const CATEGORY_TO_ACCOUNT_MAP = {
 ```
 
 **Step 5: Migration Progress**
+
 ```
 ┌─────────────────────────────────────────┐
 │  Migrating Your Data...                 │
@@ -440,6 +489,7 @@ const CATEGORY_TO_ACCOUNT_MAP = {
 ```
 
 **Step 6: Success**
+
 ```
 ┌─────────────────────────────────────────┐
 │  ✓ Migration Complete!                  │
@@ -467,23 +517,23 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
   // 2. Create opening balance journal entry
   const openingEntry = {
     date: getOldestTransactionDate(),
-    description: 'Opening Balance',
-    entries: []
+    description: "Opening Balance",
+    entries: [],
   };
 
   // Add opening balances
   for (const [accountId, balance] of Object.entries(openingBalances)) {
     const account = getAccount(accountId);
-    if (account.type === 'asset') {
+    if (account.type === "asset") {
       openingEntry.entries.push({
         accountId: accountId,
         debit: balance,
-        credit: 0
+        credit: 0,
       });
       openingEntry.entries.push({
-        accountId: '3000', // Opening Balance Equity
+        accountId: "3000", // Opening Balance Equity
         debit: 0,
-        credit: balance
+        credit: balance,
       });
     }
   }
@@ -498,38 +548,39 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
       date: txn.date,
       description: `${txn.category} - ${txn.notes}`,
       reference: `TXN-${txn.id}`,
-      entries: []
+      entries: [],
     };
 
     // Map category to account
-    const categoryAccountId = CATEGORY_TO_ACCOUNT_MAP[txn.category] ||
-                               (txn.type === 'income' ? '4900' : '5900');
+    const categoryAccountId =
+      CATEGORY_TO_ACCOUNT_MAP[txn.category] ||
+      (txn.type === "income" ? "4900" : "5900");
 
-    if (txn.type === 'expense') {
+    if (txn.type === "expense") {
       // Debit: Expense account
       entry.entries.push({
         accountId: categoryAccountId,
         debit: txn.amount,
-        credit: 0
+        credit: 0,
       });
       // Credit: Default account (bank/cash)
       entry.entries.push({
         accountId: defaultAccountId,
         debit: 0,
-        credit: txn.amount
+        credit: txn.amount,
       });
     } else {
       // Debit: Default account (bank/cash)
       entry.entries.push({
         accountId: defaultAccountId,
         debit: txn.amount,
-        credit: 0
+        credit: 0,
       });
       // Credit: Income account
       entry.entries.push({
         accountId: categoryAccountId,
         debit: 0,
-        credit: txn.amount
+        credit: txn.amount,
       });
     }
 
@@ -537,7 +588,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
   }
 
   // 4. Update settings
-  await updateSettings({ accountingMode: 'double-entry' });
+  await updateSettings({ accountingMode: "double-entry" });
 
   // 5. Archive old transactions (keep for rollback)
   await archiveTransactions();
@@ -551,6 +602,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 ## Implementation Phases
 
 ### Phase 0: Preparation (Week 1-2)
+
 - [ ] Create feature flag system
 - [ ] Design database schema
 - [ ] Create migration plan document (this doc)
@@ -558,6 +610,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 - [ ] Get community feedback
 
 ### Phase 1: Core Data Layer (Week 3-5)
+
 - [ ] Create Account data structure
 - [ ] Create JournalEntry data structure
 - [ ] Implement IndexedDB tables (accounts, journal_entries)
@@ -568,6 +621,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 - [ ] Unit tests for data layer
 
 ### Phase 2: Business Logic (Week 6-7)
+
 - [ ] Implement accounting rules validation (debits = credits)
 - [ ] Create transaction classification logic
 - [ ] Implement account balance calculations
@@ -577,6 +631,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 - [ ] Unit tests for business logic
 
 ### Phase 3: Settings & Migration UI (Week 8)
+
 - [ ] Add "Accounting Mode" toggle to Settings
 - [ ] Create migration wizard UI
 - [ ] Implement opening balance entry forms
@@ -585,6 +640,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 - [ ] Test migration with various data sizes
 
 ### Phase 4: Transaction UI (Week 9-10)
+
 - [ ] Design simplified transaction entry (preserves UX)
 - [ ] Implement account selector dropdowns
 - [ ] Add transfer transaction type
@@ -594,6 +650,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 - [ ] Update summary cards with account balances
 
 ### Phase 5: Reporting & Insights (Week 11)
+
 - [ ] Create Balance Sheet view
 - [ ] Create Income Statement view
 - [ ] Create Trial Balance view
@@ -603,6 +660,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 - [ ] Add drill-down from reports to transactions
 
 ### Phase 6: Chart of Accounts Management (Week 12)
+
 - [ ] Create Accounts management page
 - [ ] Add/Edit/Delete account functionality
 - [ ] Account balance display
@@ -611,6 +669,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 - [ ] Import/export chart of accounts
 
 ### Phase 7: Testing & Polish (Week 13-14)
+
 - [ ] End-to-end testing
 - [ ] Migration testing (various scenarios)
 - [ ] Performance testing (large datasets)
@@ -619,6 +678,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 - [ ] Tutorial/onboarding flow
 
 ### Phase 8: Release (Week 15)
+
 - [ ] Beta release to power users
 - [ ] Gather feedback
 - [ ] Bug fixes
@@ -762,6 +822,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 ## Testing Strategy
 
 ### Unit Tests
+
 - [ ] Account CRUD operations
 - [ ] Journal entry validation
 - [ ] Balance calculations
@@ -769,6 +830,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 - [ ] Report generation
 
 ### Integration Tests
+
 - [ ] End-to-end transaction flow
 - [ ] Migration from single-entry
 - [ ] Multi-account transfers
@@ -777,6 +839,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 ### Test Scenarios
 
 **Migration Testing:**
+
 1. Empty database → Should create default accounts
 2. Database with 100 transactions → Should migrate correctly
 3. Database with 10,000 transactions → Performance test
@@ -784,6 +847,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 5. Transactions with no category → Should use default
 
 **Transaction Testing:**
+
 1. Simple expense → Should create 2 entries (debit expense, credit cash)
 2. Simple income → Should create 2 entries (debit cash, credit income)
 3. Transfer → Should create 2 entries (debit to-account, credit from-account)
@@ -791,6 +855,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 5. Negative amounts → Should reject
 
 **Balance Testing:**
+
 1. Opening balance → Should set correctly
 2. After expense → Should decrease asset
 3. After income → Should increase asset
@@ -798,6 +863,7 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 5. Multiple transactions → Should accumulate correctly
 
 **Report Testing:**
+
 1. Balance sheet → Assets = Liabilities + Equity
 2. Income statement → Should match transaction totals
 3. Trial balance → Should balance (debits = credits)
@@ -808,35 +874,45 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 ## Risks and Mitigation
 
 ### Risk 1: Data Loss During Migration
+
 **Mitigation:**
+
 - Create backup before migration
 - Keep original transactions table intact
 - Allow rollback to simple mode
 - Extensive testing before release
 
 ### Risk 2: User Confusion
+
 **Mitigation:**
+
 - Clear documentation and tutorials
 - Simplified UI for common operations
 - In-app help tooltips
 - Video walkthrough
 
 ### Risk 3: Performance Issues
+
 **Mitigation:**
+
 - Optimize balance calculations
 - Use IndexedDB indexes properly
 - Lazy load reports
 - Pagination for transaction lists
 
 ### Risk 4: Accounting Errors
+
 **Mitigation:**
+
 - Validate all journal entries (debits = credits)
 - Run trial balance checks
 - Add reconciliation tools
 - Extensive testing with real-world data
 
 ### Risk 5: Adoption Rate Too Low
+
 **Mitigation:**
+
 - Make it truly optional
 - Clear benefits communication
 - Beta test with interested users first
@@ -847,18 +923,21 @@ async function migrateToDoubleEntry(defaultAccountId, openingBalances) {
 ## Success Metrics
 
 ### Technical Metrics
+
 - [ ] Migration success rate > 99%
 - [ ] Balance calculations accurate to 2 decimal places
 - [ ] Page load time < 2 seconds
 - [ ] Zero data loss incidents
 
 ### User Metrics
+
 - [ ] 10% of users enable double-entry in first month
 - [ ] 80% completion rate for migration wizard
 - [ ] < 5% rollback to simple mode
 - [ ] Positive feedback from power users
 
 ### Business Metrics
+
 - [ ] Increased user retention
 - [ ] Higher engagement (more features used)
 - [ ] Potential for premium features (multi-currency, advanced reports)
@@ -876,6 +955,7 @@ This is a **major feature** that will significantly expand FinChronicle's capabi
 5. ✅ **Clear migration path** - Wizard-guided, step-by-step
 
 **Recommended Approach:**
+
 - Start with Phase 0-1 (data layer)
 - Build minimal viable feature
 - Beta test with interested users
@@ -885,6 +965,7 @@ This is a **major feature** that will significantly expand FinChronicle's capabi
 **Timeline:** 12-15 weeks for full implementation
 
 **Next Steps:**
+
 1. Create feature branch: `feature/double-entry-bookkeeping`
 2. Start with data model implementation
 3. Build migration wizard

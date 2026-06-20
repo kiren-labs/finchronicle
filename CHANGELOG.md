@@ -124,6 +124,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New module `js/app-lock.js`; added to SW cache for offline support
 
 ### Technical
+
 - Lock overlay uses `hidden` attribute; inactivity timer wired to `click`, `keydown`, `touchstart`, `mousemove`
 - PIN inputs wrapped in `<form>` with hidden username field to satisfy browser password-manager accessibility requirements
 - `window._showMessage` bridge allows `app-lock.js` to reuse the app's existing toast without a circular import
@@ -133,6 +134,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed — Copy & Language Overhaul
 
 #### Plain-English rewrites
+
 - Replaced all `"Failed to X"` error patterns with active-voice equivalents: `"X wasn't saved. Try again."`, `"Your data didn't load. Try refreshing."` etc.
 - Removed `"Please"` from all validation and error messages — direct sentence case throughout
 - `"This action cannot be undone."` → `"You can't undo this."` (delete modal and restore confirm)
@@ -145,6 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `"Savings rate has been below…"` → `"Your savings rate has been below…"` (alert message)
 
 #### Jargon removed
+
 - `"Passphrase"` → `"Password"` across all prompts, messages, and validation errors
 - `"Encrypted Backup"` (button) → `"Password-protected backup"`
 - `"AES-256 encrypted. Requires passphrase to restore."` → `"Password-protected. You'll need your password to restore this backup."`
@@ -169,15 +172,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `"Local-only. Copy and paste into a GitHub issue"` → `"Stored on this device only. Copy and share with the developer to report a bug."`
 
 #### Capitalisation
+
 - All modal headings, button labels, and section titles converted to sentence case
 - `"Add Recurring"`, `"Edit Recurring"`, `"Add Budget"`, `"Edit Budget"`, `"Add Account"`, `"Add Goal"`, `"New Savings Goal"`, `"Edit Goal"`, `"Additional Details"`, `"Save as Template"`, `"Finalize Reconciliation"` → sentence case equivalents
 - `"Finalise"` (British) → `"Finalize"` (American English); `"Tick off"` → `"Check off"`
 
 #### Frequency labels
+
 - `"Every 2 Wks"` → `"Every 2 weeks"`
 - `"Quarterly"` → `"Every 3 months"`
 
 #### Budget & savings copy
+
 - `"Enable Budget Rollover (unused balance carries to next month)"` → `"Carry unused budget to next month"`
 - Alert threshold hint rewritten in active voice: `"You'll be alerted when spending reaches this percent of your budget."`
 - `"Over pace"` (budget health status) → `"Spending fast"`
@@ -185,9 +191,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `"Projected"` metric → `"Month-end estimate"`
 
 #### Reconciliation copy
+
 - Explainer text removes `"FinChronicle"` brand insertion; `"Tick off"` → `"Check off"`
 
 #### Tone fixes
+
 - `"Checking for updates..."` → `"Checking for updates…"` (Unicode ellipsis)
 - `"Update found! Preparing..."` → `"Update found. Preparing…"`
 - Milestone message `"🎯 25% — Great start on 'X'!"` → plain `"25% reached on 'X'."`
@@ -195,6 +203,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `"No transactions to export!"` → period; all empty-state `!` removed
 
 #### i18n foundation
+
 - Added `js/i18n.js` — `t(key, vars)` lookup function with `{variable}` interpolation
 - Added `js/lang/en.js` — single source of truth for all user-visible strings (450+ keys across 15 namespaces: `button`, `message`, `error`, `validation`, `empty`, `warning`, `hint`, `status`, `confirmation`, `modal`, `aria`, `backup_status`, `prompt`, `section`, `faq`)
 - Added `js/en.json` — reference copy of the same strings for external tooling / translation
@@ -202,6 +211,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `js/i18n.js` and `js/lang/en.js` added to `CACHE_URLS` in `sw.js`
 
 ### Technical
+
 - `APP_VERSION` → `4.2.1` in `js/state.js`
 - `CACHE_NAME` → `finchronicle-v4.2.1` in `sw.js`
 - `version` → `4.2.1` in `manifest.json`
@@ -214,6 +224,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed — Backup & Restore Overhaul
 
 #### Unified "Data & Backup" Card
+
 - Replaced 4 scattered toolbar buttons (Export CSV, Import CSV, Create Backup, Restore Backup) with a single **Data & Backup** card in Settings
 - Clear section labels: Export / Restore / Auto-Backup
 - **Download Backup** — full lossless JSON (replaces "Create Backup")
@@ -225,6 +236,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Storage Health widget now rendered inline inside the card, deferred to Settings tab open (not at app init)
 
 #### Data Completeness
+
 - `netWorthSnapshots` IDB store now included in JSON backup and restored on import
 - `appSettings` IDB store now restored on import (was backed up but never restored)
 - `exchangeRateHistory` and `tagColors` from localStorage now included in backup envelope under `localStorage` key and restored on import
@@ -233,12 +245,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `migrateBackupPayload()` normalises older backups (schema 0) on restore
 
 #### Restore UX
+
 - Restore preview now shows SHA-256 integrity status (✓ verified / ⚠ mismatch / — none)
 - Two restore modes: **Merge** (adds missing records, skips duplicates) and **Replace All** (clears all 8 IDB stores unconditionally, then writes backup, with confirmation prompt)
 - Unified file handler routes `.enc` to passphrase decrypt, `.json` to parse, `.csv` to legacy CSV path with warning
 - Currency from backup restored only in Replace All mode — Merge no longer overwrites active currency
 
 #### Hardening
+
 - `verifyIntegrity()` validates SHA-256 on restore, warns but does not block; uses in-place field zeroing to preserve key order across engines
 - `clearAllStores()` on Replace All clears all 8 IDB stores unconditionally before writing backup data
 - `bulkSaveNetWorthSnapshots()` skips duplicates by `snapshotDate` index
@@ -249,6 +263,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tags sanitized via `sanitizeHTML()` at CSV import time in both `importFromCSV` and `parseBackupCSV`
 
 ### Technical
+
 - `APP_VERSION` → `4.2.0` in `js/state.js`
 - `CACHE_NAME` → `finchronicle-v4.2.0` in `sw.js`
 - `CACHE_VERSION` → `4.2.0` in `sw.js`
@@ -273,6 +288,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **False-positive SW errors in error log**: `window.onerror` now filters out `"load failed"` events from `sw.js` source — these are browser-level background SW update failures, not app errors
 
 ### Technical
+
 - `APP_VERSION` → `4.1.1` in `js/state.js`
 - `CACHE_NAME` → `finchronicle-v4.1.1` in `sw.js`
 - `version` → `4.1.1` in `manifest.json`
@@ -284,6 +300,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added — Forward-Looking Intelligence (Phase 3)
 
 #### 3.1 Cash-Flow Forecast
+
 - New `js/forecast.js` module — pure `buildForecast(accounts, transactions, recurringTemplates, horizonDays)` function
 - Generates per-account balance timelines by walking enabled recurring templates that have account links
 - Horizon selector: 30d / 60d / 90d toggle in Reports tab
@@ -292,6 +309,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added to `CACHE_URLS` in `sw.js`
 
 #### 3.2 Financial Health Alerts
+
 - Four new alert types added to `js/alerts.js` via `runHealthAlertChecks()`:
   - **Inactivity** (`inactivity`) — fires after 5 days with no transactions logged; deduplicated daily
   - **Bill Due** (`bill-due`) — fires when a recurring expense is due within 3 days and the linked account balance is below 1.2× the bill amount; requires `fromAccount` link
@@ -302,10 +320,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Summary chip label changed from "spending alerts" to "alerts" to cover health alert types
 
 ### Changed
+
 - `js/alerts.js` imports `getAccountBalance` from `accounts.js` and `getSavingsRate` from `savings.js`
 - Deduplication key uses quarterly window for `savings-rate-trend` (vs daily for all other types)
 
 ### Technical
+
 - New module `js/forecast.js`
 - `APP_VERSION` → `4.1.0` in `js/state.js`
 - `CACHE_NAME` → `finchronicle-v4.1.0` in `sw.js`
@@ -319,6 +339,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added — Accounting Model (Phase 2)
 
 #### 2.1 Asset/Liability Classification
+
 - New account types: "loan" and "mortgage" → automatically classified as liabilities
 - All existing accounts backfilled via v11 DB migration (`credit-card` → liability, rest → asset)
 - `ACCOUNT_CLASSIFICATION` map in `js/state.js` for type → classification lookup
@@ -327,6 +348,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `getNetWorth()` uses `classification` field: liabilities subtract as `Math.abs(balance)`, assets add normally
 
 #### 2.2 Transaction ↔ Account Linking
+
 - Optional "Account" dropdown in income/expense form controlled by `appSettings.enabledFields.accountLinking`
 - Expense + linked account → sets `fromAccount`; income + linked account → sets `toAccount`
 - Dropdown auto-populates from `state.accounts` when optional fields section is expanded
@@ -334,6 +356,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `getAccountBalance()` fixed: income credits only `toAccount`, expense debits only `fromAccount` (eliminates balance-drift-on-reload bug)
 
 #### 2.3 Reconciliation Workflow
+
 - New `js/reconciliation.js` module — three pure functions (`computeReconciledBase`, `computeCheckedBalance`, `filterCandidates`) plus DOM-bound workflow
 - Transaction `status` field: `'pending' | 'cleared' | 'reconciled'` (default `'cleared'`; backfilled via v12 DB migration)
 - Reconciliation triggered from account edit modal via "Reconcile this account" button
@@ -343,6 +366,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Transaction list shows lock icon badge for `reconciled` transactions; yellow chip for `pending`
 
 #### 2.4 Category Hierarchy
+
 - `categories` in `js/state.js` changed from flat arrays to hierarchy objects: `{ parent: [children] }`
 - Expense categories reorganised with meaningful sub-categories (e.g. `Food → [Groceries, Restaurants, Coffee/Tea, Delivery]`, `Housing → [Rent, Mortgage, Maintenance]`)
 - Income sub-categories added (e.g. `Business → [Consulting, Sales, Services]`, `Investment → [Dividends, Capital Gains, Interest]`)
@@ -354,18 +378,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `css/tokens.css` income/expense color tokens; dark mode token overrides
 
 ### Changed
+
 - Account Add/Edit modal redesigned: type icon preview, compact inputs, visual divider between core and advanced fields, `role="dialog"` + `aria-modal` accessibility attributes, focus on open
 - `button.primary` used throughout (was incorrectly using `.btn.primary-btn` class which had no CSS)
 - `showAddAccountForm` / `showEditAccountForm` now focus `#accountNameInput` on open
 - SW update polling changed from `setInterval` (60 s) to `visibilitychange` event (throttled to 5 min) — reduces background CPU on mobile
 
 ### Fixed
+
 - Balance reducing on every page reload: `getAccountBalance()` was matching income on `fromAccount` OR `toAccount`; fixed to credit only `toAccount` for income, debit only `fromAccount` for expense
 - Reconciliation modal not opening: modal was using `hidden` attribute but CSS controls visibility via `.modal` / `.modal.show` class; fixed to `classList.add/remove("show")`
 - Account dropdown showing only "None": `populateLinkedAccountSelect` ran once at init when section was hidden; now re-runs on optional-fields expand
 - Reconciliation action buttons unstyled: were using non-existent `.btn.primary-btn` / `.btn.danger-btn`; replaced with scoped `.reconcile-action-primary` / `.reconcile-action-danger` classes
 
 ### Technical
+
 - `DB_VERSION` bumped to 12 (v11: classification backfill; v12: status backfill)
 - New module `js/reconciliation.js` added to `CACHE_URLS` in `sw.js`
 - Test suite: 10 unit test files, 323 tests passing; 1 new E2E spec (`reconciliation.spec.js`, 18 tests)
@@ -376,53 +403,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added — Engineering Hardening (Phase 1)
 
 #### 1.1 Storage Persistence
+
 - Call `navigator.storage.persist()` after DB init to prevent browser eviction
 - Display persistence status in Storage Health widget
 - Store `state.storagePersisted` for runtime access
 
 #### 1.2 Content Security Policy
+
 - Added `<meta http-equiv="Content-Security-Policy">` to `index.html`
 - Restricts scripts to `'self'`, allows styles from self + jsdelivr CDN (Remix Icons)
 - Blocks inline scripts, eval, and all external script sources
 
 #### 1.3 Collision-Safe IDs
+
 - New `generateId()` in `js/utils.js` using `crypto.randomUUID()`
 - Replaced `Date.now()` IDs in 7 modules: app, goals, budget, accounts, quick-entry, recurring, import-export
 - Existing numeric IDs continue to work (IndexedDB accepts mixed key types)
 - Fixed `shouldShowBackupReminder()` — now uses `createdAt` field instead of treating ID as timestamp
 
 #### 1.4 innerHTML XSS Audit
+
 - Sanitized tag suggestion rendering in `app.js` via `sanitizeHTML()`
 - Sanitized goal names and account option labels in `goals.js`
 - All user-sourced strings now pass through `sanitizeHTML()` before innerHTML insertion
 
 #### 1.5 Local Error Log
+
 - Global `window.onerror` + `unhandledrejection` handler at top of `app.js` (before imports)
 - Stores last 50 errors in `localStorage.errorLog` with timestamp and stack trace
 - "Error Log" section in Settings tab with copy-to-clipboard and clear buttons
 - Errors are viewable without DevTools — critical for mobile debugging
 
 #### 1.6 Backup Urgency
+
 - Backup reminder threshold: 30 days → 14 days
 - Auto-backup default changed from `false` to `true`
 - Ensures new users get weekly JSON backups out of the box
 
 #### 1.7 Service Worker Update Strategy
+
 - Removed `setInterval(() => registration.update(), 60000)` polling
 - Replaced with `visibilitychange` listener — checks for SW update when tab becomes visible
 - Throttled to max once per 5 minutes to avoid unnecessary network calls
 - Saves CPU on mobile when tab is backgrounded
 
 ### Fixed
+
 - Circular ES module import between `settings.js` ↔ `app.js` — moved `getErrorLog`/`clearErrorLog` to `utils.js`
 
 ### Changed
+
 - `js/utils.js` — added `generateId()`, `getErrorLog()`, `clearErrorLog()`
 - `js/auto-backup.js` — added `requestStoragePersistence()`, persistence status in health widget
 
 ---
 
 ### Planned — v3.28.1 (Dashboard & UI/UX Fix Patch)
+
 - Fix savings rate showing `0.0%` when income is ฿0 but saved amount is non-zero → show `"N/A"` instead
 - Fix annual projection showing positive when monthly average is negative → replace with deficit label in red
 - Fix period selector ("All Time") desyncing from KPI card title ("This Month") → sync card title to `state.currentFilter`
@@ -434,6 +471,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Move "Clone Last" button into the Add Transaction card header (`.form-header-actions`)
 
 ### Permanently Deferred — Will Not Build
+
 - Split Transactions — approximable with tags; low frequency in real usage
 - Account reconciliation — adds complexity for minimal gain on a personal app
 - Account-linked expenses/income — `account` optional field from v3.16 covers the basic case
@@ -444,6 +482,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.28.0] — 2026-05-05
 
 ### Added
+
 - **Net Worth Trend**: Monthly net worth snapshots stored in a new `netWorthSnapshots` IDB store (DB_VERSION 10)
 - Snapshot is captured automatically on app load — once per month, only if no snapshot exists for that month
 - SVG inline line chart rendered below the Net Worth dashboard showing up to 12 months of history
@@ -453,6 +492,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dark mode support; works fully offline
 
 ### Technical
+
 - New constants: `NET_WORTH_SNAPSHOTS_STORE` in `state.js`; DB_VERSION bumped 9 → 10
 - New DB functions: `saveNetWorthSnapshot()`, `loadNetWorthSnapshots()`, `getNetWorthSnapshotByDate()` in `db.js`
 - New functions: `captureMonthlySnapshot()`, `renderNetWorthTrend()` in `accounts.js`
@@ -462,6 +502,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.27.0] — 2026-05-05
 
 ### Added
+
 - **Reimbursement Workflow**: Mark any `expenseType: reimbursable` transaction as settled with a single tap — "Mark settled" button appears inline on the transaction card
 - Settled transactions show a green "Settled ✓" badge replacing the button
 - Family Settlement dashboard now shows per-person **Outstanding** and **Settled** reimbursement sub-rows (only visible when person has reimbursable transactions)
@@ -473,11 +514,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.26.1] — 2026-05-05
 
 ### Fixed
+
 - `exchangeRate` is now required (not nullable) when `transactionCurrency` differs from the home currency — previously silently produced a NaN `homeAmount`
 - `initAccounts()` failure now shows a user-facing toast instead of only logging to console
 - `migrateFromLocalStorage()` failure now shows a user-facing toast instead of only logging to console
 
 ### Docs
+
 - Updated `.claude/CLAUDE.md` module table with `auto-backup.js`, `multi-currency.js`, and `settlement.js` (added in v3.22–v3.26 but not listed)
 
 ---
@@ -485,6 +528,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.26.0] - 2026-05-15
 
 ### Added
+
 - **Multi-Currency Transactions (v3.24.0)** — Per-transaction foreign currency support
   - Toggle "Transaction Currency" in optional fields to enter amounts in any supported currency
   - Manual exchange rate input with automatic home-amount conversion
@@ -504,6 +548,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.22.0] - 2026-05-15
 
 ### Added
+
 - **Auto-Backup & Data Safety** — Scheduled local exports with storage health monitoring
   - Configurable auto-backup: daily, weekly, or monthly intervals (JSON or CSV format)
   - Storage Health dashboard: IndexedDB usage, transaction count, estimated remaining capacity
@@ -512,6 +557,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Last backup timestamp tracking in Settings tab
 
 ### Fixed
+
 - **CSS Design Token Audit** — Comprehensive fix across v3.13–v3.22 components
   - Replaced all non-existent CSS custom property references with correct design tokens
   - Standardised form inputs to stacked vertical layout pattern with correct sizing
@@ -524,6 +570,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.21.0] - 2026-05-01
 
 ### Added
+
 - **Smart Spending Alerts** — Proactive, context-aware notifications based on rolling 90-day averages
   - Weekly Spike: detects when category spending exceeds 40% above weekly average
   - Unusual Amount: flags single transactions exceeding 3x category median
@@ -539,6 +586,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Export full year as CSV (tax-season-friendly)
 
 ### Technical
+
 - New modules: `js/alerts.js`, `js/annual-report.js`
 - Alert state persisted in localStorage (no new IndexedDB store needed)
 - Alert checks triggered on every transaction save and on app init
@@ -548,6 +596,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.20.0] - 2026-05-01
 
 ### Added
+
 - **Savings Goals** — track progress toward savings targets with:
   - Create/edit/delete goals with name, target amount, optional deadline, and optional linked account
   - Circular progress ring indicators with color coding (red <50%, yellow 50-75%, green ≥75%)
@@ -564,6 +613,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.19.0] - 2026-05-01
 
 ### Added
+
 - **Savings Rate Dashboard** — new card in the Summary tab showing:
   - This Month Saved (amount + income context)
   - Savings Rate with color-coded percentage (green ≥20%, yellow ≥10%, red <10%)
@@ -580,6 +630,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.18.0] - 2026-04-30
 
 ### Added
+
 - **Accounts & Net Worth** — First-class account entities with derived balances and a net worth dashboard
   - Account CRUD: create, edit, deactivate accounts (checking, savings, credit-card, cash, investment, other)
   - Derived balance calculation from opening balance + transfers/income/expenses
@@ -595,6 +646,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.17.0] - 2026-05-01
 
 ### Added
+
 - **Quick Entry Templates** — Save frequently used transactions as one-tap templates for faster data entry
   - Quick bar above the form with pill-shaped template buttons showing type, label, and amount
   - "Clone Last" button to pre-fill the form with the most recent transaction
@@ -608,6 +660,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.16.0] - 2026-04-30
 
 ### Added
+
 - **Optional Fields System** — User-controlled optional transaction fields for power users; basic users see a clean form
   - Six optional fields: Payment Method, Merchant/Payee, Expense Type, Person (Attached To), Reference/Receipt ID, Location
   - Toggle each field on/off in Settings → Optional Fields; disabling hides the field but never deletes existing data
@@ -626,6 +679,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Keywords automatically rebuild from transaction history
 
 ### Technical
+
 - `js/optional-fields.js` — New module: `initOptionalFields()`, `suggestCategory()`, `renderOptionalFieldsForm()`, `getOptionalFieldValues()`, `setOptionalFieldValues()`, `clearOptionalFields()`, `bindFieldAutocomplete()`, `renderFieldToggles()`, `handleFieldToggle()`, `handleNoteInput()`, `acceptCategorySuggestion()`, `dismissCategorySuggestion()`, `rebuildSmartKeywords()`
 - `js/db.js` — DB_VERSION 5→6: new `appSettings` store; `loadAppSettings()`, `saveAppSettings()` functions
 - `js/state.js` — `APP_VERSION` → `3.16.0`, `DB_VERSION` → 6; `APP_SETTINGS_STORE` constant; `DEFAULT_APP_SETTINGS`, `PAYMENT_METHODS`, `EXPENSE_TYPES` exports; `appSettings` added to state
@@ -644,6 +698,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.15.0] - 2026-04-30
 
 ### Added
+
 - **Transfer Transaction Type** — Third transaction type for money moving between accounts (credit card payments, savings deposits, debt repayments) without inflating expense/income totals
   - Transfer option in the type selector with swap icon
   - From Account / To Account fields with autocomplete from past entries and saved accounts
@@ -661,6 +716,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Restore from backup preserves soft-delete state
 
 ### Technical
+
 - `js/transfer.js` — New module: `getAccountSuggestions()`, `toggleTransferFields()`, `bindAccountAutocomplete()`, `getTransferFormData()`, `setTransferFormData()`, `clearTransferFields()`
 - `js/db.js` — DB_VERSION 4→5 (schema-only upgrade); `deleteTransactionFromDB()` changed to soft delete; new `loadAllTransactionsFromDB()` for audit backup; `loadDataFromDB()` filters `deleted: true` records
 - `js/state.js` — `APP_VERSION` → `3.15.0`, `DB_VERSION` → 5; `transfer: ["Transfer"]` added to categories; `savedAccounts` added to state
@@ -676,6 +732,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sw.js` — `js/transfer.js` added to `CACHE_URLS`; cache version bumped to `finchronicle-v3.15.0`
 
 ### Added
+
 - **Tags & Search** — Organise and find transactions fast with free-form tags and a real-time search bar
   - Chip-style tag input in the Add/Edit transaction form; type and press Enter, comma, or Tab to add a tag
   - Autocomplete suggestions from existing tags while typing
@@ -688,6 +745,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full dark mode support for all new UI elements
 
 ### Technical
+
 - `js/search.js` — New module: `filterTransactions`, `getAllTags`, `renameTag`, `deleteTag`
 - `js/db.js` — DB_VERSION 3→4: added `tags` multiEntry index on `transactions` store in `onupgradeneeded`
 - `js/state.js` — `DB_VERSION` bumped to 4; `searchQuery`, `searchTags`, `formTags` added to `state`
@@ -705,6 +763,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.13.0] - 2026-03-26
 
 ### Added
+
 - **Budget Limits & Alerts** — Set monthly spending limits per expense category with configurable alert thresholds
   - Add, view, and delete budgets from the Settings tab (Budget Limits section)
   - Alert banner on the dashboard shows categories approaching or exceeding their limit, with percentage and amounts
@@ -714,6 +773,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - All budget data stored in IndexedDB (`budgets` store); no data leaves the device
 
 ### Technical
+
 - `js/budget.js` — New module: `loadBudgets`, `getBudgetForCategory`, `getSpentForCategory`, `checkBudgetAlerts`, `renderBudgetList`, `saveBudget`, `deleteBudget`, modal open/close, category select population
 - `js/db.js` — Added `budgets` object store in `onupgradeneeded` (DB_VERSION 3); added `getBudgetsFromDB`, `saveBudgetToDB`, `deleteBudgetFromDB`; `getAllFromStore` now guards against missing stores (returns `[]`)
 - `js/state.js` — `DB_VERSION` bumped to 3; `budgets: []` added to `state` object
@@ -725,6 +785,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `sw.js` — `js/budget.js` added to `CACHE_URLS`
 
 ### Known Limitations
+
 - Rollover carry-forward not yet implemented (planned for a future v3.13.x patch)
 - Budget alerts are scoped to the current tab session; a budget added in a second tab requires a reload to appear in the first
 
@@ -733,6 +794,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.12.1] - 2026-03-24
 
 ### Added
+
 - **Reports tab** — Split the former Groups tab into two dedicated tabs in the bottom nav
   - **Reports** (new) — Houses all four analytics charts (category pie, income vs expenses, weekly, heatmap) with the date range selector
   - **Groups** (retained) — Now exclusively shows the By Month / By Category transaction grouping list
@@ -740,11 +802,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Range date span** — Exact from/to dates displayed beside the range pills (e.g. "Sep 25, 2025 – Mar 24, 2026"); automatically reflects the earliest transaction date when "All" is selected; hidden on screens narrower than 400px
 
 ### Changed
+
 - **Heatmap — colour separability** — Intensity formula changed from linear (`total / max`) to square-root (`√(total / max)`); days with low-but-real spending are now visually distinct instead of all collapsing to the same faint pink
 - **Heatmap — period label** — Section title now shows the active range (e.g. "Spending by Day of Month — Last 6 Months") so it's clear the heatmap responds to the range selector, not the month dropdown below
 - **Weekly Spending — label clarity** — Title updated to "Weekly Spending — Last 4 Weeks" to make explicit that this chart always shows the most recent 4 rolling weeks regardless of the selected range
 
 ### Technical
+
 - `js/ui.js` — `_renderGroupCharts()` promoted to exported `updateReportsView()`; removed from `updateGroupedView()` so the two tabs are fully independent
 - `js/app.js` — Tab list extended to include `"reports"`; range pills handler updated to call `updateReportsView()`; unused `updateGroupedView` import removed
 - `js/chart.js` — Heatmap intensity: `Math.max(0.12, total/max)` → `Math.sqrt(total/max)`
@@ -756,6 +820,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.12.0] - 2026-03-24
 
 ### Added
+
 - **Reports: Complete Visualization Suite** — The Groups tab is now a full analytics dashboard
   - **Date range selector** — Choose Last 3 months / 6 months / 12 months / All time; all four charts respond instantly
   - **Income vs Expenses bar chart** — Side-by-side monthly bars with animated entry; scrollable on mobile for long ranges
@@ -764,6 +829,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Category pie chart now responds to the shared date range selector (previously was per-month only)
 
 ### Technical
+
 - `js/chart.js` — Added `getRangeMonths()`, `buildIncomeExpenseData()` / `renderIncomeExpenseChart()`, `buildWeeklyData()` / `renderWeeklyChart()`, `buildDayHeatmapData()` / `renderDayHeatmap()`; extended `buildCategoryData()` to accept a month array for range filtering
 - `js/ui.js` — `updateGroupedView()` now calls `_renderGroupCharts()` helper; pie chart driven by `state.reportRange`
 - `js/app.js` — Bound `#reportRangeSelect` change event in `bindStaticEvents()`
@@ -772,6 +838,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `css/dark-mode.css` — Added `--chart-heat` RGB token override and dark mode chart surface overrides
 
 ### Changed
+
 - **CSS refactor — token consistency and best-practice fixes** (no visual changes)
   - `--chart-heat` token moved from `css/chart.css :root {}` to its canonical location in `css/tokens.css`
   - Removed 6 no-op declarations from `tokens.css` mobile media query that re-declared values identical to the base tokens
@@ -787,6 +854,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.11.0] - 2026-03-24
 
 ### Added
+
 - **Recurring Transactions** — Auto-generate predictable expenses and income on a schedule
   - Supported frequencies: Daily, Weekly, Every 2 Weeks, Monthly, Quarterly, Yearly
   - Optional "Day of Month" field (1–28) for monthly recurrences to pin a specific day
@@ -797,6 +865,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Deleting a template does not remove already-created transactions
 
 ### Technical
+
 - New module: `js/recurring.js` — IDB CRUD, date computation, rendering, modal logic
 - New IDB store: `recurringTemplates` (DB_VERSION bumped 1 → 2)
   - Indexes: `nextDueDate`, `enabled`
@@ -816,6 +885,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.10.5] - 2026-03-20
 
 ### Added
+
 - **Category Spending Pie Chart** — CSS conic-gradient donut chart in the Groups tab
   - Renders top 7 expense categories with an "Other" bucket for the remainder
   - Hover a legend row to highlight that category's amount in the chart centre
@@ -825,6 +895,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Zero external libraries — pure CSS + Vanilla JS (`js/chart.js`, `css/chart.css`)
 
 ### Fixed
+
 - **Accessibility — WCAG AA contrast violations** (Lighthouse audit)
   - `legend-pct` percentage labels now use `--color-text` instead of the chart segment colour; chart colours (e.g. `#34C759`, `#5AC8FA`) fail the 4.5:1 ratio on white
   - `Budget Health` status badge colours promoted to strong variants:
@@ -840,10 +911,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Empty state: `role="status"` + `aria-live="polite"`
 
 ### Developer Experience
+
 - Pre-commit version-sync hook — blocks `git commit` if `APP_VERSION`, `CACHE_NAME`, and `manifest.json` version are out of sync
 - Tightened `finchronicle-dev` sub-agent description for more reliable auto-routing
 
 ### Technical
+
 - New files: `js/chart.js`, `css/chart.css`
 - New tokens: `--chart-c1..c8` in `css/tokens.css`
 - `css/chart.css` linked in `index.html` between `styles.css` and `dark-mode.css`
@@ -855,6 +928,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.10.4] - 2026-03-09
 
 ### Changed
+
 - **🏗️ Major Code Refactoring (Phase 1)** - Modernized codebase architecture for better maintainability
   - Broke down monolithic `app.js` (~1,920 lines) into **ES modules** by domain
   - Implemented **lazy loading** for FAQ and Import/Export modules (loads on-demand)
@@ -863,6 +937,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive **event binding system** replaces inline `onclick` handlers
 
 ### Performance
+
 - **Optimized transaction date handling** with cached timestamps
   - Reduces redundant date parsing during sorting operations
   - Improves list rendering performance with large transaction datasets
@@ -871,6 +946,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Import/Export module loads only when user triggers import/export
 
 ### Technical
+
 - **Module Structure**: Separated concerns into domain-specific modules
   - Service worker registration and database integration
   - Shared application state management across modules
@@ -888,12 +964,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Modal buttons
 
 ### Developer Experience
+
 - **Better code organization** - easier to find and modify features
 - **Improved maintainability** - modular structure reduces complexity
 - **Easier testing** - isolated modules can be tested independently
 - **Documentation added**: `UNUSED_CODE_ANALYSIS.md`, `ARCHITECTURE-IMPROVEMENTS.md`, `P3-REFACTORING-COMPLETION.md`
 
 ### Notes
+
 - **No user-facing changes** - all functionality remains identical
 - **No data migration required** - purely architectural improvements
 - This is a **refactoring release** focused on code quality and maintainability
@@ -903,6 +981,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.10.3] - 2026-02-23
 
 ### Added
+
 - **User Feedback System** - Easy ways for users to provide feedback
   - GitHub Issues integration for bug reports, feature requests, and general feedback
   - Pre-configured issue templates (bug report, feature request, general feedback)
@@ -919,6 +998,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Pull request template for code contributions
 
 ### Technical
+
 - New feedback modal UI component with responsive design
 - New functions: `openFeedbackModal()`, `closeFeedbackModal()`
 - GitHub issue templates in `.github/ISSUE_TEMPLATE/`
@@ -933,6 +1013,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.10.2] - 2026-02-20
 
 ### Added
+
 - **Transaction Validation Layer** - Comprehensive validation for all transactions (Foundation for future features)
   - Type validation: Only 'income' or 'expense' allowed
   - Amount validation: Must be positive, maximum ₹99 crore (999,999,999)
@@ -943,11 +1024,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Centralized validation logic for maintainability
 
 ### Security
+
 - Implemented XSS protection for notes field using HTML sanitization
 - All user inputs now validated before saving to database
 - Sanitized transaction data stored to prevent injection attacks
 
 ### Technical
+
 - New functions: `validateTransaction()`, `sanitizeHTML()`
 - Updated form submission handler to use centralized validation
 - Validation returns detailed error objects for debugging
@@ -956,6 +1039,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No database migration required (validation is JavaScript-only)
 
 ### Improved
+
 - Better error messages for invalid transaction data
 - Consolidated validation logic (previously scattered across form handler)
 - Data integrity protection for all future features
@@ -966,6 +1050,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.10.1] - 2026-02-16
 
 ### Fixed
+
 - **Amount Validation** - Fixed floating point precision issue in decimal validation
   - Form input now correctly accepts amounts with 1-2 decimal places (e.g., 2550.3, 2550.30)
   - Previously rejected valid amounts due to JavaScript floating point arithmetic issues
@@ -975,13 +1060,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved error messages and validation consistency
 
 ### Changed
+
 - Centralized amount validation logic for better maintainability
 - Amount values are now rounded to 2 decimal places for consistency
-
 
 ## [3.10.0] - 2026-02-16
 
 ### Added
+
 - **Budget Health Card** - Real-time spending insights and projections
   - Daily spending pace tracker showing average daily expenses
   - Days remaining in current month counter
@@ -992,6 +1078,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Smart detection of current vs historical months
 
 ### Improved
+
 - Monthly insights now provide more actionable spending data
 - Better visibility into spending patterns and trends
 - Helps users stay within budget through proactive alerts
@@ -1001,12 +1088,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.9.1] - 2026-02-08
 
 ### Fixed
+
 - Dark mode contrast for backup status, backup header, and FAQ headers/icons
 - Backup status now refreshes immediately after CSV export
 
 ## [3.9.0] - 2026-02-08
 
 ### Added
+
 - **Backup Reminder System** - Track and encourage regular data backups
   - Backup status card in Settings showing last backup date
   - Color-coded status indicators (green/yellow/red) based on backup age
@@ -1025,6 +1114,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Direct link from backup card to FAQ backup section
 
 ### Improved
+
 - Export function now records backup timestamp automatically
 - Users proactively notified when backup is outdated (30+ days)
 - Better onboarding for data safety awareness
@@ -1032,6 +1122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All new components fully responsive on mobile devices
 
 ### Technical
+
 - New localStorage key: `last_backup_timestamp`
 - New functions: `loadBackupTimestamp()`, `updateBackupTimestamp()`, `getDaysSinceBackup()`, `shouldShowBackupReminder()`, `renderBackupStatus()`, `renderFAQ()`, `toggleFAQSection()`, `toggleFAQItem()`, `scrollToFAQ()`, `updateSettingsContent()`
 - Modified `exportToCSV()` to call `updateBackupTimestamp()`
@@ -1045,6 +1136,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.8.0] - 2026-02-07
 
 ### Added
+
 - **Monthly Insights Panel** - Enhanced Groups tab with comprehensive monthly overview
   - Monthly summary cards showing income, expenses, savings, and transaction count
   - Month-over-month trend indicators for all metrics
@@ -1056,6 +1148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Helps identify budget-consuming categories at a glance
 
 ### Improved
+
 - Groups tab now provides actionable insights above existing month/category grouping
 - Better visibility into spending patterns without complex accounting
 - Month selector allows quick navigation between different months' insights
@@ -1063,6 +1156,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fully responsive on mobile devices (dropdown goes full-width on small screens)
 
 ### Technical
+
 - New functions: `getMonthInsights()`, `getTopSpendingCategories()`, `renderMonthlyInsights()`
 - Updated `updateGroupedView()` to include insights section
 - Added CSS styles for insights cards and category rows
@@ -1073,6 +1167,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.7.1] - 2026-02-07
 
 ### Changed
+
 - **Code Organization**: Separated JavaScript into external `app.js` file (~1,920 lines)
 - Improved developer experience with cleaner file structure
 - Better browser caching efficiency (HTML and JS cached independently)
@@ -1080,6 +1175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service worker now caches `app.js` for offline functionality
 
 ### Technical
+
 - Created `app.js` containing all application logic
 - Updated service worker cache list to include `app.js`
 - Maintained zero-framework, zero-build-tool philosophy
@@ -1090,6 +1186,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.7.0] - 2026-02-07
 
 ### Added
+
 - 🎯 **Actionable Summary Tiles**: Tap summary cards to instantly navigate to filtered views
   - **This Month** → View all transactions for current month
   - **Total Entries** → View all transactions for current month
@@ -1134,6 +1231,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New CSS token: `--font-family-mono` for numerical data
 
 ### Changed
+
 - 📊 **Total Entries**: Now shows current month count (was: all-time count)
   - More contextually relevant to "This Month" summary
   - Aligns with user mental model when viewing monthly dashboard
@@ -1145,6 +1243,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Provides better visual distinction between static metrics and trends
 
 ### Technical
+
 - Added 4 new helper functions for trend calculations (60+ lines)
 - Extended `updateTransactionsList()` with type filtering
 - Enhanced `updateSummary()` with trend calculation and display logic
@@ -1156,6 +1255,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Applied `font-variant-numeric: tabular-nums` to body for equal-width digits
 
 ### Documentation
+
 - 📋 Created **Change Request (CR) - REVISED.md**: Comprehensive implementation plan
   - Aligned with privacy-first, offline-first, vanilla JS architecture
   - Split into 2 phases: Visual Consistency + Tap Actions, Trend Indicators
@@ -1163,6 +1263,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Includes MoM calculation formulas with edge case handling
 
 ### Fixed
+
 - ♿ **Accessibility: Improved Contrast Ratios** - WCAG AA compliance for both light and dark modes
 
   **Light Mode Improvements:**
@@ -1187,6 +1288,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Mobile and desktop audits now pass for both themes
 
 ### Planned
+
 - Budget tracking per category
 - Recurring transactions
 - Search functionality
@@ -1197,6 +1299,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.6.0] - 2026-02-07
 
 ### Added
+
 - 📱 **iOS Optimizations**: Professional mobile experience
   - Zoom enabled for accessibility (users with low vision can zoom)
   - Font sizes 16px+ prevent iOS auto-zoom on input focus
@@ -1216,6 +1319,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Hidden file inputs have proper ARIA labels
 
 ### Changed
+
 - 🔍 Enhanced compact summary readability
   - Larger font sizes (main: 18px, stats: 14px)
   - Better spacing between elements
@@ -1232,6 +1336,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Better vertical alignment
 
 ### Technical
+
 - Viewport meta allows zoom for accessibility compliance
 - Mobile token scale increased for better readability
 - All CSS tokens cleanup completed (95%+ coverage)
@@ -1241,6 +1346,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.5.1] - 2026-02-06
 
 ### Added
+
 - 📱 **Bottom Navigation Bar**: Modern mobile-first navigation
   - Fixed bottom navigation with Add, List, Groups, Settings
   - Always accessible - no need to scroll to switch tabs
@@ -1259,6 +1365,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Color-coded compact stats (green for positive, red for negative)
 
 ### Changed
+
 - 🎨 Refactored styles to use shared design tokens and reduced repeated values
 - 🧩 Added `css/tokens.css` and updated dark mode to override tokens
 - 🔄 Moved tab navigation from middle of screen to fixed bottom bar
@@ -1283,6 +1390,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.5.0] - 2026-02-06
 
 ### Added
+
 - 💾 **Backup and Restore System**: Complete backup/restore functionality
   - Create timestamped backups with metadata (backup date, version, transaction count, date range, currency)
   - Multiple backup support - keep as many backup files as you want
@@ -1315,6 +1423,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Clean white background with proper icon sizing (24px)
 
 ### Changed
+
 - 🎨 Settings tab reorganized with backup/restore buttons
 - 📦 Backup files now use timestamp-based naming: `finchronicle-backup-YYYY-MM-DD-HHMMSS.csv`
 - ✅ Restore operations now use **merge mode** (safe, non-destructive)
@@ -1324,6 +1433,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🎯 Better use of horizontal space in header with quick action buttons
 
 ### Technical
+
 - Added `isDuplicateTransaction()` function for duplicate detection
 - Added `createBackup()` and `generateBackupMetadata()` for enhanced backups
 - Added `parseBackupCSV()` with metadata extraction
@@ -1342,12 +1452,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Single-line header layout with flexbox for better space utilization
 
 ### Security
+
 - Backup validation checks for required headers
 - Data integrity validation (dates, amounts, types)
 - Error recovery: if restore fails, existing data is preserved
 - Safe merge mode prevents accidental data loss
 
 ### Technical
+
 - Added `toggleSummaryCollapse()` and `loadSummaryState()` functions
 - Compact summary dynamically updates via `updateSummary()`
 - All hardcoded CSS values replaced with design tokens
@@ -1366,6 +1478,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.4.0] - 2026-02-06
 
 ### Added
+
 - ✨ **Enhanced Form Feedback**: Multi-layered confirmation when adding transactions
   - Loading state with spinner animation while saving
   - Success state with checkmark and green button color
@@ -1377,6 +1490,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Consistent across iOS and Android devices
 
 ### Changed
+
 - 🗄️ **Major upgrade: IndexedDB storage** for transactions (unlimited scale)
 - 💾 localStorage now used only for settings (currency, dark mode, version)
 - 🔄 Auto-migration from localStorage to IndexedDB on first load
@@ -1386,6 +1500,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🔢 Improved decimal precision for amount input (step changed to 0.01)
 
 ### Technical
+
 - Added IndexedDB wrapper with Promise-based API
 - Hybrid storage architecture (IndexedDB + localStorage)
 - Backward compatible migration (preserves existing data)
@@ -1399,6 +1514,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.3.2] - 2026-01-31
 
 ### Changed
+
 - 📱 Refined transaction list layout on mobile for better readability and spacing
 - 🎨 Replaced transaction icon with a styled status indicator for more room
 - 🧊 Softened edit/delete button styling with translucent treatments
@@ -1408,6 +1524,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.3.1] - 2026-01-31
 
 ### Changed
+
 - 💎 Enhanced currency display with badge styling for better visibility
 - 📊 Reorganized currency list by priority (local, major, regional currencies)
 
@@ -1416,11 +1533,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.3.0] - 2026-01-31
 
 ### Added
+
 - 📥 **CSV Import**: Import transactions from CSV files via toolbar button
   - Supports app export format and custom CSVs with Date, Category, Amount, Notes/Description
   - Automatic date normalization for common formats
 
 ### Changed
+
 - Expanded and refined expense categories for better budgeting accuracy
 
 ---
@@ -1428,6 +1547,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.1.0] - 2025-01-15
 
 ### Added
+
 - 🎨 **Professional Icons**: Replaced all emoji icons with Remix Icon font for consistent appearance across all devices
 - 🔄 **Manual Update Check**: Added refresh button in toolbar to check for updates manually
 - 🎯 **Improved Update Mechanism**:
@@ -1437,17 +1557,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Shows clear update available notification
 
 ### Changed
+
 - Transaction icons now use colored, filled arrow icons (up for income, down for expense)
 - Action buttons (edit/delete) now use professional icon font
 - Tab icons updated to modern, clean designs
 - Dark mode toggle uses sun/moon icons instead of emojis
 
 ### Fixed
+
 - Update mechanism now works properly - no need to delete and reinstall app
 - Icons now render consistently on iOS, Android, Windows, and macOS
 - Spinning animation on update check button
 
 ### Technical
+
 - Added Remix Icon font from CDN
 - Updated service worker cache to v5
 - Added proper icon styling for light and dark modes
@@ -1458,6 +1581,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2025-01-14
 
 ### Added
+
 - 💱 **Multi-Currency Support**: Choose from 20 major world currencies
   - USD, EUR, GBP, INR, JPY, CNY, THB, SGD, and 12 more
   - Beautiful currency selector modal
@@ -1475,6 +1599,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🔄 **Service Worker Updates**: Detects and notifies about new versions
 
 ### Changed
+
 - Transaction type selection is now a toggle button instead of dropdown
 - Category dropdown populates dynamically based on selected type
 - Amount label now shows selected currency symbol
@@ -1482,6 +1607,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved update flow with better user feedback
 
 ### Technical
+
 - Added version management system with localStorage
 - Service worker cache updated to v3
 - Added currency selector modal with 20 currencies
@@ -1493,6 +1619,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.0] - 2025-01-13
 
 ### Added
+
 - ✏️ **Edit Transactions**: Update any existing transaction
   - Click edit button on transaction
   - Form pre-fills with transaction data
@@ -1521,17 +1648,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - iOS-style design polish
 
 ### Changed
+
 - Transaction items now show edit and delete buttons
 - Toolbar redesigned with export and dark mode buttons
 - Improved transaction list layout
 - Better visual feedback on interactions
 
 ### Fixed
+
 - Color contrast issues for WCAG AA compliance
 - Form label associations for accessibility
 - Service Worker registration error handling
 
 ### Technical
+
 - Added modal system for confirmations
 - Implemented CSV generation and download
 - Added dark mode CSS with all component support
@@ -1543,6 +1673,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-01-12
 
 ### Added
+
 - 💰 **Track Transactions**: Add income and expense transactions
   - Type (Income/Expense)
   - Amount
@@ -1585,6 +1716,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Works on all screen sizes
 
 ### Technical
+
 - Single HTML file with embedded CSS and JavaScript
 - Service Worker for offline support
 - Web App Manifest for PWA
@@ -1615,6 +1747,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Upgrade Notes
 
 ### Upgrading to v3.4.0
+
 - **Automatic data migration**: All transactions automatically migrate from localStorage to IndexedDB
 - Migration happens seamlessly on first load
 - All existing data preserved (transactions, currency, dark mode preference)
@@ -1623,18 +1756,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No manual action required
 
 ### Upgrading from v3.0.0 to v3.1.0
+
 - No data migration needed
 - Icons automatically update to new font
 - Currency selection is preserved
 - All transactions remain intact
 
 ### Upgrading from v2.0.0 to v3.0.0
+
 - No data migration needed
 - Default currency set to INR (changeable in settings)
 - Transaction categories work same way
 - All existing data compatible
 
 ### Upgrading from v1.0.0 to v2.0.0
+
 - No data migration needed
 - All transactions automatically get IDs
 - Dark mode preference starts as disabled
@@ -1645,10 +1781,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Breaking Changes
 
 ### v3.0.0
+
 - Category structure changed to object format
 - Type dropdown replaced with toggle button
 
 ### v2.0.0
+
 - Transaction data structure extended with `createdAt` field
 - Service worker cache name changed (old cache auto-deleted)
 

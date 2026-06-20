@@ -21,6 +21,7 @@ A user who relies on "Create Backup" and later restores loses everything except 
 ## Scope
 
 ### In scope
+
 - Fix backup envelope to include all IDB stores and critical localStorage data
 - Fix restore to write all stores back (not just transactions)
 - Remove CSV from auto-backup (silently lossy)
@@ -32,6 +33,7 @@ A user who relies on "Create Backup" and later restores loses everything except 
 - Remove the 4 scattered top-of-settings toolbar buttons
 
 ### Out of scope
+
 - Auto-sync or cloud backup (violates zero-dependency, privacy-first)
 - Incremental backups
 - Backup history browser (keep last N files on device — browser can't control Downloads)
@@ -40,17 +42,17 @@ A user who relies on "Create Backup" and later restores loses everything except 
 
 ## Decisions Made
 
-| Decision | Choice | Reason |
-|----------|--------|--------|
-| Include `currency` in backup? | No | Device preference, not financial data. Conflict prompt adds friction for no value |
-| Include `smartAlerts` in backup? | No | Transient dismiss history — not financial data |
-| Include `darkMode`, UI prefs in backup? | No | Device preferences |
-| Include `exchangeRateHistory`? | Yes | User-entered FX rates — real data, not reproducible |
-| Include `tagColors`? | Yes | User customization tied to tag data |
-| CSV in auto-backup? | Remove | Silently drops 7 of 9 stores — footgun |
-| Restore mode? | Both merge + replace | Merge = safer default; Replace = device migration |
-| UI: static or JS-injected? | Static HTML in index.html | JS only updates dynamic values (last backup date, toggle state) |
-| Integrity check on restore? | SHA-256 in envelope, warn on mismatch | Don't block restore — warn and let user decide |
+| Decision                                | Choice                                | Reason                                                                            |
+| --------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------- |
+| Include `currency` in backup?           | No                                    | Device preference, not financial data. Conflict prompt adds friction for no value |
+| Include `smartAlerts` in backup?        | No                                    | Transient dismiss history — not financial data                                    |
+| Include `darkMode`, UI prefs in backup? | No                                    | Device preferences                                                                |
+| Include `exchangeRateHistory`?          | Yes                                   | User-entered FX rates — real data, not reproducible                               |
+| Include `tagColors`?                    | Yes                                   | User customization tied to tag data                                               |
+| CSV in auto-backup?                     | Remove                                | Silently drops 7 of 9 stores — footgun                                            |
+| Restore mode?                           | Both merge + replace                  | Merge = safer default; Replace = device migration                                 |
+| UI: static or JS-injected?              | Static HTML in index.html             | JS only updates dynamic values (last backup date, toggle state)                   |
+| Integrity check on restore?             | SHA-256 in envelope, warn on mismatch | Don't block restore — warn and let user decide                                    |
 
 ---
 
@@ -64,7 +66,7 @@ A user who relies on "Create Backup" and later restores loses everything except 
   currency: "THB",                        // informational only, not restored
   transactionCount: 342,
   integrity: "sha256:abc123...",          // SHA-256 of JSON with this field set to ""
-  
+
   // IDB stores
   transactions: [...],
   recurringTemplates: [...],
@@ -74,7 +76,7 @@ A user who relies on "Create Backup" and later restores loses everything except 
   quickTemplates: [...],
   appSettings: { enabledFields: {...}, keywords: {...} } | null,
   netWorthSnapshots: [...],              // NEW — requires explicit IDB read
-  
+
   // localStorage (data only, not preferences)
   localStorage: {
     exchangeRateHistory: {...} | null,   // NEW
@@ -105,12 +107,14 @@ user picks file
 ## Restore Modes
 
 ### Merge (default)
+
 - Skip records where `id` already exists in IDB
 - Append new records
 - Good for: "I accidentally deleted some transactions" / "adding records from older device"
 - Label: **"Merge — add missing records"**
 
 ### Replace (destructive)
+
 - Call `clearAllStores(storesToClear)` — only clears stores that have corresponding data in the backup payload. If backup is schema 0 (no `netWorthSnapshots`), do NOT wipe the local snapshots store.
 - Write all records from backup
 - Good for: switching devices, full rollback
@@ -118,14 +122,20 @@ user picks file
 - Extra confirmation step: "This will delete all current data. Cannot be undone."
 
 **`clearAllStores()` scope:**
+
 ```javascript
 const CLEARABLE_STORES = [
-  'transactions', 'recurringTemplates', 'budgets',
-  'accounts', 'savingsGoals', 'quickTemplates',
-  'appSettings', 'netWorthSnapshots'
+  "transactions",
+  "recurringTemplates",
+  "budgets",
+  "accounts",
+  "savingsGoals",
+  "quickTemplates",
+  "appSettings",
+  "netWorthSnapshots",
 ];
 // Only clear stores present in the backup payload:
-const storesToClear = CLEARABLE_STORES.filter(s => backupData[s] != null);
+const storesToClear = CLEARABLE_STORES.filter((s) => backupData[s] != null);
 ```
 
 ---
@@ -172,6 +182,7 @@ Single static card in Settings replaces the 4 scattered toolbar buttons and abso
 No user-visible change. Fixes silent data loss in the existing backup format.
 
 **`js/auto-backup.js` → `buildJsonBackup()`**
+
 - Make async
 - Use `loadAllTransactionsFromDB()` instead of `state.transactions` — includes soft-deleted records for complete audit trail
 - Add `getAllNetWorthSnapshots()` call to fetch snapshots from IDB
@@ -185,6 +196,7 @@ No user-visible change. Fixes silent data loss in the existing backup format.
 - **Ripple effect:** `encryptBackup()` calls `buildJsonBackup()` synchronously today — must be updated to `await buildJsonBackup()` (already inside an async function, so just add `await`)
 
 **`js/import-export.js` → `confirmRestore()`**
+
 - Add `appSettings` restore: `saveAppSettings(backupData.appSettings)` if present
 - Add `netWorthSnapshots` restore: bulk-save via `bulkSaveNetWorthSnapshots()` (add to `db.js` if missing)
 - Add localStorage restore: `exchangeRateHistory`, `tagColors` — only if present in payload
@@ -192,9 +204,11 @@ No user-visible change. Fixes silent data loss in the existing backup format.
 - Verify SHA-256 on restore: mismatch shows warning in preview modal, does not block
 
 **`js/app.js` → init**
+
 - One-shot migration: `if (getBackupSettings().backupFormat === 'csv') { saveBackupSettings({...settings, backupFormat: 'json'}) }`
 
 **`js/db.js`**
+
 - Add `getAllNetWorthSnapshots()` if not already exported
 - Add `bulkSaveNetWorthSnapshots(snapshots)` if not already exported
 - Add `clearAllStores()` (needed for Phase 2 replace mode — add now, wire in Phase 2)
@@ -211,6 +225,7 @@ No user-visible change. Fixes silent data loss in the existing backup format.
 ### Phase 2 — UI consolidation
 
 **`index.html`**
+
 - Remove 4 top-of-settings toolbar buttons: Export CSV, Import CSV, Create Backup, Restore Backup
 - Remove `restoreFile` hidden input (accept=".csv")
 - Remove `importFile` hidden input (accept=".csv")
@@ -220,12 +235,14 @@ No user-visible change. Fixes silent data loss in the existing backup format.
 - Auto-backup card: static structure in HTML, JS only fills in last-backup date and toggle state
 
 **`js/auto-backup.js` → `renderAutoBackupSettings()`**
+
 - Remove — no longer JS-renders the whole card
 - Replace with `updateAutoBackupUI()`: only updates last-backup date text + toggle checked state
 - Remove CSV option from `DEFAULT_SETTINGS.backupFormat`, hardcode to `'json'`
 - `runAutoBackupIfDue()` always calls `performJsonBackup(true)`
 
 **`js/import-export.js`**
+
 - Add `handleRestoreFileInput(file)` — detects format by extension, routes to correct path
 - `.enc` → prompt passphrase → `importEncryptedBackup()` → `processRestoredData()`
 - `.json` → `migrateBackupPayload()` → `processRestoredData()`
@@ -233,6 +250,7 @@ No user-visible change. Fixes silent data loss in the existing backup format.
 - Preview modal: add integrity check result line ("Integrity: verified ✓" or "⚠ Hash mismatch")
 
 **`js/app.js`**
+
 - Remove event bindings for old 4 toolbar buttons
 - Add event binding for new unified `dataRestoreFile` input
 - Add binding for new "Download Backup", "Encrypted Backup", "Import Spreadsheet", "Restore from Backup" buttons
@@ -246,10 +264,12 @@ No user-visible change. Fixes silent data loss in the existing backup format.
 **Merge vs Replace UI**
 
 In `processRestoredData()` preview modal, add two action buttons:
+
 - "Merge — add missing records" (default, blue)
 - "Replace — overwrite all data" (red, triggers confirmation step)
 
 `confirmRestore(mode)` accepts `'merge'` or `'replace'`:
+
 - `'replace'`: call `clearAllStores()` first, then write all stores
 - `'merge'`: existing behaviour (skip existing IDs)
 
@@ -277,18 +297,18 @@ Future versions add migration steps here.
 
 ## Files Modified — Complete List
 
-| File | Phase | Change |
-|------|-------|--------|
-| `js/auto-backup.js` | 1 + 2 | `buildJsonBackup()` async + full envelope; remove `renderAutoBackupSettings()`; add `updateAutoBackupUI()`; remove CSV path |
+| File                  | Phase     | Change                                                                                                                                                                      |
+| --------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `js/auto-backup.js`   | 1 + 2     | `buildJsonBackup()` async + full envelope; remove `renderAutoBackupSettings()`; add `updateAutoBackupUI()`; remove CSV path                                                 |
 | `js/import-export.js` | 1 + 2 + 3 | `confirmRestore()` restores all stores + localStorage; `handleRestoreFileInput()` format routing; `migrateBackupPayload()`; integrity check in preview; merge/replace modes |
-| `js/db.js` | 1 | Add `getAllNetWorthSnapshots()`, `bulkSaveNetWorthSnapshots()`, `clearAllStores()`, confirm `saveAppSettings()` exists |
-| `js/app.js` | 1 + 2 | One-shot CSV setting migration; rebind events for new buttons; remove old toolbar button bindings |
-| `index.html` | 2 | Remove 4 toolbar buttons; add static "Data & Backup" card; unified file input |
-| `css/styles.css` | 2 | Data & Backup card styles (sections, dividers) |
-| `css/dark-mode.css` | 2 | Dark mode for new card |
-| `js/state.js` | 3 | Bump `APP_VERSION` → `4.2.0` |
-| `sw.js` | 3 | Bump `CACHE_NAME` → `finchronicle-v4.2.0` |
-| `manifest.json` | 3 | Bump `version` → `4.2.0` |
+| `js/db.js`            | 1         | Add `getAllNetWorthSnapshots()`, `bulkSaveNetWorthSnapshots()`, `clearAllStores()`, confirm `saveAppSettings()` exists                                                      |
+| `js/app.js`           | 1 + 2     | One-shot CSV setting migration; rebind events for new buttons; remove old toolbar button bindings                                                                           |
+| `index.html`          | 2         | Remove 4 toolbar buttons; add static "Data & Backup" card; unified file input                                                                                               |
+| `css/styles.css`      | 2         | Data & Backup card styles (sections, dividers)                                                                                                                              |
+| `css/dark-mode.css`   | 2         | Dark mode for new card                                                                                                                                                      |
+| `js/state.js`         | 3         | Bump `APP_VERSION` → `4.2.0`                                                                                                                                                |
+| `sw.js`               | 3         | Bump `CACHE_NAME` → `finchronicle-v4.2.0`                                                                                                                                   |
+| `manifest.json`       | 3         | Bump `version` → `4.2.0`                                                                                                                                                    |
 
 ---
 
@@ -296,20 +316,21 @@ Future versions add migration steps here.
 
 After v4.2.0, restoring a `.json` or `.enc` backup restores:
 
-| Data | Store |
-|------|-------|
-| All transactions (incl. soft-deleted) | IDB `transactions` |
-| Recurring templates | IDB `recurringTemplates` |
-| Budget limits | IDB `budgets` |
-| Accounts + classification | IDB `accounts` |
-| Savings goals | IDB `savingsGoals` |
-| Quick entry templates | IDB `quickTemplates` |
-| Optional fields config | IDB `appSettings` |
-| Net worth trend history | IDB `netWorthSnapshots` |
-| Exchange rate history | localStorage `exchangeRateHistory` |
-| Tag colour assignments | localStorage `tagColors` |
+| Data                                  | Store                              |
+| ------------------------------------- | ---------------------------------- |
+| All transactions (incl. soft-deleted) | IDB `transactions`                 |
+| Recurring templates                   | IDB `recurringTemplates`           |
+| Budget limits                         | IDB `budgets`                      |
+| Accounts + classification             | IDB `accounts`                     |
+| Savings goals                         | IDB `savingsGoals`                 |
+| Quick entry templates                 | IDB `quickTemplates`               |
+| Optional fields config                | IDB `appSettings`                  |
+| Net worth trend history               | IDB `netWorthSnapshots`            |
+| Exchange rate history                 | localStorage `exchangeRateHistory` |
+| Tag colour assignments                | localStorage `tagColors`           |
 
 Not restored (device preferences):
+
 - `currency`, `darkMode`, `summaryCollapsed`, `alertsExpanded`, `smartAlerts`, UI prefs
 
 ---

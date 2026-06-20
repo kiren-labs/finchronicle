@@ -30,10 +30,10 @@ Senior-engineer lens: split by **concern** (detect / store / render), kill dupli
 
 ## Phase 0 — Prep (1 commit)
 
-| # | Task | File |
-|---|---|---|
-| 0.1 | Create branch `refactor/v4.1.2` off `main` (after `feature/backup-restore-v4.2.0` merges) | — |
-| 0.2 | Add unit-test snapshots for current behavior of `buildForecast`, `runAlertChecks`, `verifyBackup`, `parseBackupCSV` | `finance-tracker-tests/unit/` |
+| #   | Task                                                                                                                      | File                                 |
+| --- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| 0.1 | Create branch `refactor/v4.1.2` off `main` (after `feature/backup-restore-v4.2.0` merges)                                 | —                                    |
+| 0.2 | Add unit-test snapshots for current behavior of `buildForecast`, `runAlertChecks`, `verifyBackup`, `parseBackupCSV`       | `finance-tracker-tests/unit/`        |
 | 0.3 | Bump version stub: `APP_VERSION = '4.1.2'`, `CACHE_NAME = 'finchronicle-v4.1.2'`, manifest. Don't ship until phases done. | `state.js`, `sw.js`, `manifest.json` |
 
 **Gate to next phase:** snapshot tests pass on `main` head.
@@ -66,18 +66,22 @@ js/alerts/
 ### Specific cleanups
 
 1. **Collapse three month aggregators into one parameterised helper:**
+
    ```js
    function spendByCategoryInRange(start, end) { … }
    const thisWeek = spendByCategoryInRange(getWeekStart(now), now);
    const thisMonth = spendByCategoryInRange(monthStart(now), now);
    const lastMonth = spendByCategoryInRange(monthStart(now, -1), monthEnd(now, -1));
    ```
+
    Removes ~40 lines of copy-paste.
 
 2. **Replace module-mutable singletons with a store object:**
+
    ```js
-   const alertStore = createAlertStore();   // { history, dismissed, persist, dismiss, clear }
+   const alertStore = createAlertStore(); // { history, dismissed, persist, dismiss, clear }
    ```
+
    Makes `runAlertChecks` testable by passing a stub store.
 
 3. **Detector contract:** every detector returns `Alert[]` (never null, never single). Removes the `if (x) push(x)` ladder in `runHealthAlertChecks`.
@@ -105,23 +109,33 @@ js/alerts/
 ### Fix
 
 1. **Single-pass DOM builder:**
+
    ```js
    function buildEventRow(ev) {
-     const row = el('div', 'forecast-event-row' + (ev.runningBalance < 0 ? ' forecast-event-negative' : ''));
+     const row = el(
+       "div",
+       "forecast-event-row" +
+         (ev.runningBalance < 0 ? " forecast-event-negative" : ""),
+     );
      row.append(
-       el('span', 'forecast-event-date', ev.date),
-       el('span', 'forecast-event-label', ev.label),
-       el('span', amountClass(ev.amount), formatAmount(ev.amount)),
-       el('span', balanceClass(ev.runningBalance), formatCurrency(ev.runningBalance)),
+       el("span", "forecast-event-date", ev.date),
+       el("span", "forecast-event-label", ev.label),
+       el("span", amountClass(ev.amount), formatAmount(ev.amount)),
+       el(
+         "span",
+         balanceClass(ev.runningBalance),
+         formatCurrency(ev.runningBalance),
+       ),
      );
      return row;
    }
    ```
+
    `el(tag, className, text)` is a 5-line helper — add it to `utils.js`, reuse everywhere.
 
 2. **Replace `activeHorizon` module var:** read horizon from `data-horizon` on the active toggle button, or pass into `renderForecast(horizonDays)` as required arg. Keeps state in DOM where it belongs.
 
-3. **Warning dedup**: `[...new Map(warnings.map(w => [w.account, w])).values()]` keeps the *first* warning per account, but events are sorted ascending — so it correctly shows the *earliest* breach. Add a comment so the next reader doesn't "fix" it.
+3. **Warning dedup**: `[...new Map(warnings.map(w => [w.account, w])).values()]` keeps the _first_ warning per account, but events are sorted ascending — so it correctly shows the _earliest_ breach. Add a comment so the next reader doesn't "fix" it.
 
 **Wins:** No more two-pass render. No `innerHTML` with user data. ~30 lines shorter.
 
@@ -161,14 +175,16 @@ js/backup/
 1. **Single source of truth for CSV columns:** export `CSV_COLUMNS` array (and `transactionToCsvRow` mapper) from `payload.js`. `import-export.js` imports the same. Removes 30 lines of duplication and drift risk.
 
 2. **Backup epilogue helper:**
+
    ```js
    async function finalizeBackup({ blob, filename, successMsg, isAuto }) {
      await downloadBlob(blob, filename);
-     markBackupDone();   // updates settings.lastAutoBackup, timestamp, state.backupDue, UI
+     markBackupDone(); // updates settings.lastAutoBackup, timestamp, state.backupDue, UI
      if (!isAuto) showMessage(successMsg);
    }
    ```
-   Three perform* functions shrink ~15 lines each.
+
+   Three perform\* functions shrink ~15 lines each.
 
 3. **Move `downloadBlob` to `utils.js`** — `import-export.js` likely re-implements file downloads too. One canonical helper, including the iOS Web Share fallback.
 
@@ -209,14 +225,20 @@ js/data-io/
 1. **Resolve overlap with `auto-backup.js`:** `createBackup` (in `import-export.js`) vs `performJsonBackup` (in `auto-backup.js`) — what's the difference? Pick one. If both exist, document why in a 2-line comment in each.
 
 2. **Split `confirmRestore` by mode:**
+
    ```js
-   const RESTORE_HANDLERS = { merge: restoreMerge, replace: restoreReplace, append: restoreAppend };
-   export async function confirmRestore(mode = 'merge') {
+   const RESTORE_HANDLERS = {
+     merge: restoreMerge,
+     replace: restoreReplace,
+     append: restoreAppend,
+   };
+   export async function confirmRestore(mode = "merge") {
      const handler = RESTORE_HANDLERS[mode];
      if (!handler) throw new Error(`Unknown restore mode: ${mode}`);
      return handler(state.pendingRestore);
    }
    ```
+
    Each branch becomes a 30-line testable function.
 
 3. **`parseBackupCSV` legacy paths:** if specific formats are no longer in the wild, deprecate them with a `console.warn`. If they still are, add a comment naming the version that produced them.
@@ -233,14 +255,14 @@ js/data-io/
 
 ## Phase 5 — Sweep (cross-cutting)
 
-| # | Task |
-|---|---|
-| 5.1 | Add `el(tag, className, text)` and `readFileAs(file, mode)` to `utils.js`. Remove duplicates. |
+| #   | Task                                                                                                                             |
+| --- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 5.1 | Add `el(tag, className, text)` and `readFileAs(file, mode)` to `utils.js`. Remove duplicates.                                    |
 | 5.2 | Audit every `innerHTML = …` in the four refactored modules. Replace with DOM builders where the string contains computed values. |
-| 5.3 | Run validate-local.sh — version sync, no debugger/eval, manifest, SW cache list updated for any new files. |
-| 5.4 | Run unit tests + Playwright. Diff snapshots against Phase 0. Zero behavior delta required. |
-| 5.5 | Manual QA pass: offline mode, dark mode, mobile viewport, encrypted backup roundtrip, restore preview merge/replace/append. |
-| 5.6 | Update `CHANGELOG.md`: "v4.1.2 — internal refactor, no user-visible changes." |
+| 5.3 | Run validate-local.sh — version sync, no debugger/eval, manifest, SW cache list updated for any new files.                       |
+| 5.4 | Run unit tests + Playwright. Diff snapshots against Phase 0. Zero behavior delta required.                                       |
+| 5.5 | Manual QA pass: offline mode, dark mode, mobile viewport, encrypted backup roundtrip, restore preview merge/replace/append.      |
+| 5.6 | Update `CHANGELOG.md`: "v4.1.2 — internal refactor, no user-visible changes."                                                    |
 
 ---
 
@@ -256,13 +278,13 @@ js/data-io/
 
 ## Risk register
 
-| Risk | Mitigation |
-|---|---|
-| Behavior drift on alert dedup or restore merge | Snapshot tests in Phase 0; required gate before merge |
-| Cache invalidation breaks PWA upgrade path | `CACHE_NAME` bump + every new `.js` path in `CACHE_URLS` (validate-local.sh enforces) |
-| Public API change leaks into `app.js` | Each phase touches `app.js` import paths only; no signature changes |
-| Sub-directory imports break in some browsers | All imports are relative `./` paths; ES modules already used everywhere |
-| Refactor stalls mid-phase | Each phase is independently mergeable; ship in 5 small PRs not one mega-PR |
+| Risk                                           | Mitigation                                                                            |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Behavior drift on alert dedup or restore merge | Snapshot tests in Phase 0; required gate before merge                                 |
+| Cache invalidation breaks PWA upgrade path     | `CACHE_NAME` bump + every new `.js` path in `CACHE_URLS` (validate-local.sh enforces) |
+| Public API change leaks into `app.js`          | Each phase touches `app.js` import paths only; no signature changes                   |
+| Sub-directory imports break in some browsers   | All imports are relative `./` paths; ES modules already used everywhere               |
+| Refactor stalls mid-phase                      | Each phase is independently mergeable; ship in 5 small PRs not one mega-PR            |
 
 ---
 
@@ -288,4 +310,3 @@ Five-to-six small PRs over a week beats one 2000-line PR that nobody wants to re
 1. **Single-file reorg vs sub-directory split?** Recommend single-file reorg first for `alerts.js`. Sub-directory for `import-export.js` (it's 967 lines, no way around it). `auto-backup.js` borderline — single-file likely fine.
 2. **Snapshot-test investment up-front?** Worth 1–2 hours for `buildForecast` and `parseBackupCSV` because behavior drift is hardest to spot there.
 3. **Ship as 4.1.2 or roll into 4.2.0?** Ship after 4.2.0 merges. Mixing refactor with a feature release blurs the diff and reverting becomes harder.
-

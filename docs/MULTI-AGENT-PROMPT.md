@@ -18,14 +18,14 @@ You (Orchestrator)
 
 ### How Agents Work in Claude Code
 
-| Concept | What it means |
-|---------|---------------|
-| **Agent** | A subprocess with its own context window. Stateless — it has no memory of previous agent calls. |
-| **Orchestrator** | You, in the main conversation. You coordinate agents and pass context forward. |
-| **Agent tool** | How Claude Code launches an agent: `subagent_type`, `prompt`, optionally `isolation: "worktree"`. |
-| **Foreground** | Agent runs and blocks until done. Use when you need the result before continuing. |
-| **Background** | Agent runs in parallel while you continue. Use for independent work (e.g. QA + Edge Case simultaneously). |
-| **Worktree** | Isolated git branch for the agent. Changes don't touch `main` until you merge. |
+| Concept          | What it means                                                                                             |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| **Agent**        | A subprocess with its own context window. Stateless — it has no memory of previous agent calls.           |
+| **Orchestrator** | You, in the main conversation. You coordinate agents and pass context forward.                            |
+| **Agent tool**   | How Claude Code launches an agent: `subagent_type`, `prompt`, optionally `isolation: "worktree"`.         |
+| **Foreground**   | Agent runs and blocks until done. Use when you need the result before continuing.                         |
+| **Background**   | Agent runs in parallel while you continue. Use for independent work (e.g. QA + Edge Case simultaneously). |
+| **Worktree**     | Isolated git branch for the agent. Changes don't touch `main` until you merge.                            |
 
 ### When TO Use Multi-Agent
 
@@ -45,6 +45,7 @@ You (Orchestrator)
 ### The Communication Reality
 
 Agents **cannot message each other**. If you need Agent B to know what Agent A found, you:
+
 1. Read Agent A's output
 2. Copy the relevant findings into Agent B's prompt
 
@@ -53,6 +54,7 @@ This is deliberate — it forces you to review what each agent produces before p
 ### The `finchronicle-dev` Agent
 
 This project has a custom agent at `.claude/agents/finchronicle-dev.md`. It knows:
+
 - All project constraints (zero deps, XSS safety, updateUI(), etc.)
 - The correct code patterns (validateTransaction → save → updateUI)
 - Which files to touch for which operations
@@ -101,21 +103,25 @@ v3.18.0 Receipt Photos                (DB_VERSION → 7)
 All agents use `subagent_type: "finchronicle-dev"`. The role-specific prompt is what differentiates them.
 
 ### Role 1: Feature Lead
+
 **Goal:** Implement one complete feature end-to-end.
 
 **Outputs to you:**
+
 - List of files changed and why
 - Any decisions made (e.g. why a certain DB schema shape)
 - Manual test results (offline, dark mode, mobile)
 - Any open questions or risks
 
 **Does NOT:**
+
 - Bump DB_VERSION, APP_VERSION, or CACHE_NAME (Coordinator does that)
 - Commit to main (you do that after review)
 
 ---
 
 ### Role 2: QA & Constraint Validator
+
 **Goal:** Catch violations of FinChronicle's constraints before they reach main.
 
 **Inputs from you:** Summary of what Feature Lead changed + specific files to review.
@@ -123,6 +129,7 @@ All agents use `subagent_type: "finchronicle-dev"`. The role-specific prompt is 
 **Outputs to you:** PASS or FAIL with specific findings.
 
 **Test checklist:**
+
 - [ ] Works offline (DevTools → Network → Offline)
 - [ ] No external API calls or CDN requests
 - [ ] Data persists after reload
@@ -137,6 +144,7 @@ All agents use `subagent_type: "finchronicle-dev"`. The role-specific prompt is 
 ---
 
 ### Role 3: Edge Case Analyst
+
 **Goal:** Find failure modes and race conditions before users do.
 
 **Inputs from you:** Summary of what Feature Lead changed + specific files to review.
@@ -144,6 +152,7 @@ All agents use `subagent_type: "finchronicle-dev"`. The role-specific prompt is 
 **Outputs to you:** Scenario list with BLOCKER or NICE_TO_HAVE classification.
 
 **Standard scenarios to probe:**
+
 - 5000+ transactions — does the feature still load fast?
 - IndexedDB quota at 90% — error handling?
 - Two tabs open with conflicting state
@@ -152,6 +161,7 @@ All agents use `subagent_type: "finchronicle-dev"`. The role-specific prompt is 
 - Mobile soft keyboard covers form inputs
 
 **Report format per scenario:**
+
 ```
 Scenario: [name]
 Failure mode: [what bad thing happens]
@@ -165,6 +175,7 @@ Classification: BLOCKER | NICE_TO_HAVE
 ### What You Handle Directly (No Agent Needed)
 
 After Feature Lead, QA, and Edge Case all sign off:
+
 1. Update `js/state.js` — `APP_VERSION` and `DB_VERSION`
 2. Update `sw.js` — `CACHE_NAME` and `CACHE_URLS` (add new `.js` file)
 3. Update `manifest.json` — `version`
@@ -218,6 +229,7 @@ You'll be notified when each finishes. You don't need to wait — continue readi
 ### Step 3 — Review findings
 
 Read both reports. Classify findings:
+
 - **Blockers** → go back to Feature Lead with a fix prompt (repeat from Step 1, no worktree needed for a patch)
 - **NICE_TO_HAVE** → log in CHANGELOG as "known limitations / future work"
 
@@ -226,6 +238,7 @@ Read both reports. Classify findings:
 ### Step 4 — You handle the release
 
 When all roles are clear:
+
 - Edit version files directly (no agent)
 - Commit: `release: v3.13.0 Budget Limits & Alerts`
 - Create PR via `gh pr create`
@@ -387,18 +400,23 @@ RETURN FORMAT:
 ## Part 8: Practical Tips for Using This Workflow
 
 ### Do this once to learn the pattern
+
 Run the full v3.13.0 workflow manually. You'll see how each agent specializes and how findings chain together. After that, it becomes intuitive.
 
 ### Copy-paste agent outputs into a scratch file
+
 Between phases, paste each agent's output into a temporary note. When you write the next agent's prompt, you already have the context ready to include.
 
 ### Trust the blockers, triage the nice-to-haves
+
 Edge Case often finds theoretical issues. If something is NICE_TO_HAVE, log it in CHANGELOG as a known limitation and ship. Don't let perfect block good.
 
 ### You are the quality gate
+
 Agents can miss things. You reviewing agent output before passing it forward is the most important step. An agent that returns "PASS" on QA doesn't mean you skip reading it.
 
 ### Don't over-agent
+
 For a 3-line CSS fix or a typo, just edit directly. Multi-agent is for full feature releases where thoroughness matters.
 
 ---

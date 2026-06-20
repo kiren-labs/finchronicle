@@ -1,10 +1,12 @@
 # Opening Balances & Cash Transactions in Double-Entry
 
 **Your Questions:**
+
 1. How to record starting balances for multiple accounts?
 2. How to record ATM withdrawal and cash use?
 
 **Short Answer:**
+
 - Opening balances = special journal entry on day 1
 - ATM withdrawal = transfer between asset accounts (Checking → Cash)
 - Cash grocery purchase = simple transaction (Cash → Expense)
@@ -16,6 +18,7 @@
 ### Your Situation
 
 **You have:**
+
 - Account 1: Checking Account with salary deposits → 50,000 THB
 - Account 2: Savings Account (emergency fund) → 20,000 THB
 - Account 3: Cash in wallet → 2,000 THB
@@ -60,17 +63,19 @@ On migration day (e.g., 2026-01-01), create ONE special entry:
 ### Why This Works
 
 **Before (v3):** App has NO idea you even have these accounts!
+
 ```javascript
 // v3 transactions don't tell us account balances
 { type: 'income', category: 'Salary', amount: 50000 }
 // Does this mean:
-// - You have 50,000 in checking? 
+// - You have 50,000 in checking?
 // - Or just that you earned 50,000 one time?
 // - Do you have 10,000 saved somewhere?
 // Nobody knows! ❌
 ```
 
 **After (v4):** Opening entry creates starting position
+
 ```javascript
 // Now we KNOW:
 // - Checking has 50,000 on day 1
@@ -83,6 +88,7 @@ On migration day (e.g., 2026-01-01), create ONE special entry:
 ### User Experience During Migration
 
 **In migration modal:**
+
 ```
 ┌─────────────────────────────────────┐
 │ Prepare for v4 Upgrade              │
@@ -102,29 +108,30 @@ On migration day (e.g., 2026-01-01), create ONE special entry:
 ```
 
 **Code for this:**
+
 ```javascript
 async function setupOpeningBalances(balances) {
-    // balances = { checking: 50000, savings: 20000, cash: 2000, ccDebt: 5000 }
+  // balances = { checking: 50000, savings: 20000, cash: 2000, ccDebt: 5000 }
 
-    const totalAssets = balances.checking + balances.savings + balances.cash;
-    const totalLiabilities = balances.ccDebt;
-    const equity = totalAssets - totalLiabilities;
+  const totalAssets = balances.checking + balances.savings + balances.cash;
+  const totalLiabilities = balances.ccDebt;
+  const equity = totalAssets - totalLiabilities;
 
-    const openingEntry = {
-        id: `opening_${Date.now()}`,
-        date: '2026-01-01',
-        notes: 'Opening Balances',
-        entries: [
-            { accountId: '1100', debit: balances.checking, credit: 0 },
-            { accountId: '1200', debit: balances.savings, credit: 0 },
-            { accountId: '1000', debit: balances.cash, credit: 0 },
-            { accountId: '2000', debit: 0, credit: balances.ccDebt },
-            { accountId: '3000', debit: 0, credit: equity }
-        ],
-        tags: ['opening-balance']
-    };
+  const openingEntry = {
+    id: `opening_${Date.now()}`,
+    date: "2026-01-01",
+    notes: "Opening Balances",
+    entries: [
+      { accountId: "1100", debit: balances.checking, credit: 0 },
+      { accountId: "1200", debit: balances.savings, credit: 0 },
+      { accountId: "1000", debit: balances.cash, credit: 0 },
+      { accountId: "2000", debit: 0, credit: balances.ccDebt },
+      { accountId: "3000", debit: 0, credit: equity },
+    ],
+    tags: ["opening-balance"],
+  };
 
-    return await saveJournalEntry(openingEntry);
+  return await saveJournalEntry(openingEntry);
 }
 ```
 
@@ -143,6 +150,7 @@ async function setupOpeningBalances(balances) {
 ### Your Scenario
 
 **Step 1: Withdraw 5,000 THB from ATM**
+
 ```
 You: Go to ATM
 Action: Withdraw 5,000 THB using debit card
@@ -150,6 +158,7 @@ Result: Checking account decreases, Cash increases
 ```
 
 **Step 2: Buy Groceries with Cash (1,500 THB)**
+
 ```
 You: Go to grocery store
 Action: Pay with cash (1,500 THB)
@@ -165,6 +174,7 @@ Result: Cash decreases, Groceries expense increases
 **Type:** Transfer (between two asset accounts)
 
 **Journal Entry:**
+
 ```javascript
 {
   id: '1708700000001',
@@ -173,7 +183,7 @@ Result: Cash decreases, Groceries expense increases
   entries: [
     // Cash increases (debit an asset)
     { accountId: '1000', accountName: 'Cash', debit: 5000, credit: 0 },
-    
+
     // Checking decreases (credit an asset)
     { accountId: '1100', accountName: 'Checking Account', debit: 0, credit: 5000 }
   ],
@@ -191,6 +201,7 @@ Result: Cash decreases, Groceries expense increases
 ```
 
 **In the App Form:**
+
 ```
 ┌─────────────────────────────────┐
 │ Add Transaction                 │
@@ -218,6 +229,7 @@ After Save:
 **Type:** Expense (from Cash account)
 
 **Journal Entry:**
+
 ```javascript
 {
   id: '1708700000002',
@@ -226,7 +238,7 @@ After Save:
   entries: [
     // Groceries expense increases (debit expense)
     { accountId: '5000', accountName: 'Groceries Expense', debit: 1500, credit: 0 },
-    
+
     // Cash decreases (credit an asset)
     { accountId: '1000', accountName: 'Cash', debit: 0, credit: 1500 }
   ],
@@ -244,6 +256,7 @@ After Save:
 ```
 
 **In the App Form:**
+
 ```
 ┌─────────────────────────────────┐
 │ Add Transaction                 │
@@ -312,18 +325,18 @@ Note: Net worth decreased by 1,500 because we SPENT that money
 
 **YES! They must be separate accounts:**
 
-| Account | Type | What It Tracks |
-|---------|------|----------------|
-| **Checking** | Asset | Money in bank account |
-| **Savings** | Asset | Money in savings account |
-| **Cash** | Asset | Physical bills in wallet |
-| **Credit Card** | Liability | Debt you owe |
+| Account         | Type      | What It Tracks           |
+| --------------- | --------- | ------------------------ |
+| **Checking**    | Asset     | Money in bank account    |
+| **Savings**     | Asset     | Money in savings account |
+| **Cash**        | Asset     | Physical bills in wallet |
+| **Credit Card** | Liability | Debt you owe             |
 
 ### Why Separate?
 
 ```javascript
 // If Checking and Cash were the SAME account:
-// 
+//
 // You have 50,000 in checking at bank
 // You withdraw 5,000 cash
 // Account balance = 45,000
@@ -342,6 +355,7 @@ Note: Net worth decreased by 1,500 because we SPENT that money
 ### Real-World Benefit
 
 You can now answer questions like:
+
 - "How much cash do I have in my wallet?" → Look at Cash account
 - "How much is in my checking account?" → Look at Checking account
 - "How much have I spent on groceries?" → Look at Groceries expense
@@ -354,6 +368,7 @@ You can now answer questions like:
 ## Complete Example: Your Daily Routine
 
 ### Starting Position (2026-01-01)
+
 ```javascript
 // Opening balance
 {
@@ -377,6 +392,7 @@ You can now answer questions like:
 ```
 
 ### Feb 23 Morning: Receive Salary 60,000 THB (to Checking)
+
 ```javascript
 {
   date: '2026-02-23',
@@ -395,6 +411,7 @@ You can now answer questions like:
 ```
 
 ### Feb 23 11:00 AM: ATM Withdrawal 5,000 THB
+
 ```javascript
 {
   date: '2026-02-23',
@@ -413,6 +430,7 @@ You can now answer questions like:
 ```
 
 ### Feb 23 2:30 PM: Grocery Shopping 1,500 THB (Cash)
+
 ```javascript
 {
   date: '2026-02-23',
@@ -432,6 +450,7 @@ You can now answer questions like:
 ```
 
 ### Feb 23 3:00 PM: Pay Down Credit Card 3,000 THB (from Checking)
+
 ```javascript
 {
   date: '2026-02-23',
@@ -452,6 +471,7 @@ You can now answer questions like:
 ```
 
 ### End of Day Summary
+
 ```
 ACCOUNT BALANCES (Feb 23, 2026):
 ┌────────────────────────────────┐
@@ -489,18 +509,24 @@ TRIAL BALANCE VERIFICATION:
 ## Common Questions Answered
 
 ### Q1: Is "Cash" Account Same as Checking?
+
 **A:** NO! Keep them separate:
+
 - **Checking:** Money in bank (can use card/checks/online transfer)
 - **Cash:** Physical money in wallet (need to carry)
 
 ### Q2: Do I Need a "Cash" Account?
-**A:** 
+
+**A:**
+
 - If you mostly use cards → Maybe not needed (simple)
 - If you use cash regularly → YES, definitely track it
 - If you want to know "how much cash do I have?" → YES
 
 ### Q3: How Do I Track Cash Spending in v3?
+
 **A:** You can't track WHERE cash came from in v3!
+
 ```
 v3: { type: 'expense', category: 'Groceries', amount: 1500 }
 // Did you pay with cash? Credit card? Checking card?
@@ -514,7 +540,9 @@ v4: Clearly shows:
 ```
 
 ### Q4: What If I Lose 500 THB Cash?
+
 **A:** Record it as an expense!
+
 ```javascript
 {
   date: '2026-02-23',
@@ -530,29 +558,33 @@ v4: Clearly shows:
 ```
 
 ### Q5: What About Credit Card Payments?
+
 **A:** Payment is NOT an expense, it's paying down debt!
+
 ```javascript
 // WRONG:
 {
   entries: [
-    { debit: 3000 },  // Checking
-    { credit: 3000 }  // Groceries ❌ This is wrong!
-  ]
+    { debit: 3000 }, // Checking
+    { credit: 3000 }, // Groceries ❌ This is wrong!
+  ];
 }
 // Makes it look like you spent 3000 on groceries
 
 // RIGHT:
 {
   entries: [
-    { debit: 3000 },  // CC Debt decreases
-    { credit: 3000 }  // Checking decreases ✅ Correct!
-  ]
+    { debit: 3000 }, // CC Debt decreases
+    { credit: 3000 }, // Checking decreases ✅ Correct!
+  ];
 }
 // Shows you paid down debt, not spent money
 ```
 
 ### Q6: What If I Transfer Salary to Savings?
+
 **A:** Simple transfer between asset accounts!
+
 ```javascript
 {
   date: '2026-02-23',
