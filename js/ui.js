@@ -40,6 +40,8 @@ import {
   buildDayHeatmapData,
   renderDayHeatmap,
 } from "./chart.js";
+import { renderNetWorthDashboard } from "./accounts.js";
+import { renderSavingsDashboard } from "./savings.js";
 
 // ---- Master UI Refresh ----
 
@@ -608,6 +610,9 @@ export function updateReportsView() {
   if (heatmapContainer) {
     renderDayHeatmap(buildDayHeatmapData(txns, range), heatmapContainer);
   }
+
+  renderNetWorthDashboard();
+  renderSavingsDashboard();
 }
 
 function groupByMonth() {
