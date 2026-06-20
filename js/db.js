@@ -48,7 +48,10 @@ function txToPromise(tx) {
 /** Get all records from a store. Returns [] if DB not ready or store missing. */
 function idbGetAll(storeName, fallback = []) {
   if (!state.db || !hasStore(storeName)) {
-    logError(`idbGetAll: skipped — ${!state.db ? "db not ready" : `store '${storeName}' missing`}`, "db.js:idbGetAll");
+    logError(
+      `idbGetAll: skipped — ${!state.db ? "db not ready" : `store '${storeName}' missing`}`,
+      "db.js:idbGetAll",
+    );
     return Promise.resolve(fallback);
   }
   const store = state.db

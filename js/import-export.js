@@ -217,9 +217,7 @@ export async function createBackup() {
   let csv = `${metadata}\n`;
   csv += `${headers.join(",")}\n`;
   csv += rows
-    .map((row) =>
-      row.map((cell) => `"${sanitizeBackupCell(cell)}"`).join(","),
-    )
+    .map((row) => row.map((cell) => `"${sanitizeBackupCell(cell)}"`).join(","))
     .join("\n");
 
   const now = new Date();
@@ -578,7 +576,8 @@ export function parseBackupCSV(text) {
   const settledByIdx = headers.findIndex((h) => h === "settledby");
 
   // Strip CSV formula-escape apostrophe added by sanitizeBackupCell on export
-  const stripCSVEscape = (s) => (s.startsWith("'") && /^'[=+\-@\t]/.test(s) ? s.slice(1) : s);
+  const stripCSVEscape = (s) =>
+    s.startsWith("'") && /^'[=+\-@\t]/.test(s) ? s.slice(1) : s;
 
   const parsedTransactions = [];
   const dataRows = rows.slice(1);
@@ -592,7 +591,8 @@ export function parseBackupCSV(text) {
       return;
     }
 
-    const rawNotes = notesIndex !== -1 ? stripCSVEscape((row[notesIndex] || "").trim()) : "";
+    const rawNotes =
+      notesIndex !== -1 ? stripCSVEscape((row[notesIndex] || "").trim()) : "";
 
     const transaction = {
       id:

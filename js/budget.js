@@ -443,7 +443,8 @@ export function getBudgetVsActual() {
   const actualByCategory = {};
   state.transactions.forEach((t) => {
     if (t.type !== "expense" || !t.date.startsWith(monthPrefix)) return;
-    actualByCategory[t.category] = (actualByCategory[t.category] || 0) + t.amount;
+    actualByCategory[t.category] =
+      (actualByCategory[t.category] || 0) + t.amount;
   });
 
   const budgetedCategories = new Set(state.budgets.map((b) => b.category));
@@ -466,9 +467,20 @@ export function getBudgetVsActual() {
   const totalBudget = budgeted.reduce((s, r) => s + r.budget, 0);
   const totalActual = budgeted.reduce((s, r) => s + r.actual, 0);
   const totalVariance = totalBudget - totalActual;
-  const totalPct = totalBudget > 0 ? Math.round((totalActual / totalBudget) * 100) : 0;
+  const totalPct =
+    totalBudget > 0 ? Math.round((totalActual / totalBudget) * 100) : 0;
 
-  return { budgeted, unbudgeted, monthPrefix, totals: { budget: totalBudget, actual: totalActual, variance: totalVariance, pct: totalPct } };
+  return {
+    budgeted,
+    unbudgeted,
+    monthPrefix,
+    totals: {
+      budget: totalBudget,
+      actual: totalActual,
+      variance: totalVariance,
+      pct: totalPct,
+    },
+  };
 }
 
 export function renderBudgetVsActualTable() {
@@ -530,7 +542,8 @@ export function renderBudgetVsActualTable() {
       cells.forEach((val, i) => {
         const td = tr.insertCell();
         td.textContent = val;
-        if (i === 3) td.className = row.variance >= 0 ? "bva-positive" : "bva-negative";
+        if (i === 3)
+          td.className = row.variance >= 0 ? "bva-positive" : "bva-negative";
         if (i === 4 && row.pct >= 100) td.textContent = `${row.pct}% ⚠`;
       });
     });
@@ -549,7 +562,8 @@ export function renderBudgetVsActualTable() {
     tcells.forEach((val, i) => {
       const td = document.createElement("td");
       td.textContent = val;
-      if (i === 3) td.className = totals.variance >= 0 ? "bva-positive" : "bva-negative";
+      if (i === 3)
+        td.className = totals.variance >= 0 ? "bva-positive" : "bva-negative";
       trow.appendChild(td);
     });
 
@@ -589,13 +603,21 @@ export function exportBudgetVsActualCSV() {
   budgeted.forEach((r) => {
     rows.push([r.category, r.budget, r.actual, r.variance, `${r.pct}%`]);
   });
-  rows.push(["Total", totals.budget, totals.actual, totals.variance, `${totals.pct}%`]);
+  rows.push([
+    "Total",
+    totals.budget,
+    totals.actual,
+    totals.variance,
+    `${totals.pct}%`,
+  ]);
   if (unbudgeted.length > 0) {
     rows.push([]);
     rows.push(["Unbudgeted Category", "", "Actual", "", ""]);
     unbudgeted.forEach((r) => rows.push([r.category, "", r.actual, "", ""]));
   }
-  const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const csv = rows
+    .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");

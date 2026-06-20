@@ -17,7 +17,11 @@ const MAX_ERRORS = 50;
 export function logError(message, stack) {
   try {
     const log = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || "[]");
-    log.push({ timestamp: new Date().toISOString(), message, stack: stack || "" });
+    log.push({
+      timestamp: new Date().toISOString(),
+      message,
+      stack: stack || "",
+    });
     if (log.length > MAX_ERRORS) log.splice(0, log.length - MAX_ERRORS);
     localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
   } catch {

@@ -328,7 +328,9 @@ export function bindLockOverlayEvents() {
           }
         }, 1000);
       } else {
-        setLockError(`Wrong PIN. ${remaining} attempt${remaining !== 1 ? "s" : ""} left.`);
+        setLockError(
+          `Wrong PIN. ${remaining} attempt${remaining !== 1 ? "s" : ""} left.`,
+        );
       }
     }
   }
