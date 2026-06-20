@@ -221,6 +221,7 @@ export function getDOM() {
       monthExpense: document.getElementById("monthExpense"),
       monthNetTrend: document.getElementById("monthNetTrend"),
       monthIncomeTrend: document.getElementById("monthIncomeTrend"),
+      monthExpenseTrend: document.getElementById("monthExpenseTrend"),
       monthExpenseMeta: document.getElementById("monthExpenseMeta"),
       compactNet: document.getElementById("compactNet"),
       compactEntries: document.getElementById("compactEntries"),

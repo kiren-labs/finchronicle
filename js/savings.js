@@ -190,6 +190,21 @@ export function renderSavingsDashboard() {
   const currentMonth = new Date().toISOString().slice(0, 7);
   const monthSaved = getMonthlySavings(currentMonth);
   const monthIncome = getMonthlyIncome(currentMonth);
+
+  if (monthIncome === 0) {
+    container.innerHTML = `
+      <div class="savings-income-prompt">
+        <p class="savings-income-prompt-msg">Add income to unlock savings rate &amp; projections</p>
+        <button class="savings-income-prompt-btn">
+          <i class="ri-add-line"></i> Log income
+        </button>
+      </div>`;
+    container.querySelector(".savings-income-prompt-btn").addEventListener("click", () => {
+      document.dispatchEvent(new CustomEvent("fc:navigate", { detail: { tab: "add", type: "income" } }));
+    });
+    return;
+  }
+
   const rate = getSavingsRate(currentMonth);
   const trend = buildSavingsTrend();
   const projection = getAnnualProjection();

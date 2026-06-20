@@ -121,6 +121,7 @@ export function updateSummary() {
 
   const netDelta = calculateMoMDelta(net, prevTotals.net);
   const incomeDelta = calculateMoMDelta(income, prevTotals.income);
+  const expenseDelta = calculateMoMDelta(expense, prevTotals.expense);
   const expensePercent = calculateExpensePercentage(expense, income);
 
   const $ = getDOM();
@@ -152,6 +153,20 @@ export function updateSummary() {
   } else {
     $.monthIncomeTrend.textContent =
       income === 0 && prevTotals.income === 0 ? "—" : "";
+  }
+
+  // Update Expenses trend — inverted polarity: up spending = bad (red), down = good (green)
+  if (
+    expenseDelta &&
+    expenseDelta.pct !== null &&
+    !(expense === 0 && prevTotals.expense === 0)
+  ) {
+    const sign = expenseDelta.abs >= 0 ? "+" : "";
+    $.monthExpenseTrend.innerHTML = `<i class="ri-arrow-${expenseDelta.direction === "up" ? "up" : expenseDelta.direction === "down" ? "down" : "right"}-line"></i> ${sign}${Math.abs(expenseDelta.pct).toFixed(1)}% vs last month`;
+    $.monthExpenseTrend.className = `summary-trend ${expenseDelta.direction === "up" ? "negative" : expenseDelta.direction === "down" ? "positive" : "neutral"}`;
+  } else {
+    $.monthExpenseTrend.textContent = expense === 0 && prevTotals.expense === 0 ? "—" : "";
+    $.monthExpenseTrend.className = "summary-trend neutral";
   }
 
   // Update Expenses meta

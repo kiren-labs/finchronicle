@@ -301,7 +301,7 @@ export function renderBudgetList() {
 
 // Render budget modal
 export function renderBudgetModal(budget = null) {
-  const isEdit = !!budget;
+  const isEdit = !!budget?.id;
   const title = isEdit ? "Edit budget" : "Add budget";
 
   const categoryOptions = Object.entries(categories.expense)
@@ -586,8 +586,14 @@ export function renderBudgetVsActualTable() {
       cat.textContent = row.category;
       const amt = document.createElement("span");
       amt.textContent = formatCurrency(row.actual);
+      const setBudgetBtn = document.createElement("button");
+      setBudgetBtn.className = "bva-set-budget-btn";
+      setBudgetBtn.dataset.setBudget = row.category;
+      setBudgetBtn.setAttribute("aria-label", `Add budget for ${row.category}`);
+      setBudgetBtn.innerHTML = `<i class="ri-add-line"></i> Set budget`;
       line.appendChild(cat);
       line.appendChild(amt);
+      line.appendChild(setBudgetBtn);
       section.appendChild(line);
     });
     table.appendChild(section);

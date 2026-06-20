@@ -23,11 +23,13 @@ const ALERT_TYPES = {
 const ROLLING_DAYS = 90;
 const ALERT_HISTORY_MAX = 30;
 const STORAGE_KEY = "smartAlerts";
+const SNOOZE_KEY = "snoozedAlerts";
 
 // ---- Alert State ----
 
 let alertHistory = [];
 let dismissedAlerts = new Set();
+let snoozedAlerts = new Set();
 
 // ---- Initialisation ----
 
@@ -47,6 +49,21 @@ export function initAlerts() {
       dismissedAlerts = new Set();
     }
   }
+
+  // Load snoozed alerts; auto-expire entries from previous months
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  try {
+    const raw = localStorage.getItem(SNOOZE_KEY);
+    const entries = raw ? JSON.parse(raw) : [];
+    snoozedAlerts = new Set(
+      Array.isArray(entries)
+        ? entries.filter((k) => typeof k === "string" && k.includes(`:${currentMonth}`))
+        : [],
+    );
+    localStorage.setItem(SNOOZE_KEY, JSON.stringify([...snoozedAlerts]));
+  } catch {
+    snoozedAlerts = new Set();
+  }
 }
 
 function persistAlerts() {
@@ -57,6 +74,7 @@ function persistAlerts() {
       dismissed: [...dismissedAlerts].slice(0, 100),
     }),
   );
+  localStorage.setItem(SNOOZE_KEY, JSON.stringify([...snoozedAlerts]));
 }
 
 // ---- Helper: get expenses in a date range ----
@@ -520,6 +538,7 @@ export function runAlertChecks(newTransaction = null) {
 
   // Deduplicate: one alert per type+category per day (savings-rate-trend: per quarter)
   const today = new Date().toISOString().slice(0, 10);
+  const currentMonth = today.slice(0, 7);
   const now = new Date();
   const quarter = `Q${Math.floor(now.getMonth() / 3) + 1}-${now.getFullYear()}`;
   const unique = [];
@@ -529,7 +548,10 @@ export function runAlertChecks(newTransaction = null) {
     const window =
       alert.type === ALERT_TYPES.SAVINGS_RATE_TREND ? quarter : today;
     const key = `${alert.type}:${alert.category}:${window}`;
-    if (seen.has(key) || dismissedAlerts.has(key)) continue;
+    const snoozeKey = `${alert.type}:${alert.category}:${
+      alert.type === ALERT_TYPES.SAVINGS_RATE_TREND ? quarter : currentMonth
+    }`;
+    if (seen.has(key) || dismissedAlerts.has(key) || snoozedAlerts.has(snoozeKey)) continue;
     seen.add(key);
     alert.id = key;
     alert.date = today;
@@ -537,10 +559,12 @@ export function runAlertChecks(newTransaction = null) {
     unique.push(alert);
   }
 
-  // Add new alerts to history (most recent first)
+  // Add new alerts to history (most recent first); replace stale same-day entry
   for (const alert of unique) {
-    // Avoid duplicate in history
-    if (!alertHistory.some((h) => h.id === alert.id)) {
+    const existingIdx = alertHistory.findIndex((h) => h.id === alert.id);
+    if (existingIdx !== -1) {
+      alertHistory[existingIdx] = alert; // replace with fresh data
+    } else {
       alertHistory.unshift(alert);
     }
   }
@@ -556,6 +580,23 @@ export function runAlertChecks(newTransaction = null) {
 
 export function dismissAlert(alertId) {
   dismissedAlerts.add(alertId);
+  persistAlerts();
+}
+
+// ---- Public: Snooze an alert until next month ----
+
+export function snoozeAlert(alertId) {
+  const today = new Date().toISOString().slice(0, 10);
+  const currentMonth = today.slice(0, 7);
+  // alertId format: "type:category:YYYY-MM-DD" or "type:category:Q#-YYYY"
+  // Build month-scoped snooze key
+  const parts = alertId.split(":");
+  const window = parts[parts.length - 1];
+  const isQuarter = /^Q\d-\d{4}$/.test(window);
+  const snoozeKey = isQuarter
+    ? alertId // use full id for quarterly alerts
+    : `${parts.slice(0, -1).join(":")}:${currentMonth}`;
+  snoozedAlerts.add(snoozeKey);
   persistAlerts();
 }
 
@@ -638,6 +679,9 @@ function renderAlertBanner(alert) {
   return `<div class="smart-alert smart-alert-${alert.severity}" data-alert-id="${alert.id}">
     <i class="${alert.severity === "danger" ? "ri-alarm-warning-fill" : "ri-error-warning-line"}"></i>
     <span class="smart-alert-text">${alert.message}${suggestion}</span>
+    <button class="smart-alert-snooze" data-snooze="${alert.id}" aria-label="Snooze until next month" title="Snooze until next month">
+      <i class="ri-moon-line"></i>
+    </button>
     <button class="smart-alert-dismiss" data-dismiss="${alert.id}" aria-label="Dismiss">
       <i class="ri-close-line"></i>
     </button>
@@ -701,6 +745,16 @@ export function bindAlertEvents() {
   const alertsContainer = document.getElementById("smartAlerts");
   if (alertsContainer) {
     alertsContainer.addEventListener("click", (e) => {
+      const snoozeBtn = e.target.closest("[data-snooze]");
+      if (snoozeBtn) {
+        snoozeAlert(snoozeBtn.dataset.snooze);
+        const banner = snoozeBtn.closest(".smart-alert");
+        if (banner) banner.remove();
+        if (!alertsContainer.querySelector(".smart-alert")) {
+          alertsContainer.hidden = true;
+        }
+        return;
+      }
       const btn = e.target.closest("[data-dismiss]");
       if (btn) {
         dismissAlert(btn.dataset.dismiss);

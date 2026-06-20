@@ -5275,6 +5275,7 @@ button.primary.loading .btn-spinner {
   font-style: italic;
 }
 
+.smart-alert-snooze,
 .smart-alert-dismiss {
   background: none;
   border: none;
@@ -5286,6 +5287,7 @@ button.primary.loading .btn-spinner {
   transition: opacity 0.2s;
 }
 
+.smart-alert-snooze:hover,
 .smart-alert-dismiss:hover {
   opacity: 1;
 }
@@ -7204,4 +7206,63 @@ button.primary.loading .btn-spinner {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-lg);
+}
+
+/* ---- Savings income prompt (shown when no income recorded) ---- */
+.savings-income-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) 0;
+  text-align: center;
+}
+.savings-income-prompt-msg {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+.savings-income-prompt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-primary);
+  background: none;
+  color: var(--color-primary);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.savings-income-prompt-btn:hover {
+  background: var(--color-primary-soft);
+}
+
+/* ---- Unbudgeted row Set Budget button ---- */
+.bva-unbudgeted-row {
+  align-items: center;
+}
+.bva-set-budget-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-primary);
+  background: none;
+  color: var(--color-primary);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+.bva-set-budget-btn:hover {
+  background: var(--color-primary-soft);
+}
+.bva-set-budget-btn i {
+  font-size: 0.85rem;
 }
