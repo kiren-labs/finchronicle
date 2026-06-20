@@ -3,53 +3,61 @@
 ## What Was Implemented
 
 ### Priority #1: db.js Generic Helpers (completed earlier)
+
 - Rewrote `js/db.js` from 768 → 500 lines
 - Extracted generic IndexedDB helpers (`reqToPromise`, `txToPromise`, `idbGetAll`, `idbPut`, `idbDelete`, `idbBulkPut`, `idbModify`, etc.)
 - All CRUD functions now use thin wrappers over generic helpers
 
 ### Priority #2: Split app.js Event Bindings Into Feature Modules
+
 **app.js reduced from ~1700 → 1150 lines (~550 lines removed)**
 
 Moved these 10 functions out of `app.js` into their owning modules:
 
-| Function | Moved To |
-|----------|----------|
+| Function                     | Moved To                |
+| ---------------------------- | ----------------------- |
 | `bindOptionalFieldsEvents()` | `js/optional-fields.js` |
-| `bindQuickEntryEvents()` | `js/quick-entry.js` |
-| `bindAccountEvents()` | `js/accounts.js` |
-| `bindReconciliationEvents()` | `js/reconciliation.js` |
-| `bindGoalEvents()` | `js/goals.js` |
-| `bindAlertEvents()` | `js/alerts.js` |
-| `bindAnnualReportEvents()` | `js/annual-report.js` |
-| `bindAutoBackupEvents()` | `js/auto-backup.js` |
-| `bindMultiCurrencyEvents()` | `js/multi-currency.js` |
-| `bindSettlementEvents()` | `js/settlement.js` |
+| `bindQuickEntryEvents()`     | `js/quick-entry.js`     |
+| `bindAccountEvents()`        | `js/accounts.js`        |
+| `bindReconciliationEvents()` | `js/reconciliation.js`  |
+| `bindGoalEvents()`           | `js/goals.js`           |
+| `bindAlertEvents()`          | `js/alerts.js`          |
+| `bindAnnualReportEvents()`   | `js/annual-report.js`   |
+| `bindAutoBackupEvents()`     | `js/auto-backup.js`     |
+| `bindMultiCurrencyEvents()`  | `js/multi-currency.js`  |
+| `bindSettlementEvents()`     | `js/settlement.js`      |
 
 **New imports added to feature modules:**
+
 - `accounts.js` — added imports for `renderSavingsDashboard` (from savings.js), `openReconciliationModal` (from reconciliation.js)
 - `quick-entry.js` — added imports for `updateCategoryOptions`, `selectType`, `renderFormTagChips` (from ui.js)
 - `auto-backup.js` — uses dynamic `import("./import-export.js")` for lazy-loading (replaces app.js's `getImportExportModule()`)
 
 **app.js import section trimmed:**
+
 - Removed ~30 imports that were only used in the moved bind functions
 - Removed `ACCOUNT_CLASSIFICATION` from state.js import
 - Removed `toggleTransferFields`, `setOptionalFieldValues`, `setMultiCurrencyFormData`
 - Removed all internal function imports (`prefillFromTemplate`, `cloneLast`, `showAddAccountForm`, `dismissAlert`, `exportAnnualCSV`, `getBackupSettings`, etc.)
 
 **Bug fix during refactoring:**
+
 - `js/multi-currency.js` had an internal function named `bindMultiCurrencyEvents()` (binds form fields after render). The new exported `bindMultiCurrencyEvents()` (handles toggle re-render) created a name collision. Fixed by renaming the internal one to `bindMultiCurrencyFormFields()`.
 
 ### Priority #3: Separate Computation from Rendering
 
 **accounts.js:**
+
 - Moved `getActiveAccountNames()` from bottom of file up to the Pure Computation section (next to `getAccountBalance`, `getNetWorth`)
 - Moved `captureMonthlySnapshot()` from rendering section to Data Operations section (after `removeAccount`)
 - Added clear section headers: Init → Pure Computation → Account CRUD → Monthly Snapshot → Rendering → Form UI → Event Bindings
 
 **goals.js:**
+
 - Renamed section headers for clarity: `Pure Computation` (getProgressPercent, getMilestoneLevel, checkMilestone, getDaysRemaining) → `Rendering` (renderGoalsDashboard) → `Form UI` (showGoalForm, closeGoalForm, handleGoalFormSubmit, contribution modals) → `Event Bindings`
 
 **alerts.js:**
+
 - Renamed key section headers: `Alert Engine (computation)` for `runAlertChecks`, `Rendering` for `renderAlertBanners`/`renderAlertHistory`
 - File was already well-structured with all detection functions at top and rendering at bottom
 
@@ -57,20 +65,20 @@ Moved these 10 functions out of `app.js` into their owning modules:
 
 ## Files Modified
 
-| File | Change Type |
-|------|-------------|
-| `js/app.js` | Import section rewritten, 10 bind functions removed |
-| `js/db.js` | Full rewrite (earlier session) |
-| `js/accounts.js` | `bindAccountEvents` appended, function reordering, section headers |
-| `js/goals.js` | `bindGoalEvents` appended, section headers |
-| `js/alerts.js` | `bindAlertEvents` appended, section headers |
-| `js/reconciliation.js` | `bindReconciliationEvents` appended |
-| `js/annual-report.js` | `bindAnnualReportEvents` appended |
-| `js/auto-backup.js` | `bindAutoBackupEvents` appended (with dynamic import) |
-| `js/multi-currency.js` | `bindMultiCurrencyEvents` appended + internal rename |
-| `js/settlement.js` | `bindSettlementEvents` appended |
-| `js/optional-fields.js` | `bindOptionalFieldsEvents` appended |
-| `js/quick-entry.js` | `bindQuickEntryEvents` appended + new imports from ui.js |
+| File                    | Change Type                                                        |
+| ----------------------- | ------------------------------------------------------------------ |
+| `js/app.js`             | Import section rewritten, 10 bind functions removed                |
+| `js/db.js`              | Full rewrite (earlier session)                                     |
+| `js/accounts.js`        | `bindAccountEvents` appended, function reordering, section headers |
+| `js/goals.js`           | `bindGoalEvents` appended, section headers                         |
+| `js/alerts.js`          | `bindAlertEvents` appended, section headers                        |
+| `js/reconciliation.js`  | `bindReconciliationEvents` appended                                |
+| `js/annual-report.js`   | `bindAnnualReportEvents` appended                                  |
+| `js/auto-backup.js`     | `bindAutoBackupEvents` appended (with dynamic import)              |
+| `js/multi-currency.js`  | `bindMultiCurrencyEvents` appended + internal rename               |
+| `js/settlement.js`      | `bindSettlementEvents` appended                                    |
+| `js/optional-fields.js` | `bindOptionalFieldsEvents` appended                                |
+| `js/quick-entry.js`     | `bindQuickEntryEvents` appended + new imports from ui.js           |
 
 ---
 

@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, dev/** ]
+    branches: [main, dev/**]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   validate:
@@ -12,32 +12,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-    - name: Validate HTML
-      uses: Cyb3r-Jak3/html5validator-action@v7.2.0
-      with:
-        root: .
-        css: true
+      - name: Validate HTML
+        uses: Cyb3r-Jak3/html5validator-action@v7.2.0
+        with:
+          root: .
+          css: true
 
-    - name: Validate manifest.json
-      run: |
-        echo "Validating manifest.json..."
-        python3 -m json.tool manifest.json > /dev/null
+      - name: Validate manifest.json
+        run: |
+          echo "Validating manifest.json..."
+          python3 -m json.tool manifest.json > /dev/null
 
-        # Check required PWA fields
-        grep -q '"name"' manifest.json || { echo "✗ Missing 'name' field"; exit 1; }
-        grep -q '"short_name"' manifest.json || { echo "✗ Missing 'short_name' field"; exit 1; }
-        grep -q '"start_url"' manifest.json || { echo "✗ Missing 'start_url' field"; exit 1; }
+          # Check required PWA fields
+          grep -q '"name"' manifest.json || { echo "✗ Missing 'name' field"; exit 1; }
+          grep -q '"short_name"' manifest.json || { echo "✗ Missing 'short_name' field"; exit 1; }
+          grep -q '"start_url"' manifest.json || { echo "✗ Missing 'start_url' field"; exit 1; }
 
-        echo "✓ Manifest is valid"
+          echo "✓ Manifest is valid"
 
-    - name: Check service worker registration
-      run: |
-        if grep -q ".register(\"./sw.js\")" js/app.js; then
-          echo "✓ Service worker registration found in js/app.js"
-        else
-          echo "✗ Service worker registration not found in js/app.js"
-          exit 1
-        fi
+      - name: Check service worker registration
+        run: |
+          if grep -q ".register(\"./sw.js\")" js/app.js; then
+            echo "✓ Service worker registration found in js/app.js"
+          else
+            echo "✗ Service worker registration not found in js/app.js"
+            exit 1
+          fi

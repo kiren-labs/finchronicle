@@ -1,6 +1,6 @@
 # FinChronicle - Complete Architecture Guide
 
-**Version:** 4.3.1
+**Version:** 4.5.0
 **Last Updated:** 2026-05-13
 **For:** Developers who want to understand or contribute to the codebase
 
@@ -28,6 +28,7 @@
 **Pattern:** Event-Driven, Client-Side State Machine with Master Update Function
 
 **Core Principles:**
+
 - **Zero dependencies** (except Remix Icon CDN)
 - **Offline-first** (Service worker + IndexedDB)
 - **Privacy-first** (100% client-side, no backend)
@@ -162,6 +163,7 @@ finchronicle/
 The app uses native ES modules (`type="module"` in `<script>`). `js/app.js` is the single entry point — it imports from all other modules and orchestrates initialization.
 
 **Module dependency flow:**
+
 ```
 app.js (entry point)
 ├── state.js        ← imported by almost all modules
@@ -201,64 +203,66 @@ app.js (entry point)
 
 **Object Stores:**
 
-| Store | Key Path | Indexes | Purpose |
-|-------|----------|---------|---------|
-| `transactions` | `id` | `date`, `type`, `category`, `dateType` (composite), `tags` (multiEntry) | All transaction data |
-| `recurringTemplates` | `id` | `nextDueDate`, `enabled` | Recurring transaction templates |
-| `budgets` | `id` | `category` | Per-category budget limits |
-| `appSettings` | `key` | — | Optional fields configuration |
-| `quickTemplates` | `id` | — | Quick entry templates |
-| `accounts` | `id` | — | Account definitions for net worth |
-| `savingsGoals` | `id` | — | Savings goals with progress |
-| `netWorthSnapshots` | `id` | `snapshotDate` (unique) | Monthly net worth snapshots for trend chart |
+| Store                | Key Path | Indexes                                                                 | Purpose                                     |
+| -------------------- | -------- | ----------------------------------------------------------------------- | ------------------------------------------- |
+| `transactions`       | `id`     | `date`, `type`, `category`, `dateType` (composite), `tags` (multiEntry) | All transaction data                        |
+| `recurringTemplates` | `id`     | `nextDueDate`, `enabled`                                                | Recurring transaction templates             |
+| `budgets`            | `id`     | `category`                                                              | Per-category budget limits                  |
+| `appSettings`        | `key`    | —                                                                       | Optional fields configuration               |
+| `quickTemplates`     | `id`     | —                                                                       | Quick entry templates                       |
+| `accounts`           | `id`     | —                                                                       | Account definitions for net worth           |
+| `savingsGoals`       | `id`     | —                                                                       | Savings goals with progress                 |
+| `netWorthSnapshots`  | `id`     | `snapshotDate` (unique)                                                 | Monthly net worth snapshots for trend chart |
 
 **Transaction Document (complete schema as of v3.28.0):**
+
 ```typescript
 interface Transaction {
   // Core
-  id: number;                         // Date.now() timestamp (unique)
-  type: 'income' | 'expense' | 'transfer';
-  amount: number;                     // In home currency; 2 decimal places max
-  category: string;                   // From predefined categories list
-  date: string;                       // YYYY-MM-DD format
-  notes: string;                      // Optional description (sanitized)
-  tags: string[];                     // Optional tags array
-  createdAt: string;                  // ISO 8601 timestamp
-  updatedAt: string;                  // ISO 8601 timestamp (set on every save)
+  id: number; // Date.now() timestamp (unique)
+  type: "income" | "expense" | "transfer";
+  amount: number; // In home currency; 2 decimal places max
+  category: string; // From predefined categories list
+  date: string; // YYYY-MM-DD format
+  notes: string; // Optional description (sanitized)
+  tags: string[]; // Optional tags array
+  createdAt: string; // ISO 8601 timestamp
+  updatedAt: string; // ISO 8601 timestamp (set on every save)
 
   // Audit trail (v3.15)
-  deleted?: boolean;                  // Soft-delete flag
-  deletedAt?: string;                 // ISO 8601 timestamp of soft-delete
+  deleted?: boolean; // Soft-delete flag
+  deletedAt?: string; // ISO 8601 timestamp of soft-delete
 
   // Transfer fields (v3.15)
-  fromAccount?: string;               // Transfer: source account name
-  toAccount?: string;                 // Transfer: destination account name
-  transferNote?: string;              // Transfer: optional memo
+  fromAccount?: string; // Transfer: source account name
+  toAccount?: string; // Transfer: destination account name
+  transferNote?: string; // Transfer: optional memo
 
   // Optional fields (v3.16)
-  paymentMethod?: string;             // 'cash'|'credit-card'|'debit-card'|'bank-transfer'|'wallet'|'other'
-  merchant?: string;                  // Free text with autocomplete
-  expenseType?: string;               // 'personal'|'business'|'reimbursable'
-  attachedTo?: string;                // Person tag: 'Kevin', 'Beth', etc.
-  referenceId?: string;               // UPI ID, receipt number
-  location?: string;                  // City/area, free text
+  paymentMethod?: string; // 'cash'|'credit-card'|'debit-card'|'bank-transfer'|'wallet'|'other'
+  merchant?: string; // Free text with autocomplete
+  expenseType?: string; // 'personal'|'business'|'reimbursable'
+  attachedTo?: string; // Person tag: 'Kevin', 'Beth', etc.
+  referenceId?: string; // UPI ID, receipt number
+  location?: string; // City/area, free text
 
   // Multi-currency (v3.24)
-  transactionCurrency?: string;       // ISO 4217 code e.g. 'USD', 'THB'
-  exchangeRate?: number;              // Rate to home currency at time of entry
-  homeAmount?: number;                // amount × exchangeRate
+  transactionCurrency?: string; // ISO 4217 code e.g. 'USD', 'THB'
+  exchangeRate?: number; // Rate to home currency at time of entry
+  homeAmount?: number; // amount × exchangeRate
 
   // Reimbursement (v3.27)
   settled?: boolean;
-  settledAt?: string;                 // ISO 8601 timestamp
-  settledBy?: string;                 // Free text (who settled)
+  settledAt?: string; // ISO 8601 timestamp
+  settledBy?: string; // Free text (who settled)
 
   // Recurring link
-  recurringId?: number;               // ID of source recurringTemplate
+  recurringId?: number; // ID of source recurringTemplate
 }
 ```
 
 **Minimal example:**
+
 ```javascript
 {
   id: 1707398400000,
@@ -276,6 +280,7 @@ interface Transaction {
 ### 💾 localStorage Structure
 
 **Keys and Values:**
+
 ```javascript
 {
   // Settings (persistent)
@@ -311,21 +316,21 @@ All mutable state lives in the `state` object exported from `js/state.js`:
 ```javascript
 // js/state.js — single source of truth
 export const state = {
-  db: null,                        // IndexedDB connection
-  transactions: [],                // All transactions (sorted by date desc)
-  currentTab: 'add',               // Active tab
-  currentFilter: 'all',            // Active period filter ('all', 'YYYY-MM', custom range)
-  selectedMonth: 'all',            // Month filter
-  selectedCategory: 'all',         // Category filter
-  selectedType: 'all',             // Type filter
-  editingId: null,                 // Transaction being edited
-  deleteId: null,                  // Transaction pending delete
-  currentPage: 1,                  // Pagination
-  recurringTemplates: [],          // Recurring templates
-  budgets: [],                     // Budget limits
-  accounts: [],                    // Account definitions (v3.18)
-  savingsGoals: [],                // Savings goals (v3.20)
-  netWorthSnapshots: [],           // Monthly snapshots for trend chart (v3.28)
+  db: null, // IndexedDB connection
+  transactions: [], // All transactions (sorted by date desc)
+  currentTab: "add", // Active tab
+  currentFilter: "all", // Active period filter ('all', 'YYYY-MM', custom range)
+  selectedMonth: "all", // Month filter
+  selectedCategory: "all", // Category filter
+  selectedType: "all", // Type filter
+  editingId: null, // Transaction being edited
+  deleteId: null, // Transaction pending delete
+  currentPage: 1, // Pagination
+  recurringTemplates: [], // Recurring templates
+  budgets: [], // Budget limits
+  accounts: [], // Account definitions (v3.18)
+  savingsGoals: [], // Savings goals (v3.20)
+  netWorthSnapshots: [], // Monthly snapshots for trend chart (v3.28)
   // ... additional UI state
 };
 ```
@@ -399,27 +404,27 @@ user action → validateTransaction() → saveTransactionToDB() → mutate state
 ```javascript
 // 1. User Action
 function deleteTransaction(id) {
-    deleteId = id;                  // Set state
-    showDeleteModal();              // Show confirmation
+  deleteId = id; // Set state
+  showDeleteModal(); // Show confirmation
 }
 
 // 2. User Confirms
 async function confirmDelete() {
-    // 3. Update Persistent Storage
-    await deleteTransactionFromDB(deleteId);
+  // 3. Update Persistent Storage
+  await deleteTransactionFromDB(deleteId);
 
-    // 4. Update In-Memory State
-    transactions = transactions.filter(t => t.id !== deleteId);
+  // 4. Update In-Memory State
+  transactions = transactions.filter((t) => t.id !== deleteId);
 
-    // 5. Update UI
-    updateUI();  // Re-renders all views
+  // 5. Update UI
+  updateUI(); // Re-renders all views
 
-    // 6. Reset State
-    deleteId = null;
-    hideDeleteModal();
+  // 6. Reset State
+  deleteId = null;
+  hideDeleteModal();
 
-    // 7. User Feedback
-    showMessage('Transaction deleted!');
+  // 7. User Feedback
+  showMessage("Transaction deleted!");
 }
 ```
 
@@ -429,15 +434,16 @@ async function confirmDelete() {
 
 ```javascript
 function updateUI() {
-    updateSummary();             // Summary cards at top
-    updateTransactionsList();    // Main transaction list
-    updateMonthFilters();        // Month filter buttons
-    updateCategoryFilter();      // Category dropdown
-    updateGroupedView();         // Analytics tab
+  updateSummary(); // Summary cards at top
+  updateTransactionsList(); // Main transaction list
+  updateMonthFilters(); // Month filter buttons
+  updateCategoryFilter(); // Category dropdown
+  updateGroupedView(); // Analytics tab
 }
 ```
 
 **When to call:**
+
 - After adding/editing/deleting transaction
 - After changing filters (month, category, type)
 - After importing data
@@ -445,6 +451,7 @@ function updateUI() {
 - After switching tabs (some cases)
 
 **Performance Note:**
+
 - All functions run sequentially
 - With 2,000 transactions: ~10-15ms total
 - With 10,000 transactions: ~50-100ms total
@@ -453,11 +460,12 @@ function updateUI() {
 ### State Synchronization Rules
 
 **Rule 1: Always Update Both**
+
 ```javascript
 // ✅ CORRECT
-await saveTransactionToDB(tx);       // Persistent storage
-transactions.unshift(tx);            // In-memory cache
-updateUI();                          // UI refresh
+await saveTransactionToDB(tx); // Persistent storage
+transactions.unshift(tx); // In-memory cache
+updateUI(); // UI refresh
 
 // ❌ WRONG: Only IndexedDB
 await saveTransactionToDB(tx);
@@ -465,20 +473,22 @@ await saveTransactionToDB(tx);
 ```
 
 **Rule 2: Reset Dependent State**
+
 ```javascript
 // ✅ CORRECT
-selectedMonth = 'all';
-selectedCategory = 'all';
-currentPage = 1;                     // Reset pagination!
+selectedMonth = "all";
+selectedCategory = "all";
+currentPage = 1; // Reset pagination!
 updateUI();
 
 // ❌ WRONG: Don't reset pagination
-selectedMonth = 'all';
+selectedMonth = "all";
 updateUI();
 // Pagination still on page 5, but only 1 page of data!
 ```
 
 **Rule 3: updateUI() After State Change**
+
 ```javascript
 // ✅ CORRECT
 transactions.sort((a,b) => ...);
@@ -512,6 +522,7 @@ App Load
 ```
 
 **No cleanup needed because:**
+
 - IndexedDB writes are synchronous (complete before page unloads)
 - localStorage writes are immediate
 - No pending async operations to cancel
@@ -599,10 +610,12 @@ const filtered = transactions.filter(applyFilters);
 const paginated = filtered.slice(startIdx, endIdx);
 
 // Step 2: Map to HTML strings
-const html = paginated.map(tx => `
+const html = paginated
+  .map(
+    (tx) => `
     <div class="transaction-item ${tx.type}">
         <div class="icon">
-            <i class="ri-arrow-${tx.type === 'income' ? 'up' : 'down'}-circle-fill"></i>
+            <i class="ri-arrow-${tx.type === "income" ? "up" : "down"}-circle-fill"></i>
         </div>
         <div class="details">
             <div>${tx.category}</div>
@@ -616,19 +629,23 @@ const html = paginated.map(tx => `
             <button onclick="deleteTransaction(${tx.id})">Delete</button>
         </div>
     </div>
-`).join('');
+`,
+  )
+  .join("");
 
 // Step 3: Single DOM update (efficient)
-document.getElementById('transactionsList').innerHTML = html;
+document.getElementById("transactionsList").innerHTML = html;
 ```
 
 **Why this pattern:**
+
 - ✅ Efficient: Single reflow/repaint
 - ✅ Simple: No virtual DOM complexity
 - ✅ Fast: String concatenation is cheap
 - ✅ Maintainable: HTML structure visible in code
 
 **Security Note:**
+
 - Using `innerHTML` is safe here because content is developer-controlled
 - User input (notes, amounts) are inserted via template literals (escaped)
 - For true user content, use `textContent` (used in messages)
@@ -637,44 +654,45 @@ document.getElementById('transactionsList').innerHTML = html;
 
 ```javascript
 function switchTab(tab) {
-    // 1. Update state
-    currentTab = tab;
+  // 1. Update state
+  currentTab = tab;
 
-    // 2. Update tab button active state
-    document.querySelectorAll('.tab').forEach(t => {
-        const isActive = t.id === `${tab}-tab`;
-        t.classList.toggle('active', isActive);
-        t.setAttribute('aria-selected', isActive);
-    });
+  // 2. Update tab button active state
+  document.querySelectorAll(".tab").forEach((t) => {
+    const isActive = t.id === `${tab}-tab`;
+    t.classList.toggle("active", isActive);
+    t.setAttribute("aria-selected", isActive);
+  });
 
-    // 3. Update bottom nav active state (mobile)
-    document.querySelectorAll('.nav-item').forEach(nav => {
-        const isActive = nav.id === `${tab}-nav`;
-        nav.classList.toggle('active', isActive);
-        nav.setAttribute('aria-selected', isActive);
-    });
+  // 3. Update bottom nav active state (mobile)
+  document.querySelectorAll(".nav-item").forEach((nav) => {
+    const isActive = nav.id === `${tab}-nav`;
+    nav.classList.toggle("active", isActive);
+    nav.setAttribute("aria-selected", isActive);
+  });
 
-    // 4. Show/hide tab content
-    document.querySelectorAll('.tab-content').forEach(tc => {
-        const isActive = tc.id === `${tab}Tab`;
-        tc.classList.toggle('active', isActive);
-    });
+  // 4. Show/hide tab content
+  document.querySelectorAll(".tab-content").forEach((tc) => {
+    const isActive = tc.id === `${tab}Tab`;
+    tc.classList.toggle("active", isActive);
+  });
 
-    // 5. Lazy-load settings content if needed
-    if (tab === 'settings') {
-        updateSettingsContent();  // Populate backup status + FAQ
-    }
+  // 5. Lazy-load settings content if needed
+  if (tab === "settings") {
+    updateSettingsContent(); // Populate backup status + FAQ
+  }
 }
 ```
 
 **CSS for tab visibility:**
+
 ```css
 .tab-content {
-    display: none;  /* Hidden by default */
+  display: none; /* Hidden by default */
 }
 
 .tab-content.active {
-    display: block;  /* Show when active */
+  display: block; /* Show when active */
 }
 ```
 
@@ -688,41 +706,41 @@ function switchTab(tab) {
 **Cache Strategy:** Cache-First (Offline-First)
 
 ```javascript
-const CACHE_NAME = 'finchronicle-v3.21.0';
+const CACHE_NAME = "finchronicle-v3.21.0";
 
 // Files to cache for offline use
 const CACHE_URLS = [
-    './',
-    './index.html',
-    './manifest.json',
-    './css/tokens.css',
-    './css/styles.css',
-    './css/chart.css',
-    './css/dark-mode.css',
-    './js/app.js',
-    './js/state.js',
-    './js/db.js',
-    './js/ui.js',
-    './js/validation.js',
-    './js/utils.js',
-    './js/currency.js',
-    './js/settings.js',
-    './js/chart.js',
-    './js/recurring.js',
-    './js/budget.js',
-    './js/search.js',
-    './js/transfer.js',
-    './js/optional-fields.js',
-    './js/quick-entry.js',
-    './js/accounts.js',
-    './js/savings.js',
-    './js/goals.js',
-    './js/alerts.js',
-    './js/forecast.js',
-    './js/annual-report.js',
-    // faq.js and import-export.js are lazy-loaded
-    './icons/...',
-    'https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css'
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./css/tokens.css",
+  "./css/styles.css",
+  "./css/chart.css",
+  "./css/dark-mode.css",
+  "./js/app.js",
+  "./js/state.js",
+  "./js/db.js",
+  "./js/ui.js",
+  "./js/validation.js",
+  "./js/utils.js",
+  "./js/currency.js",
+  "./js/settings.js",
+  "./js/chart.js",
+  "./js/recurring.js",
+  "./js/budget.js",
+  "./js/search.js",
+  "./js/transfer.js",
+  "./js/optional-fields.js",
+  "./js/quick-entry.js",
+  "./js/accounts.js",
+  "./js/savings.js",
+  "./js/goals.js",
+  "./js/alerts.js",
+  "./js/forecast.js",
+  "./js/annual-report.js",
+  // faq.js and import-export.js are lazy-loaded
+  "./icons/...",
+  "https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css",
 ];
 ```
 
@@ -800,37 +818,39 @@ Result: App fully functional offline! 🎉
 // In js/app.js — Service Worker registration
 
 // Register service worker
-navigator.serviceWorker.register('sw.js')
-    .then(registration => {
-        // Check for updates every 60 seconds
-        setInterval(() => {
-            registration.update();
-        }, 60000);
+navigator.serviceWorker.register("sw.js").then((registration) => {
+  // Check for updates every 60 seconds
+  setInterval(() => {
+    registration.update();
+  }, 60000);
 
-        // Listen for new service worker
-        registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
+  // Listen for new service worker
+  registration.addEventListener("updatefound", () => {
+    const newWorker = registration.installing;
 
-            newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // New version available!
-                    showUpdatePrompt();  // Show banner
-                }
-            });
-        });
+    newWorker.addEventListener("statechange", () => {
+      if (
+        newWorker.state === "installed" &&
+        navigator.serviceWorker.controller
+      ) {
+        // New version available!
+        showUpdatePrompt(); // Show banner
+      }
     });
+  });
+});
 
 // Listen for SW messages
-navigator.serviceWorker.addEventListener('message', event => {
-    if (event.data.type === 'SW_UPDATED') {
-        showUpdatePrompt();  // Show "Update Available" banner
-    }
+navigator.serviceWorker.addEventListener("message", (event) => {
+  if (event.data.type === "SW_UPDATED") {
+    showUpdatePrompt(); // Show "Update Available" banner
+  }
 });
 
 // User clicks "Update Now"
 function applyUpdate() {
-    navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
-    // SW activates → Page reloads → New version active
+  navigator.serviceWorker.controller.postMessage({ type: "SKIP_WAITING" });
+  // SW activates → Page reloads → New version active
 }
 ```
 
@@ -872,120 +892,123 @@ function applyUpdate() {
 
 ```css
 :root {
-    /* ===== Typography Scale ===== */
-    --font-xs: 12px;
-    --font-sm: 14px;
-    --font-md: 16px;
-    --font-lg: 18px;
-    --font-xl: 20px;
-    --font-2xl: 24px;
-    --font-3xl: 28px;
-    --font-4xl: 32px;
-    --font-5xl: 40px;
+  /* ===== Typography Scale ===== */
+  --font-xs: 12px;
+  --font-sm: 14px;
+  --font-md: 16px;
+  --font-lg: 18px;
+  --font-xl: 20px;
+  --font-2xl: 24px;
+  --font-3xl: 28px;
+  --font-4xl: 32px;
+  --font-5xl: 40px;
 
-    /* ===== Spacing Scale (8px base) ===== */
-    --space-2xs: 4px;
-    --space-xs: 6px;
-    --space-sm: 8px;
-    --space-md: 12px;
-    --space-lg: 16px;
-    --space-xl: 20px;
-    --space-2xl: 24px;
-    --space-3xl: 32px;
+  /* ===== Spacing Scale (8px base) ===== */
+  --space-2xs: 4px;
+  --space-xs: 6px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
 
-    /* ===== Color Palette ===== */
-    /* Primary (Action) */
-    --color-primary: #0051D5;
-    --color-primary-hover: #003DA0;
-    --color-on-primary: #FFFFFF;
+  /* ===== Color Palette ===== */
+  /* Primary (Action) */
+  --color-primary: #0051d5;
+  --color-primary-hover: #003da0;
+  --color-on-primary: #ffffff;
 
-    /* Semantic Colors */
-    --color-success: #34c759;       /* Income, positive */
-    --color-danger: #ff3b30;        /* Expense, negative */
-    --color-warning: #ffc107;       /* Warnings */
+  /* Semantic Colors */
+  --color-success: #34c759; /* Income, positive */
+  --color-danger: #ff3b30; /* Expense, negative */
+  --color-warning: #ffc107; /* Warnings */
 
-    /* Neutral Colors */
-    --color-bg: #f5f5f7;            /* Page background */
-    --color-surface: #ffffff;       /* Card background */
-    --color-border: #d1d1d6;        /* Borders */
-    --color-text: #1d1d1f;          /* Primary text */
-    --color-text-muted: #6e6e73;    /* Secondary text */
+  /* Neutral Colors */
+  --color-bg: #f5f5f7; /* Page background */
+  --color-surface: #ffffff; /* Card background */
+  --color-border: #d1d1d6; /* Borders */
+  --color-text: #1d1d1f; /* Primary text */
+  --color-text-muted: #6e6e73; /* Secondary text */
 
-    /* ===== Border Radius ===== */
-    --radius-sm: 6px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-xl: 16px;
-    --radius-pill: 999px;
+  /* ===== Border Radius ===== */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
 
-    /* ===== Shadows ===== */
-    --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.3);
+  /* ===== Shadows ===== */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
 
-    /* ===== Transitions ===== */
-    --transition-fast: 0.2s ease;
-    --transition-med: 0.3s ease;
-    --transition-slow: 0.5s ease;
+  /* ===== Transitions ===== */
+  --transition-fast: 0.2s ease;
+  --transition-med: 0.3s ease;
+  --transition-slow: 0.5s ease;
 }
 ```
 
 ### Component Style Example
 
 **Button Component (styles.css):**
+
 ```css
 /* Base button styles */
 button.primary {
-    /* Layout */
-    width: 100%;
-    padding: var(--button-padding-y) var(--button-padding-x);
+  /* Layout */
+  width: 100%;
+  padding: var(--button-padding-y) var(--button-padding-x);
 
-    /* Colors (using tokens) */
-    background: var(--color-primary);
-    color: var(--color-on-primary);
+  /* Colors (using tokens) */
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 
-    /* Typography */
-    font-size: var(--font-md);
-    font-weight: 600;
+  /* Typography */
+  font-size: var(--font-md);
+  font-weight: 600;
 
-    /* Visual */
-    border: none;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
+  /* Visual */
+  border: none;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 
-    /* Interaction */
-    cursor: pointer;
-    transition: var(--transition-fast);
+  /* Interaction */
+  cursor: pointer;
+  transition: var(--transition-fast);
 }
 
 /* Hover state */
 button.primary:hover {
-    background: var(--color-primary-hover);
-    box-shadow: var(--shadow-md);
+  background: var(--color-primary-hover);
+  box-shadow: var(--shadow-md);
 }
 
 /* Loading state */
 button.primary.loading {
-    opacity: 0.8;
-    cursor: wait;
+  opacity: 0.8;
+  cursor: wait;
 }
 
 /* Success state */
 button.primary.success {
-    background: var(--color-success);
+  background: var(--color-success);
 }
 
 /* Dark mode override */
 body.dark-mode button.primary {
-    background: var(--color-primary);  /* Token automatically different in dark mode */
+  background: var(
+    --color-primary
+  ); /* Token automatically different in dark mode */
 }
 
 /* Mobile responsive */
 @media (max-width: 480px) {
-    button.primary {
-        padding: var(--space-sm) var(--space-md);
-        font-size: var(--font-sm);
-    }
+  button.primary {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-sm);
+  }
 }
 ```
 
@@ -996,82 +1019,85 @@ body.dark-mode button.primary {
 ```css
 /* 1. Light mode tokens defined in :root */
 :root {
-    --color-bg: #f5f5f7;
-    --color-text: #1d1d1f;
+  --color-bg: #f5f5f7;
+  --color-text: #1d1d1f;
 }
 
 /* 2. Dark mode overrides when body has class */
 body.dark-mode {
-    --color-bg: #000000;      /* Override token */
-    --color-text: #ffffff;    /* Override token */
+  --color-bg: #000000; /* Override token */
+  --color-text: #ffffff; /* Override token */
 }
 
 /* 3. Components use tokens (automatically adapt) */
 body {
-    background: var(--color-bg);       /* Uses appropriate token */
-    color: var(--color-text);
+  background: var(--color-bg); /* Uses appropriate token */
+  color: var(--color-text);
 }
 ```
 
 **Toggle dark mode:**
+
 ```javascript
 function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    const enabled = document.body.classList.contains('dark-mode');
-    localStorage.setItem('darkMode', enabled ? 'enabled' : 'disabled');
+  document.body.classList.toggle("dark-mode");
+  const enabled = document.body.classList.contains("dark-mode");
+  localStorage.setItem("darkMode", enabled ? "enabled" : "disabled");
 }
 
 // Load on app start
 function loadDarkMode() {
-    const darkMode = localStorage.getItem('darkMode');
-    if (darkMode === 'enabled') {
-        document.body.classList.add('dark-mode');
-    }
+  const darkMode = localStorage.getItem("darkMode");
+  if (darkMode === "enabled") {
+    document.body.classList.add("dark-mode");
+  }
 }
 ```
 
 ### Responsive Design Strategy
 
 **Breakpoints:**
+
 ```css
 /* Desktop First Approach */
 
 /* Base: Desktop (> 480px) */
 .container {
-    max-width: 800px;
-    padding: 24px;
+  max-width: 800px;
+  padding: 24px;
 }
 
 /* Tablet/Mobile (≤ 480px) */
 @media (max-width: 480px) {
-    .container {
-        padding: 16px;
-    }
+  .container {
+    padding: 16px;
+  }
 
-    /* Hide desktop tabs, show bottom nav */
-    .tabs-container {
-        display: none;
-    }
+  /* Hide desktop tabs, show bottom nav */
+  .tabs-container {
+    display: none;
+  }
 
-    .bottom-nav {
-        display: flex;
-    }
+  .bottom-nav {
+    display: flex;
+  }
 }
 
 /* Small Mobile (≤ 360px) */
 @media (max-width: 360px) {
-    .container {
-        padding: 12px;
-    }
+  .container {
+    padding: 12px;
+  }
 
-    /* Further compaction */
-    .transaction-item {
-        font-size: 14px;
-    }
+  /* Further compaction */
+  .transaction-item {
+    font-size: 14px;
+  }
 }
 ```
 
 **Mobile Optimizations:**
+
 - Bottom navigation (easier thumb access)
 - Larger touch targets (48px minimum)
 - Simplified layouts (single column)
@@ -1120,97 +1146,101 @@ function bindStaticEvents() { ... }
 ```
 
 **Lazy-loaded modules** (imported dynamically to keep initial load fast):
+
 - `faq.js` — loaded on first Settings tab visit
 - `import-export.js` — loaded on first CSV import/export call
 
 ### Naming Conventions
 
-| Prefix | Purpose | Example | Return |
-|--------|---------|---------|--------|
-| `init*` | Initialize systems | initDB() | Promise<void> |
-| `load*` | Load from storage | loadDataFromDB() | Promise<Array> |
-| `save*` | Save to storage | saveTransactionToDB(tx) | Promise<void> |
-| `update*` | Refresh UI | updateUI() | void |
-| `render*` | Generate HTML | renderFAQ() | string |
-| `format*` | Transform data | formatCurrency(amt) | string |
-| `calculate*` | Compute values | calculateMoMDelta() | object |
-| `get*` | Retrieve data | getMonthTotals() | object |
-| `toggle*` | Switch state | toggleDarkMode() | void |
-| `show*` / `hide*` | UI visibility | showMessage(text) | void |
-| `on*` | Event handlers | onSummaryTileClick() | void |
+| Prefix            | Purpose            | Example                 | Return         |
+| ----------------- | ------------------ | ----------------------- | -------------- |
+| `init*`           | Initialize systems | initDB()                | Promise<void>  |
+| `load*`           | Load from storage  | loadDataFromDB()        | Promise<Array> |
+| `save*`           | Save to storage    | saveTransactionToDB(tx) | Promise<void>  |
+| `update*`         | Refresh UI         | updateUI()              | void           |
+| `render*`         | Generate HTML      | renderFAQ()             | string         |
+| `format*`         | Transform data     | formatCurrency(amt)     | string         |
+| `calculate*`      | Compute values     | calculateMoMDelta()     | object         |
+| `get*`            | Retrieve data      | getMonthTotals()        | object         |
+| `toggle*`         | Switch state       | toggleDarkMode()        | void           |
+| `show*` / `hide*` | UI visibility      | showMessage(text)       | void           |
+| `on*`             | Event handlers     | onSummaryTileClick()    | void           |
 
 ### Common Patterns
 
 **Pattern 1: CRUD Operations**
+
 ```javascript
 // Create
 async function saveTransactionToDB(tx) {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    await store.put(tx);  // Insert or Update
+  const transaction = db.transaction([STORE_NAME], "readwrite");
+  const store = transaction.objectStore(STORE_NAME);
+  await store.put(tx); // Insert or Update
 }
 
 // Read
 async function loadDataFromDB() {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.getAll();
-    return new Promise((resolve) => {
-        request.onsuccess = () => resolve(request.result);
-    });
+  const transaction = db.transaction([STORE_NAME], "readonly");
+  const store = transaction.objectStore(STORE_NAME);
+  const request = store.getAll();
+  return new Promise((resolve) => {
+    request.onsuccess = () => resolve(request.result);
+  });
 }
 
 // Update (same as Create - put() does both)
 
 // Delete
 async function deleteTransactionFromDB(id) {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    await store.delete(id);
+  const transaction = db.transaction([STORE_NAME], "readwrite");
+  const store = transaction.objectStore(STORE_NAME);
+  await store.delete(id);
 }
 ```
 
 **Pattern 2: Filter + Render**
+
 ```javascript
 function updateTransactionsList() {
-    // 1. Start with full dataset
-    let filtered = transactions;
+  // 1. Start with full dataset
+  let filtered = transactions;
 
-    // 2. Apply filters sequentially
-    if (selectedMonth !== 'all') {
-        filtered = filtered.filter(t => t.date.startsWith(selectedMonth));
-    }
-    if (selectedCategory !== 'all') {
-        filtered = filtered.filter(t => t.category === selectedCategory);
-    }
-    if (selectedType !== 'all') {
-        filtered = filtered.filter(t => t.type === selectedType);
-    }
+  // 2. Apply filters sequentially
+  if (selectedMonth !== "all") {
+    filtered = filtered.filter((t) => t.date.startsWith(selectedMonth));
+  }
+  if (selectedCategory !== "all") {
+    filtered = filtered.filter((t) => t.category === selectedCategory);
+  }
+  if (selectedType !== "all") {
+    filtered = filtered.filter((t) => t.type === selectedType);
+  }
 
-    // 3. Paginate
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const page = filtered.slice(start, end);
+  // 3. Paginate
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const page = filtered.slice(start, end);
 
-    // 4. Render HTML
-    const html = page.map(tx => renderTransaction(tx)).join('');
-    document.getElementById('list').innerHTML = html;
+  // 4. Render HTML
+  const html = page.map((tx) => renderTransaction(tx)).join("");
+  document.getElementById("list").innerHTML = html;
 
-    // 5. Update pagination controls
-    renderPagination(filtered.length);
+  // 5. Update pagination controls
+  renderPagination(filtered.length);
 }
 ```
 
 **Pattern 3: Show Message + Auto-Hide**
+
 ```javascript
 function showMessage(text) {
-    const msg = document.getElementById('message');
-    msg.textContent = text;              // Safe: uses textContent
-    msg.classList.add('show');
+  const msg = document.getElementById("message");
+  msg.textContent = text; // Safe: uses textContent
+  msg.classList.add("show");
 
-    setTimeout(() => {
-        msg.classList.remove('show');
-    }, 2000);                            // Auto-hide after 2 seconds
+  setTimeout(() => {
+    msg.classList.remove("show");
+  }, 2000); // Auto-hide after 2 seconds
 }
 ```
 
@@ -1223,6 +1253,7 @@ function showMessage(text) {
 #### Decision 1: Vanilla JS (No Frameworks)
 
 **Why:**
+
 - ✅ Zero framework overhead (smaller bundle: 100KB vs 500KB+)
 - ✅ No build tooling required (no webpack, vite, rollup)
 - ✅ Easier to understand (entire codebase in one file)
@@ -1231,11 +1262,13 @@ function showMessage(text) {
 - ✅ Works indefinitely (no framework migrations)
 
 **Trade-offs:**
+
 - ⚠️ No automatic reactivity (manual updateUI() calls)
 - ⚠️ No component encapsulation (shared state object)
 - ⚠️ Manual state synchronization required
 
 **When to reconsider:**
+
 - App grows beyond 5000 lines
 - Need complex state management
 - Multiple developers working simultaneously
@@ -1244,6 +1277,7 @@ function showMessage(text) {
 #### Decision 2: IndexedDB (Not localStorage)
 
 **Why IndexedDB:**
+
 ```javascript
 // localStorage limits
 5-10 MB quota                  vs    50-100+ MB quota (IndexedDB)
@@ -1254,19 +1288,21 @@ No transactions                vs    ACID transactions
 ```
 
 **Use cases:**
+
 - **IndexedDB:** Transaction data (large, structured, needs indexing)
 - **localStorage:** Settings (small, simple, immediate access)
 
 **Example:**
+
 ```javascript
 // ✅ GOOD: Large dataset in IndexedDB
-await saveTransactionToDB(transaction);  // Non-blocking, indexed
+await saveTransactionToDB(transaction); // Non-blocking, indexed
 
 // ✅ GOOD: Small settings in localStorage
-localStorage.setItem('darkMode', 'enabled');  // Immediate, simple
+localStorage.setItem("darkMode", "enabled"); // Immediate, simple
 
 // ❌ BAD: Large dataset in localStorage
-localStorage.setItem('transactions', JSON.stringify(allTransactions));
+localStorage.setItem("transactions", JSON.stringify(allTransactions));
 // Blocks UI, slow parsing, hits quota
 ```
 
@@ -1275,29 +1311,34 @@ localStorage.setItem('transactions', JSON.stringify(allTransactions));
 **Why No Server:**
 
 **Privacy Benefits:**
+
 - All data stays on user's device
 - No server = no data breach risk
 - No accounts = no password leaks
 - No cloud = no unauthorized access
 
 **Architecture Benefits:**
+
 - No hosting costs (static hosting is free)
 - No API security concerns
 - No authentication/authorization needed
 - No server maintenance
 
 **Offline Benefits:**
+
 - Works without internet connection
 - No network latency
 - No downtime (no server to crash)
 
 **Trade-offs:**
+
 - ⚠️ No cloud sync across devices
 - ⚠️ No automated backups (user's responsibility)
 - ⚠️ Data lost if device cleared
 - ⚠️ No server-side analytics
 
 **Mitigation:**
+
 - CSV export for manual backup
 - Backup reminders (v3.9.0)
 - Clear user education (FAQ)
@@ -1305,6 +1346,7 @@ localStorage.setItem('transactions', JSON.stringify(allTransactions));
 #### Decision 4: Cache-First PWA Strategy
 
 **Why Cache-First:**
+
 ```javascript
 // Traditional (Network-First):
 Request → Network → If fails → Cache
@@ -1319,29 +1361,35 @@ Benefits:
 ```
 
 **Implementation:**
+
 ```javascript
 // sw.js fetch handler
-self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request)           // Try cache first
-            .then(cached => {
-                return cached ||               // Return if found
-                    fetch(event.request)       // Fetch if not cached
-                        .then(response => {
-                            // Update cache for future
-                            caches.open(CACHE_NAME)
-                                .then(cache => cache.put(event.request, response.clone()));
-                            return response;
-                        });
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    caches
+      .match(event.request) // Try cache first
+      .then((cached) => {
+        return (
+          cached || // Return if found
+          fetch(event.request) // Fetch if not cached
+            .then((response) => {
+              // Update cache for future
+              caches
+                .open(CACHE_NAME)
+                .then((cache) => cache.put(event.request, response.clone()));
+              return response;
             })
-            .catch(() => caches.match('./'))   // Fallback to index.html
-    );
+        );
+      })
+      .catch(() => caches.match("./")), // Fallback to index.html
+  );
 });
 ```
 
 #### Decision 5: ES Modules (Modular Architecture)
 
 **Why ES Modules (since v3.11):**
+
 - ✅ Each module has a single responsibility
 - ✅ Clear dependency graph (import/export)
 - ✅ No global scope pollution
@@ -1350,11 +1398,13 @@ self.addEventListener('fetch', (event) => {
 - ✅ Lazy loading for non-critical modules
 
 **Trade-offs:**
+
 - ⚠️ More files to manage (21 modules)
 - ⚠️ Must be served over HTTP (not file://)
 - ⚠️ All modules must be listed in SW CACHE_URLS
 
 **Previous approach (v1–v3.10):**
+
 - Single monolithic `app.js` (~2500 lines)
 - Refactored to modules starting in v3.11
 
@@ -1549,31 +1599,37 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 ### Strengths
 
 ✅ **Simple & Maintainable**
+
 - Single codebase, easy to understand
 - No complex frameworks or build tools
 - Clear function responsibilities
 
 ✅ **Fast & Efficient**
+
 - Cache-first: instant loading
 - IndexedDB: async, non-blocking
 - Pagination: handles large datasets
 
 ✅ **Private & Secure**
+
 - 100% client-side (no backend)
 - No external APIs
 - No tracking or analytics
 
 ✅ **Offline-First**
+
 - Service worker caching
 - IndexedDB persistence
 - Works without internet
 
 ✅ **Accessible**
+
 - ARIA labels and roles
 - Keyboard navigation
 - Screen reader support
 
 ✅ **Responsive**
+
 - Mobile-optimized layouts
 - Touch-friendly interactions
 - Progressive enhancement
@@ -1581,20 +1637,24 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 ### Trade-offs
 
 ⚠️ **Manual State Management**
+
 - Must call updateUI() manually
 - No automatic reactivity
 - Potential for inconsistencies
 
 ⚠️ **No Multi-Device Sync**
+
 - Data doesn't sync across devices
 - Users must manually export/import
 - Dependent on user discipline
 
 ⚠️ **Manual State Management**
+
 - Must call updateUI() after every state change — no automatic reactivity
 - Risk of UI drift if a state mutation is made without a subsequent updateUI() call
 
 ⚠️ **Limited Scalability**
+
 - Works well up to ~10K transactions
 - Beyond that: performance degrades
 - Would need optimization or architecture change
@@ -1606,6 +1666,7 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 ### Understanding the Codebase
 
 **Start here:**
+
 1. Read `README.md` - Overview and setup
 2. Read `CHANGELOG.md` - Feature evolution
 3. Open `index.html` - See UI structure
@@ -1613,6 +1674,7 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 5. Follow one user action end-to-end (e.g., add transaction)
 
 **Key Functions to Understand:**
+
 1. `initDB()` - Database setup
 2. `updateUI()` - Master refresh
 3. `saveTransactionToDB()` - Persistence
@@ -1622,6 +1684,7 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 ### Common Modifications
 
 **Add a new feature:**
+
 1. Add UI in index.html
 2. Add state variable if needed (top of app.js)
 3. Add handler function
@@ -1632,18 +1695,19 @@ RESULT: ✅ Transaction saved, UI updated, user notified
 8. Test thoroughly
 
 **Example: Add category icons**
+
 ```javascript
 // 1. Define icon mapping
 const categoryIcons = {
-    'Food': 'ri-restaurant-line',
-    'Transport': 'ri-car-line',
-    // ...
+  Food: "ri-restaurant-line",
+  Transport: "ri-car-line",
+  // ...
 };
 
 // 2. Use in rendering
 function renderTransaction(tx) {
-    const icon = categoryIcons[tx.category] || 'ri-money-dollar-circle-line';
-    return `
+  const icon = categoryIcons[tx.category] || "ri-money-dollar-circle-line";
+  return `
         <div class="transaction-item">
             <i class="${icon}"></i>
             ${tx.category}
@@ -1661,27 +1725,32 @@ function renderTransaction(tx) {
 ### Design Philosophies
 
 **1. KISS (Keep It Simple, Stupid)**
+
 - Avoid over-engineering
 - Use simplest solution that works
 - No premature optimization
 
 **2. YAGNI (You Aren't Gonna Need It)**
+
 - Don't build features for hypothetical future
 - Add features when actually needed
 - Lean codebase
 
 **3. DRY (Don't Repeat Yourself)**
+
 - Utility functions (formatCurrency, formatDate)
 - Reusable CSS classes
 - Consistent patterns throughout
 
 **4. Progressive Enhancement**
+
 - Works with JavaScript disabled (basic HTML)
 - Enhanced with CSS (styling)
 - Interactive with JavaScript (full features)
 - Installable as PWA (native-like)
 
 **5. Privacy by Design**
+
 - No data collection by default
 - No external APIs
 - No tracking or analytics
@@ -1692,12 +1761,14 @@ function renderTransaction(tx) {
 ## 🎓 Conclusion
 
 FinChronicle uses a **pragmatic, straightforward architecture** that prioritizes:
+
 - Simplicity over sophistication
 - Privacy over convenience
 - Maintainability over features
 - User control over automated systems
 
 **Perfect for:**
+
 - Solo developers
 - Privacy-focused apps
 - Offline-first requirements
@@ -1705,6 +1776,7 @@ FinChronicle uses a **pragmatic, straightforward architecture** that prioritizes
 - Learning vanilla web development
 
 **Not ideal for:**
+
 - Large teams (no component boundaries)
 - Complex state management needs
 - Multi-device sync requirements

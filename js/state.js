@@ -3,7 +3,7 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "4.4.0";
+export const APP_VERSION = "4.5.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
@@ -50,7 +50,7 @@ export const ITEMS_PER_PAGE = 20;
 export const state = {
   db: null,
   transactions: [],
-  currentTab: "add",
+  currentTab: "home",
   currentGrouping: "month",
   selectedMonth: "all",
   selectedCategory: "all",

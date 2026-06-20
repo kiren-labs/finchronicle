@@ -2,11 +2,11 @@ name: Security Scan
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 0 * * 1'  # Weekly on Monday
+    - cron: "0 0 * * 1" # Weekly on Monday
 
 jobs:
   security:
@@ -14,41 +14,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'table'
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
 
-    - name: Check for hardcoded secrets
-      run: |
-        echo "Checking for hardcoded secrets..."
-        if grep -r "password\s*=\|api_key\s*=\|secret\s*=" --include="*.html" --include="*.js" 2>/dev/null; then
-          echo "✗ Found potential hardcoded secrets"
-          exit 1
-        fi
-        echo "✓ No hardcoded secrets found"
-
-    - name: Check for eval usage
-      run: |
-        echo "Checking for eval() usage..."
-        if grep -r "eval(" --include="*.html" --include="*.js" 2>/dev/null; then
-          echo "✗ Found eval() usage (security risk)"
-          exit 1
-        fi
-        echo "✓ No eval() usage found"
-
-    - name: Verify SRI integrity
-      run: |
-        echo "Checking for Subresource Integrity..."
-        if grep -q "cdn\|unpkg\|jsdelivr" index.html; then
-          if ! grep -q "integrity=" index.html; then
-            echo "⚠ Warning: CDN resources found without SRI integrity"
-          else
-            echo "✓ SRI integrity present"
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Checking for hardcoded secrets..."
+          if grep -r "password\s*=\|api_key\s*=\|secret\s*=" --include="*.html" --include="*.js" 2>/dev/null; then
+            echo "✗ Found potential hardcoded secrets"
+            exit 1
           fi
-        fi
+          echo "✓ No hardcoded secrets found"
+
+      - name: Check for eval usage
+        run: |
+          echo "Checking for eval() usage..."
+          if grep -r "eval(" --include="*.html" --include="*.js" 2>/dev/null; then
+            echo "✗ Found eval() usage (security risk)"
+            exit 1
+          fi
+          echo "✓ No eval() usage found"
+
+      - name: Verify SRI integrity
+        run: |
+          echo "Checking for Subresource Integrity..."
+          if grep -q "cdn\|unpkg\|jsdelivr" index.html; then
+            if ! grep -q "integrity=" index.html; then
+              echo "⚠ Warning: CDN resources found without SRI integrity"
+            else
+              echo "✓ SRI integrity present"
+            fi
+          fi

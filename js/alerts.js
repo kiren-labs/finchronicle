@@ -274,14 +274,16 @@ function checkVelocity(thisMonthTotals) {
       );
       const remainingBudget = Math.max(0, budget.monthlyLimit - spent);
       const remainingDays = daysInMonth - dayOfMonth;
-      const dailyCap = remainingDays > 0 ? Math.round(remainingBudget / remainingDays) : 0;
+      const dailyCap =
+        remainingDays > 0 ? Math.round(remainingBudget / remainingDays) : 0;
       alerts.push({
         type: ALERT_TYPES.VELOCITY_WARNING,
         category: budget.category,
         message: `${budget.category}: on pace to exceed budget by ${pctOver}% (~day ${exceedDay})`,
-        suggestion: remainingDays > 0
-          ? `Limit ${budget.category} to ${formatCurrency(dailyCap)}/day for the rest of the month to stay within budget.`
-          : null,
+        suggestion:
+          remainingDays > 0
+            ? `Limit ${budget.category} to ${formatCurrency(dailyCap)}/day for the rest of the month to stay within budget.`
+            : null,
         severity: pctOver >= 30 ? "danger" : "warning",
         value: projectedTotal,
         limit: budget.monthlyLimit,
@@ -370,9 +372,10 @@ function checkBillDue() {
         type: ALERT_TYPES.BILL_DUE,
         category: tmpl.category || "_health",
         message: `${tmpl.name || tmpl.category} (${formatCurrency(tmpl.amount)}) is due ${dayLabel} — ${tmpl.fromAccount} balance is ${formatCurrency(balance)}.`,
-        suggestion: shortfall > 0
-          ? `Transfer ${formatCurrency(shortfall)} to ${tmpl.fromAccount} before ${dayLabel === "today" ? "end of day" : dayLabel}.`
-          : null,
+        suggestion:
+          shortfall > 0
+            ? `Transfer ${formatCurrency(shortfall)} to ${tmpl.fromAccount} before ${dayLabel === "today" ? "end of day" : dayLabel}.`
+            : null,
         severity: balance < tmpl.amount ? "danger" : "warning",
         value: tmpl.amount,
         account: tmpl.fromAccount,
@@ -403,9 +406,10 @@ function checkSavingsRateTrend() {
   const targetSavings = avgIncome * 0.2;
   const currentSavings = avgIncome * (parseFloat(avg) / 100);
   const gap = Math.round(targetSavings - currentSavings);
-  const suggestion = avgIncome > 0 && gap > 0
-    ? `At your income of ${formatCurrency(Math.round(avgIncome))}, saving 20% means cutting expenses by ${formatCurrency(gap)}/month.`
-    : null;
+  const suggestion =
+    avgIncome > 0 && gap > 0
+      ? `At your income of ${formatCurrency(Math.round(avgIncome))}, saving 20% means cutting expenses by ${formatCurrency(gap)}/month.`
+      : null;
   return {
     type: ALERT_TYPES.SAVINGS_RATE_TREND,
     category: "_health",
@@ -443,14 +447,16 @@ function checkMonthlyPace() {
     if (projected > budget.monthlyLimit * 1.2) {
       const remaining = budget.monthlyLimit - spent;
       const remainingDays = daysInMonth - dayOfMonth;
-      const dailyCap = remainingDays > 0 ? Math.round(remaining / remainingDays) : 0;
+      const dailyCap =
+        remainingDays > 0 ? Math.round(remaining / remainingDays) : 0;
       alerts.push({
         type: ALERT_TYPES.MONTHLY_PACE,
         category: budget.category,
         message: `${budget.category} spending is on pace for ${formatCurrency(Math.round(projected))} this month — budget is ${formatCurrency(budget.monthlyLimit)}.`,
-        suggestion: remainingDays > 0
-          ? `Spend no more than ${formatCurrency(dailyCap)}/day on ${budget.category} to stay within budget.`
-          : null,
+        suggestion:
+          remainingDays > 0
+            ? `Spend no more than ${formatCurrency(dailyCap)}/day on ${budget.category} to stay within budget.`
+            : null,
         severity: projected > budget.monthlyLimit * 1.5 ? "danger" : "warning",
         value: projected,
         limit: budget.monthlyLimit,

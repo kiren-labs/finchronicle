@@ -329,7 +329,6 @@
           <span class="title-text"><span class="fin-text">Fin</span><span class="chronicle-text">Chronicle</span></span>
         </h1>
         <div class="header-meta">
-          <span class="status-inline"><span class="status-dot"></span> Offline</span>
           <span class="version" id="appVersion">v3.7.1</span>
           <button class="header-btn" aria-label="Send feedback" title="Send feedback">
             <i class="ri-feedback-line"></i>
@@ -366,31 +365,36 @@
         <button>Dismiss</button>
       </div>
 
+      <!-- Global Status Strip (visible on all tabs) -->
+      <div id="statusStrip" class="status-strip">
+        <div class="status-strip-inner">
+          <i class="ri-bar-chart-2-line status-strip-icon"></i>
+          <span class="status-strip-label" id="statusStripLabel">Jun</span>
+          <span class="status-strip-sep">•</span>
+          <span class="compact-stat" id="compactNet">฿0</span>
+          <span class="status-strip-sep">•</span>
+          <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i><span id="compactIncome">฿0</span></span>
+          <span class="status-strip-sep">•</span>
+          <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i><span id="compactExpense">฿0</span></span>
+          <span class="status-strip-sep">•</span>
+          <span class="compact-stat-small"><i class="ri-file-list-line"></i><span id="compactEntries">0</span></span>
+          <span id="budgetAlertBadge" class="budget-alert-badge" hidden></span>
+        </div>
+        <button class="status-strip-btn" id="statusStripToggle" aria-label="View dashboard">
+          <i class="ri-layout-grid-line"></i>
+        </button>
+      </div>
+
+      <!-- Home Tab -->
+      <div id="homeTab" class="tab-content active" role="tabpanel" aria-labelledby="home-nav">
       <!-- Summary Cards -->
       <div class="summary-section">
         <div class="summary-header">
           <div class="summary-header-content">
             <h2 class="summary-title">
-              <i class="ri-bar-chart-2-line summary-title-icon"></i>
               <span id="summaryMonthLabel">Summary</span>
             </h2>
-            <div class="summary-compact" id="summaryCompact">
-              <span class="compact-stat" id="compactNet">฿0</span>
-              <span class="compact-separator">•</span>
-              <span class="compact-stat-small"><i class="ri-file-list-line"></i>
-                <span id="compactEntries">0</span></span>
-              <span class="compact-separator">•</span>
-              <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i>
-                <span id="compactIncome">฿0</span></span>
-              <span class="compact-separator">•</span>
-              <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i>
-                <span id="compactExpense">฿0</span></span>
-              <span id="budgetAlertBadge" class="budget-alert-badge" hidden></span>
-            </div>
           </div>
-          <button class="collapse-btn" aria-label="Toggle Summary">
-            <i class="ri-arrow-up-s-line" id="summaryCollapseIcon"></i>
-          </button>
         </div>
         <div class="summary" id="summaryCards">
           <div class="summary-card" role="button" tabindex="0" aria-label="View transactions for this month">
@@ -437,6 +441,8 @@
           </div>
         </div>
         <div id="budgetAlerts"></div>
+        <!-- Budget vs Actual Report (v4.5.0) -->
+        <div id="budgetVsActualContainer"></div>
         <!-- Smart Spending Alerts (v3.21.0) -->
         <div id="smartAlerts" hidden></div>
         <!-- Net Worth Dashboard (v3.18.0) -->
@@ -472,6 +478,7 @@
           <div id="settlementDashboard"></div>
         </div>
       </div>
+      </div><!-- end #homeTab -->
       <!-- Goal Form Modal (v3.20.0) -->
       <div id="goalFormModal" class="modal">
         <div class="modal-content modal-sm">
@@ -547,7 +554,10 @@
 
       <!-- Tab Navigation -->
       <div class="tabs" role="tablist" aria-label="Main navigation">
-        <button id="add-tab" class="tab active" role="tab" aria-selected="true" aria-controls="addTab">
+        <button id="home-tab" class="tab active" role="tab" aria-selected="true" aria-controls="homeTab">
+          <i class="ri-home-line"></i> Home
+        </button>
+        <button id="add-tab" class="tab" role="tab" aria-selected="false" aria-controls="addTab">
           <i class="ri-add-line"></i> Add
         </button>
         <button id="list-tab" class="tab" role="tab" aria-selected="false" aria-controls="listTab">
@@ -562,7 +572,7 @@
       </div>
 
       <!-- Add Transaction Tab -->
-      <div id="addTab" class="tab-content active" role="tabpanel" aria-labelledby="add-tab">
+      <div id="addTab" class="tab-content" role="tabpanel" aria-labelledby="add-nav">
         <!-- Quick Entry Bar (v3.17.0) -->
         <div id="quickEntryBar" class="quick-entry-bar" hidden></div>
 
@@ -851,15 +861,31 @@
           </div>
           <div id="forecast-content"></div>
         </div>
+
+        <!-- Grouped View Entry Button -->
+        <button class="grouped-view-entry-btn" id="openGroupedViewBtn" type="button">
+          <i class="ri-list-ordered"></i>
+          <span>Grouped View</span>
+          <i class="ri-arrow-right-s-line grouped-view-chevron"></i>
+        </button>
       </div>
 
-      <!-- Groups Tab -->
-      <div id="groupsTab" class="tab-content" role="tabpanel" aria-labelledby="groups-tab">
-        <div class="filters">
-          <button class="filter-btn active">By Month</button>
-          <button class="filter-btn">By Category</button>
+      <!-- Grouped View Segue Panel -->
+      <div id="groupedViewPanel" class="segue-panel" aria-hidden="true">
+        <div class="segue-panel-header">
+          <button class="segue-back-btn" id="closeGroupedViewBtn" type="button" aria-label="Back to Reports">
+            <i class="ri-arrow-left-s-line"></i>
+            <span>Reports</span>
+          </button>
+          <span class="segue-panel-title">Grouped View</span>
         </div>
-        <div id="groupedContent"></div>
+        <div class="segue-panel-body">
+          <div class="filters">
+            <button class="filter-btn active" data-group="month">By Month</button>
+            <button class="filter-btn" data-group="category">By Category</button>
+          </div>
+          <div id="groupedContent"></div>
+        </div>
       </div>
 
       <!-- Settings Tab -->
@@ -1255,21 +1281,21 @@
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav" role="tablist" aria-label="Main navigation">
-    <button id="add-nav" class="nav-item active" role="tab" aria-selected="true" aria-controls="addTab">
-      <i class="ri-add-line nav-item-icon"></i>
-      <span>Add</span>
+    <button id="home-nav" class="nav-item active" role="tab" aria-selected="true" aria-controls="homeTab">
+      <i class="ri-home-line nav-item-icon"></i>
+      <span>Home</span>
     </button>
     <button id="list-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="listTab">
       <i class="ri-list-check nav-item-icon"></i>
       <span>List</span>
     </button>
+    <button id="add-nav" class="nav-item nav-item-add" role="tab" aria-selected="false" aria-controls="addTab">
+      <i class="ri-add-line nav-item-icon"></i>
+      <span>Add</span>
+    </button>
     <button id="reports-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="reportsTab">
       <i class="ri-bar-chart-2-line nav-item-icon"></i>
       <span>Reports</span>
-    </button>
-    <button id="groups-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="groupsTab">
-      <i class="ri-stack-line nav-item-icon"></i>
-      <span>Groups</span>
     </button>
     <button id="settings-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="settingsTab">
       <i class="ri-settings-3-line nav-item-icon"></i>

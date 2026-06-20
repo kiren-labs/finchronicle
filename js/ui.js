@@ -59,9 +59,6 @@ export function updateUI() {
     case "reports":
       updateReportsView();
       break;
-    case "groups":
-      updateGroupedView();
-      break;
     case "settings":
       updateSettingsContent();
       break;
@@ -170,6 +167,22 @@ export function updateSummary() {
   $.compactEntries.textContent = count;
   $.compactIncome.textContent = formatCurrency(income);
   $.compactExpense.textContent = formatCurrency(expense);
+
+  // Update status strip label (short month name)
+  const stripLabel = document.getElementById("statusStripLabel");
+  if (stripLabel) {
+    if (state.selectedMonth === "all") {
+      stripLabel.textContent = "All";
+    } else {
+      const [y, m] = state.selectedMonth
+        ? state.selectedMonth.split("-")
+        : activeMonth.split("-");
+      stripLabel.textContent = new Date(
+        parseInt(y),
+        parseInt(m) - 1,
+      ).toLocaleDateString("en-US", { month: "short" });
+    }
+  }
 }
 
 // ---- Transaction List (P3: DocumentFragment rendering) ----
@@ -703,19 +716,36 @@ export function switchTab(tab) {
     activeNav.setAttribute("aria-selected", "true");
   }
 
+  // Also sync top tab bar if present
+  const activeTopTab = document.getElementById(`${tab}-tab`);
+  if (activeTopTab) {
+    activeTopTab.classList.add("active");
+    activeTopTab.setAttribute("aria-selected", "true");
+  }
+
   // Update tab content
   document
     .querySelectorAll(".tab-content")
     .forEach((t) => t.classList.remove("active"));
   document.getElementById(`${tab}Tab`).classList.add("active");
 
-  // Hide summary on settings tab, show on all others
-  const summarySection = document.querySelector(".summary-section");
-  if (summarySection)
-    summarySection.style.display = tab === "settings" ? "none" : "";
+  // Toggle settings-active class on body (hides status strip on settings tab)
+  document.body.classList.toggle("settings-active", tab === "settings");
+
+  // Update status strip button icon: grid icon on non-home tabs, check icon on home
+  const stripBtn = document.getElementById("statusStripToggle");
+  if (stripBtn) {
+    const icon = stripBtn.querySelector("i");
+    if (icon) {
+      icon.className = tab === "home" ? "ri-check-line" : "ri-layout-grid-line";
+    }
+  }
 
   // Refresh the newly visible tab's content (P1: lazy-render)
   switch (tab) {
+    case "home":
+      // summary is already updated by updateUI(); nothing extra needed
+      break;
     case "add":
       renderTagPicker();
       break;
@@ -806,7 +836,7 @@ export function onSummaryTileClick(tileType) {
 export function changeGrouping(type, event) {
   state.currentGrouping = type;
 
-  document.querySelectorAll("#groupsTab .filter-btn").forEach((btn) => {
+  document.querySelectorAll("#groupedViewPanel .filter-btn").forEach((btn) => {
     btn.classList.remove("active");
   });
   if (event && event.target) {

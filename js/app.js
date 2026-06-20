@@ -2,26 +2,7 @@
 // App Entry Point — Initialisation, Event Bindings, Service Worker
 // ============================================================================
 
-// ---- Global Error Log (v3.29.0) ----
-// Must be before any imports to catch early errors.
-const ERROR_LOG_KEY = "errorLog";
-const MAX_ERRORS = 50;
-
-function logError(message, stack) {
-  try {
-    const log = JSON.parse(localStorage.getItem(ERROR_LOG_KEY) || "[]");
-    log.push({
-      timestamp: new Date().toISOString(),
-      message,
-      stack: stack || "",
-    });
-    if (log.length > MAX_ERRORS) log.splice(0, log.length - MAX_ERRORS);
-    localStorage.setItem(ERROR_LOG_KEY, JSON.stringify(log));
-  } catch {
-    // DA3: localStorage full or unavailable (Safari Private Browsing) — surface to console so errors are never silently lost
-    console.error("[FinChronicle] logError fallback:", message, stack);
-  }
-}
+// Global error handlers — logError imported from utils.js (imports hoist before body runs in ES modules)
 
 window.onerror = (message, source, lineno, colno, error) => {
   const msg = String(message);
@@ -38,17 +19,22 @@ window.addEventListener("unhandledrejection", (event) => {
 // DA4: window.onerror does not fire for ES module top-level import failures.
 // A failed static import causes the entire module script to not execute — the
 // error surfaces as an 'error' event on the script element itself.
-window.addEventListener("error", (event) => {
-  if (event.target && event.target.tagName === "SCRIPT") {
-    logError(
-      `Module load failed: ${event.target.src || "(inline)"}`,
-      "script-load-error",
-    );
-  }
-}, true); // capture phase to catch script element errors
+window.addEventListener(
+  "error",
+  (event) => {
+    if (event.target && event.target.tagName === "SCRIPT") {
+      logError(
+        `Module load failed: ${event.target.src || "(inline)"}`,
+        "script-load-error",
+      );
+    }
+  },
+  true,
+); // capture phase to catch script element errors
 
 import { state, currencies } from "./state.js";
 import {
+  logError,
   showMessage,
   generateId,
   sanitizeHTML,
@@ -76,9 +62,8 @@ import {
   updateReportsView,
   switchTab,
   quickAddTransaction,
-  toggleSummaryCollapse,
-  loadSummaryState,
   onSummaryTileClick,
+  updateGroupedView,
   changeGrouping,
   editTransaction,
   deleteTransaction,
@@ -251,13 +236,35 @@ function bindStaticEvents() {
     .querySelector("#installPrompt button")
     .addEventListener("click", hideInstallPrompt);
 
-  // ---- Summary section header (collapse) ----
+  // ---- Status strip button: navigate to Home ----
   document
-    .querySelector(".summary-header")
-    .addEventListener("click", toggleSummaryCollapse);
-  document.querySelector(".collapse-btn").addEventListener("click", (e) => {
-    e.stopPropagation();
-    toggleSummaryCollapse();
+    .getElementById("statusStripToggle")
+    ?.addEventListener("click", () => switchTab("home"));
+
+  // ---- Grouped View segue panel ----
+  document
+    .getElementById("openGroupedViewBtn")
+    ?.addEventListener("click", () => {
+      const panel = document.getElementById("groupedViewPanel");
+      if (panel) {
+        panel.classList.add("open");
+        panel.setAttribute("aria-hidden", "false");
+        updateGroupedView();
+      }
+    });
+  document
+    .getElementById("closeGroupedViewBtn")
+    ?.addEventListener("click", () => {
+      const panel = document.getElementById("groupedViewPanel");
+      if (panel) {
+        panel.classList.remove("open");
+        panel.setAttribute("aria-hidden", "true");
+      }
+    });
+  document.querySelectorAll("#groupedViewPanel .filter-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) =>
+      changeGrouping(e.target.dataset.group, e),
+    );
   });
 
   // ---- Summary tile clicks ----
@@ -288,7 +295,7 @@ function bindStaticEvents() {
     .addEventListener("click", closeCurrencySelector);
 
   // ---- Tab navigation (top tabs + bottom nav) ----
-  ["add", "list", "reports", "groups", "settings"].forEach((tab) => {
+  ["home", "add", "list", "reports", "settings"].forEach((tab) => {
     const topTab = document.getElementById(`${tab}-tab`);
     if (topTab) topTab.addEventListener("click", () => switchTab(tab));
 
@@ -904,7 +911,9 @@ function bindFormSubmit() {
           const el = document.getElementById(`${err.field}Error`);
           if (el) el.textContent = err.message;
         });
-        const errorMessage = validation.errors.map((err) => err.message).join(", ");
+        const errorMessage = validation.errors
+          .map((err) => err.message)
+          .join(", ");
         showMessage(errorMessage);
         submitBtn.classList.remove("loading");
         submitBtn.disabled = false;
@@ -921,8 +930,9 @@ function bindFormSubmit() {
       try {
         try {
           await saveTransactionToDB(sanitizedTransaction);
-        } catch {
+        } catch (retryErr) {
           // One retry after 300ms — handles transient IDB lock / quota spike
+          logError(retryErr?.message, retryErr?.stack);
           await new Promise((r) => setTimeout(r, 300));
           await saveTransactionToDB(sanitizedTransaction);
         }
@@ -1222,7 +1232,6 @@ async function init() {
     await initAutoBackup();
     checkAppVersion();
     loadDarkMode();
-    loadSummaryState();
     updateCurrencyDisplay();
     loadBackupTimestamp();
     checkInstallPrompt();

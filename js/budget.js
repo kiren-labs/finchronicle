@@ -399,6 +399,7 @@ export function renderBudgetAlerts() {
   if (alerts.length === 0) {
     container.innerHTML = "";
     _updateBudgetBadge([], false);
+    renderBudgetVsActualTable();
     return;
   }
 
@@ -425,6 +426,205 @@ export function renderBudgetAlerts() {
 
   // Update collapsed-state badge in summary header
   _updateBudgetBadge(alerts, hasExceeded);
+  renderBudgetVsActualTable();
+}
+
+// ---- Budget vs Actual Report (v4.5.0) ----
+
+export function getBudgetVsActual() {
+  const filter = state.selectedMonth || "all";
+  const now = new Date();
+  const monthPrefix =
+    filter === "all"
+      ? `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+      : filter;
+
+  // Sum expenses per category for the selected month
+  const actualByCategory = {};
+  state.transactions.forEach((t) => {
+    if (t.type !== "expense" || !t.date.startsWith(monthPrefix)) return;
+    actualByCategory[t.category] =
+      (actualByCategory[t.category] || 0) + t.amount;
+  });
+
+  const budgetedCategories = new Set(state.budgets.map((b) => b.category));
+
+  const budgeted = state.budgets
+    .map((b) => {
+      const actual = actualByCategory[b.category] || 0;
+      const limit = b.monthlyLimit || 0;
+      const variance = limit - actual;
+      const pct = limit > 0 ? Math.round((actual / limit) * 100) : 0;
+      return { category: b.category, budget: limit, actual, variance, pct };
+    })
+    .sort((a, b) => b.pct - a.pct);
+
+  const unbudgeted = Object.entries(actualByCategory)
+    .filter(([cat]) => !budgetedCategories.has(cat))
+    .map(([category, actual]) => ({ category, actual }))
+    .sort((a, b) => b.actual - a.actual);
+
+  const totalBudget = budgeted.reduce((s, r) => s + r.budget, 0);
+  const totalActual = budgeted.reduce((s, r) => s + r.actual, 0);
+  const totalVariance = totalBudget - totalActual;
+  const totalPct =
+    totalBudget > 0 ? Math.round((totalActual / totalBudget) * 100) : 0;
+
+  return {
+    budgeted,
+    unbudgeted,
+    monthPrefix,
+    totals: {
+      budget: totalBudget,
+      actual: totalActual,
+      variance: totalVariance,
+      pct: totalPct,
+    },
+  };
+}
+
+export function renderBudgetVsActualTable() {
+  const container = document.getElementById("budgetVsActualContainer");
+  if (!container) return;
+
+  const { budgeted, unbudgeted, monthPrefix, totals } = getBudgetVsActual();
+
+  if (budgeted.length === 0 && unbudgeted.length === 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  const table = document.createElement("div");
+  table.className = "budget-vs-actual-table";
+
+  // Header
+  const header = document.createElement("div");
+  header.className = "bva-header";
+  const title = document.createElement("span");
+  title.className = "bva-title";
+  title.textContent = `Budget vs Actual — ${monthPrefix}`;
+  const exportBtn = document.createElement("button");
+  exportBtn.className = "bva-export-btn";
+  exportBtn.textContent = "Export CSV";
+  exportBtn.addEventListener("click", exportBudgetVsActualCSV);
+  header.appendChild(title);
+  header.appendChild(exportBtn);
+  table.appendChild(header);
+
+  if (budgeted.length > 0) {
+    // Table wrapper
+    const wrap = document.createElement("div");
+    wrap.className = "bva-table-wrapper";
+
+    const tbl = document.createElement("table");
+    // Column headers
+    const thead = tbl.createTHead();
+    const hrow = thead.insertRow();
+    ["Category", "Budget", "Actual", "Variance", "% Used"].forEach((h) => {
+      const th = document.createElement("th");
+      th.textContent = h;
+      hrow.appendChild(th);
+    });
+
+    const tbody = tbl.createTBody();
+    budgeted.forEach((row) => {
+      const tr = tbody.insertRow();
+      if (row.pct >= 100) tr.className = "bva-over";
+      else if (row.pct >= 80) tr.className = "bva-warn";
+
+      const cells = [
+        row.category,
+        formatCurrency(row.budget),
+        formatCurrency(row.actual),
+        `${row.variance >= 0 ? "+" : ""}${formatCurrency(row.variance)}`,
+        `${row.pct}%`,
+      ];
+      cells.forEach((val, i) => {
+        const td = tr.insertCell();
+        td.textContent = val;
+        if (i === 3)
+          td.className = row.variance >= 0 ? "bva-positive" : "bva-negative";
+        if (i === 4 && row.pct >= 100) td.textContent = `${row.pct}% ⚠`;
+      });
+    });
+
+    // Totals row
+    const tfoot = tbl.createTFoot();
+    const trow = tfoot.insertRow();
+    trow.className = "bva-totals";
+    const tcells = [
+      "Total",
+      formatCurrency(totals.budget),
+      formatCurrency(totals.actual),
+      `${totals.variance >= 0 ? "+" : ""}${formatCurrency(totals.variance)}`,
+      `${totals.pct}%`,
+    ];
+    tcells.forEach((val, i) => {
+      const td = document.createElement("td");
+      td.textContent = val;
+      if (i === 3)
+        td.className = totals.variance >= 0 ? "bva-positive" : "bva-negative";
+      trow.appendChild(td);
+    });
+
+    wrap.appendChild(tbl);
+    table.appendChild(wrap);
+  }
+
+  // Unbudgeted section
+  if (unbudgeted.length > 0) {
+    const section = document.createElement("div");
+    section.className = "bva-unbudgeted";
+    const sh = document.createElement("p");
+    sh.className = "bva-section-header";
+    sh.textContent = "Unbudgeted Spending";
+    section.appendChild(sh);
+    unbudgeted.forEach((row) => {
+      const line = document.createElement("div");
+      line.className = "bva-unbudgeted-row";
+      const cat = document.createElement("span");
+      cat.textContent = row.category;
+      const amt = document.createElement("span");
+      amt.textContent = formatCurrency(row.actual);
+      line.appendChild(cat);
+      line.appendChild(amt);
+      section.appendChild(line);
+    });
+    table.appendChild(section);
+  }
+
+  container.innerHTML = "";
+  container.appendChild(table);
+}
+
+export function exportBudgetVsActualCSV() {
+  const { budgeted, unbudgeted, monthPrefix, totals } = getBudgetVsActual();
+  const rows = [["Category", "Budget", "Actual", "Variance", "% Used"]];
+  budgeted.forEach((r) => {
+    rows.push([r.category, r.budget, r.actual, r.variance, `${r.pct}%`]);
+  });
+  rows.push([
+    "Total",
+    totals.budget,
+    totals.actual,
+    totals.variance,
+    `${totals.pct}%`,
+  ]);
+  if (unbudgeted.length > 0) {
+    rows.push([]);
+    rows.push(["Unbudgeted Category", "", "Actual", "", ""]);
+    unbudgeted.forEach((r) => rows.push([r.category, "", r.actual, "", ""]));
+  }
+  const csv = rows
+    .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `budget-vs-actual-${monthPrefix}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function _updateBudgetBadge(alerts, hasExceeded) {

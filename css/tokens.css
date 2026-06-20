@@ -2,174 +2,178 @@
 /* Version: 3.7.1 */
 
 :root {
-    --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    --font-family-mono: ui-monospace, 'SF Mono', Monaco, 'Segoe UI Mono', 'Consolas', 'Liberation Mono', monospace;
+  --font-family-base:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-family-mono:
+    ui-monospace, "SF Mono", Monaco, "Segoe UI Mono", "Consolas",
+    "Liberation Mono", monospace;
 
-    --color-primary: #0051D5;
-    --color-primary-hover: #0046b8;
-    --color-primary-strong: #007AFF;
-    --color-primary-soft: #e6f0ff;
+  --color-primary: #0051d5;
+  --color-primary-hover: #0046b8;
+  --color-primary-strong: #007aff;
+  --color-primary-soft: #e6f0ff;
 
-    --color-success: #34c759;
-    --color-success-strong: #147A33;
-    --color-success-deep: #28a745;
+  --color-success: #34c759;
+  --color-success-strong: #147a33;
+  --color-success-deep: #28a745;
 
-    --color-income: #34c759;
-    --color-expense: #ff3b30;
-    --color-income-text: #1a7a3a;
-    --color-expense-text: #C41E1A;
+  --color-income: #34c759;
+  --color-expense: #ff3b30;
+  --color-income-text: #1a7a3a;
+  --color-expense-text: #c41e1a;
 
-    --color-danger: #ff3b30;
-    --color-danger-strong: #C41E1A;
-    --color-danger-deep: #c5221f;
+  --color-danger: #ff3b30;
+  --color-danger-strong: #c41e1a;
+  --color-danger-deep: #c5221f;
 
-    --color-transfer: #6366f1;
+  --color-transfer: #6366f1;
 
-    --color-text: #1d1d1f;
-    --color-text-muted: #6e6e73;
-    --color-text-subtle: #6e6e73;
+  --color-text: #1d1d1f;
+  --color-text-muted: #6e6e73;
+  --color-text-subtle: #6e6e73;
 
-    --color-bg: #f5f5f7;
-    --color-surface: #ffffff;
-    --color-border: #e5e5e7;
+  --color-bg: #f5f5f7;
+  --color-surface: #ffffff;
+  --color-border: #e5e5e7;
 
-    --color-toggle-bg: #f5f5f7;
-    --color-toggle-active-bg: #ffffff;
+  --color-toggle-bg: #f5f5f7;
+  --color-toggle-active-bg: #ffffff;
 
-    --color-disabled-bg: #e5e5e7;
-    --color-disabled-text: #86868b;
+  --color-disabled-bg: #e5e5e7;
+  --color-disabled-text: #86868b;
 
-    --color-status: #008833;
+  --color-status: #008833;
 
-    --color-edit-bg: #e3f0ff;
-    --color-edit-border: #b3d4ff;
-    --color-edit-active-bg: #cce4ff;
-    --color-edit-active-text: #003d99;
+  --color-edit-bg: #e3f0ff;
+  --color-edit-border: #b3d4ff;
+  --color-edit-active-bg: #cce4ff;
+  --color-edit-active-text: #003d99;
 
-    --color-delete-bg: #ffe8e6;
-    --color-delete-border: #f3b3ad;
-    --color-delete-active-bg: #ffd4cf;
-    --color-delete-active-text: #c5221f;
+  --color-delete-bg: #ffe8e6;
+  --color-delete-border: #f3b3ad;
+  --color-delete-active-bg: #ffd4cf;
+  --color-delete-active-text: #c5221f;
 
-    --color-warning-bg: #fff3cd;
-    --color-warning-border: #ffc107;
-    --color-warning-text: #856404;
+  --color-warning-bg: #fff3cd;
+  --color-warning-border: #ffc107;
+  --color-warning-text: #856404;
 
-    --color-danger-bg: #fdecea;
-    --color-danger-border: #ff3b30;
-    --color-danger-text: #9a1c14;
+  --color-danger-bg: #fdecea;
+  --color-danger-border: #ff3b30;
+  --color-danger-text: #9a1c14;
 
-    --color-success-bg: #e7f5eb;
-    --color-success-border: #34c759;
-    --color-success-text: #145a37;
+  --color-success-bg: #e7f5eb;
+  --color-success-border: #34c759;
+  --color-success-text: #145a37;
 
-    --color-primary-bg: #e6f0ff;
+  --color-primary-bg: #e6f0ff;
 
-    /* Logo colors - Split-color wordmark */
-    --color-fin: #1F3A93;          /* Navy blue for "Fin" (trust, finance) */
-    --color-chronicle: #40831F;    /* Vibrant green for "Chronicle" (growth, time) */
+  /* Logo colors - Split-color wordmark */
+  --color-fin: #1f3a93; /* Navy blue for "Fin" (trust, finance) */
+  --color-chronicle: #40831f; /* Vibrant green for "Chronicle" (growth, time) */
 
-    --color-info-bg: #d1ecf1;
-    --color-info-border: #17a2b8;
-    --color-info-text: #0c5460;
+  --color-info-bg: #d1ecf1;
+  --color-info-border: #17a2b8;
+  --color-info-text: #0c5460;
 
-    --color-chip-negative-bg: #fff1f0;
-    --color-chip-positive-bg: #eef8f0;
+  --color-chip-negative-bg: #fff1f0;
+  --color-chip-positive-bg: #eef8f0;
 
-    --color-install: #667eea;
-    --color-install-dark: #764ba2;
+  --color-install: #667eea;
+  --color-install-dark: #764ba2;
 
-    --gradient-primary: linear-gradient(135deg, #0051D5 0%, #0046b8 100%);
-    --gradient-install: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-update: linear-gradient(135deg, #34c759 0%, #30b34d 100%);
-    --gradient-income: linear-gradient(180deg, #34c759 0%, #28a745 100%);
-    --gradient-expense: linear-gradient(180deg, #ff3b30 0%, #d93025 100%);
-    --gradient-transfer: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+  --gradient-primary: linear-gradient(135deg, #0051d5 0%, #0046b8 100%);
+  --gradient-install: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-update: linear-gradient(135deg, #34c759 0%, #30b34d 100%);
+  --gradient-income: linear-gradient(180deg, #34c759 0%, #28a745 100%);
+  --gradient-expense: linear-gradient(180deg, #ff3b30 0%, #d93025 100%);
+  --gradient-transfer: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
 
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
-    --shadow-primary: 0 4px 12px rgba(0, 81, 213, 0.3);
-    --shadow-primary-sm: 0 2px 6px rgba(0, 81, 213, 0.2);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-primary: 0 4px 12px rgba(0, 81, 213, 0.3);
+  --shadow-primary-sm: 0 2px 6px rgba(0, 81, 213, 0.2);
 
-    --radius-sm: 6px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --radius-pill: 999px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
 
-    --transition-fast: 0.2s ease;
-    --transition-med: 0.3s ease;
-    --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-fast: 0.2s ease;
+  --transition-med: 0.3s ease;
+  --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    --space-2xs: 4px;
-    --space-xs: 6px;
-    --space-sm: 8px;
-    --space-md: 12px;
-    --space-lg: 16px;
-    --space-xl: 20px;
-    --space-2xl: 24px;
-    --space-3xl: 28px;
+  --space-2xs: 4px;
+  --space-xs: 6px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 28px;
 
-    --button-padding-y: 12px;
-    --button-padding-x: var(--space-lg);
-    --icon-sm: 16px;
-    --icon-md: 18px;
-    --icon-lg: 20px;
-    --icon-xl: 24px;
-    --icon-2xl: 26px;
+  --button-padding-y: 12px;
+  --button-padding-x: var(--space-lg);
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+  --icon-2xl: 26px;
 
-    --icon-button-sm: 28px;
-    /* Small icon buttons */
-    --icon-button-md: 32px;
-    /* Standard icon buttons */
-    --icon-button-lg: 36px;
-    /* Large icon buttons */
+  --icon-button-sm: 28px;
+  /* Small icon buttons */
+  --icon-button-md: 32px;
+  /* Standard icon buttons */
+  --icon-button-lg: 36px;
+  /* Large icon buttons */
 
-    --text-padding-y: 12px;
-    /* Vertical padding for inputs */
-    --text-padding-x: var(--space-lg);
+  --text-padding-y: 12px;
+  /* Vertical padding for inputs */
+  --text-padding-x: var(--space-lg);
 
-    --font-xs: 11px;
-    --font-sm: 12px;
-    --font-md: 14px;
-    --font-lg: 16px;
-    --font-xl: 18px;
-    --font-2xl: 20px;
-    --font-3xl: 22px;
-    --font-4xl: 24px;
-    --font-5xl: 26px;
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-md: 14px;
+  --font-lg: 16px;
+  --font-xl: 18px;
+  --font-2xl: 20px;
+  --font-3xl: 22px;
+  --font-4xl: 24px;
+  --font-5xl: 26px;
 
-    --color-on-primary: #ffffff;
-    --color-on-danger: #ffffff;
+  --color-on-primary: #ffffff;
+  --color-on-danger: #ffffff;
 
-    /* Category pie chart palette */
-    --chart-c1: #FF9F0A;   /* amber   — Food */
-    --chart-c2: #FF6B35;   /* coral   — Groceries / Housing */
-    --chart-c3: #0051D5;   /* blue    — Transport */
-    --chart-c4: #5AC8FA;   /* sky     — Utilities / Bills */
-    --chart-c5: #BF5AF2;   /* purple  — Personal / Shopping */
-    --chart-c6: #FF3B30;   /* red     — Healthcare / Debt */
-    --chart-c7: #34C759;   /* green   — Savings / Investments */
-    --chart-c8: #8E8E93;   /* slate   — Misc / Other */
+  /* Category pie chart palette */
+  --chart-c1: #ff9f0a; /* amber   — Food */
+  --chart-c2: #ff6b35; /* coral   — Groceries / Housing */
+  --chart-c3: #0051d5; /* blue    — Transport */
+  --chart-c4: #5ac8fa; /* sky     — Utilities / Bills */
+  --chart-c5: #bf5af2; /* purple  — Personal / Shopping */
+  --chart-c6: #ff3b30; /* red     — Healthcare / Debt */
+  --chart-c7: #34c759; /* green   — Savings / Investments */
+  --chart-c8: #8e8e93; /* slate   — Misc / Other */
 
-    /* Day-of-month heatmap heat colour (RGB components only — used in rgba()) */
-    --chart-heat: 255, 59, 48;   /* matches --color-danger; dark-mode.css overrides */
+  /* Day-of-month heatmap heat colour (RGB components only — used in rgba()) */
+  --chart-heat:
+    255, 59, 48; /* matches --color-danger; dark-mode.css overrides */
 }
 
 /* Mobile (≤480px) token adjustments */
 @media (max-width: 480px) {
-    :root {
-        --space-lg: 14px;
-    }
+  :root {
+    --space-lg: 14px;
+  }
 }
 
 /* Small phone (≤360px) token adjustments */
 @media (max-width: 360px) {
-    :root {
-        --space-lg: 10px;
-        --space-md: 8px;
-        --font-3xl: 20px;
-        --font-2xl: 18px;
-        --font-lg: 14px;
-    }
+  :root {
+    --space-lg: 10px;
+    --space-md: 8px;
+    --font-3xl: 20px;
+    --font-2xl: 18px;
+    --font-lg: 14px;
+  }
 }

@@ -118,11 +118,11 @@ Issues we cannot address:
 
 ## 📜 Supported Versions
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 3.x.x   | ✅ Yes             |
-| 2.x.x   | ❌ No              |
-| 1.x.x   | ❌ No              |
+| Version | Supported |
+| ------- | --------- |
+| 3.x.x   | ✅ Yes    |
+| 2.x.x   | ❌ No     |
+| 1.x.x   | ❌ No     |
 
 Only the latest major version receives security updates.
 
