@@ -111,6 +111,7 @@ import {
   saveRecurringTemplate,
   selectRecurringType,
   initRecurringTagEvents,
+  renderSubscriptionTracker,
 } from "./recurring.js";
 import {
   initBudgets,
@@ -273,6 +274,27 @@ function bindStaticEvents() {
       changeGrouping(e.target.dataset.group, e),
     );
   });
+
+  // ---- Subscription Tracker segue panel ----
+  document
+    .getElementById("openSubscriptionBtn")
+    ?.addEventListener("click", () => {
+      const panel = document.getElementById("subscriptionPanel");
+      if (panel) {
+        panel.classList.add("open");
+        panel.removeAttribute("inert");
+        renderSubscriptionTracker();
+      }
+    });
+  document
+    .getElementById("closeSubscriptionBtn")
+    ?.addEventListener("click", () => {
+      const panel = document.getElementById("subscriptionPanel");
+      if (panel) {
+        panel.classList.remove("open");
+        panel.setAttribute("inert", "");
+      }
+    });
 
   // ---- Summary tile clicks ----
   document.querySelectorAll(".summary-card").forEach((card) => {

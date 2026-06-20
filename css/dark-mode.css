@@ -935,6 +935,19 @@ body.dark-mode .health-ratio-card {
   background: var(--color-surface);
 }
 
+/* Subscription Tracker (v4.7.0) */
+body.dark-mode .sub-summary-stat {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+body.dark-mode .sub-list {
+  background: var(--color-border);
+  border-color: var(--color-border);
+}
+body.dark-mode .sub-row {
+  background: var(--color-surface);
+}
+
 /* Primary-colored outline buttons: --color-primary (#0053ad) is unreadable on dark surfaces.
    Override all affected buttons to use --color-primary-strong (#409cff) which is WCAG AA compliant. */
 body.dark-mode .savings-income-prompt-btn {
