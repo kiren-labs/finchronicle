@@ -270,7 +270,7 @@ function bindStaticEvents() {
     .addEventListener("click", closeCurrencySelector);
 
   // ---- Tab navigation (top tabs + bottom nav) ----
-  ["add", "list", "reports", "groups", "settings"].forEach((tab) => {
+  ["home", "add", "list", "reports", "groups", "settings"].forEach((tab) => {
     const topTab = document.getElementById(`${tab}-tab`);
     if (topTab) topTab.addEventListener("click", () => switchTab(tab));
 

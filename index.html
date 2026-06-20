@@ -366,6 +366,8 @@
         <button>Dismiss</button>
       </div>
 
+      <!-- Home Tab -->
+      <div id="homeTab" class="tab-content active" role="tabpanel" aria-labelledby="home-nav">
       <!-- Summary Cards -->
       <div class="summary-section">
         <div class="summary-header">
@@ -474,6 +476,7 @@
           <div id="settlementDashboard"></div>
         </div>
       </div>
+      </div><!-- end #homeTab -->
       <!-- Goal Form Modal (v3.20.0) -->
       <div id="goalFormModal" class="modal">
         <div class="modal-content modal-sm">
@@ -549,7 +552,10 @@
 
       <!-- Tab Navigation -->
       <div class="tabs" role="tablist" aria-label="Main navigation">
-        <button id="add-tab" class="tab active" role="tab" aria-selected="true" aria-controls="addTab">
+        <button id="home-tab" class="tab active" role="tab" aria-selected="true" aria-controls="homeTab">
+          <i class="ri-home-line"></i> Home
+        </button>
+        <button id="add-tab" class="tab" role="tab" aria-selected="false" aria-controls="addTab">
           <i class="ri-add-line"></i> Add
         </button>
         <button id="list-tab" class="tab" role="tab" aria-selected="false" aria-controls="listTab">
@@ -564,7 +570,7 @@
       </div>
 
       <!-- Add Transaction Tab -->
-      <div id="addTab" class="tab-content active" role="tabpanel" aria-labelledby="add-tab">
+      <div id="addTab" class="tab-content" role="tabpanel" aria-labelledby="add-nav">
         <!-- Quick Entry Bar (v3.17.0) -->
         <div id="quickEntryBar" class="quick-entry-bar" hidden></div>
 
@@ -1257,21 +1263,21 @@
 
   <!-- Bottom Navigation -->
   <nav class="bottom-nav" role="tablist" aria-label="Main navigation">
-    <button id="add-nav" class="nav-item active" role="tab" aria-selected="true" aria-controls="addTab">
-      <i class="ri-add-line nav-item-icon"></i>
-      <span>Add</span>
+    <button id="home-nav" class="nav-item active" role="tab" aria-selected="true" aria-controls="homeTab">
+      <i class="ri-home-line nav-item-icon"></i>
+      <span>Home</span>
     </button>
     <button id="list-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="listTab">
       <i class="ri-list-check nav-item-icon"></i>
       <span>List</span>
     </button>
+    <button id="add-nav" class="nav-item nav-item-add" role="tab" aria-selected="false" aria-controls="addTab">
+      <i class="ri-add-line nav-item-icon"></i>
+      <span>Add</span>
+    </button>
     <button id="reports-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="reportsTab">
       <i class="ri-bar-chart-2-line nav-item-icon"></i>
       <span>Reports</span>
-    </button>
-    <button id="groups-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="groupsTab">
-      <i class="ri-stack-line nav-item-icon"></i>
-      <span>Groups</span>
     </button>
     <button id="settings-nav" class="nav-item" role="tab" aria-selected="false" aria-controls="settingsTab">
       <i class="ri-settings-3-line nav-item-icon"></i>

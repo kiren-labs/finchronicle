@@ -2682,6 +2682,44 @@ button.primary.loading .btn-spinner {
     margin-bottom: var(--space-2xs);
 }
 
+/* Elevated center Add button */
+.nav-item-add {
+    position: relative;
+    bottom: 10px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff !important;
+    box-shadow: 0 4px 14px rgba(0, 81, 213, 0.35);
+    padding: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.nav-item-add .nav-item-icon {
+    margin-bottom: 0;
+    font-size: var(--font-5xl);
+}
+
+.nav-item-add span {
+    display: none;
+}
+
+.nav-item-add:hover,
+.nav-item-add:focus-visible {
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(0, 81, 213, 0.45);
+}
+
+.nav-item-add.active {
+    background: var(--color-primary);
+    color: #fff !important;
+}
+
 /* 5-item nav: tighten icon + label on mobile */
 @media (max-width: 480px) {
     .nav-item {
@@ -2691,6 +2729,10 @@ button.primary.loading .btn-spinner {
 
     .nav-item-icon {
         font-size: var(--font-3xl);
+    }
+
+    .nav-item-add .nav-item-icon {
+        font-size: var(--font-4xl);
     }
 }
 

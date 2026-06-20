@@ -50,7 +50,7 @@ export const ITEMS_PER_PAGE = 20;
 export const state = {
   db: null,
   transactions: [],
-  currentTab: "add",
+  currentTab: "home",
   currentGrouping: "month",
   selectedMonth: "all",
   selectedCategory: "all",

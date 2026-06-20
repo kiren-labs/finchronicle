@@ -703,19 +703,24 @@ export function switchTab(tab) {
     activeNav.setAttribute("aria-selected", "true");
   }
 
+  // Also sync top tab bar if present
+  const activeTopTab = document.getElementById(`${tab}-tab`);
+  if (activeTopTab) {
+    activeTopTab.classList.add("active");
+    activeTopTab.setAttribute("aria-selected", "true");
+  }
+
   // Update tab content
   document
     .querySelectorAll(".tab-content")
     .forEach((t) => t.classList.remove("active"));
   document.getElementById(`${tab}Tab`).classList.add("active");
 
-  // Hide summary on settings tab, show on all others
-  const summarySection = document.querySelector(".summary-section");
-  if (summarySection)
-    summarySection.style.display = tab === "settings" ? "none" : "";
-
   // Refresh the newly visible tab's content (P1: lazy-render)
   switch (tab) {
+    case "home":
+      // summary is already updated by updateUI(); nothing extra needed
+      break;
     case "add":
       renderTagPicker();
       break;
