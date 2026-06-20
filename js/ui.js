@@ -41,7 +41,7 @@ import {
   renderDayHeatmap,
 } from "./chart.js";
 import { renderNetWorthDashboard } from "./accounts.js";
-import { renderSavingsDashboard } from "./savings.js";
+import { renderSavingsDashboard, renderHealthRatios } from "./savings.js";
 
 // ---- Master UI Refresh ----
 
@@ -613,6 +613,7 @@ export function updateReportsView() {
 
   renderNetWorthDashboard();
   renderSavingsDashboard();
+  renderHealthRatios();
 }
 
 function groupByMonth() {

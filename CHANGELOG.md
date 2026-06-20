@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.6.0] — 2026-06-20
+
+### Added
+
+- **Financial Health Ratios** — 2×2 KPI grid in the Reports tab showing four diagnostic ratios computed entirely from existing IndexedDB data:
+  - **Emergency Fund** — liquid asset balance ÷ avg 3-month expenses. Target ≥ 6 months.
+  - **Debt-to-Income** — monthly debt payments (credit card, EMI, loans) ÷ monthly income. Target < 36%.
+  - **Housing Cost** — rent/mortgage expense ÷ monthly income. Target < 30%.
+  - **Savings Rate** — amount saved ÷ monthly income. Target ≥ 20% (surfaced from existing v3.19 calculation).
+  - Each card shows value, target sub-text, and a green/yellow/red status indicator.
+  - Summary line: "N of 4 ratios healthy." Hidden if < 2 months of transaction data.
+- **Expense trend arrow on summary card** — Expenses card now shows a month-over-month trend with inverted polarity: spending up = red ↑, spending down = green ↓.
+- **Empty income prompt in Savings** — When no income is logged for the month, the Savings card shows a prompt "Add income to unlock savings rate & projections" with a one-tap button to navigate to the Add tab with Income type pre-selected.
+- **Alert monthly snooze** — Each smart alert now has a moon (🌙) snooze button. Snoozing suppresses that alert type+category for the rest of the current month. Snooze entries auto-expire on the next month's app load. Existing × dismiss remains for permanent dismissal.
+- **Unbudgeted spending → Set Budget** — Each row in the Unbudgeted Spending section now has a "Set budget" pill button that opens the Add Budget modal pre-filled with that category.
+
+### Changed
+
+- **Net Worth and Savings dashboards moved to Reports** — Home tab is now a daily-glance screen (month stats, budget alerts, smart alerts, goals, settlement). Deep analytics (Net Worth, Savings Rate, Financial Health Ratios) are in Reports.
+- **`fc:navigate` CustomEvent** — Internal navigation from non-UI modules (e.g. savings prompt) now dispatches `fc:navigate` on `document` instead of importing `switchTab`/`selectType` directly, avoiding circular imports.
+
+### Technical
+
+- No new IDB stores, no DB_VERSION bump
+- `renderHealthRatios()` exported from `js/savings.js`; called by `updateReportsView()` in `js/ui.js`
+- `ui.js` imports `renderNetWorthDashboard` from `accounts.js` and `renderSavingsDashboard`, `renderHealthRatios` from `savings.js`
+- `snoozeAlert(alertId)` exported from `js/alerts.js`; `snoozedAlerts` Set persisted to `localStorage` under key `snoozedAlerts`
+- `isEdit = !!budget?.id` in `renderBudgetModal()` — allows category-only pre-fill without entering edit mode
+
 ## [4.5.1] — 2026-06-20
 
 ### Added

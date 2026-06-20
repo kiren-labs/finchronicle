@@ -927,3 +927,7 @@ body.dark-mode .segue-panel-header {
   background: var(--color-surface);
   border-color: var(--color-border);
 }
+
+body.dark-mode .health-ratio-card {
+  background: var(--color-surface);
+}
