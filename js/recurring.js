@@ -617,3 +617,111 @@ async function toggleRecurring(id) {
   renderRecurringSection();
   showMessage(template.enabled ? "Recurring resumed." : "Recurring paused.");
 }
+
+// ============================================================================
+// Subscription Tracker (v4.7.0)
+// ============================================================================
+
+export function getSubscriptions() {
+  const templates = state.recurringTemplates || [];
+  return templates.filter(
+    (t) => t.type === "expense" && (t.frequency === "monthly" || t.frequency === "yearly"),
+  );
+}
+
+function getAvgMonthlyIncome3() {
+  const now = new Date();
+  let total = 0;
+  let count = 0;
+  for (let i = 1; i <= 3; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const m = d.toISOString().slice(0, 7);
+    const inc = state.transactions
+      .filter((t) => !t.deleted && t.type === "income" && t.date.startsWith(m))
+      .reduce((s, t) => s + (t.homeAmount || t.amount), 0);
+    if (inc > 0) { total += inc; count++; }
+  }
+  return count > 0 ? total / count : 0;
+}
+
+export function renderSubscriptionTracker() {
+  const container = document.getElementById("subscriptionContent");
+  if (!container) return;
+
+  const subs = getSubscriptions();
+
+  if (subs.length === 0) {
+    container.innerHTML = `
+      <div class="sub-empty">
+        <i class="ri-service-line"></i>
+        <p>No subscriptions found</p>
+        <p class="sub-empty-sub">Monthly or yearly recurring expenses appear here automatically.</p>
+      </div>`;
+    return;
+  }
+
+  // Normalise all amounts to monthly equivalent
+  const withMonthly = subs.map((t) => ({
+    ...t,
+    monthlyAmount: t.frequency === "yearly" ? t.amount / 12 : t.amount,
+  }));
+
+  // Sort: active first, then by monthly amount descending
+  withMonthly.sort((a, b) => {
+    if (a.enabled !== b.enabled) return a.enabled ? -1 : 1;
+    return b.monthlyAmount - a.monthlyAmount;
+  });
+
+  const totalMonthly = withMonthly.reduce((s, t) => s + t.monthlyAmount, 0);
+  const totalAnnual = totalMonthly * 12;
+  const avgIncome = getAvgMonthlyIncome3();
+  const pctOfIncome = avgIncome > 0 ? (totalMonthly / avgIncome) * 100 : null;
+
+  const rows = withMonthly.map((t) => {
+    const isPaused = !t.enabled;
+    const nextLabel = isPaused ? "Paused" : formatDate(t.nextDueDate);
+    const freqLabel = t.frequency === "yearly" ? "Yearly" : "Monthly";
+    return `
+      <div class="sub-row${isPaused ? " sub-row-paused" : ""}">
+        <div class="sub-row-info">
+          <span class="sub-row-name">${sanitizeHTML(t.category)}${t.notes ? `<span class="sub-row-note"> · ${sanitizeHTML(t.notes)}</span>` : ""}</span>
+          <span class="sub-row-meta">${freqLabel} · Next: ${nextLabel}</span>
+        </div>
+        <div class="sub-row-amounts">
+          <span class="sub-row-monthly">${formatCurrency(t.monthlyAmount)}<span class="sub-row-per">/mo</span></span>
+          ${t.frequency === "yearly" ? `<span class="sub-row-actual">${formatCurrency(t.amount)}/yr</span>` : ""}
+        </div>
+      </div>`;
+  }).join("");
+
+  const incomeFooter = pctOfIncome !== null
+    ? `<span class="sub-income-pct">${pctOfIncome.toFixed(1)}% of avg monthly income</span>`
+    : "";
+
+  container.innerHTML = `
+    <div class="sub-summary">
+      <div class="sub-summary-stat">
+        <span class="sub-summary-label">Monthly total</span>
+        <span class="sub-summary-value">${formatCurrency(totalMonthly)}</span>
+      </div>
+      <div class="sub-summary-stat">
+        <span class="sub-summary-label">Annual total</span>
+        <span class="sub-summary-value">${formatCurrency(totalAnnual)}</span>
+      </div>
+    </div>
+    ${incomeFooter}
+    <div class="sub-list">${rows}</div>
+    <button class="sub-manage-btn" id="subManageBtn" type="button">
+      <i class="ri-settings-3-line"></i> Manage Recurring
+    </button>`;
+
+  document.getElementById("subManageBtn")?.addEventListener("click", () => {
+    const panel = document.getElementById("subscriptionPanel");
+    if (panel) { panel.classList.remove("open"); panel.setAttribute("inert", ""); }
+    document.dispatchEvent(new CustomEvent("fc:navigate", { detail: { tab: "settings" } }));
+    // Scroll recurring card into view after tab switch renders
+    requestAnimationFrame(() => {
+      document.getElementById("recurringContainer")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}

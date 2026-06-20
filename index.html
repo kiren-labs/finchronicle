@@ -858,6 +858,13 @@
           <span>Grouped View</span>
           <i class="ri-arrow-right-s-line grouped-view-chevron"></i>
         </button>
+
+        <!-- Subscription Tracker Entry Button -->
+        <button class="grouped-view-entry-btn" id="openSubscriptionBtn" type="button">
+          <i class="ri-service-line"></i>
+          <span>Subscriptions</span>
+          <i class="ri-arrow-right-s-line grouped-view-chevron"></i>
+        </button>
       </div>
 
       <!-- Grouped View Segue Panel -->
@@ -875,6 +882,20 @@
             <button class="filter-btn" data-group="category">By Category</button>
           </div>
           <div id="groupedContent"></div>
+        </div>
+      </div>
+
+      <!-- Subscription Tracker Segue Panel (v4.7.0) -->
+      <div id="subscriptionPanel" class="segue-panel" inert>
+        <div class="segue-panel-header">
+          <button class="segue-back-btn" id="closeSubscriptionBtn" type="button" aria-label="Back to Reports">
+            <i class="ri-arrow-left-s-line"></i>
+            <span>Reports</span>
+          </button>
+          <span class="segue-panel-title">Subscriptions</span>
+        </div>
+        <div class="segue-panel-body">
+          <div id="subscriptionContent"></div>
         </div>
       </div>
 

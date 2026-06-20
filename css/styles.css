@@ -7386,3 +7386,143 @@ button.primary.loading .btn-spinner {
 .health-ratio-card.ratio-bad .ratio-status-icon {
   color: var(--color-danger-strong);
 }
+
+/* ============================================================================
+   Subscription Tracker (v4.7.0)
+   ============================================================================ */
+
+.sub-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+.sub-summary-stat {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.sub-summary-label {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+.sub-summary-value {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.sub-income-pct {
+  display: block;
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-md);
+}
+.sub-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: var(--space-lg);
+}
+.sub-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+}
+.sub-row-paused {
+  opacity: 0.5;
+}
+.sub-row-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sub-row-name {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sub-row-note {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+.sub-row-meta {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+}
+.sub-row-amounts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.sub-row-monthly {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--color-expense-text);
+}
+.sub-row-per {
+  font-size: var(--font-xs);
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+.sub-row-actual {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+}
+.sub-manage-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: none;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.sub-manage-btn:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.sub-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl) 0;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+.sub-empty i {
+  font-size: 2.5rem;
+  opacity: 0.4;
+}
+.sub-empty-sub {
+  font-size: var(--font-sm);
+  max-width: 260px;
+  margin: 0;
+}
