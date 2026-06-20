@@ -716,9 +716,12 @@ export function renderSubscriptionTracker() {
     </button>`;
 
   document.getElementById("subManageBtn")?.addEventListener("click", () => {
-    document.dispatchEvent(new CustomEvent("fc:navigate", { detail: { tab: "settings" } }));
-    // Close the segue panel
     const panel = document.getElementById("subscriptionPanel");
     if (panel) { panel.classList.remove("open"); panel.setAttribute("inert", ""); }
+    document.dispatchEvent(new CustomEvent("fc:navigate", { detail: { tab: "settings" } }));
+    // Scroll recurring card into view after tab switch renders
+    requestAnimationFrame(() => {
+      document.getElementById("recurringContainer")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   });
 }
