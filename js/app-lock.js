@@ -31,6 +31,7 @@ const TIMEOUT_OPTIONS = [
 
 let _lockTimer = null;
 let _locked = false;
+let _biometricInProgress = false;
 
 function resetInactivityTimer() {
   const mins = getLockTimeout();
@@ -147,6 +148,7 @@ function updateLockButtonVisibility() {
 export function lock() {
   if (!isLockEnabled()) return;
   _locked = true;
+  _biometricInProgress = false;
   _pinAttempts = 0;
   _lockoutUntil = 0;
   clearInterval(_lockoutTimer);
@@ -165,9 +167,14 @@ async function _autoTriggerBiometric() {
   if (!getCredentialId() || !(await isBiometricAvailable())) return;
   // Brief delay so the overlay is visible before the OS prompt appears
   await new Promise((r) => setTimeout(r, 350));
-  if (!_locked) return;
-  if (await authenticateWithBiometric()) await unlock();
-  // Dismissed or failed — silently stay on PIN screen
+  if (!_locked || _biometricInProgress) return;
+  _biometricInProgress = true;
+  try {
+    if (await authenticateWithBiometric()) await unlock();
+    // Dismissed or failed — silently stay on PIN screen
+  } finally {
+    _biometricInProgress = false;
+  }
 }
 
 async function unlock() {
@@ -342,10 +349,16 @@ export function bindLockOverlayEvents() {
   unlockBtn.addEventListener("click", attemptUnlock);
 
   biometBtn?.addEventListener("click", async () => {
-    if (await authenticateWithBiometric()) {
-      await unlock();
-    } else {
-      setLockError("Biometric failed. Use your PIN instead.");
+    if (_biometricInProgress) return;
+    _biometricInProgress = true;
+    try {
+      if (await authenticateWithBiometric()) {
+        await unlock();
+      } else {
+        setLockError("Biometric failed. Use your PIN instead.");
+      }
+    } finally {
+      _biometricInProgress = false;
     }
   });
 
