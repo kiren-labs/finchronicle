@@ -5,7 +5,7 @@
 import { state } from "./state.js";
 import { saveTransactionToDB } from "./db.js";
 import { formatCurrency } from "./currency.js";
-import { formatDate, showMessage } from "./utils.js";
+import { formatDate, showMessage, generateId } from "./utils.js";
 import { updateUI } from "./ui.js";
 
 // Module-level reconciliation session — not on global state object
@@ -178,8 +178,10 @@ export function openReconciliationModal(accountName) {
 
   const finaliseBtn = document.getElementById("reconciliationFinaliseBtn");
   const forceBtn = document.getElementById("reconciliationForceBtn");
+  const adjustBtn = document.getElementById("reconciliationAdjustBtn");
   if (finaliseBtn) finaliseBtn.hidden = true;
   if (forceBtn) forceBtn.hidden = true;
+  if (adjustBtn) adjustBtn.hidden = true;
 
   modal.classList.add("show");
   document.getElementById("reconciliationStatementBalance")?.focus();
