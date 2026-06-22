@@ -625,7 +625,9 @@ async function toggleRecurring(id) {
 export function getSubscriptions() {
   const templates = state.recurringTemplates || [];
   return templates.filter(
-    (t) => t.type === "expense" && (t.frequency === "monthly" || t.frequency === "yearly"),
+    (t) =>
+      t.type === "expense" &&
+      (t.frequency === "monthly" || t.frequency === "yearly"),
   );
 }
 
@@ -639,7 +641,10 @@ function getAvgMonthlyIncome3() {
     const inc = state.transactions
       .filter((t) => !t.deleted && t.type === "income" && t.date.startsWith(m))
       .reduce((s, t) => s + (t.homeAmount || t.amount), 0);
-    if (inc > 0) { total += inc; count++; }
+    if (inc > 0) {
+      total += inc;
+      count++;
+    }
   }
   return count > 0 ? total / count : 0;
 }
@@ -677,11 +682,12 @@ export function renderSubscriptionTracker() {
   const avgIncome = getAvgMonthlyIncome3();
   const pctOfIncome = avgIncome > 0 ? (totalMonthly / avgIncome) * 100 : null;
 
-  const rows = withMonthly.map((t) => {
-    const isPaused = !t.enabled;
-    const nextLabel = isPaused ? "Paused" : formatDate(t.nextDueDate);
-    const freqLabel = t.frequency === "yearly" ? "Yearly" : "Monthly";
-    return `
+  const rows = withMonthly
+    .map((t) => {
+      const isPaused = !t.enabled;
+      const nextLabel = isPaused ? "Paused" : formatDate(t.nextDueDate);
+      const freqLabel = t.frequency === "yearly" ? "Yearly" : "Monthly";
+      return `
       <div class="sub-row${isPaused ? " sub-row-paused" : ""}">
         <div class="sub-row-info">
           <span class="sub-row-name">${sanitizeHTML(t.category)}${t.notes ? `<span class="sub-row-note"> · ${sanitizeHTML(t.notes)}</span>` : ""}</span>
@@ -692,11 +698,13 @@ export function renderSubscriptionTracker() {
           ${t.frequency === "yearly" ? `<span class="sub-row-actual">${formatCurrency(t.amount)}/yr</span>` : ""}
         </div>
       </div>`;
-  }).join("");
+    })
+    .join("");
 
-  const incomeFooter = pctOfIncome !== null
-    ? `<span class="sub-income-pct">${pctOfIncome.toFixed(1)}% of avg monthly income</span>`
-    : "";
+  const incomeFooter =
+    pctOfIncome !== null
+      ? `<span class="sub-income-pct">${pctOfIncome.toFixed(1)}% of avg monthly income</span>`
+      : "";
 
   container.innerHTML = `
     <div class="sub-summary">
@@ -717,11 +725,18 @@ export function renderSubscriptionTracker() {
 
   document.getElementById("subManageBtn")?.addEventListener("click", () => {
     const panel = document.getElementById("subscriptionPanel");
-    if (panel) { panel.classList.remove("open"); panel.setAttribute("inert", ""); }
-    document.dispatchEvent(new CustomEvent("fc:navigate", { detail: { tab: "settings" } }));
+    if (panel) {
+      panel.classList.remove("open");
+      panel.setAttribute("inert", "");
+    }
+    document.dispatchEvent(
+      new CustomEvent("fc:navigate", { detail: { tab: "settings" } }),
+    );
     // Scroll recurring card into view after tab switch renders
     requestAnimationFrame(() => {
-      document.getElementById("recurringContainer")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      document
+        .getElementById("recurringContainer")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 }

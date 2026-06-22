@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.7.1] — 2026-06-22
+
+### Added
+
+- **Reconciliation Balance Adjustment** — when a reconciliation difference can't be located, a new "Create Balance Adjustment" button auto-creates a corrective transaction for the exact gap amount and marks it reconciled.
+  - Expense entry when app balance is too high (positive difference); income entry when too low.
+  - Posted to a dedicated `Reconciliation Adjustment` category, excluded from income/expense totals, savings rate, budget pace, category charts, and annual report — but counted in account balance and net worth.
+  - `isAdjustment: true` flag on the transaction schema enables the exclusion.
+  - "Reconcile Anyway" renamed to "Continue Anyway" for clearer phrasing.
+
 ## [4.7.0] — 2026-06-20
 
 ### Added

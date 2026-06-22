@@ -65,6 +65,7 @@ export function getMonthlyIncome(month) {
   state.transactions.forEach((t) => {
     if (t.deleted) return;
     if (t.type !== "income") return;
+    if (t.isAdjustment) return;
     if (!t.date || !t.date.startsWith(month)) return;
     total += t.amount;
   });
@@ -179,7 +180,11 @@ function getAvgMonthlyExpense(months = 3) {
     const monthTotal = state.transactions
       .filter(
         (t) =>
-          !t.deleted && t.type === "expense" && t.date && t.date.startsWith(m),
+          !t.deleted &&
+          t.type === "expense" &&
+          !t.isAdjustment &&
+          t.date &&
+          t.date.startsWith(m),
       )
       .reduce((s, t) => s + (t.homeAmount || t.amount), 0);
     if (monthTotal > 0) {
