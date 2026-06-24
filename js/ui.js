@@ -106,6 +106,7 @@ export function updateSummary() {
   const { income, expense, count } = state.transactions.reduce(
     (acc, t) => {
       if (
+        t.date &&
         t.date.startsWith(activeMonth) &&
         t.type !== "transfer" &&
         !t.isAdjustment

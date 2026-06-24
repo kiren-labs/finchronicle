@@ -489,6 +489,10 @@ function bindStaticEvents() {
 
   // ---- Reconciliation (v4.0.0) ----
   bindReconciliationEvents();
+  document.addEventListener("reconciliation:finalised", () => {
+    renderAccountManager();
+    renderNetWorthDashboard();
+  });
 
   // ---- Goals (v3.20.0) ----
   bindGoalEvents();

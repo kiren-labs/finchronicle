@@ -341,16 +341,19 @@ export async function finaliseReconciliation(force = false) {
   );
   closeReconciliationModal();
   updateUI();
+  document.dispatchEvent(new CustomEvent("reconciliation:finalised"));
 }
 
 async function createAdjustingEntry(accountName, difference, statementDate) {
   const isExpense = difference > 0;
+  const entryDate =
+    statementDate || new Date().toISOString().slice(0, 10);
   const entry = {
     id: generateId(),
     type: isExpense ? "expense" : "income",
     amount: Math.abs(difference),
     category: "Reconciliation Adjustment",
-    date: statementDate,
+    date: entryDate,
     notes: "Balance adjustment — reconciliation",
     tags: ["adjustment"],
     status: "reconciled",
