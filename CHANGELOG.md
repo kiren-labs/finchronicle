@@ -7,9 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
-
-## [4.7.1] — 2026-06-22
+## [4.7.1] — 2026-06-24
 
 ### Added
 
@@ -18,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Posted to a dedicated `Reconciliation Adjustment` category, excluded from income/expense totals, savings rate, budget pace, category charts, and annual report — but counted in account balance and net worth.
   - `isAdjustment: true` flag on the transaction schema enables the exclusion.
   - "Reconcile Anyway" renamed to "Continue Anyway" for clearer phrasing.
+
+- **Filter by Account in transaction list** — new "Filter by Account" dropdown in the List tab, below the category filter. Selecting an account shows only transactions where that account appears as `fromAccount` or `toAccount`, making it easy to cross-check entries against a bank statement. Dropdown is auto-populated from actual transaction data and resets on summary-tile navigation.
 
 ## [4.7.0] — 2026-06-20
 

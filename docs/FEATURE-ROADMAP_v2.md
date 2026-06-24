@@ -1,7 +1,7 @@
 # FinChronicle Feature Roadmap
 
-> Last updated: 2026-06-20
-> Current version: v4.7.0
+> Last updated: 2026-06-24
+> Current version: v4.7.1
 
 ---
 
@@ -35,6 +35,10 @@ All features from the previous roadmap have shipped. The app is now a full perso
 | v4.2.0  | Backup & Restore Overhaul — full envelope, UI consolidation, merge/replace modes, SHA-256 integrity   | May 2026     |
 | v4.2.1  | Copy & language overhaul — plain-English errors, jargon removal, sentence case, i18n foundation       | Jun 2026     |
 | v4.3.0  | App Lock — PIN gate + biometric (WebAuthn), auto-lock timeout, lock-now header button                 | Jun 2026     |
+| v4.5.1  | Home tab dashboard, Global Status Strip, Add tab form-only                                            | Jun 2026     |
+| v4.6.0  | Financial Health Ratios (emergency fund, debt-to-income, housing cost), expense trend arrow           | Jun 2026     |
+| v4.7.0  | Subscription Tracker — recurring expense panel with monthly/annual totals and income %                | Jun 2026     |
+| v4.7.1  | Reconciliation Balance Adjustment and Filter by Account in transaction list                           | Jun 2026     |
 
 ---
 
@@ -402,7 +406,11 @@ Active Subscriptions                          ฿2,340/month
 
 When a reconciliation difference can't be located, a "Create Balance Adjustment" button auto-creates a corrective transaction for the exact gap, marks it `reconciled`, and finalises. The adjustment carries `isAdjustment: true` — excluded from income/expense totals, savings rate, budget pace, category charts, and annual report, but counted in account balance and net worth.
 
-**Files modified:** `js/reconciliation.js`, `js/state.js`, `js/ui.js`, `js/savings.js`, `js/annual-report.js`, `index.html`, `css/styles.css`, `js/lang/en.js`
+Account filter dropdown in the List tab lets users select a specific account and see only transactions where that account appears as `fromAccount` or `toAccount`. Primary use case: cross-checking the app's transaction list against a bank statement during reconciliation.
+
+**Behaviour:** Dropdown auto-populates from actual transaction data (not the saved accounts list). Resets to "All Accounts" on summary-tile navigation and tab switches. Works in combination with existing month, category, and type filters.
+
+**Files modified:** `js/reconciliation.js`, `js/state.js`, `js/ui.js`, `js/app.js`, `js/savings.js`, `js/annual-report.js`, `index.html`, `css/styles.css`, `js/lang/en.js`
 
 ---
 
