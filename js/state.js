@@ -55,6 +55,7 @@ export const state = {
   selectedMonth: "all",
   selectedCategory: "all",
   selectedType: "all",
+  selectedAccount: "all",
   insightsMonth: "current",
   editingId: null,
   deleteId: null,
@@ -236,6 +237,7 @@ export function getDOM() {
       nextBtn: document.getElementById("nextBtn"),
       monthFilters: document.getElementById("monthFilters"),
       categoryFilter: document.getElementById("categoryFilter"),
+      accountFilter: document.getElementById("accountFilter"),
       groupedContent: document.getElementById("groupedContent"),
     };
   }

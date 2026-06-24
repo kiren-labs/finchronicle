@@ -75,6 +75,7 @@ import {
   updateCategoryOptions,
   filterByMonth,
   filterByCategory,
+  filterByAccount,
   nextPage,
   prevPage,
   openFeedbackModal,
@@ -346,6 +347,11 @@ function bindStaticEvents() {
   document
     .getElementById("categoryFilter")
     .addEventListener("change", filterByCategory);
+
+  // ---- Account filter (onchange) ----
+  document
+    .getElementById("accountFilter")
+    .addEventListener("change", filterByAccount);
 
   // ---- Pagination ----
   document.getElementById("prevBtn").addEventListener("click", prevPage);

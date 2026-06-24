@@ -52,6 +52,7 @@ export function updateUI() {
   // Always update filters (lightweight)
   updateMonthFilters();
   updateCategoryFilter();
+  updateAccountFilter();
 
   // Only render the visible tab's content (P1: lazy-render)
   switch (state.currentTab) {
@@ -238,6 +239,13 @@ export function updateTransactionsList() {
   }
   if (state.selectedType !== "all") {
     filtered = filtered.filter((t) => t.type === state.selectedType);
+  }
+  if (state.selectedAccount !== "all") {
+    filtered = filtered.filter(
+      (t) =>
+        t.fromAccount === state.selectedAccount ||
+        t.toAccount === state.selectedAccount,
+    );
   }
 
   // Search + tag filter (v3.14.0)
@@ -482,6 +490,27 @@ export function filterByMonth(month) {
 
 export function filterByCategory() {
   state.selectedCategory = document.getElementById("categoryFilter").value;
+  state.currentPage = 1;
+  updateTransactionsList();
+}
+
+export function updateAccountFilter() {
+  const filter = getDOM().accountFilter;
+  if (!filter) return;
+  const accounts = new Set();
+  for (const t of state.transactions) {
+    if (t.fromAccount) accounts.add(t.fromAccount);
+    if (t.toAccount) accounts.add(t.toAccount);
+  }
+  let html = `<option value="all">All Accounts</option>`;
+  for (const acc of [...accounts].sort()) {
+    html += `<option value="${acc}" ${state.selectedAccount === acc ? "selected" : ""}>${acc}</option>`;
+  }
+  filter.innerHTML = html;
+}
+
+export function filterByAccount() {
+  state.selectedAccount = getDOM().accountFilter.value;
   state.currentPage = 1;
   updateTransactionsList();
 }
@@ -841,21 +870,25 @@ export function onSummaryTileClick(tileType) {
       state.selectedMonth = currentMonth;
       state.selectedCategory = "all";
       state.selectedType = "all";
+      state.selectedAccount = "all";
       break;
     case "total-entries":
       state.selectedMonth = currentMonth;
       state.selectedCategory = "all";
       state.selectedType = "all";
+      state.selectedAccount = "all";
       break;
     case "income":
       state.selectedMonth = currentMonth;
       state.selectedCategory = "all";
       state.selectedType = "income";
+      state.selectedAccount = "all";
       break;
     case "expenses":
       state.selectedMonth = currentMonth;
       state.selectedCategory = "all";
       state.selectedType = "expense";
+      state.selectedAccount = "all";
       break;
   }
 
