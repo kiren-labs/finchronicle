@@ -346,8 +346,7 @@ export async function finaliseReconciliation(force = false) {
 
 async function createAdjustingEntry(accountName, difference, statementDate) {
   const isExpense = difference > 0;
-  const entryDate =
-    statementDate || new Date().toISOString().slice(0, 10);
+  const entryDate = statementDate || new Date().toISOString().slice(0, 10);
   const entry = {
     id: generateId(),
     type: isExpense ? "expense" : "income",

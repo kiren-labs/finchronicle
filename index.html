@@ -373,9 +373,11 @@
           <span class="status-strip-sep">•</span>
           <span class="compact-stat" id="compactNet">฿0</span>
           <span class="status-strip-sep">•</span>
-          <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i><span id="compactIncome">฿0</span></span>
+          <span class="compact-stat-small compact-income"><i class="ri-arrow-up-line"></i><span
+              id="compactIncome">฿0</span></span>
           <span class="status-strip-sep">•</span>
-          <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i><span id="compactExpense">฿0</span></span>
+          <span class="compact-stat-small compact-expense"><i class="ri-arrow-down-line"></i><span
+              id="compactExpense">฿0</span></span>
           <span class="status-strip-sep">•</span>
           <span class="compact-stat-small"><i class="ri-file-list-line"></i><span id="compactEntries">0</span></span>
           <span id="budgetAlertBadge" class="budget-alert-badge" hidden></span>
@@ -387,81 +389,81 @@
 
       <!-- Home Tab -->
       <div id="homeTab" class="tab-content active" role="tabpanel" aria-labelledby="home-nav">
-      <!-- Summary Cards -->
-      <div class="summary-section">
-        <div class="summary-header">
-          <div class="summary-header-content">
-            <h2 class="summary-title">
-              <span id="summaryMonthLabel">Summary</span>
-            </h2>
+        <!-- Summary Cards -->
+        <div class="summary-section">
+          <div class="summary-header">
+            <div class="summary-header-content">
+              <h2 class="summary-title">
+                <span id="summaryMonthLabel">Summary</span>
+              </h2>
+            </div>
+          </div>
+          <div class="summary" id="summaryCards">
+            <div class="summary-card" role="button" tabindex="0" aria-label="View transactions for this month">
+              <div class="card-icon">
+                <i class="ri-calendar-check-line"></i>
+              </div>
+              <div class="card-content">
+                <div class="summary-label" id="thisMonthLabel">This Month</div>
+                <div class="summary-value" id="monthNet">0</div>
+                <div class="summary-trend" id="monthNetTrend"></div>
+              </div>
+            </div>
+            <div class="summary-card" role="button" tabindex="0" aria-label="View all transactions for this month">
+              <div class="card-icon">
+                <i class="ri-list-check-2"></i>
+              </div>
+              <div class="card-content">
+                <div class="summary-label">Total Entries</div>
+                <div class="summary-value" id="totalEntries">0</div>
+                <div class="summary-meta" id="totalEntriesMeta">This month</div>
+              </div>
+            </div>
+            <div class="summary-card positive" role="button" tabindex="0"
+              aria-label="View income transactions for this month">
+              <div class="card-icon">
+                <i class="ri-arrow-up-circle-fill"></i>
+              </div>
+              <div class="card-content">
+                <div class="summary-label">Income</div>
+                <div class="summary-value" id="monthIncome">0</div>
+                <div class="summary-trend" id="monthIncomeTrend"></div>
+              </div>
+            </div>
+            <div class="summary-card negative" role="button" tabindex="0"
+              aria-label="View expense transactions for this month">
+              <div class="card-icon">
+                <i class="ri-arrow-down-circle-fill"></i>
+              </div>
+              <div class="card-content">
+                <div class="summary-label">Expenses</div>
+                <div class="summary-value" id="monthExpense">0</div>
+                <div class="summary-trend" id="monthExpenseTrend"></div>
+                <div class="summary-meta" id="monthExpenseMeta"></div>
+              </div>
+            </div>
+          </div>
+          <div id="budgetAlerts"></div>
+          <!-- Budget vs Actual Report (v4.5.0) -->
+          <div id="budgetVsActualContainer"></div>
+          <!-- Smart Spending Alerts (v3.21.0) -->
+          <div id="smartAlerts" hidden></div>
+          <!-- Savings Goals (v3.20.0) -->
+          <div class="card goals-card" id="goalsSection" hidden>
+            <div class="goals-header">
+              <h3><i class="ri-trophy-line"></i> Goals</h3>
+              <button class="btn-icon" id="addGoalBtn" title="Add Goal">
+                <i class="ri-add-line"></i>
+              </button>
+            </div>
+            <div id="goalsDashboard"></div>
+          </div>
+          <!-- Family Settlement (v3.26.0) -->
+          <div class="card settlement-card" id="settlementSection" hidden>
+            <h3><i class="ri-group-line"></i> Family Settlement</h3>
+            <div id="settlementDashboard"></div>
           </div>
         </div>
-        <div class="summary" id="summaryCards">
-          <div class="summary-card" role="button" tabindex="0" aria-label="View transactions for this month">
-            <div class="card-icon">
-              <i class="ri-calendar-check-line"></i>
-            </div>
-            <div class="card-content">
-              <div class="summary-label" id="thisMonthLabel">This Month</div>
-              <div class="summary-value" id="monthNet">0</div>
-              <div class="summary-trend" id="monthNetTrend"></div>
-            </div>
-          </div>
-          <div class="summary-card" role="button" tabindex="0" aria-label="View all transactions for this month">
-            <div class="card-icon">
-              <i class="ri-list-check-2"></i>
-            </div>
-            <div class="card-content">
-              <div class="summary-label">Total Entries</div>
-              <div class="summary-value" id="totalEntries">0</div>
-              <div class="summary-meta" id="totalEntriesMeta">This month</div>
-            </div>
-          </div>
-          <div class="summary-card positive" role="button" tabindex="0"
-            aria-label="View income transactions for this month">
-            <div class="card-icon">
-              <i class="ri-arrow-up-circle-fill"></i>
-            </div>
-            <div class="card-content">
-              <div class="summary-label">Income</div>
-              <div class="summary-value" id="monthIncome">0</div>
-              <div class="summary-trend" id="monthIncomeTrend"></div>
-            </div>
-          </div>
-          <div class="summary-card negative" role="button" tabindex="0"
-            aria-label="View expense transactions for this month">
-            <div class="card-icon">
-              <i class="ri-arrow-down-circle-fill"></i>
-            </div>
-            <div class="card-content">
-              <div class="summary-label">Expenses</div>
-              <div class="summary-value" id="monthExpense">0</div>
-              <div class="summary-trend" id="monthExpenseTrend"></div>
-              <div class="summary-meta" id="monthExpenseMeta"></div>
-            </div>
-          </div>
-        </div>
-        <div id="budgetAlerts"></div>
-        <!-- Budget vs Actual Report (v4.5.0) -->
-        <div id="budgetVsActualContainer"></div>
-        <!-- Smart Spending Alerts (v3.21.0) -->
-        <div id="smartAlerts" hidden></div>
-        <!-- Savings Goals (v3.20.0) -->
-        <div class="card goals-card" id="goalsSection" hidden>
-          <div class="goals-header">
-            <h3><i class="ri-trophy-line"></i> Goals</h3>
-            <button class="btn-icon" id="addGoalBtn" title="Add Goal">
-              <i class="ri-add-line"></i>
-            </button>
-          </div>
-          <div id="goalsDashboard"></div>
-        </div>
-        <!-- Family Settlement (v3.26.0) -->
-        <div class="card settlement-card" id="settlementSection" hidden>
-          <h3><i class="ri-group-line"></i> Family Settlement</h3>
-          <div id="settlementDashboard"></div>
-        </div>
-      </div>
       </div><!-- end #homeTab -->
       <!-- Goal Form Modal (v3.20.0) -->
       <div id="goalFormModal" class="modal">
@@ -1130,8 +1132,8 @@
                   hidden>
                   <i class="ri-alert-line"></i> Continue Anyway
                 </button>
-                <button type="button" id="reconciliationAdjustBtn" class="reconcile-action-btn reconcile-action-secondary"
-                  hidden>
+                <button type="button" id="reconciliationAdjustBtn"
+                  class="reconcile-action-btn reconcile-action-secondary" hidden>
                   <i class="ri-equalizer-line"></i> Create Balance Adjustment
                 </button>
               </div>

@@ -175,7 +175,8 @@ export function buildCategoryData(transactions, month, topN = 7) {
     filtered = transactions.filter((t) => t.type === "expense");
   } else if (Array.isArray(month)) {
     filtered = transactions.filter(
-      (t) => t.type === "expense" && t.date && month.includes(t.date.slice(0, 7)),
+      (t) =>
+        t.type === "expense" && t.date && month.includes(t.date.slice(0, 7)),
     );
   } else {
     filtered = transactions.filter(

@@ -639,7 +639,10 @@ function getAvgMonthlyIncome3() {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const m = d.toISOString().slice(0, 7);
     const inc = state.transactions
-      .filter((t) => !t.deleted && t.type === "income" && t.date && t.date.startsWith(m))
+      .filter(
+        (t) =>
+          !t.deleted && t.type === "income" && t.date && t.date.startsWith(m),
+      )
       .reduce((s, t) => s + (t.homeAmount || t.amount), 0);
     if (inc > 0) {
       total += inc;
