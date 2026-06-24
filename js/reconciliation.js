@@ -5,7 +5,7 @@
 import { state } from "./state.js";
 import { saveTransactionToDB } from "./db.js";
 import { formatCurrency } from "./currency.js";
-import { formatDate, showMessage } from "./utils.js";
+import { formatDate, showMessage, generateId } from "./utils.js";
 import { updateUI } from "./ui.js";
 
 // Module-level reconciliation session — not on global state object
@@ -178,8 +178,10 @@ export function openReconciliationModal(accountName) {
 
   const finaliseBtn = document.getElementById("reconciliationFinaliseBtn");
   const forceBtn = document.getElementById("reconciliationForceBtn");
+  const adjustBtn = document.getElementById("reconciliationAdjustBtn");
   if (finaliseBtn) finaliseBtn.hidden = true;
   if (forceBtn) forceBtn.hidden = true;
+  if (adjustBtn) adjustBtn.hidden = true;
 
   modal.classList.add("show");
   document.getElementById("reconciliationStatementBalance")?.focus();
@@ -275,12 +277,15 @@ export function renderReconciliationDifference() {
   if (difference === 0) {
     diffEl.className = "reconciliation-difference reconciliation-match";
     const forceBtn = document.getElementById("reconciliationForceBtn");
+    const adjustBtn = document.getElementById("reconciliationAdjustBtn");
     if (forceBtn) forceBtn.hidden = true;
+    if (adjustBtn) adjustBtn.hidden = true;
   } else {
     diffEl.className = "reconciliation-difference reconciliation-mismatch";
     const hint = document.createElement("p");
     hint.className = "recon-hint";
-    hint.textContent = "Review unmatched transactions before finalizing.";
+    hint.textContent =
+      "Review unmatched transactions first. Can't find the difference? Record a balance adjustment.";
     diffEl.appendChild(hint);
   }
 }
@@ -309,11 +314,13 @@ export async function finaliseReconciliation(force = false) {
       const warning = document.createElement("p");
       warning.className = "recon-hint recon-force-warning";
       warning.textContent =
-        'Balance does not match. Use "Reconcile Anyway" to proceed.';
+        'Balance does not match. Use "Continue Anyway" or "Create Balance Adjustment" to proceed.';
       diffEl.appendChild(warning);
     }
     const forceBtn = document.getElementById("reconciliationForceBtn");
+    const adjustBtn = document.getElementById("reconciliationAdjustBtn");
     if (forceBtn) forceBtn.hidden = false;
+    if (adjustBtn) adjustBtn.hidden = false;
     return;
   }
 
@@ -334,6 +341,54 @@ export async function finaliseReconciliation(force = false) {
   );
   closeReconciliationModal();
   updateUI();
+  document.dispatchEvent(new CustomEvent("reconciliation:finalised"));
+}
+
+async function createAdjustingEntry(accountName, difference, statementDate) {
+  const isExpense = difference > 0;
+  const entryDate = statementDate || new Date().toISOString().slice(0, 10);
+  const entry = {
+    id: generateId(),
+    type: isExpense ? "expense" : "income",
+    amount: Math.abs(difference),
+    category: "Reconciliation Adjustment",
+    date: entryDate,
+    notes: "Balance adjustment — reconciliation",
+    tags: ["adjustment"],
+    status: "reconciled",
+    isAdjustment: true,
+    createdAt: new Date().toISOString(),
+    ...(isExpense ? { fromAccount: accountName } : { toAccount: accountName }),
+  };
+  await saveTransactionToDB(entry);
+  state.transactions.unshift(entry);
+  return entry;
+}
+
+export async function finaliseWithAdjustment() {
+  if (!reconciliationState) return;
+  const { accountName, statementBalance, candidates, checkedIds } =
+    reconciliationState;
+  const base = computeReconciledBase(
+    accountName,
+    state.accounts,
+    state.transactions,
+  );
+  const checked = computeCheckedBalance(
+    base,
+    accountName,
+    candidates,
+    checkedIds,
+  );
+  const difference = Math.round((checked - statementBalance) * 100) / 100;
+  if (difference !== 0) {
+    await createAdjustingEntry(
+      accountName,
+      difference,
+      reconciliationState.statementDate,
+    );
+  }
+  await finaliseReconciliation(true);
 }
 
 export function closeReconciliationModal() {
@@ -367,6 +422,9 @@ export function bindReconciliationEvents() {
   document
     .getElementById("reconciliationForceBtn")
     ?.addEventListener("click", () => finaliseReconciliation(true));
+  document
+    .getElementById("reconciliationAdjustBtn")
+    ?.addEventListener("click", () => finaliseWithAdjustment());
 
   document
     .getElementById("reconciliationList")

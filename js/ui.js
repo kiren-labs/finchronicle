@@ -52,6 +52,7 @@ export function updateUI() {
   // Always update filters (lightweight)
   updateMonthFilters();
   updateCategoryFilter();
+  updateAccountFilter();
 
   // Only render the visible tab's content (P1: lazy-render)
   switch (state.currentTab) {
@@ -105,7 +106,12 @@ export function updateSummary() {
 
   const { income, expense, count } = state.transactions.reduce(
     (acc, t) => {
-      if (t.date.startsWith(activeMonth) && t.type !== "transfer") {
+      if (
+        t.date &&
+        t.date.startsWith(activeMonth) &&
+        t.type !== "transfer" &&
+        !t.isAdjustment
+      ) {
         acc.count++;
         const amt = t.homeAmount || t.amount;
         if (t.type === "income") acc.income += amt;
@@ -212,7 +218,9 @@ export function updateTransactionsList() {
   let filtered = state.transactions;
 
   if (state.selectedMonth !== "all") {
-    filtered = filtered.filter((t) => t.date.startsWith(state.selectedMonth));
+    filtered = filtered.filter(
+      (t) => t.date && t.date.startsWith(state.selectedMonth),
+    );
   }
   if (state.selectedCategory !== "all") {
     // If selected value is a parent category, also match its children
@@ -231,6 +239,13 @@ export function updateTransactionsList() {
   }
   if (state.selectedType !== "all") {
     filtered = filtered.filter((t) => t.type === state.selectedType);
+  }
+  if (state.selectedAccount !== "all") {
+    filtered = filtered.filter(
+      (t) =>
+        t.fromAccount === state.selectedAccount ||
+        t.toAccount === state.selectedAccount,
+    );
   }
 
   // Search + tag filter (v3.14.0)
@@ -403,7 +418,9 @@ export function updateTransactionsList() {
 
 export function updateMonthFilters() {
   const months = [
-    ...new Set(state.transactions.map((t) => t.date.slice(0, 7))),
+    ...new Set(
+      state.transactions.filter((t) => t.date).map((t) => t.date.slice(0, 7)),
+    ),
   ];
   months.sort().reverse();
 
@@ -473,6 +490,27 @@ export function filterByMonth(month) {
 
 export function filterByCategory() {
   state.selectedCategory = document.getElementById("categoryFilter").value;
+  state.currentPage = 1;
+  updateTransactionsList();
+}
+
+export function updateAccountFilter() {
+  const filter = getDOM().accountFilter;
+  if (!filter) return;
+  const accounts = new Set();
+  for (const t of state.transactions) {
+    if (t.fromAccount) accounts.add(t.fromAccount);
+    if (t.toAccount) accounts.add(t.toAccount);
+  }
+  let html = `<option value="all">All Accounts</option>`;
+  for (const acc of [...accounts].sort()) {
+    html += `<option value="${acc}" ${state.selectedAccount === acc ? "selected" : ""}>${acc}</option>`;
+  }
+  filter.innerHTML = html;
+}
+
+export function filterByAccount() {
+  state.selectedAccount = getDOM().accountFilter.value;
   state.currentPage = 1;
   updateTransactionsList();
 }
@@ -621,6 +659,7 @@ function groupByMonth() {
   const grouped = {};
 
   state.transactions.forEach((t) => {
+    if (!t.date) return;
     const month = t.date.slice(0, 7);
     if (!grouped[month]) {
       grouped[month] = { income: 0, expense: 0, transfer: 0, count: 0 };
@@ -831,21 +870,25 @@ export function onSummaryTileClick(tileType) {
       state.selectedMonth = currentMonth;
       state.selectedCategory = "all";
       state.selectedType = "all";
+      state.selectedAccount = "all";
       break;
     case "total-entries":
       state.selectedMonth = currentMonth;
       state.selectedCategory = "all";
       state.selectedType = "all";
+      state.selectedAccount = "all";
       break;
     case "income":
       state.selectedMonth = currentMonth;
       state.selectedCategory = "all";
       state.selectedType = "income";
+      state.selectedAccount = "all";
       break;
     case "expenses":
       state.selectedMonth = currentMonth;
       state.selectedCategory = "all";
       state.selectedType = "expense";
+      state.selectedAccount = "all";
       break;
   }
 
@@ -1060,12 +1103,14 @@ export function getPreviousMonth(currentMonth) {
 }
 
 export function getMonthTotals(month) {
-  const filtered = state.transactions.filter((t) => t.date.startsWith(month));
+  const filtered = state.transactions.filter(
+    (t) => t.date && t.date.startsWith(month),
+  );
   const income = filtered
-    .filter((t) => t.type === "income")
+    .filter((t) => t.type === "income" && !t.isAdjustment)
     .reduce((sum, t) => sum + t.amount, 0);
   const expense = filtered
-    .filter((t) => t.type === "expense")
+    .filter((t) => t.type === "expense" && !t.isAdjustment)
     .reduce((sum, t) => sum + t.amount, 0);
 
   return { income, expense, net: income - expense, count: filtered.length };
@@ -1131,7 +1176,11 @@ export function getTopSpendingCategories(month, limit = 5) {
   const targetMonth =
     month === "all" ? new Date().toISOString().slice(0, 7) : month;
   const expenseTxs = state.transactions.filter(
-    (t) => t.type === "expense" && t.date.startsWith(targetMonth),
+    (t) =>
+      t.type === "expense" &&
+      !t.isAdjustment &&
+      t.date &&
+      t.date.startsWith(targetMonth),
   );
   if (expenseTxs.length === 0) return [];
 
@@ -1160,7 +1209,7 @@ export function getTopSpendingCategories(month, limit = 5) {
 export function getAvailableMonths() {
   if (state.transactions.length === 0) return [];
   const months = new Set();
-  state.transactions.forEach((t) => months.add(t.date.slice(0, 7)));
+  state.transactions.forEach((t) => t.date && months.add(t.date.slice(0, 7)));
   return Array.from(months).sort().reverse();
 }
 
@@ -1175,7 +1224,11 @@ export function calculateBudgetHealth(month) {
   const daysRemaining = daysInMonth - currentDay;
 
   const expenseTxs = state.transactions.filter(
-    (t) => t.type === "expense" && t.date.startsWith(month),
+    (t) =>
+      t.type === "expense" &&
+      !t.isAdjustment &&
+      t.date &&
+      t.date.startsWith(month),
   );
 
   if (expenseTxs.length === 0 || currentDay === 0) return null;

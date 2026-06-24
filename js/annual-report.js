@@ -17,7 +17,9 @@ function getYearOptions() {
 }
 
 function getTransactionsForYear(year) {
-  return state.transactions.filter((t) => t.date && t.date.startsWith(year));
+  return state.transactions.filter(
+    (t) => t.date && t.date.startsWith(year) && !t.isAdjustment,
+  );
 }
 
 // ---- Annual Aggregation ----

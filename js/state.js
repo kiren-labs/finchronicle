@@ -3,7 +3,7 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "4.7.0";
+export const APP_VERSION = "4.7.1";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
@@ -55,6 +55,7 @@ export const state = {
   selectedMonth: "all",
   selectedCategory: "all",
   selectedType: "all",
+  selectedAccount: "all",
   insightsMonth: "current",
   editingId: null,
   deleteId: null,
@@ -115,6 +116,7 @@ export const EXPENSE_TYPES = ["personal", "business", "reimbursable"];
 // Existing flat category names are preserved as parents for backwards compatibility.
 export const categories = {
   income: {
+    "Reconciliation Adjustment": [],
     Salary: [],
     Business: ["Consulting", "Sales", "Services"],
     Investment: ["Dividends", "Capital Gains", "Interest"],
@@ -146,6 +148,7 @@ export const categories = {
     "Fees/Docs": [],
     Household: [],
     "Misc/Buffer": [],
+    "Reconciliation Adjustment": [],
     "Other Expense": [],
   },
 };
@@ -234,6 +237,7 @@ export function getDOM() {
       nextBtn: document.getElementById("nextBtn"),
       monthFilters: document.getElementById("monthFilters"),
       categoryFilter: document.getElementById("categoryFilter"),
+      accountFilter: document.getElementById("accountFilter"),
       groupedContent: document.getElementById("groupedContent"),
     };
   }

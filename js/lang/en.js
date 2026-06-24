@@ -589,6 +589,9 @@ export default {
     step_1_label: "Enter your bank statement details",
     step_2_label: "Check off each transaction that appears on your statement",
     check_against: "Check against statement: {account}",
+    create_adjusting_entry: "Create Balance Adjustment",
+    adjustment_created:
+      "Balance adjustment recorded. {count} transaction{plural} reconciled.",
   },
   faq: {
     category_backup: "Data backup & recovery",

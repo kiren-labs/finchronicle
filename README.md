@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-4.7.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.7.1-blue.svg)](CHANGELOG.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -312,17 +312,21 @@ export const categories = {
 
 - ✅ Cash-Flow Forecast — 30/60/90-day account balance projection from recurring templates (v4.1)
 - ✅ Financial Health Alerts — inactivity, bill-due, savings rate trend, monthly pace (v4.1)
+- ✅ Backup & Restore Overhaul — full envelope, merge/replace modes, SHA-256 integrity (v4.2)
+- ✅ App Lock — PIN gate + biometric (WebAuthn), auto-lock timeout (v4.3)
+- ✅ Home tab dashboard + Global Status Strip (v4.5.1)
+- ✅ Financial Health Ratios — emergency fund, debt-to-income, housing cost KPIs (v4.6)
+- ✅ Subscription Tracker — monthly/annual cost summary from recurring templates (v4.7)
+- ✅ Reconciliation Balance Adjustment and Filter by Account in transaction list (v4.7.1)
 
-### Upcoming (v4.2+)
+### Upcoming (v4.8+)
 
-- [ ] **v4.2** — Budget vs Actual Report — consolidated table with variance per category
-- [ ] **v4.3** — Financial Health Ratios — emergency fund, debt-to-income, housing cost KPIs
-- [ ] **v4.4** — Subscription Tracker — monthly/annual cost summary from recurring templates
-- [ ] **v4.5** — Duplicate Transaction Detection — inline warning before save
-- [ ] **v4.6** — Bank Statement CSV Importer — generic column mapper, client-side only
-- [ ] **v4.7** — Local Notifications — bill-due and budget reminders via Service Worker
-- [ ] **v4.8** — Bulk Transaction Operations — recategorize, tag, delete multiple at once
-- [ ] **v4.9** — Category Management — rename, merge, cleanup suggestions
+- [ ] **v4.8** — Duplicate Transaction Detection — inline warning before save
+- [ ] **v4.9** — Bank Statement CSV Importer — generic column mapper, client-side only
+- [ ] **v4.10** — Actionable Spending Insights — heuristic suggestions on every alert
+- [ ] **v4.11** — Budget vs Actual Report — consolidated table with variance per category
+- [ ] **v4.12** — Bulk Transaction Operations — recategorize, tag, delete multiple at once
+- [ ] **v4.13** — Category Management — rename, merge, cleanup suggestions
 
 See [FinChronicleFeatureRoadmap_v2.md](docs/FinChronicleFeatureRoadmap_v2.md) for full details.
 

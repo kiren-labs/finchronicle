@@ -75,6 +75,7 @@ import {
   updateCategoryOptions,
   filterByMonth,
   filterByCategory,
+  filterByAccount,
   nextPage,
   prevPage,
   openFeedbackModal,
@@ -347,6 +348,11 @@ function bindStaticEvents() {
     .getElementById("categoryFilter")
     .addEventListener("change", filterByCategory);
 
+  // ---- Account filter (onchange) ----
+  document
+    .getElementById("accountFilter")
+    .addEventListener("change", filterByAccount);
+
   // ---- Pagination ----
   document.getElementById("prevBtn").addEventListener("click", prevPage);
   document.getElementById("nextBtn").addEventListener("click", nextPage);
@@ -489,6 +495,10 @@ function bindStaticEvents() {
 
   // ---- Reconciliation (v4.0.0) ----
   bindReconciliationEvents();
+  document.addEventListener("reconciliation:finalised", () => {
+    renderAccountManager();
+    renderNetWorthDashboard();
+  });
 
   // ---- Goals (v3.20.0) ----
   bindGoalEvents();
