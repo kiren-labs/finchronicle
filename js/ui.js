@@ -217,7 +217,7 @@ export function updateTransactionsList() {
   let filtered = state.transactions;
 
   if (state.selectedMonth !== "all") {
-    filtered = filtered.filter((t) => t.date.startsWith(state.selectedMonth));
+    filtered = filtered.filter((t) => t.date && t.date.startsWith(state.selectedMonth));
   }
   if (state.selectedCategory !== "all") {
     // If selected value is a parent category, also match its children
@@ -408,7 +408,7 @@ export function updateTransactionsList() {
 
 export function updateMonthFilters() {
   const months = [
-    ...new Set(state.transactions.map((t) => t.date.slice(0, 7))),
+    ...new Set(state.transactions.filter((t) => t.date).map((t) => t.date.slice(0, 7))),
   ];
   months.sort().reverse();
 
@@ -626,6 +626,7 @@ function groupByMonth() {
   const grouped = {};
 
   state.transactions.forEach((t) => {
+    if (!t.date) return;
     const month = t.date.slice(0, 7);
     if (!grouped[month]) {
       grouped[month] = { income: 0, expense: 0, transfer: 0, count: 0 };
@@ -1065,7 +1066,7 @@ export function getPreviousMonth(currentMonth) {
 }
 
 export function getMonthTotals(month) {
-  const filtered = state.transactions.filter((t) => t.date.startsWith(month));
+  const filtered = state.transactions.filter((t) => t.date && t.date.startsWith(month));
   const income = filtered
     .filter((t) => t.type === "income" && !t.isAdjustment)
     .reduce((sum, t) => sum + t.amount, 0);
@@ -1137,7 +1138,7 @@ export function getTopSpendingCategories(month, limit = 5) {
     month === "all" ? new Date().toISOString().slice(0, 7) : month;
   const expenseTxs = state.transactions.filter(
     (t) =>
-      t.type === "expense" && !t.isAdjustment && t.date.startsWith(targetMonth),
+      t.type === "expense" && !t.isAdjustment && t.date && t.date.startsWith(targetMonth),
   );
   if (expenseTxs.length === 0) return [];
 
@@ -1166,7 +1167,7 @@ export function getTopSpendingCategories(month, limit = 5) {
 export function getAvailableMonths() {
   if (state.transactions.length === 0) return [];
   const months = new Set();
-  state.transactions.forEach((t) => months.add(t.date.slice(0, 7)));
+  state.transactions.forEach((t) => t.date && months.add(t.date.slice(0, 7)));
   return Array.from(months).sort().reverse();
 }
 
@@ -1181,7 +1182,7 @@ export function calculateBudgetHealth(month) {
   const daysRemaining = daysInMonth - currentDay;
 
   const expenseTxs = state.transactions.filter(
-    (t) => t.type === "expense" && !t.isAdjustment && t.date.startsWith(month),
+    (t) => t.type === "expense" && !t.isAdjustment && t.date && t.date.startsWith(month),
   );
 
   if (expenseTxs.length === 0 || currentDay === 0) return null;

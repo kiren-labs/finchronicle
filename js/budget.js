@@ -442,7 +442,7 @@ export function getBudgetVsActual() {
   // Sum expenses per category for the selected month
   const actualByCategory = {};
   state.transactions.forEach((t) => {
-    if (t.type !== "expense" || !t.date.startsWith(monthPrefix)) return;
+    if (t.type !== "expense" || !t.date || !t.date.startsWith(monthPrefix)) return;
     actualByCategory[t.category] =
       (actualByCategory[t.category] || 0) + t.amount;
   });

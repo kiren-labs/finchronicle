@@ -175,11 +175,11 @@ export function buildCategoryData(transactions, month, topN = 7) {
     filtered = transactions.filter((t) => t.type === "expense");
   } else if (Array.isArray(month)) {
     filtered = transactions.filter(
-      (t) => t.type === "expense" && month.includes(t.date.slice(0, 7)),
+      (t) => t.type === "expense" && t.date && month.includes(t.date.slice(0, 7)),
     );
   } else {
     filtered = transactions.filter(
-      (t) => t.type === "expense" && t.date.startsWith(month),
+      (t) => t.type === "expense" && t.date && t.date.startsWith(month),
     );
   }
 
@@ -241,6 +241,7 @@ export function buildIncomeExpenseData(transactions, range) {
   const byMonth = {};
   transactions.forEach((t) => {
     if (t.type === "transfer") return; // exclude transfers from income/expense chart
+    if (!t.date) return;
     const m = t.date.slice(0, 7);
     if (!byMonth[m]) byMonth[m] = { income: 0, expense: 0 };
     if (t.type === "income") byMonth[m].income += t.amount;
@@ -454,12 +455,14 @@ export function buildDayHeatmapData(transactions, range) {
   const months = getRangeMonths(range);
   const filtered = transactions.filter((t) => {
     if (t.type !== "expense") return false;
+    if (!t.date) return false;
     return months === null || months.includes(t.date.slice(0, 7));
   });
 
   const byDay = {};
   filtered.forEach((t) => {
-    const day = parseInt(t.date.slice(8, 10), 10);
+    const day = t.date ? parseInt(t.date.slice(8, 10), 10) : null;
+    if (!day) return;
     byDay[day] = (byDay[day] || 0) + t.amount;
   });
 
