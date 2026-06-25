@@ -41,6 +41,7 @@ import {
   getErrorLog,
   clearErrorLog,
   evaluateAmountExpr,
+  formatDate,
 } from "./utils.js";
 import { t } from "./i18n.js";
 import {
@@ -55,8 +56,9 @@ import {
   updateCurrencyDisplay,
   toggleCurrencySelector,
   closeCurrencySelector,
+  formatCurrency,
 } from "./currency.js";
-import { validateTransaction } from "./validation.js";
+import { validateTransaction, detectDuplicate } from "./validation.js";
 import {
   updateUI,
   updateReportsView,
@@ -339,9 +341,11 @@ function bindStaticEvents() {
   });
 
   // ---- Cancel Edit button ----
-  document
-    .getElementById("cancelEditBtn")
-    .addEventListener("click", cancelEdit);
+  document.getElementById("cancelEditBtn").addEventListener("click", () => {
+    cancelEdit();
+    hideDuplicateWarning();
+    allowDuplicateSubmit = false;
+  });
 
   // ---- Category filter (onchange) ----
   document
@@ -517,6 +521,9 @@ function bindStaticEvents() {
 
   // ---- Settlement (v3.26.0) ----
   bindSettlementEvents();
+
+  // ---- Duplicate warning actions (v4.8.0) ----
+  bindDuplicateWarningEvents();
 }
 
 function bindSettingsButtons() {
@@ -885,8 +892,62 @@ function bindTagInputEvents() {
 // ============================================================================
 
 let saveRenderTimeout = null;
+let allowDuplicateSubmit = false;
+let duplicateTxId = null;
+
+function hideDuplicateWarning() {
+  const warning = document.getElementById("duplicateWarning");
+  const message = document.getElementById("duplicateWarningMessage");
+  if (warning) warning.hidden = true;
+  if (message) message.textContent = "";
+  duplicateTxId = null;
+}
+
+function showDuplicateWarning(duplicateTx) {
+  const warning = document.getElementById("duplicateWarning");
+  const message = document.getElementById("duplicateWarningMessage");
+  if (!warning || !message || !duplicateTx) return;
+
+  const descriptor =
+    (duplicateTx.merchant || duplicateTx.notes || duplicateTx.category || "")
+      .toString()
+      .trim() || duplicateTx.category;
+  const preview = `${formatDate(duplicateTx.date)} - ${descriptor} - ${formatCurrency(duplicateTx.homeAmount ?? duplicateTx.amount)}`;
+  message.textContent = t("message.duplicate_warning", { preview });
+  warning.hidden = false;
+  duplicateTxId = duplicateTx.id;
+}
+
+function bindDuplicateWarningEvents() {
+  const addAnywayBtn = document.getElementById("duplicateAddAnywayBtn");
+  const viewExistingBtn = document.getElementById("duplicateViewExistingBtn");
+
+  addAnywayBtn?.addEventListener("click", () => {
+    allowDuplicateSubmit = true;
+    hideDuplicateWarning();
+    document.getElementById("transactionForm")?.requestSubmit();
+  });
+
+  viewExistingBtn?.addEventListener("click", () => {
+    if (!duplicateTxId) return;
+    const id = duplicateTxId;
+    hideDuplicateWarning();
+    editTransaction(id);
+  });
+}
 
 function bindFormSubmit() {
+  const formEl = document.getElementById("transactionForm");
+
+  ["input", "change"].forEach((eventName) => {
+    formEl.addEventListener(eventName, () => {
+      if (!document.getElementById("duplicateWarning")?.hidden) {
+        hideDuplicateWarning();
+      }
+      allowDuplicateSubmit = false;
+    });
+  });
+
   document
     .getElementById("transactionForm")
     .addEventListener("submit", async function (e) {
@@ -964,6 +1025,22 @@ function bindFormSubmit() {
       }
 
       const sanitizedTransaction = validation.sanitized;
+
+      const duplicateMatch = detectDuplicate(
+        sanitizedTransaction,
+        state.transactions,
+      );
+      if (duplicateMatch && !allowDuplicateSubmit) {
+        showDuplicateWarning(duplicateMatch);
+        submitBtn.classList.remove("loading");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+        return;
+      }
+
+      allowDuplicateSubmit = false;
+      hideDuplicateWarning();
+
       // Cache timestamp for fast sorting
       sanitizedTransaction.dateTs = new Date(
         sanitizedTransaction.date,
@@ -1024,6 +1101,7 @@ function bindFormSubmit() {
           clearOptionalFields();
           clearMultiCurrencyFields();
           dismissCategorySuggestion();
+          hideDuplicateWarning();
           selectType("expense");
           document.getElementById("formTitle").textContent = "Add Transaction";
           document.getElementById("cancelEditBtn").style.display = "none";

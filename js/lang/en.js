@@ -206,6 +206,7 @@ export default {
   message: {
     transaction_saved: "Transaction saved.",
     transaction_updated: "Transaction updated.",
+    duplicate_warning: "This looks like a duplicate of {preview}. Add anyway?",
     transaction_deleted: "Transaction deleted.",
     transaction_cloned: "Last transaction cloned. Review and save.",
     marked_settled: "Marked as settled.",

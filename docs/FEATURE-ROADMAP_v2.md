@@ -1,7 +1,7 @@
 # FinChronicle Feature Roadmap
 
 > Last updated: 2026-06-24
-> Current version: v4.7.1
+> Current version: v4.8.0
 
 ---
 
@@ -811,7 +811,7 @@ Last significant data-capture gap. Storage-first constraints apply.
 | v4.6.0  | Financial Health Ratios (emergency fund, debt-to-income, housing cost)     | 12         | HIGH     | ✅ Shipped |
 | v4.7.0  | Subscription Tracker                                                       | 12         | MEDIUM   | ✅ Shipped |
 | v4.7.1  | Reconciliation Balance Adjustment — one-click plug for balance gaps        | 12         | HIGH     | ✅ Shipped |
-| v4.8.0  | Duplicate Transaction Detection                                            | 12         | MEDIUM   | Planned    |
+| v4.8.0  | Duplicate Transaction Detection                                            | 12         | MEDIUM   | ✅ Shipped |
 | v4.9.0  | Bank Statement CSV Importer                                                | 12         | MEDIUM   | Planned    |
 | v4.10.0 | Local Notifications                                                        | 12         | HIGH     | Planned    |
 | v4.11.0 | Bulk Transaction Operations                                                | 12         | MEDIUM   | Planned    |

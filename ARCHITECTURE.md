@@ -1,6 +1,6 @@
 # FinChronicle - Complete Architecture Guide
 
-**Version:** 4.7.1
+**Version:** 4.8.0
 **Last Updated:** 2026-05-13
 **For:** Developers who want to understand or contribute to the codebase
 

@@ -4202,6 +4202,50 @@ button.primary.loading .btn-spinner {
   opacity: 0.7;
 }
 
+.duplicate-warning {
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-bg);
+}
+
+.duplicate-warning-message {
+  margin: 0;
+  color: var(--color-warning-text);
+  font-size: var(--font-sm);
+  line-height: 1.4;
+}
+
+.duplicate-warning-actions {
+  margin-top: var(--space-sm);
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.duplicate-warning-btn {
+  border: 1px solid var(--color-warning-border);
+  background: transparent;
+  color: var(--color-warning-text);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2xs) var(--space-md);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-family-base);
+}
+
+.duplicate-warning-btn-primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.duplicate-warning-btn:hover {
+  opacity: 0.9;
+}
+
 /* Settings: Optional fields toggle list */
 .optional-fields-settings-header {
   display: flex;
