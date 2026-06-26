@@ -226,3 +226,35 @@ export function validateTransaction(transaction) {
     sanitized: transaction,
   };
 }
+
+// Non-blocking duplicate detection (v4.8.0)
+export function detectDuplicate(candidate, existingTransactions = []) {
+  if (!candidate || !Array.isArray(existingTransactions)) return null;
+
+  const candidateAmount = Number(candidate.amount);
+  if (isNaN(candidateAmount) || candidateAmount <= 0) return null;
+
+  const candidateDate = new Date(candidate.date);
+  if (isNaN(candidateDate.getTime())) return null;
+
+  return existingTransactions.find((tx) => {
+    if (!tx || tx.deleted) return false;
+    if (candidate.id && tx.id === candidate.id) return false;
+    if (tx.type !== candidate.type) return false;
+    if (tx.category !== candidate.category) return false;
+
+    const existingAmount = Number(tx.amount);
+    if (isNaN(existingAmount) || existingAmount <= 0) return false;
+
+    const amountDelta = Math.abs(existingAmount - candidateAmount);
+    if (amountDelta / candidateAmount >= 0.05) return false;
+
+    const existingDate = new Date(tx.date);
+    if (isNaN(existingDate.getTime())) return false;
+
+    const dayDiff = Math.abs(
+      Math.floor((existingDate.getTime() - candidateDate.getTime()) / 86400000),
+    );
+    return dayDiff <= 2;
+  });
+}

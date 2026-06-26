@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.8.0] — 2026-06-25
+
+### Added
+
+- **Duplicate Transaction Detection** — non-blocking duplicate warning in the Add Transaction form before save.
+  - Duplicate check runs when type + category match, amount is within 5%, and date is within 2 days.
+  - Existing soft-deleted transactions are ignored.
+  - Warning banner now offers two actions: **Yes, add it** (continue save) or **View existing** (open matched transaction in edit mode).
+  - Duplicate detection excludes the same transaction ID while editing.
+  - Detection is advisory only and does not block save.
+
 ## [4.7.1] — 2026-06-24
 
 ### Added

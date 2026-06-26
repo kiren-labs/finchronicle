@@ -711,6 +711,18 @@
               </button>
             </div>
 
+            <div id="duplicateWarning" class="duplicate-warning" hidden aria-live="polite">
+              <p id="duplicateWarningMessage" class="duplicate-warning-message"></p>
+              <div class="duplicate-warning-actions">
+                <button type="button" id="duplicateAddAnywayBtn" class="duplicate-warning-btn duplicate-warning-btn-primary">
+                  Yes, add it
+                </button>
+                <button type="button" id="duplicateViewExistingBtn" class="duplicate-warning-btn">
+                  View existing
+                </button>
+              </div>
+            </div>
+
             <input type="hidden" id="editId" value="" />
 
             <button type="submit" class="primary" id="submitBtn">
