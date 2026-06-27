@@ -709,4 +709,43 @@ export function bindAutoBackupEvents() {
   document.getElementById("backupOverdueBtn")?.addEventListener("click", () => {
     performJsonBackup(false);
   });
+
+  // Bank Statement Import (v4.9.0)
+  document
+    .getElementById("importBankStatementBtn")
+    ?.addEventListener("click", async () => {
+      document.getElementById("bankImportFile").click();
+    });
+
+  document
+    .getElementById("bankImportFile")
+    ?.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const mod = await import("./import-export.js");
+      mod.handleBankImportFile(file);
+      e.target.value = "";
+    });
+
+  document
+    .getElementById("bankImportCloseBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await import("./import-export.js");
+      mod.closeBankImportModal();
+    });
+
+  document
+    .getElementById("bankImportCancelBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await import("./import-export.js");
+      mod.closeBankImportModal();
+    });
+
+  document
+    .getElementById("bankImportConfirmBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await import("./import-export.js");
+      await mod.confirmBankImport();
+    });
+
 }

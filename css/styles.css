@@ -2767,7 +2767,7 @@ button.primary.loading .btn-spinner {
 
 /* Add nav button — same style as other nav items, primary color accent */
 .nav-item-add {
-  color: var(--color-primary);
+  color: var(--gradient-install);
 }
 
 /* 5-item nav: tighten icon + label on mobile */
@@ -6011,6 +6011,164 @@ button.primary.loading .btn-spinner {
 
 .data-backup-hint:last-child {
   margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Bank Statement Importer (v4.9.0)
+   ========================================================================== */
+
+.bank-import-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.bank-import-filename-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.bank-import-filename {
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  word-break: break-all;
+}
+
+.bank-import-preset-badge {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.bank-import-section-label {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.bank-import-saved-mappings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.bank-mapping-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.bank-mapping-pill:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg);
+}
+
+.bank-import-mapper-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.bank-map-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.bank-map-label {
+  flex: 0 0 180px;
+  font-size: var(--font-sm);
+  color: var(--color-text);
+}
+
+.bank-map-select,
+.bank-map-input {
+  flex: 1;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-sm);
+  font-family: inherit;
+}
+
+.bank-map-input {
+  max-width: 80px;
+}
+
+.bank-map-name-input {
+  max-width: 200px;
+}
+
+.bank-import-preview {
+  overflow-x: auto;
+}
+
+.bank-import-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-xs);
+}
+
+.bank-import-preview-table th {
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+  border-bottom: 2px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bank-import-preview-table td {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.bank-preview-type-income {
+  color: var(--color-income);
+  font-weight: 600;
+}
+
+.bank-preview-type-expense {
+  color: var(--color-expense);
+  font-weight: 600;
+}
+
+.bank-import-empty {
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.bank-import-save-mapping-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-sm);
+  color: var(--color-text);
+  flex-wrap: wrap;
 }
 
 .auto-backup-row.disabled {
