@@ -125,6 +125,49 @@
     </div>
   </div>
 
+  <!-- Bank Import Modal (v4.9.0) -->
+  <div class="modal" id="bankImportModal" role="dialog" aria-modal="true" aria-labelledby="bankImportModalTitle">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3 id="bankImportModalTitle"><i class="ri-bank-line" aria-hidden="true"></i> Import Bank Statement</h3>
+        <button class="close-btn" id="bankImportCloseBtn" aria-label="Close">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <div class="modal-body bank-import-body">
+        <div class="bank-import-filename-row">
+          <span class="bank-import-filename" id="bankImportName"></span>
+          <span class="bank-import-preset-badge hidden" id="bankImportPresetBadge"></span>
+        </div>
+
+        <div id="bankImportSavedMappings" class="bank-import-saved-mappings"></div>
+
+        <p class="bank-import-section-label">Column mapping</p>
+        <div id="bankImportMapperForm" class="bank-import-mapper-form"></div>
+
+        <div class="bank-map-row">
+          <label for="bankImportAccount" class="bank-map-label">Link to account</label>
+          <select id="bankImportAccount" class="bank-map-select"></select>
+        </div>
+
+        <p class="bank-import-section-label">Preview (first 10 rows)</p>
+        <div id="bankImportPreview" class="bank-import-preview"></div>
+
+        <div class="bank-import-save-mapping-row">
+          <input type="checkbox" id="bankImportSaveMapping" />
+          <label for="bankImportSaveMapping">Save this mapping as</label>
+          <input type="text" id="bankImportMappingName" class="bank-map-input bank-map-name-input" placeholder="e.g. KBank Salary" maxlength="40" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" id="bankImportCancelBtn" type="button">Cancel</button>
+        <button class="modal-btn modal-btn-primary" id="bankImportConfirmBtn" type="button">
+          <i class="ri-import-line" aria-hidden="true"></i> Import
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Restore Report Modal -->
   <div class="modal" id="restoreReportModal">
     <div class="modal-content">
@@ -1270,6 +1313,13 @@
               <p class="data-backup-hint">
                 CSV import — adds transactions only
               </p>
+              <button class="data-backup-btn" id="importBankStatementBtn" type="button">
+                <i class="ri-bank-line" aria-hidden="true"></i>
+                <span>Import Bank Statement</span>
+              </button>
+              <p class="data-backup-hint">
+                Map your bank's CSV columns and import directly. KBank auto-detected.
+              </p>
             </div>
           </div>
 
@@ -1301,6 +1351,7 @@
         <!-- Hidden file inputs -->
         <input type="file" id="spreadsheetImportFile" accept=".csv,text/csv" hidden aria-hidden="true" />
         <input type="file" id="dataRestoreFile" accept=".json,.enc,.csv" hidden aria-hidden="true" />
+        <input type="file" id="bankImportFile" accept=".csv,text/csv" hidden aria-hidden="true" />
 
         <!-- Backup Status Card (v3.9.0) -->
         <div id="backupStatusContainer"></div>

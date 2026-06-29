@@ -812,7 +812,7 @@ Last significant data-capture gap. Storage-first constraints apply.
 | v4.7.0  | Subscription Tracker                                                       | 12         | MEDIUM   | ✅ Shipped |
 | v4.7.1  | Reconciliation Balance Adjustment — one-click plug for balance gaps        | 12         | HIGH     | ✅ Shipped |
 | v4.8.0  | Duplicate Transaction Detection                                            | 12         | MEDIUM   | ✅ Shipped |
-| v4.9.0  | Bank Statement CSV Importer                                                | 12         | MEDIUM   | Planned    |
+| v4.9.0  | Bank Statement CSV Importer                                                | 12         | MEDIUM   | ✅ Shipped |
 | v4.10.0 | Local Notifications                                                        | 12         | HIGH     | Planned    |
 | v4.11.0 | Bulk Transaction Operations                                                | 12         | MEDIUM   | Planned    |
 | v4.12.0 | Category Management (rename, merge, cleanup)                               | 12         | MEDIUM   | Planned    |

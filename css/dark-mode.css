@@ -980,3 +980,21 @@ body.dark-mode .bva-set-budget-btn:hover {
 body.dark-mode .nav-item-add {
   color: var(--color-primary-strong);
 }
+
+/* Bank Statement Importer (v4.9.0) */
+body.dark-mode .bank-map-select,
+body.dark-mode .bank-map-input {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+body.dark-mode .bank-mapping-pill {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+body.dark-mode .bank-import-preview-table th,
+body.dark-mode .bank-import-preview-table td {
+  border-color: var(--color-border);
+}

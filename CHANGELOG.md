@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.9.0] — 2026-06-26
+
+### Added
+
+- **Bank Statement CSV Importer** — import any bank's CSV export directly into FinChronicle via a column-mapper UI.
+  - Upload any bank CSV from Settings → Restore → Import Bank Statement.
+  - Column mapper lets you assign Date, Description, Debit, and Credit columns, plus how many header rows to skip.
+  - **KBank auto-detection** — KBank CSV files (Be1st card format) are detected automatically and columns are pre-mapped; no manual selection required.
+  - 10-row live preview table updates as you adjust column assignments, showing resolved dates, amounts, and income/expense type.
+  - **Saved mappings** — check "Save this mapping" after a successful import to reuse column config next time (up to 5 saved mappings, oldest auto-evicted).
+  - **Account linking** — select an account from your account list to tag all imported transactions with `fromAccount` (expenses) or `toAccount` (income).
+  - All imported transactions start with `status: "pending"` and blank category — use the reconciliation workflow to review and categorize.
+  - Full duplicate detection using the v4.8.0 engine — rows matching an existing transaction by date + amount are skipped automatically.
+  - Runs entirely client-side; file never leaves the device.
+  - Import summary toast: "Imported N transactions. N skipped."
+
 ## [4.8.0] — 2026-06-25
 
 ### Added

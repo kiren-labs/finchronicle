@@ -3,7 +3,7 @@
 // ============================================================================
 
 // App Version
-export const APP_VERSION = "4.8.0";
+export const APP_VERSION = "4.9.0";
 export const VERSION_KEY = "app_version";
 
 // IndexedDB Configuration
@@ -63,6 +63,7 @@ export const state = {
   updateAvailable: false,
   lastBackupTimestamp: null,
   pendingRestoreData: null,
+  pendingBankImport: null,
   currentPage: 1,
   recurringTemplates: [],
   reportRange: "6m",

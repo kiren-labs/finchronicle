@@ -42,6 +42,7 @@ export default {
     export_spreadsheet: "Export to spreadsheet",
     restore_backup: "Restore from backup",
     import_spreadsheet: "Import spreadsheet",
+    import_bank_statement: "Import Bank Statement",
     check_updates: "Check for updates",
     change_currency: "Change currency",
     toggle_dark: "Toggle dark mode",
