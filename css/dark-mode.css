@@ -998,3 +998,18 @@ body.dark-mode .bank-import-preview-table th,
 body.dark-mode .bank-import-preview-table td {
   border-color: var(--color-border);
 }
+
+/* Notifications (v4.10.0) */
+body.dark-mode .notif-quiet-select {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+body.dark-mode .notif-perm-granted {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+body.dark-mode .notif-perm-denied {
+  background: #450a0a;
+  color: #fca5a5;
+}

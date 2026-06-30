@@ -179,6 +179,11 @@ import {
 import { initGoals, renderGoalsDashboard, bindGoalEvents } from "./goals.js";
 import { bindReconciliationEvents } from "./reconciliation.js";
 import { initAppLock, lock, renderLockSettings } from "./app-lock.js";
+import {
+  renderNotificationSettings,
+  bindNotificationEvents,
+  runNotificationChecks,
+} from "./notifications.js";
 
 // ============================================================================
 // Lazy-loading for optional features (FAQ, Import/Export)
@@ -524,6 +529,9 @@ function bindStaticEvents() {
 
   // ---- Duplicate warning actions (v4.8.0) ----
   bindDuplicateWarningEvents();
+
+  // ---- Notifications (v4.10.0) ----
+  bindNotificationEvents();
 }
 
 function bindSettingsButtons() {
@@ -1110,6 +1118,7 @@ function bindFormSubmit() {
           renderQuickBar();
           renderAccountManager();
           renderAlertBanners(runAlertChecks(sanitizedTransaction));
+          runNotificationChecks();
           renderAnnualReport();
           renderForecast();
           renderSettlementDashboard();
@@ -1357,6 +1366,10 @@ async function init() {
     // App Lock (v4.3.0) — render settings panel, then gate if enabled
     await renderLockSettings();
     await initAppLock();
+
+    // Notifications (v4.10.0)
+    renderNotificationSettings();
+    runNotificationChecks();
 
     // Service Worker (non-blocking)
     registerServiceWorker();
