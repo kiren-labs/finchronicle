@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.10.0] — 2026-06-30
+
+### Added
+
+- **Local Notifications** — on-device alerts with no server involved.
+  - Four notification types: **Recurring due** (today/tomorrow), **Budget warning** (≥80% used), **Inactivity nudge** (3+ days without a transaction), **Backup reminder** (14+ days without a backup).
+  - Master enable toggle with OS permission request flow.
+  - Per-type toggles to enable/disable individual notification categories.
+  - **Quiet hours** — configurable start/end hour; no alerts fired during that window.
+  - **Dedup guard** — same notification tag is suppressed if already sent today, preventing accumulation on repeated page loads.
+  - **Recent notifications log** — last 10 sent notifications shown in Settings with timestamp.
+  - Fully offline; uses Web Notification API + Service Worker `showNotification()` with `new Notification()` fallback.
+  - Android PWA and iOS 16.4+ installed PWA supported.
+
 ## [4.9.0] — 2026-06-26
 
 ### Added
