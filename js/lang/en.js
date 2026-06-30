@@ -560,11 +560,14 @@ export default {
     recurring_due_today: "{name} is due today",
     recurring_due_tomorrow: "{name} is due tomorrow",
     budget_warning: "{category} budget {pct}% used",
-    budget_warning_body: "{category} budget is {pct}% used with {days} days left.",
+    budget_warning_body:
+      "{category} budget is {pct}% used with {days} days left.",
     inactivity_title: "Haven't logged anything recently",
-    inactivity_body: "You haven't logged a transaction in {days} days. Tap to add one.",
+    inactivity_body:
+      "You haven't logged a transaction in {days} days. Tap to add one.",
     backup_reminder_title: "Backup overdue",
-    backup_reminder_body: "No backup in {days} days. Open FinChronicle to download one.",
+    backup_reminder_body:
+      "No backup in {days} days. Open FinChronicle to download one.",
   },
   alert: {
     spike: "Spike",

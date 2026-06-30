@@ -791,7 +791,7 @@ function isBankDuplicate(newTxn, existingTransactions) {
       e.date === newTxn.date &&
       e.type === newTxn.type &&
       e.amount === newTxn.amount &&
-      (e.notes || "") === (newTxn.notes || "")
+      (e.notes || "") === (newTxn.notes || ""),
   );
 }
 
@@ -1102,7 +1102,11 @@ function detectBankPreset(rows) {
     const row = rows[i];
     if (!row) continue;
     const joined = row.join(" ").toLowerCase();
-    if (joined.includes("kbank") || joined.includes("be1st card") || joined.includes("048-")) {
+    if (
+      joined.includes("kbank") ||
+      joined.includes("be1st card") ||
+      joined.includes("048-")
+    ) {
       return "kbank";
     }
   }
@@ -1125,8 +1129,18 @@ function parseBankDate(raw) {
 
 function monthAbbrevToNum(abbrev) {
   const map = {
-    jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
-    jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12",
+    jan: "01",
+    feb: "02",
+    mar: "03",
+    apr: "04",
+    may: "05",
+    jun: "06",
+    jul: "07",
+    aug: "08",
+    sep: "09",
+    oct: "10",
+    nov: "11",
+    dec: "12",
   };
   return map[abbrev.toLowerCase()] || "";
 }
@@ -1134,7 +1148,7 @@ function monthAbbrevToNum(abbrev) {
 async function loadBankMappings() {
   const { loadAppSettings } = await import("./db.js");
   const settings = await loadAppSettings();
-  return (settings && settings.bankMappings) ? settings.bankMappings : [];
+  return settings && settings.bankMappings ? settings.bankMappings : [];
 }
 
 async function saveBankMapping(mapping) {
@@ -1182,7 +1196,9 @@ async function openBankImportMapper(text, filename) {
 
   const presetKey = detectBankPreset(rows);
   const savedMappings = await loadBankMappings();
-  const savedMapping = savedMappings.find((m) => m.filename === filename || (presetKey && m.presetKey === presetKey));
+  const savedMapping = savedMappings.find(
+    (m) => m.filename === filename || (presetKey && m.presetKey === presetKey),
+  );
 
   const config = savedMapping || (presetKey ? BANK_PRESETS[presetKey] : null);
 
@@ -1190,7 +1206,13 @@ async function openBankImportMapper(text, filename) {
   renderBankImportMapper(rows, filename, presetKey, config, savedMappings);
 }
 
-function renderBankImportMapper(rows, filename, presetKey, config, savedMappings) {
+function renderBankImportMapper(
+  rows,
+  filename,
+  presetKey,
+  config,
+  savedMappings,
+) {
   const modal = document.getElementById("bankImportModal");
   if (!modal) return;
 
@@ -1226,35 +1248,62 @@ function renderBankImportMapper(rows, filename, presetKey, config, savedMappings
   }
 
   // Populate column index selectors from first data row headers
-  const skipRows = (config && config.skipRows) ? config.skipRows : 0;
+  const skipRows = config && config.skipRows ? config.skipRows : 0;
   const dataStartRow = rows[skipRows] || rows[0];
-  const colOptions = dataStartRow.map((cell, i) => {
-    const label = cell.trim() || `Col ${i + 1}`;
-    return `<option value="${i}">${label} (col ${i + 1})</option>`;
-  }).join("");
+  const colOptions = dataStartRow
+    .map((cell, i) => {
+      const label = cell.trim() || `Col ${i + 1}`;
+      return `<option value="${i}">${label} (col ${i + 1})</option>`;
+    })
+    .join("");
 
   const addBlank = `<option value="">— skip —</option>`;
 
   const fields = [
     { id: "bankMapDate", label: "Date column", key: "dateCol", required: true },
-    { id: "bankMapDesc", label: "Description column", key: "descriptionCol", required: false },
-    { id: "bankMapDebit", label: "Debit column", key: "debitCol", required: true },
-    { id: "bankMapCredit", label: "Credit column", key: "creditCol", required: false },
+    {
+      id: "bankMapDesc",
+      label: "Description column",
+      key: "descriptionCol",
+      required: false,
+    },
+    {
+      id: "bankMapDebit",
+      label: "Debit column",
+      key: "debitCol",
+      required: true,
+    },
+    {
+      id: "bankMapCredit",
+      label: "Credit column",
+      key: "creditCol",
+      required: false,
+    },
   ];
 
   if (mapperForm) {
-    mapperForm.innerHTML = fields.map((f) => {
-      const selected = (config && config[f.key] !== undefined) ? config[f.key] : "";
-      const opts = (f.required ? "" : addBlank) + colOptions.split("</option>").map((o, i) => {
-        if (o.includes(`value="${selected}"`)) return o.replace(">", " selected>") + "</option>";
-        return o + (o ? "</option>" : "");
-      }).join("");
-      return `<div class="bank-map-row">
+    mapperForm.innerHTML =
+      fields
+        .map((f) => {
+          const selected =
+            config && config[f.key] !== undefined ? config[f.key] : "";
+          const opts =
+            (f.required ? "" : addBlank) +
+            colOptions
+              .split("</option>")
+              .map((o, i) => {
+                if (o.includes(`value="${selected}"`))
+                  return o.replace(">", " selected>") + "</option>";
+                return o + (o ? "</option>" : "");
+              })
+              .join("");
+          return `<div class="bank-map-row">
         <label for="${f.id}" class="bank-map-label">${f.label}${f.required ? " *" : ""}</label>
         <select id="${f.id}" class="bank-map-select">${addBlank}${colOptions}</select>
       </div>`;
-    }).join("") +
-    `<div class="bank-map-row">
+        })
+        .join("") +
+      `<div class="bank-map-row">
       <label for="bankMapSkipRows" class="bank-map-label">Header rows to skip</label>
       <input id="bankMapSkipRows" class="bank-map-input" type="number" min="0" max="20" value="${skipRows}" />
     </div>`;
@@ -1273,11 +1322,16 @@ function renderBankImportMapper(rows, filename, presetKey, config, savedMappings
     if (savedMappings.length === 0) {
       savedMappingsEl.innerHTML = "";
     } else {
-      savedMappingsEl.innerHTML = `<p class="bank-import-section-label">Saved mappings</p>` +
-        savedMappings.map((m) => `
+      savedMappingsEl.innerHTML =
+        `<p class="bank-import-section-label">Saved mappings</p>` +
+        savedMappings
+          .map(
+            (m) => `
           <button class="bank-mapping-pill" data-mapping-name="${sanitizeHTML(m.name)}" type="button">
             <i class="ri-bank-line" aria-hidden="true"></i> ${sanitizeHTML(m.name)}
-          </button>`).join("");
+          </button>`,
+          )
+          .join("");
     }
   }
 
@@ -1285,7 +1339,13 @@ function renderBankImportMapper(rows, filename, presetKey, config, savedMappings
   refreshBankImportPreview(rows, config);
 
   // Bind live preview refresh — re-bind every render (fresh DOM nodes)
-  ["bankMapDate", "bankMapDesc", "bankMapDebit", "bankMapCredit", "bankMapSkipRows"].forEach((id) => {
+  [
+    "bankMapDate",
+    "bankMapDesc",
+    "bankMapDebit",
+    "bankMapCredit",
+    "bankMapSkipRows",
+  ].forEach((id) => {
     document.getElementById(id)?.addEventListener("change", () => {
       const pending = state.pendingBankImport;
       if (pending) refreshBankImportPreview(pending.rows, pending.config);
@@ -1314,21 +1374,44 @@ function refreshBankImportPreview(rows, config) {
   const previewEl = document.getElementById("bankImportPreview");
   if (!previewEl) return;
 
-  const skipRows = parseInt(document.getElementById("bankMapSkipRows")?.value || "0", 10) || 0;
+  const skipRows =
+    parseInt(document.getElementById("bankMapSkipRows")?.value || "0", 10) || 0;
   const dateColEl = document.getElementById("bankMapDate");
   const descColEl = document.getElementById("bankMapDesc");
   const debitColEl = document.getElementById("bankMapDebit");
   const creditColEl = document.getElementById("bankMapCredit");
 
-  const dateCol = dateColEl ? parseInt(dateColEl.value, 10) : (config ? config.dateCol : 0);
-  const descCol = descColEl && descColEl.value !== "" ? parseInt(descColEl.value, 10) : (config ? config.descriptionCol : -1);
-  const debitCol = debitColEl ? parseInt(debitColEl.value, 10) : (config ? config.debitCol : 2);
-  const creditCol = creditColEl && creditColEl.value !== "" ? parseInt(creditColEl.value, 10) : (config ? config.creditCol : -1);
+  const dateCol = dateColEl
+    ? parseInt(dateColEl.value, 10)
+    : config
+      ? config.dateCol
+      : 0;
+  const descCol =
+    descColEl && descColEl.value !== ""
+      ? parseInt(descColEl.value, 10)
+      : config
+        ? config.descriptionCol
+        : -1;
+  const debitCol = debitColEl
+    ? parseInt(debitColEl.value, 10)
+    : config
+      ? config.debitCol
+      : 2;
+  const creditCol =
+    creditColEl && creditColEl.value !== ""
+      ? parseInt(creditColEl.value, 10)
+      : config
+        ? config.creditCol
+        : -1;
 
-  const dataRows = rows.slice(skipRows + 1).filter((r) => r.some((c) => c.trim() !== "")).slice(0, 10);
+  const dataRows = rows
+    .slice(skipRows + 1)
+    .filter((r) => r.some((c) => c.trim() !== ""))
+    .slice(0, 10);
 
   if (dataRows.length === 0) {
-    previewEl.innerHTML = "<p class='bank-import-empty'>No data rows found with current settings.</p>";
+    previewEl.innerHTML =
+      "<p class='bank-import-empty'>No data rows found with current settings.</p>";
     return;
   }
 
@@ -1339,26 +1422,37 @@ function refreshBankImportPreview(rows, config) {
     <th>Type</th>
   </tr>`;
 
-  const tbody = dataRows.map((row) => {
-    const rawDate = (row[dateCol] || "").trim();
-    const date = parseBankDate(rawDate) || rawDate;
-    const desc = descCol >= 0 ? (row[descCol] || "").trim() : "";
-    const rawDebit = (row[debitCol] || "").replace(/,/g, "");
-    const rawCredit = creditCol >= 0 ? (row[creditCol] || "").replace(/,/g, "") : "";
-    const debitAmt = parseFloat(rawDebit);
-    const creditAmt = parseFloat(rawCredit);
-    const isIncome = !isNaN(creditAmt) && creditAmt > 0 && (isNaN(debitAmt) || debitAmt <= 0);
-    const amount = isIncome ? creditAmt : (!isNaN(debitAmt) && debitAmt > 0 ? debitAmt : null);
-    const type = isIncome ? "income" : "expense";
+  const tbody = dataRows
+    .map((row) => {
+      const rawDate = (row[dateCol] || "").trim();
+      const date = parseBankDate(rawDate) || rawDate;
+      const desc = descCol >= 0 ? (row[descCol] || "").trim() : "";
+      const rawDebit = (row[debitCol] || "").replace(/,/g, "");
+      const rawCredit =
+        creditCol >= 0 ? (row[creditCol] || "").replace(/,/g, "") : "";
+      const debitAmt = parseFloat(rawDebit);
+      const creditAmt = parseFloat(rawCredit);
+      const isIncome =
+        !isNaN(creditAmt) &&
+        creditAmt > 0 &&
+        (isNaN(debitAmt) || debitAmt <= 0);
+      const amount = isIncome
+        ? creditAmt
+        : !isNaN(debitAmt) && debitAmt > 0
+          ? debitAmt
+          : null;
+      const type = isIncome ? "income" : "expense";
 
-    if (!amount) return "";
-    return `<tr>
+      if (!amount) return "";
+      return `<tr>
       <td>${sanitizeHTML(date)}</td>
       ${descCol >= 0 ? `<td>${sanitizeHTML(desc.slice(0, 40))}</td>` : ""}
       <td>${amount.toFixed(2)}</td>
       <td class="bank-preview-type-${type}">${type}</td>
     </tr>`;
-  }).filter(Boolean).join("");
+    })
+    .filter(Boolean)
+    .join("");
 
   previewEl.innerHTML = `<table class="bank-import-preview-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table>`;
 }
@@ -1375,17 +1469,30 @@ export async function confirmBankImport() {
 
   const { rows, filename, presetKey } = pending;
 
-  const skipRows = parseInt(document.getElementById("bankMapSkipRows")?.value || "0", 10) || 0;
-  const dateCol = parseInt(document.getElementById("bankMapDate")?.value || "0", 10);
+  const skipRows =
+    parseInt(document.getElementById("bankMapSkipRows")?.value || "0", 10) || 0;
+  const dateCol = parseInt(
+    document.getElementById("bankMapDate")?.value || "0",
+    10,
+  );
   const descColEl = document.getElementById("bankMapDesc");
-  const descCol = descColEl && descColEl.value !== "" ? parseInt(descColEl.value, 10) : -1;
-  const debitCol = parseInt(document.getElementById("bankMapDebit")?.value || "2", 10);
+  const descCol =
+    descColEl && descColEl.value !== "" ? parseInt(descColEl.value, 10) : -1;
+  const debitCol = parseInt(
+    document.getElementById("bankMapDebit")?.value || "2",
+    10,
+  );
   const creditColEl = document.getElementById("bankMapCredit");
-  const creditCol = creditColEl && creditColEl.value !== "" ? parseInt(creditColEl.value, 10) : -1;
+  const creditCol =
+    creditColEl && creditColEl.value !== ""
+      ? parseInt(creditColEl.value, 10)
+      : -1;
   const fromAccount = document.getElementById("bankImportAccount")?.value || "";
   const saveMapping = document.getElementById("bankImportSaveMapping")?.checked;
 
-  const dataRows = rows.slice(skipRows + 1).filter((r) => r.some((c) => c.trim() !== ""));
+  const dataRows = rows
+    .slice(skipRows + 1)
+    .filter((r) => r.some((c) => c.trim() !== ""));
   const nowIso = new Date().toISOString();
   const newTransactions = [];
   let skipped = 0;
@@ -1393,17 +1500,29 @@ export async function confirmBankImport() {
   dataRows.forEach((row) => {
     const rawDate = (row[dateCol] || "").trim();
     const date = parseBankDate(rawDate);
-    if (!date) { skipped++; return; }
+    if (!date) {
+      skipped++;
+      return;
+    }
 
     const rawDebit = (row[debitCol] || "").replace(/,/g, "");
     const debitAmt = parseFloat(rawDebit);
-    const rawCredit = creditCol >= 0 ? (row[creditCol] || "").replace(/,/g, "") : "";
+    const rawCredit =
+      creditCol >= 0 ? (row[creditCol] || "").replace(/,/g, "") : "";
     const creditAmt = parseFloat(rawCredit);
 
-    const isIncome = !isNaN(creditAmt) && creditAmt > 0 && (isNaN(debitAmt) || debitAmt <= 0);
-    const amount = isIncome ? creditAmt : (!isNaN(debitAmt) && debitAmt > 0 ? debitAmt : NaN);
+    const isIncome =
+      !isNaN(creditAmt) && creditAmt > 0 && (isNaN(debitAmt) || debitAmt <= 0);
+    const amount = isIncome
+      ? creditAmt
+      : !isNaN(debitAmt) && debitAmt > 0
+        ? debitAmt
+        : NaN;
 
-    if (isNaN(amount) || amount <= 0) { skipped++; return; }
+    if (isNaN(amount) || amount <= 0) {
+      skipped++;
+      return;
+    }
 
     const desc = descCol >= 0 ? sanitizeHTML((row[descCol] || "").trim()) : "";
     const type = isIncome ? "income" : "expense";
@@ -1427,13 +1546,19 @@ export async function confirmBankImport() {
       else txn.toAccount = fromAccount;
     }
 
-    if (isBankDuplicate(txn, state.transactions)) { skipped++; return; }
+    if (isBankDuplicate(txn, state.transactions)) {
+      skipped++;
+      return;
+    }
 
     newTransactions.push(txn);
   });
 
   if (newTransactions.length === 0) {
-    showMessage(`Nothing imported. ${skipped} rows skipped (duplicates or invalid).`, "warning");
+    showMessage(
+      `Nothing imported. ${skipped} rows skipped (duplicates or invalid).`,
+      "warning",
+    );
     closeBankImportModal();
     return;
   }
@@ -1444,7 +1569,9 @@ export async function confirmBankImport() {
   updateUI();
 
   if (saveMapping) {
-    const mappingName = document.getElementById("bankImportMappingName")?.value.trim() || filename;
+    const mappingName =
+      document.getElementById("bankImportMappingName")?.value.trim() ||
+      filename;
     await saveBankMapping({
       name: mappingName,
       filename,
@@ -1459,6 +1586,7 @@ export async function confirmBankImport() {
   }
 
   closeBankImportModal();
-  showMessage(`Imported ${newTransactions.length} transactions. ${skipped} skipped.`);
+  showMessage(
+    `Imported ${newTransactions.length} transactions. ${skipped} skipped.`,
+  );
 }
-

@@ -137,7 +137,11 @@ function checkRecurringDue(prefs) {
       const when = tmpl.nextDueDate === todayStr ? "today" : "tomorrow";
       const name = tmpl.notes || tmpl.category || "Recurring transaction";
       const amtStr = tmpl.amount ? ` (${formatCurrency(tmpl.amount)})` : "";
-      send(`${name} is due ${when}`, `${name}${amtStr} is due ${when}.`, `recurring_${tmpl.id}`);
+      send(
+        `${name} is due ${when}`,
+        `${name}${amtStr} is due ${when}.`,
+        `recurring_${tmpl.id}`,
+      );
     }
   }
 }
@@ -146,7 +150,11 @@ function checkBudgetWarning(prefs) {
   if (!prefs.budgetWarning) return;
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysInMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+  ).getDate();
   const daysPassed = now.getDate();
   const daysLeft = daysInMonth - daysPassed;
 
@@ -294,7 +302,14 @@ export function renderNotificationSettings() {
     .join("");
 
   const quietHoursOptions = Array.from({ length: 24 }, (_, h) => {
-    const label = h === 0 ? "12 AM" : h < 12 ? `${h} AM` : h === 12 ? "12 PM" : `${h - 12} PM`;
+    const label =
+      h === 0
+        ? "12 AM"
+        : h < 12
+          ? `${h} AM`
+          : h === 12
+            ? "12 PM"
+            : `${h - 12} PM`;
     return `<option value="${h}">${label}</option>`;
   }).join("");
 
