@@ -1,8 +1,8 @@
 // Service Worker for FinChronicle - Offline-first PWA
-// Version: 4.9.0
+// Version: 4.10.0
 
-const CACHE_NAME = "finchronicle-v4.9.0";
-const CACHE_VERSION = "4.9.0";
+const CACHE_NAME = "finchronicle-v4.10.0";
+const CACHE_VERSION = "4.10.0";
 
 // Critical files for offline functionality
 const CACHE_URLS = [
@@ -38,6 +38,7 @@ const CACHE_URLS = [
   "./js/settlement.js",
   "./js/reconciliation.js",
   "./js/app-lock.js",
+  "./js/notifications.js",
   "./manifest.json",
   "./css/tokens.css",
   "./css/styles.css",
@@ -60,6 +61,21 @@ self.addEventListener("message", (event) => {
     console.log("Service Worker: Received SKIP_WAITING message");
     self.skipWaiting();
   }
+});
+
+// Notification click — focus existing window or open a new one
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if ("focus" in client) return client.focus();
+        }
+        if (clients.openWindow) return clients.openWindow("./");
+      }),
+  );
 });
 
 // Install event - cache files

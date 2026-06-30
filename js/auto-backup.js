@@ -747,5 +747,4 @@ export function bindAutoBackupEvents() {
       const mod = await import("./import-export.js");
       await mod.confirmBankImport();
     });
-
 }

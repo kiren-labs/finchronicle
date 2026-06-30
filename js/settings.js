@@ -8,6 +8,10 @@ import { renderFAQ } from "./faq.js";
 import { renderRecurringSection } from "./recurring.js";
 import { renderBudgetList } from "./budget.js";
 import { getAllTags, getTagColor } from "./search.js";
+import {
+  renderNotificationSettings,
+  bindNotificationEvents,
+} from "./notifications.js";
 
 // ---- Dark Mode ----
 
@@ -295,6 +299,8 @@ export function updateSettingsContent() {
   renderBudgetList();
   renderTagManagement();
   renderErrorLogSection();
+  renderNotificationSettings();
+  bindNotificationEvents();
 
   if (backupContainer) {
     backupContainer.innerHTML = renderBackupStatus();
