@@ -682,13 +682,14 @@ function saveJournalEntry(entry) {
 - **Realistic MVP: 5-8 weeks**
 
 **Scope Creep in Plan:**
-| Feature | Business Case | Implementation Plan | Recommendation |
-|---------|---------------|---------------------|----------------|
-| Trial Balance | ✅ Mentioned | ✅ Full UI | MVP: Just verify, no UI |
-| Balance Sheet | ✅ Mentioned | ✅ Full report | MVP: Skip, add v4.1 |
-| Chart of Accounts Management | ❌ Out of scope | ✅ Full Phase 6 | v4.2+ |
-| Reconciliation UI | ❌ Out of scope | ✅ Phase 5 | v4.2+ |
-| Net Worth Chart | ❌ Not mentioned | ✅ Phase 5 | v4.1+ |
+
+| Feature                      | Business Case    | Implementation Plan | Recommendation          |
+| ---------------------------- | ---------------- | ------------------- | ----------------------- |
+| Trial Balance                | ✅ Mentioned     | ✅ Full UI          | MVP: Just verify, no UI |
+| Balance Sheet                | ✅ Mentioned     | ✅ Full report      | MVP: Skip, add v4.1     |
+| Chart of Accounts Management | ❌ Out of scope  | ✅ Full Phase 6     | v4.2+                   |
+| Reconciliation UI            | ❌ Out of scope  | ✅ Phase 5          | v4.2+                   |
+| Net Worth Chart              | ❌ Not mentioned | ✅ Phase 5          | v4.1+                   |
 
 **Recommended MVP (4-6 weeks):**
 
