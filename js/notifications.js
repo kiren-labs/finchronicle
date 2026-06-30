@@ -100,6 +100,12 @@ async function send(title, body, tag) {
   const prefs = loadNotifPrefs();
   if (!prefs.enabled || isQuietHours(prefs)) return;
 
+  // Dedup: skip if same tag already sent today
+  const today = new Date().toISOString().slice(0, 10);
+  const history = loadHistory();
+  if (history.some((h) => h.tag === tag && h.sentAt.slice(0, 10) === today))
+    return;
+
   addToHistory({ title, body, tag });
 
   const reg =
@@ -107,15 +113,20 @@ async function send(title, body, tag) {
       ? await navigator.serviceWorker.getRegistration().catch(() => null)
       : null;
 
-  if (reg) {
-    reg.showNotification(title, {
-      body,
-      tag,
-      icon: "./icons/icon-192.png",
-      badge: "./icons/icon-192.png",
-    });
+  const opts = {
+    body,
+    tag,
+    icon: "./icons/icon-192.png",
+    badge: "./icons/icon-192.png",
+  };
+
+  if (reg && reg.active) {
+    try {
+      await reg.showNotification(title, opts);
+    } catch {
+      new Notification(title, { body, tag, icon: "./icons/icon-192.png" });
+    }
   } else {
-    // Fallback for when SW isn't active
     new Notification(title, { body, tag, icon: "./icons/icon-192.png" });
   }
 }
