@@ -94,7 +94,7 @@ export async function requestNotifPermission() {
 
 // ---- Send ----
 
-async function send(title, body, tag) {
+async function send(title, body, tag, data = {}) {
   if (!("Notification" in window) || Notification.permission !== "granted")
     return;
   const prefs = loadNotifPrefs();
@@ -118,16 +118,17 @@ async function send(title, body, tag) {
     tag,
     icon: "./icons/icon-192.png",
     badge: "./icons/icon-192.png",
+    data,
   };
 
   if (reg && reg.active) {
     try {
       await reg.showNotification(title, opts);
     } catch {
-      new Notification(title, { body, tag, icon: "./icons/icon-192.png" });
+      new Notification(title, { body, tag, icon: "./icons/icon-192.png", data });
     }
   } else {
-    new Notification(title, { body, tag, icon: "./icons/icon-192.png" });
+    new Notification(title, { body, tag, icon: "./icons/icon-192.png", data });
   }
 }
 
@@ -152,6 +153,7 @@ function checkRecurringDue(prefs) {
         `${name} is due ${when}`,
         `${name}${amtStr} is due ${when}.`,
         `recurring_${tmpl.id}`,
+        { type: TYPE.RECURRING_DUE, templateId: tmpl.id, category: tmpl.category },
       );
     }
   }
@@ -183,10 +185,12 @@ function checkBudgetWarning(prefs) {
     const pct = budget.monthlyLimit > 0 ? spent / budget.monthlyLimit : 0;
     if (pct >= 0.8 && pct < 1.0) {
       const pctStr = Math.round(pct * 100);
+      const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
       send(
         `${budget.category} budget ${pctStr}% used`,
         `${budget.category} budget is ${pctStr}% used with ${daysLeft} days left.`,
         `budget_${budget.category}_${now.getFullYear()}_${now.getMonth()}`,
+        { type: TYPE.BUDGET_WARNING, category: budget.category, month },
       );
     }
   }
@@ -211,6 +215,7 @@ function checkInactivity(prefs) {
       "Haven't logged anything recently",
       `You haven't logged a transaction in ${daysSince} days. Tap to add one.`,
       `inactivity_${new Date().toISOString().slice(0, 10)}`,
+      { type: TYPE.INACTIVITY },
     );
   }
 }
@@ -223,6 +228,7 @@ function checkBackupReminder(prefs) {
       "Backup overdue",
       `No backup in ${days} days. Open FinChronicle to download one.`,
       `backup_reminder_${new Date().toISOString().slice(0, 10)}`,
+      { type: TYPE.BACKUP_REMINDER },
     );
   }
 }

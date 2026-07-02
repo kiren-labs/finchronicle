@@ -1370,6 +1370,7 @@ async function init() {
     // Notifications (v4.10.0)
     renderNotificationSettings();
     runNotificationChecks();
+    handleNotifDeepLink();
 
     // Service Worker (non-blocking)
     registerServiceWorker();
@@ -1380,12 +1381,59 @@ async function init() {
   }
 }
 
+// ---- Notification deep-link handler ----
+// Reads ?notif=TYPE:PARAM from the URL (set by SW notificationclick) and
+// navigates to the relevant view without a full reload.
+function handleNotifDeepLink() {
+  const params = new URLSearchParams(window.location.search);
+  const notif = params.get("notif");
+  if (!notif) return;
+
+  // Strip the param so back/refresh doesn't re-trigger
+  const clean = new URL(window.location.href);
+  clean.searchParams.delete("notif");
+  history.replaceState(null, "", clean.pathname + (clean.search || ""));
+
+  const parts = notif.split(":");
+  const type = parts[0];
+
+  if (type === "budget" && parts[1] && parts[2]) {
+    const category = decodeURIComponent(parts[1]);
+    const month = parts[2];
+    switchTab("list");
+    filterByMonth(month);
+    state.selectedCategory = category;
+    updateUI();
+  } else if (type === "recurring") {
+    switchTab("settings");
+    const el = document.getElementById("recurringContainer");
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+  } else if (type === "inactivity") {
+    switchTab("add");
+  } else if (type === "backup") {
+    switchTab("settings");
+    const el = document.getElementById("backupStatusContainer");
+    if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+  }
+}
+
 // M19: Register SW message listener early — before init() — so SW_UPDATED
 // messages sent during fast updates are never missed.
 if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
   navigator.serviceWorker.addEventListener("message", (event) => {
     if (event.data?.type === "SW_UPDATED") {
       showUpdatePrompt();
+    }
+    if (event.data?.type === "NOTIF_NAVIGATE" && event.data.url) {
+      const params = new URLSearchParams(new URL(event.data.url, location.origin).search);
+      const notif = params.get("notif");
+      if (notif) {
+        // Inject into current URL and re-run handler (app is already open)
+        const u = new URL(location.href);
+        u.searchParams.set("notif", notif);
+        history.replaceState(null, "", u.pathname + u.search);
+        handleNotifDeepLink();
+      }
     }
   });
 }

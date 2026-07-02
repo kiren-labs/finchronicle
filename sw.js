@@ -63,17 +63,33 @@ self.addEventListener("message", (event) => {
   }
 });
 
-// Notification click — focus existing window or open a new one
+// Notification click — deep-link into the relevant view
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
+  const data = event.notification.data || {};
+  let url = "./";
+
+  if (data.type === "budget_warning" && data.category && data.month) {
+    url = `./?notif=budget:${encodeURIComponent(data.category)}:${data.month}`;
+  } else if (data.type === "recurring_due" && data.templateId) {
+    url = `./?notif=recurring:${encodeURIComponent(data.templateId)}`;
+  } else if (data.type === "inactivity") {
+    url = "./?notif=inactivity";
+  } else if (data.type === "backup_reminder") {
+    url = "./?notif=backup";
+  }
+
   event.waitUntil(
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
         for (const client of clientList) {
-          if ("focus" in client) return client.focus();
+          if ("focus" in client) {
+            client.postMessage({ type: "NOTIF_NAVIGATE", url });
+            return client.focus();
+          }
         }
-        if (clients.openWindow) return clients.openWindow("./");
+        if (clients.openWindow) return clients.openWindow(url);
       }),
   );
 });
