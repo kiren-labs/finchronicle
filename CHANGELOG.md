@@ -13,11 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Bulk Transaction Operations** — select multiple transactions and act on them at once.
   - **Select mode** — new "Select" button in the List tab header activates selection mode. Tapping any transaction item toggles it; a checkbox icon replaces the type icon. Edit/Delete action buttons are hidden during selection. "Select" button becomes "Cancel" to exit.
-  - **Sticky action bar** — appears at the bottom when at least one item is selected, showing the count and three actions.
+  - **Floating action bar** — replaces the old sticky sheet. A pill-shaped bar centred above the nav bar, primary-colour background, white text, slide-in animation. Appears when at least one item is selected.
+  - **Bulk Mark as Cleared** — new green "Clear" button in the action bar; sets `status: "cleared"` on all selected transactions in one tap. Useful for clearing a batch of pending imports from a bank statement.
   - **Bulk Recategorize** — opens a modal with the full category list; applying updates all selected transactions in IndexedDB and in memory, then exits select mode.
   - **Bulk Tag** — opens a modal with a text input; the tag is normalised (lowercase, spaces → hyphens) and appended to each selected transaction (existing tags are preserved; duplicate tags are ignored).
   - **Bulk Delete** — confirmation dialog then soft-deletes all selected transactions (`deleted: true`), removes them from `state.transactions`, and exits select mode.
   - Selection state is module-local in `js/ui.js` (not persisted, not in `state`). Switching tabs exits select mode automatically.
+
+- **Contextual FAQ help sheets** — a `?` button in the header of the Grouped View and Subscriptions segue panels opens a slide-up bottom sheet with the FAQ section relevant to that panel. Lazy-loaded; zero impact on initial load.
+
+- **Expanded FAQ** — eight new FAQ categories covering the most common user-confusion points:
+  - *Transaction statuses & bulk editing* — pending, cleared, reconciled, bulk select, bulk clear
+  - *Recurring transactions* — what they are, how to set up, auto-generation, subscription view
+  - *Grouped View* — what it shows, by-month vs by-category
+  - *Budgets* — how to set a budget, what alerts mean, editing/removing
+  - *Savings Goals* — how goals work, adding contributions, goal vs transaction
+  - *Smart Spending Alerts* — the four alert types, dismiss/snooze, turning off
+  - *Search & Tags* — searching, adding tags, filtering by tag, managing tags
+  - *App Lock* — enabling PIN, forgot PIN recovery, timeout options
+
+### Fixed
+
+- **Mobile bulk select layout** — in select mode on small screens (<480 px), the checkbox now appears on the left side of each transaction row (matching the natural reading direction) instead of the right. Grid template updated to `auto 1fr auto` with a named `check` area.
 
 ---
 
