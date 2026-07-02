@@ -707,5 +707,93 @@ export default {
     q_select_all: "Can I select all transactions at once?",
     a_select_all:
       "Tapping <strong>Select</strong> enters selection mode but does not auto-select everything, so you can choose exactly which transactions to act on. Tap each one you want, or use the month and category filters first to narrow the list before selecting.",
+
+    category_recurring: "Recurring transactions",
+    q_what_is_recurring: "What is a recurring transaction?",
+    a_what_is_recurring:
+      "A recurring transaction is one that repeats on a schedule — for example, rent every month or a weekly grocery run. You set it up once and the app adds it to your transaction list automatically when it is due.",
+    q_how_to_set_recurring: "How do I set up a recurring transaction?",
+    a_how_to_set_recurring:
+      "Go to <strong>Settings → Recurring Transactions → Add New</strong>. Fill in the amount, category, and frequency (daily, weekly, monthly, or yearly). Choose a start date and the app will generate the transaction on each due date.",
+    q_recurring_auto_add:
+      "Will the app add the transaction without me doing anything?",
+    a_recurring_auto_add:
+      "Yes. When you open the app on or after the due date, it checks for overdue recurring templates and adds them automatically. You will see a brief notice at the top of the screen when this happens.",
+    q_what_is_subscription: "What is the Subscriptions view?",
+    a_what_is_subscription:
+      "The <strong>Subscriptions</strong> view (in Reports) scans your recurring templates and shows only the ones that look like subscription services — streaming, software, memberships, and similar. It totals your monthly subscription cost so you can see at a glance what you are committing to each month.",
+    q_subscription_missing: "A subscription is not showing up in the list.",
+    a_subscription_missing:
+      "The Subscriptions view only shows recurring templates, not individual transactions. If a service is missing, go to Settings → Recurring Transactions and make sure you have a template set up for it with a monthly or yearly frequency.",
+
+    category_grouped: "Grouped View",
+    q_what_is_grouped: "What is the Grouped View?",
+    a_what_is_grouped:
+      "The <strong>Grouped View</strong> (in Reports) organises your transactions into summaries. Switch between <strong>By Month</strong> and <strong>By Category</strong> using the filter buttons at the top. Each group shows the total amount and a list of the individual transactions inside it.",
+    q_grouped_by_month: "What does 'By Month' show?",
+    a_grouped_by_month:
+      "By Month lists every calendar month that has transactions. Each month shows a total for income and expenses, plus a savings figure. Tap a month to expand and see the individual transactions.",
+    q_grouped_by_category: "What does 'By Category' show?",
+    a_grouped_by_category:
+      "By Category groups all transactions across all time by their category. This is useful for seeing your total lifetime spend on food, transport, rent, and so on. Tap a category to see the individual transactions inside it.",
+
+    category_budgets: "Budgets",
+    q_what_are_budgets: "What are budgets and how do they work?",
+    a_what_are_budgets:
+      "Budgets let you set a monthly spending limit for any category. Go to <strong>Settings → Budgets → Add Budget</strong>, pick a category, and enter the limit. The app tracks how much you have spent in that category this month and warns you when you are getting close.",
+    q_budget_alert: "I got a budget alert. What does it mean?",
+    a_budget_alert:
+      "A budget alert appears when your spending in a category reaches a certain percentage of your limit. The alert is a warning, not a block — you can still add transactions. Check your spending and decide if you need to adjust your habits or your budget limit.",
+    q_edit_budget: "How do I change or remove a budget?",
+    a_edit_budget:
+      "Go to <strong>Settings → Budgets</strong>. Tap the edit icon on any budget to change the limit. Tap the delete icon to remove it. Changes take effect immediately.",
+
+    category_goals: "Savings Goals",
+    q_what_are_goals: "What are savings goals?",
+    a_what_are_goals:
+      "Savings goals let you track progress toward something you are saving for — a holiday, a phone, an emergency fund. You set a target amount and a deadline, then add contributions as you save. The progress bar shows how close you are.",
+    q_add_goal_contribution:
+      "How do I record that I saved money toward a goal?",
+    a_add_goal_contribution:
+      "Open the <strong>Savings</strong> section on the Home screen → find your goal → tap <strong>Add Contribution</strong>. Enter the amount you are setting aside. This does not create a transaction — it only updates the goal's progress counter.",
+    q_goal_vs_transaction: "Should I record goal savings as a transaction too?",
+    a_goal_vs_transaction:
+      "Yes, if you are moving money to a separate savings account. Record it as a <strong>Transfer</strong> from your main account to your savings account. That keeps your account balances correct. The goal contribution is a separate progress tracker — it does not affect your balances.",
+
+    category_alerts: "Smart Spending Alerts",
+    q_what_are_alerts: "What are Smart Alerts?",
+    a_what_are_alerts:
+      "Smart Alerts watch your spending patterns and flag anything unusual. There are four types: <strong>Unusual Spike</strong> (you spent much more than normal in a category), <strong>Weekend Splurge</strong> (high weekend spending), <strong>Duplicate</strong> (two very similar transactions close together), and <strong>Large Transaction</strong> (a single transaction above your normal range).",
+    q_dismiss_alert: "How do I dismiss or snooze an alert?",
+    a_dismiss_alert:
+      "Tap the <strong>✕</strong> on an alert banner to dismiss it permanently, or tap <strong>Snooze</strong> to hide it for a week. Dismissed alerts are shown in the Alert History section in Settings so you can review them later.",
+    q_alerts_too_noisy: "The alerts are too frequent. Can I turn them off?",
+    a_alerts_too_noisy:
+      "You can dismiss individual alerts using the ✕ button. To disable a specific alert type entirely, go to <strong>Settings → Smart Alerts</strong> and toggle off the types you do not want.",
+
+    category_search_tags: "Search & Tags",
+    q_how_to_search: "How do I search for a transaction?",
+    a_how_to_search:
+      "In the <strong>List</strong> tab, tap the search bar at the top and type. The app searches across the category, notes, amount, and tags of every transaction. Results update as you type.",
+    q_what_are_tags: "What are tags and how do I add one?",
+    a_what_are_tags:
+      "Tags are short labels you attach to transactions to group them in a custom way — for example <em>#holiday</em>, <em>#work</em>, or <em>#kiren</em>. When adding or editing a transaction, tap the <strong>Tags</strong> field and type a tag name. You can add multiple tags to one transaction.",
+    q_filter_by_tag: "How do I see all transactions with a specific tag?",
+    a_filter_by_tag:
+      "In the <strong>List</strong> tab, tap a tag chip on any transaction to filter the list by that tag. Or type the tag name in the search bar.",
+    q_manage_tags: "How do I rename or delete a tag?",
+    a_manage_tags:
+      "Go to <strong>Settings → Tags</strong>. Tap the edit icon to rename a tag across all transactions at once. Tap the delete icon to remove it from all transactions.",
+
+    category_applock: "App Lock",
+    q_what_is_applock: "What is App Lock?",
+    a_what_is_applock:
+      "App Lock protects your financial data with a PIN. When enabled, the app locks automatically after a period of inactivity. You must enter the PIN to view or add transactions. Enable it in <strong>Settings → App Lock</strong>.",
+    q_forgot_pin: "I forgot my PIN. How do I get back in?",
+    a_forgot_pin:
+      "Close the app completely and reopen it. On the lock screen, tap <strong>Forgot PIN</strong>. This will clear the PIN and unlock the app, but it does not delete any of your data. Set a new PIN in Settings afterwards.",
+    q_applock_timeout: "How long until the app locks itself?",
+    a_applock_timeout:
+      "You can choose the timeout in <strong>Settings → App Lock</strong>. Options range from immediately (locks as soon as you leave the app) to 30 minutes of inactivity.",
   },
 };

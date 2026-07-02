@@ -312,6 +312,33 @@ function bindStaticEvents() {
       }
     });
 
+  // ---- Segue panel help buttons ----
+  document
+    .getElementById("groupedViewHelpBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await getFAQModule();
+      mod.showContextualHelp("category_grouped");
+    });
+  document
+    .getElementById("subscriptionHelpBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await getFAQModule();
+      mod.showContextualHelp("category_recurring");
+    });
+  document
+    .getElementById("faqHelpSheetClose")
+    ?.addEventListener("click", async () => {
+      const mod = await getFAQModule();
+      mod.closeHelpSheet();
+    });
+  document
+    .getElementById("faqHelpSheet")
+    ?.querySelector(".faq-help-sheet-backdrop")
+    ?.addEventListener("click", async () => {
+      const mod = await getFAQModule();
+      mod.closeHelpSheet();
+    });
+
   // ---- Summary tile clicks ----
   document.querySelectorAll(".summary-card").forEach((card) => {
     const label = card.getAttribute("aria-label") || "";

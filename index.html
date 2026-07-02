@@ -975,6 +975,7 @@
             <span>Reports</span>
           </button>
           <span class="segue-panel-title">Grouped View</span>
+          <button class="segue-help-btn" id="groupedViewHelpBtn" type="button" aria-label="Help for Grouped View"><i class="ri-question-line"></i></button>
         </div>
         <div class="segue-panel-body">
           <div class="filters">
@@ -993,9 +994,22 @@
             <span>Reports</span>
           </button>
           <span class="segue-panel-title">Subscriptions</span>
+          <button class="segue-help-btn" id="subscriptionHelpBtn" type="button" aria-label="Help for Subscriptions"><i class="ri-question-line"></i></button>
         </div>
         <div class="segue-panel-body">
           <div id="subscriptionContent"></div>
+        </div>
+      </div>
+
+      <!-- Contextual FAQ Help Sheet (shared) -->
+      <div id="faqHelpSheet" class="faq-help-sheet" role="dialog" aria-modal="true" aria-labelledby="faqHelpSheetTitle">
+        <div class="faq-help-sheet-backdrop"></div>
+        <div class="faq-help-sheet-panel">
+          <div class="faq-help-sheet-header">
+            <span id="faqHelpSheetTitle" class="faq-help-sheet-title"></span>
+            <button class="faq-help-sheet-close" id="faqHelpSheetClose" type="button" aria-label="Close help"><i class="ri-close-line"></i></button>
+          </div>
+          <div class="faq-help-sheet-body" id="faqHelpSheetBody"></div>
         </div>
       </div>
 
