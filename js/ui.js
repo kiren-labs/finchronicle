@@ -14,6 +14,64 @@ import { filterTransactions, getAllTags, getTagColor } from "./search.js";
 import { sanitizeHTML, formatDate, formatMonth, showMessage } from "./utils.js";
 import { formatCurrency } from "./currency.js";
 import { deleteTransactionFromDB } from "./db.js";
+
+// ---- Bulk Select Mode (v4.11.0) ----
+// Module-local UI state — not persisted, not in state.js (UI-only)
+let _selectMode = false;
+let _selectedIds = new Set();
+
+export function isSelectMode() {
+  return _selectMode;
+}
+export function getSelectedIds() {
+  return new Set(_selectedIds);
+}
+export function getSelectedCount() {
+  return _selectedIds.size;
+}
+
+export function enterSelectMode() {
+  _selectMode = true;
+  _selectedIds.clear();
+  updateTransactionsList();
+  _updateBulkActionBar();
+}
+
+export function exitSelectMode() {
+  _selectMode = false;
+  _selectedIds.clear();
+  updateTransactionsList();
+  _updateBulkActionBar();
+}
+
+export function toggleSelectAll(filtered) {
+  const allSelected = filtered.every((t) => _selectedIds.has(t.id));
+  if (allSelected) {
+    filtered.forEach((t) => _selectedIds.delete(t.id));
+  } else {
+    filtered.forEach((t) => _selectedIds.add(t.id));
+  }
+  updateTransactionsList();
+  _updateBulkActionBar();
+}
+
+function _updateBulkActionBar() {
+  const bar = document.getElementById("bulkActionBar");
+  if (!bar) return;
+  if (_selectMode && _selectedIds.size > 0) {
+    bar.querySelector(".bulk-count").textContent =
+      `${_selectedIds.size} selected`;
+    bar.classList.add("show");
+  } else {
+    bar.classList.remove("show");
+  }
+}
+
+function _toggleTransaction(id) {
+  if (_selectedIds.has(id)) _selectedIds.delete(id);
+  else _selectedIds.add(id);
+  _updateBulkActionBar();
+}
 import { updateSettingsContent } from "./settings.js";
 import {
   renderBudgetAlerts,
@@ -211,6 +269,12 @@ export function updateSummary() {
 
 // ---- Transaction List (P3: DocumentFragment rendering) ----
 
+// Expose current filtered set for bulk select-all
+let _lastFilteredTransactions = [];
+export function getLastFilteredTransactions() {
+  return _lastFilteredTransactions;
+}
+
 export function updateTransactionsList() {
   const $ = getDOM();
   const list = $.transactionsList;
@@ -250,6 +314,17 @@ export function updateTransactionsList() {
 
   // Search + tag filter (v3.14.0)
   filtered = filterTransactions(filtered);
+
+  // Expose for bulk select-all
+  _lastFilteredTransactions = filtered;
+
+  // Render Select toggle button
+  const selectToggle = document.getElementById("bulkSelectToggle");
+  if (selectToggle) {
+    selectToggle.textContent = _selectMode ? "Cancel" : "Select";
+    selectToggle.setAttribute("aria-pressed", _selectMode ? "true" : "false");
+    selectToggle.style.display = filtered.length > 0 ? "" : "none";
+  }
 
   // Render active tag filter pills
   const activeTagFilters = document.getElementById("activeTagFilters");
@@ -302,7 +377,11 @@ export function updateTransactionsList() {
     const sign = isTransfer ? "" : isIncome ? "+" : "-";
 
     const item = document.createElement("div");
-    item.className = `transaction-item ${t.type}`;
+    const isSelected = _selectedIds.has(t.id);
+    item.className = `transaction-item ${t.type}${_selectMode ? " selectable" : ""}${isSelected ? " selected" : ""}`;
+    if (_selectMode) {
+      item.dataset.selectId = t.id;
+    }
 
     // Build icon based on type
     let iconHtml;
@@ -370,7 +449,7 @@ export function updateTransactionsList() {
     }
 
     item.innerHTML = `
-            ${iconHtml}
+            ${_selectMode ? `<div class="bulk-checkbox" aria-hidden="true"><span class="bulk-check-icon">${isSelected ? '<i class="ri-checkbox-line"></i>' : '<i class="ri-checkbox-blank-line"></i>'}</span></div>` : iconHtml}
             <div class="transaction-details">
                 ${categoryHtml}
                 ${t.notes ? `<div class="transaction-note">${sanitizeHTML(t.notes)}</div>` : ""}
@@ -391,10 +470,14 @@ export function updateTransactionsList() {
                     : ""
                 }
             </div>
-            <div class="transaction-actions">
+            ${
+              _selectMode
+                ? ""
+                : `<div class="transaction-actions">
                 <button class="action-btn edit-btn" data-action="edit" data-id="${t.id}" aria-label="Edit transaction"><i class="ri-edit-line"></i></button>
                 <button class="action-btn delete-btn" data-action="delete" data-id="${t.id}" aria-label="Delete transaction"><i class="ri-delete-bin-line"></i></button>
-            </div>
+            </div>`
+            }
         `;
 
     fragment.appendChild(item);
@@ -402,6 +485,25 @@ export function updateTransactionsList() {
 
   list.innerHTML = "";
   list.appendChild(fragment);
+
+  // Select mode: item tap toggles selection
+  if (_selectMode) {
+    list.querySelectorAll("[data-select-id]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        // Don't intercept tag pill clicks
+        if (e.target.closest("[data-tag]")) return;
+        _toggleTransaction(el.dataset.selectId);
+        const icon = el.querySelector(".bulk-check-icon");
+        if (icon) {
+          const checked = _selectedIds.has(el.dataset.selectId);
+          icon.innerHTML = checked
+            ? '<i class="ri-checkbox-line"></i>'
+            : '<i class="ri-checkbox-blank-line"></i>';
+          el.classList.toggle("selected", checked);
+        }
+      });
+    });
+  }
 
   // Update pagination controls
   if (filtered.length > ITEMS_PER_PAGE) {

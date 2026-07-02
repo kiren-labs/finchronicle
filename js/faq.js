@@ -60,6 +60,96 @@ export const faqData = [
       { q: t("faq.q_tab_summary"), a: t("faq.a_tab_summary") },
     ],
   },
+  {
+    category: t("faq.category_statuses"),
+    icon: "ri-checkbox-circle-line",
+    questions: [
+      { q: t("faq.q_what_is_pending"), a: t("faq.a_what_is_pending") },
+      { q: t("faq.q_how_to_clear_one"), a: t("faq.a_how_to_clear_one") },
+      { q: t("faq.q_what_is_reconciled"), a: t("faq.a_what_is_reconciled") },
+      { q: t("faq.q_bulk_select"), a: t("faq.a_bulk_select") },
+      { q: t("faq.q_bulk_clear_pending"), a: t("faq.a_bulk_clear_pending") },
+      { q: t("faq.q_select_all"), a: t("faq.a_select_all") },
+    ],
+  },
+  {
+    category: t("faq.category_recurring"),
+    icon: "ri-repeat-line",
+    questions: [
+      { q: t("faq.q_what_is_recurring"), a: t("faq.a_what_is_recurring") },
+      {
+        q: t("faq.q_how_to_set_recurring"),
+        a: t("faq.a_how_to_set_recurring"),
+      },
+      { q: t("faq.q_recurring_auto_add"), a: t("faq.a_recurring_auto_add") },
+      {
+        q: t("faq.q_what_is_subscription"),
+        a: t("faq.a_what_is_subscription"),
+      },
+      {
+        q: t("faq.q_subscription_missing"),
+        a: t("faq.a_subscription_missing"),
+      },
+    ],
+  },
+  {
+    category: t("faq.category_grouped"),
+    icon: "ri-list-ordered",
+    questions: [
+      { q: t("faq.q_what_is_grouped"), a: t("faq.a_what_is_grouped") },
+      { q: t("faq.q_grouped_by_month"), a: t("faq.a_grouped_by_month") },
+      { q: t("faq.q_grouped_by_category"), a: t("faq.a_grouped_by_category") },
+    ],
+  },
+  {
+    category: t("faq.category_budgets"),
+    icon: "ri-wallet-3-line",
+    questions: [
+      { q: t("faq.q_what_are_budgets"), a: t("faq.a_what_are_budgets") },
+      { q: t("faq.q_budget_alert"), a: t("faq.a_budget_alert") },
+      { q: t("faq.q_edit_budget"), a: t("faq.a_edit_budget") },
+    ],
+  },
+  {
+    category: t("faq.category_goals"),
+    icon: "ri-trophy-line",
+    questions: [
+      { q: t("faq.q_what_are_goals"), a: t("faq.a_what_are_goals") },
+      {
+        q: t("faq.q_add_goal_contribution"),
+        a: t("faq.a_add_goal_contribution"),
+      },
+      { q: t("faq.q_goal_vs_transaction"), a: t("faq.a_goal_vs_transaction") },
+    ],
+  },
+  {
+    category: t("faq.category_alerts"),
+    icon: "ri-alarm-warning-line",
+    questions: [
+      { q: t("faq.q_what_are_alerts"), a: t("faq.a_what_are_alerts") },
+      { q: t("faq.q_dismiss_alert"), a: t("faq.a_dismiss_alert") },
+      { q: t("faq.q_alerts_too_noisy"), a: t("faq.a_alerts_too_noisy") },
+    ],
+  },
+  {
+    category: t("faq.category_search_tags"),
+    icon: "ri-search-line",
+    questions: [
+      { q: t("faq.q_how_to_search"), a: t("faq.a_how_to_search") },
+      { q: t("faq.q_what_are_tags"), a: t("faq.a_what_are_tags") },
+      { q: t("faq.q_filter_by_tag"), a: t("faq.a_filter_by_tag") },
+      { q: t("faq.q_manage_tags"), a: t("faq.a_manage_tags") },
+    ],
+  },
+  {
+    category: t("faq.category_applock"),
+    icon: "ri-lock-password-line",
+    questions: [
+      { q: t("faq.q_what_is_applock"), a: t("faq.a_what_is_applock") },
+      { q: t("faq.q_forgot_pin"), a: t("faq.a_forgot_pin") },
+      { q: t("faq.q_applock_timeout"), a: t("faq.a_applock_timeout") },
+    ],
+  },
 ];
 
 // Render FAQ section
@@ -149,6 +239,57 @@ export function toggleFAQItem(sectionIndex, qIndex) {
 }
 
 // Scroll to FAQ section and auto-expand first section
+// Show a context-specific help sheet with a subset of FAQ questions.
+// categoryKey: one of the faq category keys (e.g. "category_recurring")
+export function showContextualHelp(categoryKey) {
+  const sheet = document.getElementById("faqHelpSheet");
+  const titleEl = document.getElementById("faqHelpSheetTitle");
+  const bodyEl = document.getElementById("faqHelpSheetBody");
+  if (!sheet || !bodyEl) return;
+
+  const section = faqData.find((s) => s.category === t(`faq.${categoryKey}`));
+  if (!section) return;
+
+  if (titleEl) titleEl.textContent = section.category;
+
+  let html = "";
+  section.questions.forEach((qa, i) => {
+    html += `
+      <div class="faq-item">
+        <button class="faq-question" data-help-item="${i}" aria-expanded="false" aria-controls="helpAnswer${i}">
+          <span>${qa.q}</span>
+          <i class="ri-add-line faq-item-icon" id="helpIcon${i}" aria-hidden="true"></i>
+        </button>
+        <div class="faq-answer" id="helpAnswer${i}" style="display:none;" role="region">${qa.a}</div>
+      </div>`;
+  });
+  bodyEl.innerHTML = html;
+
+  // bind toggle events
+  bodyEl.querySelectorAll("[data-help-item]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const i = btn.dataset.helpItem;
+      const ans = document.getElementById(`helpAnswer${i}`);
+      const ico = document.getElementById(`helpIcon${i}`);
+      const open = ans.style.display !== "none";
+      ans.style.display = open ? "none" : "block";
+      ico.className = open
+        ? "ri-add-line faq-item-icon"
+        : "ri-subtract-line faq-item-icon";
+      btn.setAttribute("aria-expanded", String(!open));
+    });
+  });
+
+  sheet.classList.add("show");
+  document.body.classList.add("help-sheet-open");
+}
+
+export function closeHelpSheet() {
+  const sheet = document.getElementById("faqHelpSheet");
+  if (sheet) sheet.classList.remove("show");
+  document.body.classList.remove("help-sheet-open");
+}
+
 export function scrollToFAQ() {
   const faqSection = document.getElementById("faq-backup");
   if (faqSection) {

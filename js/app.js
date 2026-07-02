@@ -32,7 +32,7 @@ window.addEventListener(
   true,
 ); // capture phase to catch script element errors
 
-import { state, currencies } from "./state.js";
+import { state, currencies, categories as categoriesRef } from "./state.js";
 import {
   logError,
   showMessage,
@@ -50,6 +50,8 @@ import {
   loadDataFromDB,
   saveTransactionToDB,
   markTransactionSettled,
+  bulkSoftDeleteTransactions,
+  bulkUpdateTransactions,
 } from "./db.js";
 import {
   setCurrency,
@@ -84,6 +86,12 @@ import {
   closeFeedbackModal,
   renderFormTagChips,
   renderTagPicker,
+  enterSelectMode,
+  exitSelectMode,
+  isSelectMode,
+  getSelectedIds,
+  getSelectedCount,
+  getLastFilteredTransactions,
 } from "./ui.js";
 import {
   getAllTags,
@@ -302,6 +310,33 @@ function bindStaticEvents() {
         panel.classList.remove("open");
         panel.setAttribute("inert", "");
       }
+    });
+
+  // ---- Segue panel help buttons ----
+  document
+    .getElementById("groupedViewHelpBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await getFAQModule();
+      mod.showContextualHelp("category_grouped");
+    });
+  document
+    .getElementById("subscriptionHelpBtn")
+    ?.addEventListener("click", async () => {
+      const mod = await getFAQModule();
+      mod.showContextualHelp("category_recurring");
+    });
+  document
+    .getElementById("faqHelpSheetClose")
+    ?.addEventListener("click", async () => {
+      const mod = await getFAQModule();
+      mod.closeHelpSheet();
+    });
+  document
+    .getElementById("faqHelpSheet")
+    ?.querySelector(".faq-help-sheet-backdrop")
+    ?.addEventListener("click", async () => {
+      const mod = await getFAQModule();
+      mod.closeHelpSheet();
     });
 
   // ---- Summary tile clicks ----
@@ -532,6 +567,186 @@ function bindStaticEvents() {
 
   // ---- Notifications (v4.10.0) ----
   bindNotificationEvents();
+
+  // ---- Bulk Operations (v4.11.0) ----
+  bindBulkOperationEvents();
+}
+
+// ============================================================================
+// Bulk Operations (v4.11.0)
+// ============================================================================
+
+function _buildRecatOptions() {
+  const sel = document.getElementById("bulkRecatSelect");
+  if (!sel) return;
+  sel.innerHTML = "";
+  const buildGroup = (label, tree) => {
+    const group = document.createElement("optgroup");
+    group.label = label;
+    for (const [parent, children] of Object.entries(tree)) {
+      const opt = document.createElement("option");
+      opt.value = parent;
+      opt.textContent = parent;
+      group.appendChild(opt);
+      children.forEach((child) => {
+        const co = document.createElement("option");
+        co.value = child;
+        co.textContent = `  ${child}`;
+        group.appendChild(co);
+      });
+    }
+    sel.appendChild(group);
+  };
+  buildGroup("Income", categoriesRef.income);
+  buildGroup("Expense", categoriesRef.expense);
+}
+
+function bindBulkOperationEvents() {
+  // Select / Cancel toggle
+  document.getElementById("bulkSelectToggle")?.addEventListener("click", () => {
+    if (isSelectMode()) exitSelectMode();
+    else enterSelectMode();
+  });
+
+  // Recategorize button
+  document
+    .getElementById("bulkRecategorizeBtn")
+    ?.addEventListener("click", () => {
+      const count = getSelectedCount();
+      if (count === 0) return;
+      const countEl = document.getElementById("bulkRecatCount");
+      if (countEl)
+        countEl.textContent = `${count} transaction${count > 1 ? "s" : ""}`;
+      _buildRecatOptions();
+      document.getElementById("bulkRecategorizeModal")?.classList.add("show");
+    });
+  document
+    .getElementById("bulkRecatCancelBtn")
+    ?.addEventListener("click", () => {
+      document
+        .getElementById("bulkRecategorizeModal")
+        ?.classList.remove("show");
+    });
+  document
+    .getElementById("bulkRecatConfirmBtn")
+    ?.addEventListener("click", async () => {
+      const sel = document.getElementById("bulkRecatSelect");
+      const newCategory = sel?.value;
+      if (!newCategory) return;
+      const ids = [...getSelectedIds()];
+      const now = new Date().toISOString();
+      await bulkUpdateTransactions(ids, (t) => ({
+        ...t,
+        category: newCategory,
+        updatedAt: now,
+      }));
+      state.transactions = state.transactions.map((t) =>
+        ids.includes(t.id)
+          ? { ...t, category: newCategory, updatedAt: now }
+          : t,
+      );
+      document
+        .getElementById("bulkRecategorizeModal")
+        ?.classList.remove("show");
+      exitSelectMode();
+      updateUI();
+      showMessage(
+        `Recategorized ${ids.length} transaction${ids.length > 1 ? "s" : ""}.`,
+      );
+    });
+
+  // Tag button
+  document.getElementById("bulkTagBtn")?.addEventListener("click", () => {
+    const count = getSelectedCount();
+    if (count === 0) return;
+    const countEl = document.getElementById("bulkTagCount");
+    if (countEl)
+      countEl.textContent = `${count} transaction${count > 1 ? "s" : ""}`;
+    const input = document.getElementById("bulkTagInput");
+    if (input) input.value = "";
+    document.getElementById("bulkTagModal")?.classList.add("show");
+    document.getElementById("bulkTagInput")?.focus();
+  });
+  document.getElementById("bulkTagCancelBtn")?.addEventListener("click", () => {
+    document.getElementById("bulkTagModal")?.classList.remove("show");
+  });
+  document
+    .getElementById("bulkTagConfirmBtn")
+    ?.addEventListener("click", async () => {
+      const raw = document.getElementById("bulkTagInput")?.value.trim();
+      if (!raw) return;
+      const tag = raw.toLowerCase().replace(/\s+/g, "-");
+      const ids = [...getSelectedIds()];
+      const now = new Date().toISOString();
+      await bulkUpdateTransactions(ids, (t) => {
+        const existing = Array.isArray(t.tags) ? t.tags : [];
+        return {
+          ...t,
+          tags: existing.includes(tag) ? existing : [...existing, tag],
+          updatedAt: now,
+        };
+      });
+      state.transactions = state.transactions.map((t) => {
+        if (!ids.includes(t.id)) return t;
+        const existing = Array.isArray(t.tags) ? t.tags : [];
+        return {
+          ...t,
+          tags: existing.includes(tag) ? existing : [...existing, tag],
+          updatedAt: now,
+        };
+      });
+      document.getElementById("bulkTagModal")?.classList.remove("show");
+      exitSelectMode();
+      updateUI();
+      showMessage(
+        `Tagged ${ids.length} transaction${ids.length > 1 ? "s" : ""} with "${tag}".`,
+      );
+    });
+
+  // Mark as Cleared button
+  document
+    .getElementById("bulkMarkClearedBtn")
+    ?.addEventListener("click", async () => {
+      const ids = [...getSelectedIds()];
+      if (ids.length === 0) return;
+      const now = new Date().toISOString();
+      await bulkUpdateTransactions(ids, (t) => ({
+        ...t,
+        status: "cleared",
+        updatedAt: now,
+      }));
+      state.transactions = state.transactions.map((t) =>
+        ids.includes(t.id) ? { ...t, status: "cleared", updatedAt: now } : t,
+      );
+      exitSelectMode();
+      updateUI();
+      showMessage(
+        `Marked ${ids.length} transaction${ids.length > 1 ? "s" : ""} as cleared.`,
+      );
+    });
+
+  // Delete button
+  document
+    .getElementById("bulkDeleteBtn")
+    ?.addEventListener("click", async () => {
+      const ids = [...getSelectedIds()];
+      if (ids.length === 0) return;
+      if (
+        !confirm(
+          `Delete ${ids.length} transaction${ids.length > 1 ? "s" : ""}? This cannot be undone.`,
+        )
+      )
+        return;
+      await bulkSoftDeleteTransactions(ids);
+      state.transactions = state.transactions.filter(
+        (t) => !ids.includes(t.id),
+      );
+      exitSelectMode();
+      updateUI();
+      showMessage(
+        `Deleted ${ids.length} transaction${ids.length > 1 ? "s" : ""}.`,
+      );
+    });
 }
 
 function bindSettingsButtons() {
@@ -1370,6 +1585,7 @@ async function init() {
     // Notifications (v4.10.0)
     renderNotificationSettings();
     runNotificationChecks();
+    handleNotifDeepLink();
 
     // Service Worker (non-blocking)
     registerServiceWorker();
@@ -1380,12 +1596,69 @@ async function init() {
   }
 }
 
+// ---- Notification deep-link handler ----
+// Reads ?notif=TYPE:PARAM from the URL (set by SW notificationclick) and
+// navigates to the relevant view without a full reload.
+function handleNotifDeepLink() {
+  const params = new URLSearchParams(window.location.search);
+  const notif = params.get("notif");
+  if (!notif) return;
+
+  // Strip the param so back/refresh doesn't re-trigger
+  const clean = new URL(window.location.href);
+  clean.searchParams.delete("notif");
+  history.replaceState(null, "", clean.pathname + (clean.search || ""));
+
+  const parts = notif.split(":");
+  const type = parts[0];
+
+  if (type === "budget" && parts[1] && parts[2]) {
+    const category = decodeURIComponent(parts[1]);
+    const month = parts[2];
+    switchTab("list");
+    filterByMonth(month);
+    state.selectedCategory = category;
+    updateUI();
+  } else if (type === "recurring") {
+    switchTab("settings");
+    const el = document.getElementById("recurringContainer");
+    if (el)
+      setTimeout(
+        () => el.scrollIntoView({ behavior: "smooth", block: "start" }),
+        150,
+      );
+  } else if (type === "inactivity") {
+    switchTab("add");
+  } else if (type === "backup") {
+    switchTab("settings");
+    const el = document.getElementById("backupStatusContainer");
+    if (el)
+      setTimeout(
+        () => el.scrollIntoView({ behavior: "smooth", block: "start" }),
+        150,
+      );
+  }
+}
+
 // M19: Register SW message listener early — before init() — so SW_UPDATED
 // messages sent during fast updates are never missed.
 if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
   navigator.serviceWorker.addEventListener("message", (event) => {
     if (event.data?.type === "SW_UPDATED") {
       showUpdatePrompt();
+    }
+    if (event.data?.type === "NOTIF_NAVIGATE" && event.data.url) {
+      const params = new URLSearchParams(
+        new URL(event.data.url, location.origin).search,
+      );
+      const notif = params.get("notif");
+      if (notif) {
+        // Inject into current URL and re-run handler (app is already open)
+        const u = new URL(location.href);
+        u.searchParams.set("notif", notif);
+        history.replaceState(null, "", u.pathname + u.search);
+        handleNotifDeepLink();
+      }
     }
   });
 }

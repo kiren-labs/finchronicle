@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![Version](https://img.shields.io/badge/version-4.10.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-4.11.0-blue.svg)](CHANGELOG.md)
 [![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-contributor%20covenant-purple.svg)](CODE_OF_CONDUCT.md)
 [![Security](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
@@ -318,15 +318,16 @@ export const categories = {
 - ✅ Financial Health Ratios — emergency fund, debt-to-income, housing cost KPIs (v4.6)
 - ✅ Subscription Tracker — monthly/annual cost summary from recurring templates (v4.7)
 - ✅ Reconciliation Balance Adjustment and Filter by Account in transaction list (v4.7.1)
+- ✅ Duplicate Transaction Detection — inline warning before save (v4.8)
+- ✅ Bank Statement CSV Importer — generic column mapper, KBank auto-detect (v4.9)
+- ✅ Local Notifications — recurring due, budget warning, inactivity nudge, backup reminder (v4.10)
+- ✅ Bulk Transaction Operations — recategorize, tag, delete multiple at once (v4.11)
 
-### Upcoming (v4.8+)
+### Upcoming (v4.12+)
 
-- [ ] **v4.8** — Duplicate Transaction Detection — inline warning before save
-- [ ] **v4.9** — Bank Statement CSV Importer — generic column mapper, client-side only
-- [ ] **v4.10** — Actionable Spending Insights — heuristic suggestions on every alert
-- [ ] **v4.11** — Budget vs Actual Report — consolidated table with variance per category
-- [ ] **v4.12** — Bulk Transaction Operations — recategorize, tag, delete multiple at once
-- [ ] **v4.13** — Category Management — rename, merge, cleanup suggestions
+- [ ] **v4.12** — Category Management — rename, merge, cleanup suggestions
+- [ ] **v4.13** — Business & Tax Export — tax year config, business expense report
+- [ ] **v4.14** — Loan / EMI Tracker with amortization schedule
 
 See [FinChronicleFeatureRoadmap_v2.md](docs/FinChronicleFeatureRoadmap_v2.md) for full details.
 

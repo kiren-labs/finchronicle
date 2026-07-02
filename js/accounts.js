@@ -63,12 +63,19 @@ export function getAccountBalance(accountName) {
   if (!account) return 0;
 
   const opening = account.openingBalance || 0;
+  // Only count transactions created after the account was created to avoid
+  // matching historical transactions that happened to carry the same account name string.
+  const accountCreatedTs = account.createdAt
+    ? new Date(account.createdAt).getTime()
+    : 0;
 
   let credits = 0;
   let debits = 0;
 
   state.transactions.forEach((t) => {
     if (t.deleted) return;
+    if (t.createdAt && new Date(t.createdAt).getTime() < accountCreatedTs)
+      return;
 
     if (t.type === "transfer") {
       if (t.toAccount === accountName) credits += t.amount;
@@ -421,10 +428,10 @@ export function renderAccountManager() {
 
   let html = "";
   state.accounts.forEach((account) => {
+    const isInactive = account.isActive === false;
     const balance = getAccountBalance(account.name);
     const balClass = balance >= 0 ? "positive" : "negative";
     const typeLabel = account.type.replace("-", " ");
-    const inactive = account.isActive === false ? " inactive" : "";
     const savingsBadge = account.isSavings
       ? `<span class="savings-badge" aria-label="Savings account">savings</span>`
       : "";
@@ -435,8 +442,17 @@ export function renderAccountManager() {
         ? `<span class="liability-badge" aria-label="Liability account">liability</span>`
         : "";
 
+    const actions = isInactive
+      ? `<span class="account-archived-label">archived</span>`
+      : `<button class="template-action-btn account-edit-btn" data-id="${account.id}" title="Edit">
+            <i class="ri-pencil-line"></i>
+          </button>
+          <button class="template-action-btn template-delete-btn account-delete-btn" data-id="${account.id}" title="Delete">
+            <i class="ri-delete-bin-line"></i>
+          </button>`;
+
     html += `
-    <div class="account-item${inactive}" data-id="${account.id}">
+    <div class="account-item${isInactive ? " inactive" : ""}" data-id="${account.id}">
       <div class="account-item-info">
         <div class="account-item-icon">${getAccountIcon(account.type)}</div>
         <div class="account-item-details">
@@ -446,14 +462,7 @@ export function renderAccountManager() {
       </div>
       <div class="account-item-right">
         <span class="account-item-balance ${balClass}">${formatCurrency(balance)}</span>
-        <div class="account-item-actions">
-          <button class="template-action-btn account-edit-btn" data-id="${account.id}" title="Edit">
-            <i class="ri-pencil-line"></i>
-          </button>
-          <button class="template-action-btn template-delete-btn account-delete-btn" data-id="${account.id}" title="Delete">
-            <i class="ri-delete-bin-line"></i>
-          </button>
-        </div>
+        <div class="account-item-actions">${actions}</div>
       </div>
     </div>`;
   });
@@ -646,7 +655,16 @@ export function bindAccountEvents() {
       if (deleteBtn) {
         const id = deleteBtn.dataset.id;
         const account = state.accounts.find((a) => String(a.id) === id);
-        if (account && confirm(`Delete account "${account.name}"?`)) {
+        if (!account) return;
+        const isReferenced = state.transactions.some(
+          (t) =>
+            !t.deleted &&
+            (t.fromAccount === account.name || t.toAccount === account.name),
+        );
+        const msg = isReferenced
+          ? `"${account.name}" is used by existing transactions and will be archived (hidden from dropdowns) rather than deleted. Continue?`
+          : `Delete account "${account.name}"?`;
+        if (confirm(msg)) {
           await removeAccount(id);
           renderAccountManager();
           renderNetWorthDashboard();

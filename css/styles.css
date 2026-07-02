@@ -1197,6 +1197,28 @@ button.primary.loading .btn-spinner {
     height: var(--icon-button-sm);
     font-size: var(--font-sm);
   }
+
+  /* Bulk select mode: checkbox on LEFT */
+  .transaction-item.selectable {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "check details amount"
+      "check details amount";
+    padding-left: var(--space-2xl);
+  }
+
+  .transaction-item.selectable .bulk-checkbox {
+    grid-area: check;
+    align-self: center;
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+    margin-left: calc(-1 * var(--space-sm));
+  }
+
+  .transaction-item.selectable .transaction-amount {
+    align-self: center;
+  }
 }
 
 /* ==========================================================================
@@ -4816,6 +4838,13 @@ button.primary.loading .btn-spinner {
   opacity: 0.5;
 }
 
+.account-archived-label {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: var(--space-1) var(--space-2);
+}
+
 .account-item-info {
   display: flex;
   align-items: center;
@@ -7443,7 +7472,86 @@ button.primary.loading .btn-spinner {
   font-weight: 600;
   color: var(--color-text);
   margin: 0 auto;
-  padding-right: 60px; /* balance the back btn width */
+}
+
+.segue-help-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--font-xl);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.segue-help-btn:hover {
+  background: var(--color-primary-light, rgba(99, 102, 241, 0.1));
+}
+
+/* ---- Contextual FAQ Help Sheet ---- */
+.faq-help-sheet {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+}
+.faq-help-sheet.show {
+  display: block;
+}
+.faq-help-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+.faq-help-sheet-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  max-height: 72vh;
+  display: flex;
+  flex-direction: column;
+  animation: sheetSlideUp 0.22s ease;
+}
+@keyframes sheetSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.faq-help-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-lg) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+.faq-help-sheet-title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.faq-help-sheet-close {
+  background: none;
+  border: none;
+  font-size: var(--font-2xl);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+}
+.faq-help-sheet-body {
+  overflow-y: auto;
+  padding: var(--space-sm) var(--space-lg) var(--space-2xl);
+  flex: 1;
 }
 .segue-panel-body {
   flex: 1;
@@ -7876,4 +7984,134 @@ button.primary.loading .btn-spinner {
 .notif-request-btn {
   margin-top: var(--space-2);
   margin-bottom: var(--space-3);
+}
+
+/* ---- Bulk Operations (v4.11.0) ---- */
+
+.list-header-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 var(--space-sm) var(--space-sm);
+}
+
+.bulk-select-toggle {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+.bulk-select-toggle:hover {
+  background: var(--color-primary-light, rgba(99, 102, 241, 0.1));
+}
+
+/* Transaction item in select mode */
+.transaction-item.selectable {
+  cursor: pointer;
+  user-select: none;
+}
+.transaction-item.selectable:active {
+  opacity: 0.8;
+}
+.transaction-item.selected {
+  background: var(--color-primary-light, rgba(99, 102, 241, 0.08));
+}
+
+.bulk-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  font-size: 22px;
+  color: var(--color-primary);
+}
+
+/* Floating bulk action bar */
+.bulk-action-bar {
+  display: none;
+  position: fixed;
+  bottom: calc(68px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 600;
+  background: var(--color-primary, #6366f1);
+  color: #fff;
+  border: none;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.28),
+    0 1px 6px rgba(0, 0, 0, 0.18);
+  padding: var(--space-sm) var(--space-lg);
+  align-items: center;
+  gap: var(--space-md);
+  border-radius: 100px;
+  min-width: 280px;
+  max-width: calc(100vw - 32px);
+  animation: bulkBarIn 0.18s ease;
+}
+@keyframes bulkBarIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+.bulk-action-bar.show {
+  display: flex;
+}
+
+.bulk-count {
+  font-size: var(--font-sm);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  padding-right: var(--space-xs);
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.bulk-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex: 1;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+.bulk-action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.bulk-action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+.bulk-action-btn.bulk-action-danger {
+  color: #fca5a5;
+}
+.bulk-action-btn.bulk-action-danger:hover {
+  background: rgba(239, 68, 68, 0.35);
+}
+.bulk-action-btn.bulk-action-success {
+  color: #bbf7d0;
+}
+.bulk-action-btn.bulk-action-success:hover {
+  background: rgba(52, 199, 89, 0.35);
 }
