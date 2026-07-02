@@ -7905,7 +7905,7 @@ button.primary.loading .btn-spinner {
   transition: background 0.15s;
 }
 .bulk-select-toggle:hover {
-  background: var(--color-primary-light, rgba(99,102,241,0.1));
+  background: var(--color-primary-light, rgba(99, 102, 241, 0.1));
 }
 
 /* Transaction item in select mode */
@@ -7917,7 +7917,7 @@ button.primary.loading .btn-spinner {
   opacity: 0.8;
 }
 .transaction-item.selected {
-  background: var(--color-primary-light, rgba(99,102,241,0.08));
+  background: var(--color-primary-light, rgba(99, 102, 241, 0.08));
 }
 
 .bulk-checkbox {
@@ -7939,7 +7939,7 @@ button.primary.loading .btn-spinner {
   z-index: 500;
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.12);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
   padding: var(--space-sm) var(--space-md);
   align-items: center;
   gap: var(--space-md);
@@ -7986,5 +7986,5 @@ button.primary.loading .btn-spinner {
   color: var(--color-danger);
 }
 .bulk-action-btn.bulk-action-danger:hover {
-  background: rgba(239,68,68,0.1);
+  background: rgba(239, 68, 68, 0.1);
 }

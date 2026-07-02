@@ -1,7 +1,7 @@
 # FinChronicle Feature Roadmap
 
-> Last updated: 2026-06-24
-> Current version: v4.8.0
+> Last updated: 2026-07-02
+> Current version: v4.11.0
 
 ---
 
@@ -484,7 +484,7 @@ Generic column mapper that accepts any bank's CSV export — no fixed format ass
 
 ---
 
-### v4.10.0 — Local Notifications
+### ✅ v4.10.0 — Local Notifications — SHIPPED 2026-06-30
 
 **Priority: HIGH**
 **New file: `js/notifications.js`**
@@ -516,7 +516,7 @@ Budget warnings and recurring due-date reminders exist as in-app alerts but go u
 
 ---
 
-### v4.11.0 — Bulk Transaction Operations
+### ✅ v4.11.0 — Bulk Transaction Operations — SHIPPED 2026-07-02
 
 **Priority: MEDIUM**
 
@@ -813,8 +813,8 @@ Last significant data-capture gap. Storage-first constraints apply.
 | v4.7.1  | Reconciliation Balance Adjustment — one-click plug for balance gaps        | 12         | HIGH     | ✅ Shipped |
 | v4.8.0  | Duplicate Transaction Detection                                            | 12         | MEDIUM   | ✅ Shipped |
 | v4.9.0  | Bank Statement CSV Importer                                                | 12         | MEDIUM   | ✅ Shipped |
-| v4.10.0 | Local Notifications                                                        | 12         | HIGH     | Planned    |
-| v4.11.0 | Bulk Transaction Operations                                                | 12         | MEDIUM   | Planned    |
+| v4.10.0 | Local Notifications                                                        | 12         | HIGH     | ✅ Shipped |
+| v4.11.0 | Bulk Transaction Operations                                                | 12         | MEDIUM   | ✅ Shipped |
 | v4.12.0 | Category Management (rename, merge, cleanup)                               | 12         | MEDIUM   | Planned    |
 | v4.13.0 | Business & Tax Export                                                      | 12         | MEDIUM   | Planned    |
 | v4.14.0 | Loan / EMI Tracker with amortization schedule                              | 13         | MEDIUM   | Planned    |

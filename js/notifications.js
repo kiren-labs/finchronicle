@@ -125,7 +125,12 @@ async function send(title, body, tag, data = {}) {
     try {
       await reg.showNotification(title, opts);
     } catch {
-      new Notification(title, { body, tag, icon: "./icons/icon-192.png", data });
+      new Notification(title, {
+        body,
+        tag,
+        icon: "./icons/icon-192.png",
+        data,
+      });
     }
   } else {
     new Notification(title, { body, tag, icon: "./icons/icon-192.png", data });
@@ -153,7 +158,11 @@ function checkRecurringDue(prefs) {
         `${name} is due ${when}`,
         `${name}${amtStr} is due ${when}.`,
         `recurring_${tmpl.id}`,
-        { type: TYPE.RECURRING_DUE, templateId: tmpl.id, category: tmpl.category },
+        {
+          type: TYPE.RECURRING_DUE,
+          templateId: tmpl.id,
+          category: tmpl.category,
+        },
       );
     }
   }

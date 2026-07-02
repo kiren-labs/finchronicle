@@ -20,9 +20,15 @@ import { deleteTransactionFromDB } from "./db.js";
 let _selectMode = false;
 let _selectedIds = new Set();
 
-export function isSelectMode() { return _selectMode; }
-export function getSelectedIds() { return new Set(_selectedIds); }
-export function getSelectedCount() { return _selectedIds.size; }
+export function isSelectMode() {
+  return _selectMode;
+}
+export function getSelectedIds() {
+  return new Set(_selectedIds);
+}
+export function getSelectedCount() {
+  return _selectedIds.size;
+}
 
 export function enterSelectMode() {
   _selectMode = true;
@@ -53,7 +59,8 @@ function _updateBulkActionBar() {
   const bar = document.getElementById("bulkActionBar");
   if (!bar) return;
   if (_selectMode && _selectedIds.size > 0) {
-    bar.querySelector(".bulk-count").textContent = `${_selectedIds.size} selected`;
+    bar.querySelector(".bulk-count").textContent =
+      `${_selectedIds.size} selected`;
     bar.classList.add("show");
   } else {
     bar.classList.remove("show");
@@ -264,7 +271,9 @@ export function updateSummary() {
 
 // Expose current filtered set for bulk select-all
 let _lastFilteredTransactions = [];
-export function getLastFilteredTransactions() { return _lastFilteredTransactions; }
+export function getLastFilteredTransactions() {
+  return _lastFilteredTransactions;
+}
 
 export function updateTransactionsList() {
   const $ = getDOM();
@@ -461,10 +470,14 @@ export function updateTransactionsList() {
                     : ""
                 }
             </div>
-            ${_selectMode ? "" : `<div class="transaction-actions">
+            ${
+              _selectMode
+                ? ""
+                : `<div class="transaction-actions">
                 <button class="action-btn edit-btn" data-action="edit" data-id="${t.id}" aria-label="Edit transaction"><i class="ri-edit-line"></i></button>
                 <button class="action-btn delete-btn" data-action="delete" data-id="${t.id}" aria-label="Delete transaction"><i class="ri-delete-bin-line"></i></button>
-            </div>`}
+            </div>`
+            }
         `;
 
     fragment.appendChild(item);
@@ -483,7 +496,9 @@ export function updateTransactionsList() {
         const icon = el.querySelector(".bulk-check-icon");
         if (icon) {
           const checked = _selectedIds.has(el.dataset.selectId);
-          icon.innerHTML = checked ? '<i class="ri-checkbox-line"></i>' : '<i class="ri-checkbox-blank-line"></i>';
+          icon.innerHTML = checked
+            ? '<i class="ri-checkbox-line"></i>'
+            : '<i class="ri-checkbox-blank-line"></i>';
           el.classList.toggle("selected", checked);
         }
       });

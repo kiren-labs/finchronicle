@@ -65,14 +65,17 @@ export function getAccountBalance(accountName) {
   const opening = account.openingBalance || 0;
   // Only count transactions created after the account was created to avoid
   // matching historical transactions that happened to carry the same account name string.
-  const accountCreatedTs = account.createdAt ? new Date(account.createdAt).getTime() : 0;
+  const accountCreatedTs = account.createdAt
+    ? new Date(account.createdAt).getTime()
+    : 0;
 
   let credits = 0;
   let debits = 0;
 
   state.transactions.forEach((t) => {
     if (t.deleted) return;
-    if (t.createdAt && new Date(t.createdAt).getTime() < accountCreatedTs) return;
+    if (t.createdAt && new Date(t.createdAt).getTime() < accountCreatedTs)
+      return;
 
     if (t.type === "transfer") {
       if (t.toAccount === accountName) credits += t.amount;
@@ -654,7 +657,9 @@ export function bindAccountEvents() {
         const account = state.accounts.find((a) => String(a.id) === id);
         if (!account) return;
         const isReferenced = state.transactions.some(
-          (t) => !t.deleted && (t.fromAccount === account.name || t.toAccount === account.name),
+          (t) =>
+            !t.deleted &&
+            (t.fromAccount === account.name || t.toAccount === account.name),
         );
         const msg = isReferenced
           ? `"${account.name}" is used by existing transactions and will be archived (hidden from dropdowns) rather than deleted. Continue?`
