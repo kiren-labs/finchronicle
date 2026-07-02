@@ -60,6 +60,18 @@ export const faqData = [
       { q: t("faq.q_tab_summary"), a: t("faq.a_tab_summary") },
     ],
   },
+  {
+    category: t("faq.category_statuses"),
+    icon: "ri-checkbox-circle-line",
+    questions: [
+      { q: t("faq.q_what_is_pending"), a: t("faq.a_what_is_pending") },
+      { q: t("faq.q_how_to_clear_one"), a: t("faq.a_how_to_clear_one") },
+      { q: t("faq.q_what_is_reconciled"), a: t("faq.a_what_is_reconciled") },
+      { q: t("faq.q_bulk_select"), a: t("faq.a_bulk_select") },
+      { q: t("faq.q_bulk_clear_pending"), a: t("faq.a_bulk_clear_pending") },
+      { q: t("faq.q_select_all"), a: t("faq.a_select_all") },
+    ],
+  },
 ];
 
 // Render FAQ section

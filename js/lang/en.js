@@ -687,5 +687,25 @@ export default {
     q_tab_summary: "What are the summary cards at the top of the screen?",
     a_tab_summary:
       "The summary cards show your current month's Net Balance, Total Entries, Income, and Expenses at a glance. Tap any card to jump straight to the List tab filtered for that category. Use the collapse button (the chevron on the right) to hide the cards if you want more space. The Net Worth, Savings, Goals, and Settlement sections below the cards can be shown or hidden from Settings → Features.",
+    category_statuses: "Transaction statuses & bulk editing",
+    q_what_is_pending: "What does 'pending' mean on a transaction?",
+    a_what_is_pending:
+      "A <strong>pending</strong> transaction is one you recorded but your bank has not yet processed. For example, a payment you made today that hasn't appeared on your bank statement yet. Pending transactions are counted in your totals — the badge is just a reminder that the bank hasn't confirmed it.",
+    q_how_to_clear_one: "How do I mark a pending transaction as cleared?",
+    a_how_to_clear_one:
+      "Tap the transaction to open it for editing. Change the <strong>Status</strong> field from <em>Pending</em> to <em>Cleared</em>, then save. Cleared means the transaction has been confirmed by your bank.",
+    q_what_is_reconciled: "What does 'reconciled' mean?",
+    a_what_is_reconciled:
+      "A <strong>reconciled</strong> transaction has been matched and verified against your official bank statement. Reconciled transactions are locked — they cannot be accidentally edited. Use the Reconciliation tool (Settings → Reconciliation) to reconcile a batch of transactions against a statement.",
+    q_bulk_select: "How do I select and edit multiple transactions at once?",
+    a_bulk_select:
+      "In the <strong>List</strong> tab, tap <strong>Select</strong> (top right) to enter selection mode. Tap each transaction you want to include — a checkbox appears on the left of each row. Once you have selected one or more transactions, a floating action bar appears at the bottom with these options: <strong>Clear</strong> (mark all selected as cleared), <strong>Recategorize</strong> (change the category of all selected), <strong>Tag</strong> (add a tag to all selected), and <strong>Delete</strong> (permanently remove all selected). Tap <strong>Cancel</strong> to exit selection mode without making changes.",
+    q_bulk_clear_pending:
+      "I have many pending transactions. Can I clear them all at once?",
+    a_bulk_clear_pending:
+      "Yes. Go to the <strong>List</strong> tab → tap <strong>Select</strong> → tap each pending transaction you want to clear → tap the green <strong>Clear</strong> button in the floating bar at the bottom. All selected transactions will be marked as cleared in one step.",
+    q_select_all: "Can I select all transactions at once?",
+    a_select_all:
+      "Tapping <strong>Select</strong> enters selection mode but does not auto-select everything, so you can choose exactly which transactions to act on. Tap each one you want, or use the month and category filters first to narrow the list before selecting.",
   },
 };
