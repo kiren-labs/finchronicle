@@ -676,6 +676,28 @@ function bindBulkOperationEvents() {
       );
     });
 
+  // Mark as Cleared button
+  document
+    .getElementById("bulkMarkClearedBtn")
+    ?.addEventListener("click", async () => {
+      const ids = [...getSelectedIds()];
+      if (ids.length === 0) return;
+      const now = new Date().toISOString();
+      await bulkUpdateTransactions(ids, (t) => ({
+        ...t,
+        status: "cleared",
+        updatedAt: now,
+      }));
+      state.transactions = state.transactions.map((t) =>
+        ids.includes(t.id) ? { ...t, status: "cleared", updatedAt: now } : t,
+      );
+      exitSelectMode();
+      updateUI();
+      showMessage(
+        `Marked ${ids.length} transaction${ids.length > 1 ? "s" : ""} as cleared.`,
+      );
+    });
+
   // Delete button
   document
     .getElementById("bulkDeleteBtn")

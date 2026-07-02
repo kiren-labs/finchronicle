@@ -1016,7 +1016,9 @@ body.dark-mode .notif-perm-denied {
 
 /* Bulk Operations (v4.11.0) */
 body.dark-mode .bulk-action-bar {
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 4px 28px rgba(0, 0, 0, 0.5),
+    0 1px 8px rgba(0, 0, 0, 0.3);
 }
 body.dark-mode .transaction-item.selected {
   background: rgba(99, 102, 241, 0.15);
