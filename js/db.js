@@ -358,6 +358,45 @@ export function bulkSaveTransactionsToDB(transactionsArray) {
   return idbBulkPut(STORE_NAME, transactionsArray);
 }
 
+export function bulkSoftDeleteTransactions(ids) {
+  assertDB();
+  const now = new Date().toISOString();
+  return new Promise((resolve, reject) => {
+    const tx = state.db.transaction([STORE_NAME], "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    ids.forEach((id) => {
+      const req = store.get(id);
+      req.onsuccess = () => {
+        const rec = req.result;
+        if (rec && !rec.deleted) {
+          rec.deleted = true;
+          rec.deletedAt = now;
+          store.put(rec);
+        }
+      };
+    });
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+export function bulkUpdateTransactions(ids, mutator) {
+  assertDB();
+  return new Promise((resolve, reject) => {
+    const tx = state.db.transaction([STORE_NAME], "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    ids.forEach((id) => {
+      const req = store.get(id);
+      req.onsuccess = () => {
+        const rec = req.result;
+        if (rec && !rec.deleted) store.put(mutator(rec));
+      };
+    });
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
 // ============================================================================
 // Recurring Templates
 // ============================================================================

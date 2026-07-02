@@ -808,8 +808,44 @@
             <option value="all">All Accounts</option>
           </select>
         </div>
+        <div class="list-header-row">
+          <button id="bulkSelectToggle" class="bulk-select-toggle" aria-pressed="false" type="button" style="display:none">Select</button>
+        </div>
         <div class="card">
           <div id="transactionsList"></div>
+        </div>
+        <!-- Bulk Action Bar (v4.11.0) -->
+        <div id="bulkActionBar" class="bulk-action-bar" role="toolbar" aria-label="Bulk actions">
+          <span class="bulk-count">0 selected</span>
+          <div class="bulk-actions">
+            <button id="bulkRecategorizeBtn" class="bulk-action-btn" type="button" title="Recategorize"><i class="ri-price-tag-3-line"></i> Recategorize</button>
+            <button id="bulkTagBtn" class="bulk-action-btn" type="button" title="Add tag"><i class="ri-hashtag"></i> Tag</button>
+            <button id="bulkDeleteBtn" class="bulk-action-btn bulk-action-danger" type="button" title="Delete selected"><i class="ri-delete-bin-line"></i> Delete</button>
+          </div>
+        </div>
+        <!-- Bulk Recategorize Modal -->
+        <div class="modal" id="bulkRecategorizeModal" role="dialog" aria-modal="true" aria-labelledby="bulkRecatTitle">
+          <div class="modal-content">
+            <div class="modal-title" id="bulkRecatTitle">Recategorize <span id="bulkRecatCount"></span></div>
+            <div class="modal-text">Choose a new category for all selected transactions.</div>
+            <select id="bulkRecatSelect" class="category-filter" style="width:100%;margin-bottom:var(--space-xl)"></select>
+            <div class="modal-actions">
+              <button class="modal-btn modal-btn-cancel" id="bulkRecatCancelBtn">Cancel</button>
+              <button class="modal-btn modal-btn-primary" id="bulkRecatConfirmBtn">Apply</button>
+            </div>
+          </div>
+        </div>
+        <!-- Bulk Tag Modal -->
+        <div class="modal" id="bulkTagModal" role="dialog" aria-modal="true" aria-labelledby="bulkTagTitle">
+          <div class="modal-content">
+            <div class="modal-title" id="bulkTagTitle">Add Tag to <span id="bulkTagCount"></span></div>
+            <div class="modal-text">Type a tag to add to all selected transactions.</div>
+            <input id="bulkTagInput" type="text" class="search-input" placeholder="Tag name…" autocomplete="off" style="width:100%;margin-bottom:var(--space-xl)" />
+            <div class="modal-actions">
+              <button class="modal-btn modal-btn-cancel" id="bulkTagCancelBtn">Cancel</button>
+              <button class="modal-btn modal-btn-primary" id="bulkTagConfirmBtn">Apply</button>
+            </div>
+          </div>
         </div>
         <div id="paginationControls" class="pagination-container hidden">
           <button id="prevBtn" class="pagination-btn pagination-btn-prev" aria-label="Previous page">

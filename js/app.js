@@ -32,7 +32,7 @@ window.addEventListener(
   true,
 ); // capture phase to catch script element errors
 
-import { state, currencies } from "./state.js";
+import { state, currencies, categories as categoriesRef } from "./state.js";
 import {
   logError,
   showMessage,
@@ -50,6 +50,8 @@ import {
   loadDataFromDB,
   saveTransactionToDB,
   markTransactionSettled,
+  bulkSoftDeleteTransactions,
+  bulkUpdateTransactions,
 } from "./db.js";
 import {
   setCurrency,
@@ -84,6 +86,12 @@ import {
   closeFeedbackModal,
   renderFormTagChips,
   renderTagPicker,
+  enterSelectMode,
+  exitSelectMode,
+  isSelectMode,
+  getSelectedIds,
+  getSelectedCount,
+  getLastFilteredTransactions,
 } from "./ui.js";
 import {
   getAllTags,
@@ -532,6 +540,121 @@ function bindStaticEvents() {
 
   // ---- Notifications (v4.10.0) ----
   bindNotificationEvents();
+
+  // ---- Bulk Operations (v4.11.0) ----
+  bindBulkOperationEvents();
+}
+
+// ============================================================================
+// Bulk Operations (v4.11.0)
+// ============================================================================
+
+function _buildRecatOptions() {
+  const sel = document.getElementById("bulkRecatSelect");
+  if (!sel) return;
+  sel.innerHTML = "";
+  const buildGroup = (label, tree) => {
+    const group = document.createElement("optgroup");
+    group.label = label;
+    for (const [parent, children] of Object.entries(tree)) {
+      const opt = document.createElement("option");
+      opt.value = parent;
+      opt.textContent = parent;
+      group.appendChild(opt);
+      children.forEach((child) => {
+        const co = document.createElement("option");
+        co.value = child;
+        co.textContent = `  ${child}`;
+        group.appendChild(co);
+      });
+    }
+    sel.appendChild(group);
+  };
+  buildGroup("Income", categoriesRef.income);
+  buildGroup("Expense", categoriesRef.expense);
+}
+
+function bindBulkOperationEvents() {
+  // Select / Cancel toggle
+  document.getElementById("bulkSelectToggle")?.addEventListener("click", () => {
+    if (isSelectMode()) exitSelectMode();
+    else enterSelectMode();
+  });
+
+  // Recategorize button
+  document.getElementById("bulkRecategorizeBtn")?.addEventListener("click", () => {
+    const count = getSelectedCount();
+    if (count === 0) return;
+    const countEl = document.getElementById("bulkRecatCount");
+    if (countEl) countEl.textContent = `${count} transaction${count > 1 ? "s" : ""}`;
+    _buildRecatOptions();
+    document.getElementById("bulkRecategorizeModal")?.classList.add("show");
+  });
+  document.getElementById("bulkRecatCancelBtn")?.addEventListener("click", () => {
+    document.getElementById("bulkRecategorizeModal")?.classList.remove("show");
+  });
+  document.getElementById("bulkRecatConfirmBtn")?.addEventListener("click", async () => {
+    const sel = document.getElementById("bulkRecatSelect");
+    const newCategory = sel?.value;
+    if (!newCategory) return;
+    const ids = [...getSelectedIds()];
+    const now = new Date().toISOString();
+    await bulkUpdateTransactions(ids, (t) => ({ ...t, category: newCategory, updatedAt: now }));
+    state.transactions = state.transactions.map((t) =>
+      ids.includes(t.id) ? { ...t, category: newCategory, updatedAt: now } : t,
+    );
+    document.getElementById("bulkRecategorizeModal")?.classList.remove("show");
+    exitSelectMode();
+    updateUI();
+    showMessage(`Recategorized ${ids.length} transaction${ids.length > 1 ? "s" : ""}.`);
+  });
+
+  // Tag button
+  document.getElementById("bulkTagBtn")?.addEventListener("click", () => {
+    const count = getSelectedCount();
+    if (count === 0) return;
+    const countEl = document.getElementById("bulkTagCount");
+    if (countEl) countEl.textContent = `${count} transaction${count > 1 ? "s" : ""}`;
+    const input = document.getElementById("bulkTagInput");
+    if (input) input.value = "";
+    document.getElementById("bulkTagModal")?.classList.add("show");
+    document.getElementById("bulkTagInput")?.focus();
+  });
+  document.getElementById("bulkTagCancelBtn")?.addEventListener("click", () => {
+    document.getElementById("bulkTagModal")?.classList.remove("show");
+  });
+  document.getElementById("bulkTagConfirmBtn")?.addEventListener("click", async () => {
+    const raw = document.getElementById("bulkTagInput")?.value.trim();
+    if (!raw) return;
+    const tag = raw.toLowerCase().replace(/\s+/g, "-");
+    const ids = [...getSelectedIds()];
+    const now = new Date().toISOString();
+    await bulkUpdateTransactions(ids, (t) => {
+      const existing = Array.isArray(t.tags) ? t.tags : [];
+      return { ...t, tags: existing.includes(tag) ? existing : [...existing, tag], updatedAt: now };
+    });
+    state.transactions = state.transactions.map((t) => {
+      if (!ids.includes(t.id)) return t;
+      const existing = Array.isArray(t.tags) ? t.tags : [];
+      return { ...t, tags: existing.includes(tag) ? existing : [...existing, tag], updatedAt: now };
+    });
+    document.getElementById("bulkTagModal")?.classList.remove("show");
+    exitSelectMode();
+    updateUI();
+    showMessage(`Tagged ${ids.length} transaction${ids.length > 1 ? "s" : ""} with "${tag}".`);
+  });
+
+  // Delete button
+  document.getElementById("bulkDeleteBtn")?.addEventListener("click", async () => {
+    const ids = [...getSelectedIds()];
+    if (ids.length === 0) return;
+    if (!confirm(`Delete ${ids.length} transaction${ids.length > 1 ? "s" : ""}? This cannot be undone.`)) return;
+    await bulkSoftDeleteTransactions(ids);
+    state.transactions = state.transactions.filter((t) => !ids.includes(t.id));
+    exitSelectMode();
+    updateUI();
+    showMessage(`Deleted ${ids.length} transaction${ids.length > 1 ? "s" : ""}.`);
+  });
 }
 
 function bindSettingsButtons() {
