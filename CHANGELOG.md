@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [4.11.0] — 2026-07-02
+
+### Added
+
+- **Bulk Transaction Operations** — select multiple transactions and act on them at once.
+  - **Select mode** — new "Select" button in the List tab header activates selection mode. Tapping any transaction item toggles it; a checkbox icon replaces the type icon. Edit/Delete action buttons are hidden during selection. "Select" button becomes "Cancel" to exit.
+  - **Sticky action bar** — appears at the bottom when at least one item is selected, showing the count and three actions.
+  - **Bulk Recategorize** — opens a modal with the full category list; applying updates all selected transactions in IndexedDB and in memory, then exits select mode.
+  - **Bulk Tag** — opens a modal with a text input; the tag is normalised (lowercase, spaces → hyphens) and appended to each selected transaction (existing tags are preserved; duplicate tags are ignored).
+  - **Bulk Delete** — confirmation dialog then soft-deletes all selected transactions (`deleted: true`), removes them from `state.transactions`, and exits select mode.
+  - Selection state is module-local in `js/ui.js` (not persisted, not in `state`). Switching tabs exits select mode automatically.
+
+---
+
 ## [4.10.0] — 2026-06-30
 
 ### Added
