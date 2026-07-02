@@ -4816,6 +4816,13 @@ button.primary.loading .btn-spinner {
   opacity: 0.5;
 }
 
+.account-archived-label {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: var(--space-1) var(--space-2);
+}
+
 .account-item-info {
   display: flex;
   align-items: center;
